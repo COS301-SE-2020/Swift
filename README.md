@@ -1,1 +1,19 @@
-# Sympathy-Engine-Emotion-Analysis
+# Swift
+
+Swift aims to create a convenient, flexible, and scalable interface suitable for both customers and restaurants giving users the opportunity to order, track and pay for their food immediately. The application will also use Augmented Reality to show real live photogrammetry models of the food, making the menu come to life.
+
+## Project Management Tools
+
+* :open_book: [Clickup](https://app.clickup.com/2546114/v/l/s/2693763)
+
+## Lumiqon Team Members
+
+| **Cadon Gernandt (Team Leader)** | **Giovanni Joubert** | **Onkarabile Kau** |
+| :-----: | :-----: | :-----: |
+| ![Cadon Gernandt](team/cadon.jpg "Cadon Gernandt") <br/> [![GitHub](team/github.ico)](https://github.com/cadongernandt) <br/> *cadongernandt* <br/> [Profile Page](https://cadongernandt.github.io/) | ![Giovanni Joubert](team/giovanni.jpg "Giovanni Joubert") <br/> [![GitHub](team/github.ico)](https://github.com/gjcsup) <br/> *gjcsup*  <br/> [Profile Page](https://gjcsup.github.io/) | ![Onkarabile Kau](team/onkarabile.jpg "Onkarabile Kau") <br/> [![GitHub](team/github.ico)](https://github.com/Onkarabile-kau) <br/> *Onkarabile-kau*  <br/> [Profile Page](http://onkarabile-kau.github.io/) |
+| **Skills** <br/><ul><li>UI/UX Design</li><li>Unity</li><li>Flutter</li><li>Web development</li><li>Animation</li></ul> |  **Skills** <br/><ul><li>Adobe Creative Cloud</li><li>Web Development</li><li>Android</li><li>Python</li><li>Videography</li></ul> | **Skills** <br/><ul><li>Java</li><li>C++</li><li>Data Structures</li><li>NodeJS</li><li>Database Development</li></ul> |
+
+| **Nigel Mpofu** | **Iva Stefanova** |
+| :-----: | :-----: |
+| ![Nigel Mpofu](team/nigel.jpg "Nigel Mpofu") <br/> [![GitHub](team/github.ico)](https://github.com/nigelmpofu) <br/> *nigelmpofu* <br/> [Profile Page](https://nigelmpofu.me) | ![Iva Stefanova](team/iva.jpg "Iva Stefanova") <br/> [![GitHub](team/github.ico)](https://github.com/IvaKStefanova) <br/> *IvaKStefanova* <br/> [Profile Page](https://ivakstefanova.github.io/) |
+| **Skills** <br/><ul><li>Android</li><li>C/C++</li><li>Java</li><li>Python & Django</li><li>Web Development</li><li>Linux</li></ul> | **Skills** <br/><ul><li>Web Development</li><li>Flutter</li><li>Database Development</li><li>Java</li><li>UI/UX Design</li></ul> |
