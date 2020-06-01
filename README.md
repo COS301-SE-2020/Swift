@@ -5,6 +5,7 @@ Swift aims to create a convenient, flexible, and scalable interface suitable for
 ## Status
 
 ![Swift API CI](https://github.com/COS301-SE-2020/Swift/workflows/Swift%20API%20CI/badge.svg)
+![Deploy to Google App Engine](https://github.com/COS301-SE-2020/Swift/workflows/Deploy%20to%20Google%20App%20Engine/badge.svg)
 
 ## Project Management Tools
 
