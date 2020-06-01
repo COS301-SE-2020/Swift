@@ -1,4 +1,4 @@
-"use strict"
+'use strict'
 
 const bodyParser = require('body-parser');
 const express = require('express');
@@ -10,7 +10,7 @@ const SERVER_PORT = process.env.PORT || 3264;
 app.use(bodyParser.json());
 
 // Set Lumiqon server header
-app.use(function (req, res, next) {
+app.use((req, res, next) => {
     //res.setHeader('Server', 'Lumiqon');
     res.setHeader('X-Powered-By', 'Lumiqon');
     next();
@@ -23,7 +23,7 @@ app.post('/', require('./api/api'));
 app.put('/', require('./api/api'));
 
 // Start server
-var server = app.listen(SERVER_PORT, function () {
+var server = app.listen(SERVER_PORT, () => {
     console.log('Server listening on port: ' + server.address().port);
 });
 
