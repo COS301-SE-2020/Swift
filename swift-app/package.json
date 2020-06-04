@@ -9,6 +9,10 @@
     "test:e2e": "vue-cli-service test:e2e"
   },
   "dependencies": {
+    "@capacitor/android": "^2.1.2",
+    "@capacitor/cli": "^2.1.2",
+    "@capacitor/core": "^2.1.2",
+    "@capacitor/ios": "^2.1.2",
     "core-js": "^3.6.5",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
