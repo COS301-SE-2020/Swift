@@ -7,7 +7,6 @@
     <div class="row d-flex flex-column align-center">
       <v-col cols="10" >
         <v-text-field
-          v-model="username"
           :rules="[rules.required]"
           name="username"
           label="Username"

@@ -7,7 +7,6 @@
     <div class="row d-flex flex-column align-center">
       <v-col cols="10" >
         <v-text-field
-          v-model="username"
           :rules="[rules.required]"
           name="username"
           label="Username or Email"
@@ -16,7 +15,6 @@
       </v-col>
       <v-col cols="10">
         <v-text-field
-          v-model="password"
           :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
           :rules="[rules.required, rules.incorrectPassword]"
           :type="showPassword ? 'text' : 'password'"

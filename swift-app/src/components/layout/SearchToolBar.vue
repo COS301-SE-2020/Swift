@@ -1,7 +1,6 @@
 <template>
   <div class="toolbar">
     <v-card color="grey lighten-4" flat  :height=toolbarHeight tile>
-    <!-- <v-card color="grey lighten-4" flat height="140px" tile> -->
       <v-container>
           <v-row>
               <v-col cols="12">
@@ -21,15 +20,15 @@
           </v-row>
           <v-expand-transition>
             <v-row class="my-2" v-if="expand">
-                <v-col class="d-flex" cols="4" sm="4">
+                <v-col class="d-flex" cols="6" sm="6">
                     <v-select prepend-icon="mdi-currency-usd" color="grey darken-4" :items="prices" label="Price" solo dense></v-select>
                 </v-col>
-                <v-col class="d-flex" cols="4" sm="4">
+                <v-col class="d-flex" cols="6" sm="6">
                     <v-select prepend-icon="mdi-sort-variant" color="grey darken-4" :items="sorting" label="Sort" solo dense></v-select>
                 </v-col>
-                <v-col class="d-flex" cols="4" sm="4">
+                <!-- <v-col class="d-flex" cols="4" sm="4">
                     <v-select prepend-icon="mdi-clock-outline" color="grey darken-4" :items="prepTimes" label="Time" solo dense></v-select>
-                </v-col>
+                </v-col> -->
             </v-row>
           </v-expand-transition>
       </v-container>

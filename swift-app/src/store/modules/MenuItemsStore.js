@@ -5,13 +5,21 @@ const initialState = () => ({
     {
       id: '1',
       name: 'Fruit Salad',
-      description: 'It is nice'
+      rating: 4,
+      price: '120.00',
+      description: "The BEST Fruit Salad with a sweet and bright honey lime dressing! It's an incredibly refreshing, must have side dish that's made with beautiful blend of delicious fruits and a simple dressing to compliment it.",
+      prepTime: '15',
+      images: [],
     },
     {
       id: '2',
       name: 'Seafood',
-      description: 'It is yummy'
-    }
+      rating: 3,
+      price: '100.00',
+      description: "Seafood at its best",
+      prepTime: '15',
+      images: [],
+    },
   ]
 });
 

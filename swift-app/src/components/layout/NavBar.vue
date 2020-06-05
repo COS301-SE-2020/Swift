@@ -1,5 +1,5 @@
 <template>
-  <v-bottom-navigation app grow :value="activeBtn" color="primary" >
+  <v-bottom-navigation app grow  color="primary" >
     <v-btn v-for="link in links" class="align-center" :key="link.text" router :to="link.route" min-height="56px">
       <span>{{ link.text }}</span>
       <v-icon>{{ link.icon }}</v-icon>
