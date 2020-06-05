@@ -49,31 +49,29 @@
     <div class="row d-flex flex-column align-center ">
       <p>Don't have an account? <a @click="goToRegister"><u>Register</u></a>.</p>
     </div>
-    
   </v-container>
-
 </template>
 
 <script>
-  export default {
-    data () {
-      return {
-        showPassword: false,
-        showPlaceholder: false,
-        password: '',
-        rules: {
-          required: value => !!value || '*Required.',
-          incorrectPassword: () => ('*Incorrect Password'),
-        },
-      }
-    },
-    methods: {
-      goToRegister () {
-        this.$router.push('/register')
+export default {
+  data () {
+    return {
+      showPassword: false,
+      showPlaceholder: false,
+      password: '',
+      rules: {
+        required: value => !!value || '*Required.',
+        incorrectPassword: () => ('*Incorrect Password'),
       },
-      goToHome () {
-        this.$router.push('/')
-      },
+    }
+  },
+  methods: {
+    goToRegister () {
+      this.$router.push('/register')
     },
-  }
+    goToHome () {
+      this.$router.push('/')
+    },
+  },
+}
 </script>

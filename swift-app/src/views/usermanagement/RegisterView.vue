@@ -48,26 +48,26 @@
 </template>
 
 <script>
-  export default {
-    data () {
-      return {
-        showPassword: false,
-        showPlaceholder: false,
-        password: '',
-        rules: {
-          required: value => !!value || '*Required.',
-          min: v => v.length >= 8 || '*Min 8 characters',
-          emailMatch: () => ('*This email has already been used'),
-        },
-      }
-    },
-    methods: {
-      goToLogin () {
-        this.$router.push('login')
+export default {
+  data () {
+    return {
+      showPassword: false,
+      showPlaceholder: false,
+      password: '',
+      rules: {
+        required: value => !!value || '*Required.',
+        min: v => v.length >= 8 || '*Min 8 characters',
+        emailMatch: () => ('*This email has already been used'),
       },
-      goToHome () {
-        this.$router.push('/')
-      },
+    }
+  },
+  methods: {
+    goToLogin () {
+      this.$router.push('login')
     },
-  }
+    goToHome () {
+      this.$router.push('/')
+    },
+  },
+}
 </script>

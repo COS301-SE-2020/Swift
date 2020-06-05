@@ -1,7 +1,6 @@
 <template>
   <div class="homemenu">
     <SearchToolBar></SearchToolBar>
-    <!-- <transition-group> -->
       <v-container py-0 transition="slide-x-transition">
         <v-row style="max-width: 400px" class="overflow-y-auto">
           <v-col cols="12">

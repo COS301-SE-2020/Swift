@@ -12,7 +12,7 @@
 
 <script>
 import NavBar from '@/components/layout/NavBar';
-import store from '../store/store.js';
+import store from '@/store/store.js';
 import { mapActions, mapGetters } from 'vuex'
 
 export default {

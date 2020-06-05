@@ -1,5 +1,4 @@
 // State object
-
 const initialState = () => ({
   menuItems: [
     {
@@ -29,9 +28,6 @@ const state = initialState();
 const getters = {
   getVariable1( state ) {
     return state.varaible1;
-  },
-  getVariable2( state ) {
-    return state.varaible2;
   },
 }
 
@@ -64,9 +60,6 @@ const mutations = {
 
   SET_VARIABLE_1(state, data) {
     state.varaible1 = data;
-  },
-  SET_VARIABLE_2(state, data) {
-    state.variable2 = data;
   },
 }
 export default {
