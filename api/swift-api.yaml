@@ -1,3 +1,6 @@
 # [START gae_quickstart_yaml]
 runtime: nodejs10
+
+env_variables:
+    DB_USER: lumiqon
 # [END gae_quickstart_yaml]
