@@ -20,7 +20,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       # Swap environment vars
-      - uses: actions/yaml-env-secrets@v1.0
+      - uses: ./.github/actions/yaml-env-secrets@api
         env:
           DB_USER: ${{ secrets.DB_USER }}
 

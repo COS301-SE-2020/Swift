@@ -1,0 +1,8 @@
+name: 'GAE YAML Environment Secrets'
+description: 'Compiles and swaps environment variables in swift-api.yaml with the minimal effort'
+branding:
+  icon: 'cloud'
+  color: 'blue'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
