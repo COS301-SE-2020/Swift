@@ -30,4 +30,4 @@ jobs:
       # Deploy App to App Engine
       - name: Deploy
         run: |
-          gcloud app deploy ./api/swift-api.yaml --quiet
+          gcloud app deploy ./api/swift-api.yaml --quiet --promote --update-env-vars DB_USER=lumiqon
