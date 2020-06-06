@@ -1,6 +1,6 @@
 'use strict'
 
-//const db = require('./db');
+const db = require('./db');
 const express = require('express');
 const router = express.Router();
 
@@ -12,7 +12,7 @@ router.delete('/', (req, res) => {
 
 // Handle GET request
 router.get('/', (req, res) => {
-    var jsonResponse = {'request':'GET', 'response':'GET -> Swift API :)','user_agent':req.headers['user-agent'],'env':process.env.DB_USER||'-'};
+    var jsonResponse = {'request':'GET', 'response':'GET -> Swift API :)','user_agent':req.headers['user-agent'],'env':process.env.DB_PORT||'-'};
     res.status(200).send(jsonResponse);
 });
 
