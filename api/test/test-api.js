@@ -37,8 +37,7 @@ describe('Test API Endpoints', () => {
         const jsonPattern = `{
             "request": "GET",
             "response": "GET -> Swift API :)",
-            "user_agent": /./,
-            "env": /./
+            "user_agent": /./
         }`;
         chai.request(server)
         .get('/')
