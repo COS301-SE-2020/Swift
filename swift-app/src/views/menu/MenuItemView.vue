@@ -7,7 +7,7 @@
         :src="item.img"
       ></v-carousel-item>
     </v-carousel>
-    <v-btn color="secondary" absolute small fab style="top: 175px; right: 65px;">
+    <v-btn @click="openARScanner" color="secondary" absolute small fab style="top: 175px; right: 65px;">
       <v-icon>mdi-cube-scan</v-icon>
     </v-btn>
     <v-fab-transition>
@@ -125,6 +125,16 @@ export default {
   methods: {
     changeFavouriteFab () {
       this.favourited = !this.favourited
+    },
+    openARScanner() {
+      return this.$ionic.alertController
+        .create({
+          header: 'Augmented Reality',
+          subHeader: 'Coming Soon',
+          message: 'This feature will be added in a future build.',
+          buttons: ['OK']
+        })
+        .then(a => a.present())  
     },
     reserve () {
       this.loading = true
