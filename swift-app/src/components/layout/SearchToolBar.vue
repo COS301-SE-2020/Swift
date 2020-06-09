@@ -1,5 +1,78 @@
 <template>
   <div class="toolbar">
+    <v-card color="grey lighten-4" flat :height=toolbarHeight tile>
+      <v-container>
+        <v-row>
+          <v-col cols="12">
+            <div class="title">What would you like to order?</div>
+          </v-col>
+        </v-row>
+        <v-row no-gutters d-flex flex-row >
+          <v-col cols="12">
+            <v-autocomplete  v-model="model" :items="items" :loading="isLoading" :search-input.sync="search" chips clearable hide-details hide-selected item-text="name" item-value="symbol" label="Search..." solo>
+              <template v-slot:no-data>
+                <v-list-item>
+                  <v-list-item-title>
+                    Search for your favorite
+                    <strong>food or drinks</strong>
+                  </v-list-item-title>
+                </v-list-item>
+              </template>
+              <template v-slot:selection="{ attr, on, item, selected }">
+                <!-- <v-chip v-bind="attr" :input-value="selected" color="blue-grey" class="white--text" v-on="on"> -->
+                  <v-icon left>mdi-coin</v-icon>
+                  <span class="black--text" v-text="item.name"></span>
+                <!-- </v-chip> -->
+              </template>
+              <template v-slot:item="{ item }">
+                <v-list-item-avatar color="grey darken-4" size="35px">
+                  <img src="https://source.unsplash.com/800x800/?cake" alt="" >
+                </v-list-item-avatar>
+                <v-list-item-content>
+                  <v-list-item-title v-text="item.name"></v-list-item-title>
+                  <v-list-item-subtitle v-text="item.symbol"></v-list-item-subtitle>
+                </v-list-item-content>
+                <v-list-item-action>
+                  <v-icon>mdi-coin</v-icon>
+                </v-list-item-action>
+              </template>
+            </v-autocomplete>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-card> 
+  </div>
+
+  <!-- <v-autocomplete v-model="model" :items="items" :loading="isLoading" :search-input.sync="search" chips clearable hide-details hide-selected item-text="name" item-value="symbol" label="What would you like to order?" solo>
+    <template v-slot:no-data>
+      <v-list-item>
+        <v-list-item-title>
+          Search for your favorite
+          <strong>food or drinks</strong>
+        </v-list-item-title>
+      </v-list-item>
+    </template>
+    <template v-slot:selection="{ attr, on, item, selected }">
+      <v-chip v-bind="attr" :input-value="selected" color="blue-grey" class="white--text" v-on="on">
+        <v-icon left>mdi-coin</v-icon>
+        <span v-text="item.name"></span>
+      </v-chip>
+    </template>
+    <template v-slot:item="{ item }">
+      <v-list-item-avatar color="grey darken-4" size="35px">
+        <img src="https://source.unsplash.com/800x800/?cake" alt="" >
+      </v-list-item-avatar>
+      <v-list-item-content>
+        <v-list-item-title v-text="item.name"></v-list-item-title>
+        <v-list-item-subtitle v-text="item.symbol"></v-list-item-subtitle>
+      </v-list-item-content>
+      <v-list-item-action>
+        <v-icon>mdi-coin</v-icon>
+      </v-list-item-action>
+    </template>
+  </v-autocomplete> -->
+  
+  <!-- <div class="toolbar">
     <v-card color="grey lighten-4" flat  :height=toolbarHeight tile>
       <v-container>
         <v-row>
@@ -26,14 +99,11 @@
             <v-col class="d-flex" cols="6" sm="6">
               <v-select prepend-icon="mdi-sort-variant" color="grey darken-4" :items="sorting" label="Sort" solo dense></v-select>
             </v-col>
-            <!-- <v-col class="d-flex" cols="4" sm="4">
-                <v-select prepend-icon="mdi-clock-outline" color="grey darken-4" :items="prepTimes" label="Time" solo dense></v-select>
-            </v-col> -->
           </v-row>
         </v-expand-transition>
       </v-container>
     </v-card> 
-  </div>
+  </div> -->
 </template>
 
 <script>
@@ -45,13 +115,15 @@
       toolbarExpanded: false,
       toolbarHeight: '140px',
       expand: false,
+
+      isLoading: false,
+      items: [],
+      model: null,
+      search: null,
+      tab: null,
     }),
     methods: {
-      searchForResults () {
-        
-      },
       showFilters () {
-        // var { seen, toolbarHeight, toolbarExpanded } = this; 
         this.toolbarExpanded = !this.toolbarExpanded   
         this.expand = !this.expand
         
@@ -60,6 +132,27 @@
         } else {
           this.toolbarHeight = '200px';
         }
+      },
+    },
+    watch: {
+      model (val) {
+        if (val != null) this.tab = 0
+        else this.tab = null
+      },
+      search (val) {
+        if (this.items.length > 0) return
+
+        this.isLoading = true
+
+        fetch('https://api.coingecko.com/api/v3/coins/list')
+          .then(res => res.clone().json())
+          .then(res => {
+            this.items = res
+          })
+          .catch(err => {
+            console.log(err)
+          })
+          .finally(() => (this.isLoading = false))
       },
     },
   } 

@@ -22,11 +22,54 @@
           </v-slide-group>
         </v-sheet>
         <v-divider class="mt-2"></v-divider>
+
         <v-row style="max-width: 400px" class="overflow-y-auto">
           <v-col cols="12">
             <div class="title">Popular Drinks</div>
           </v-col>
         </v-row>
+
+        <v-sheet class="mx-auto" max-width="700">
+          <v-slide-group multiple>
+            <v-slide-item v-for="card in popularDrinks" :key="card.title">
+              <div class="ml-0" align="center">
+                <v-btn style="background: none;" width="100px" height="100px" min-width="100px" class="ml-0 mr-1">
+                  <v-avatar size="80px">
+                    <img :src=card.src alt="" >
+                  </v-avatar>
+                </v-btn>
+                <div class="mt-1 subtitle-2">{{card.title}}</div>
+              </div>
+            </v-slide-item>
+          </v-slide-group>
+        </v-sheet>
+        
+
+        <v-row style="max-width: 400px" class="overflow-y-auto">
+          <v-col cols="12">
+            <div class="title">Popular Food</div>
+          </v-col>
+        </v-row>
+
+        <v-sheet class="mx-auto" max-width="700">
+          <v-slide-group multiple>
+            <v-slide-item v-for="card in popularFood" :key="card.title">
+              <v-card ripple class="mr-3">
+                <v-img :src="card.src" class="white--text align-center" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" width="170px" height="100px">
+                  <v-card-title class="pl-2 pt-1 body-1" v-text="card.title"></v-card-title>
+                  <v-card-subtitle class="pl-2 white--text subtitle-2" v-text="card.price"></v-card-subtitle>
+                  <v-rating size="14" class="pl-2" dense color="yellow darken-3" background-color="secondary" :value=card.rating></v-rating>
+                  <v-fab-transition>
+                    <v-btn @click="changeFavouriteFab" :key="activateFavourite.icon"  :color="activateFavourite.color" style="top: 3px; right: 3px; transform: scale(0.8);" absolute  small fab  >
+                      <v-icon>{{ activateFavourite.icon }}</v-icon>
+                    </v-btn>
+                  </v-fab-transition>
+                </v-img>
+              </v-card>
+            </v-slide-item>
+          </v-slide-group>
+        </v-sheet>
+
       </v-container>
     <NavBar></NavBar>
   </div>
@@ -51,11 +94,36 @@ export default {
       { img: 'https://source.unsplash.com/800x800/?alcohol', name: 'Alcohol' },
       { img: 'https://source.unsplash.com/800x800/?hamburger', name: 'Burgers' },
       { img: 'https://source.unsplash.com/800x800/?cake', name: 'Cakes' },
-    ]
+    ],
+    popularDrinks: [
+      { title: 'Filter Coffee', price: 'R82.00', rating: 5, src: 'https://source.unsplash.com/800x800/?coffee' },
+      { title: 'Boxed Water', price: 'R52.00', rating: 5, src: 'https://source.unsplash.com/800x800/?boxedwater' },
+      { title: 'Tea', price: 'R62.00', rating: 4, src: 'https://source.unsplash.com/800x800/?tea' },
+      { title: 'Juice', price: 'R87.00', rating: 3, src: 'https://source.unsplash.com/800x800/?juice' },
+    ],
+    popularFood: [
+      { title: 'Spaghetti', price: 'R82.00', rating: 5, src: 'https://source.unsplash.com/800x800/?spaghetti' },
+      { title: 'Lasagna', price: 'R52.00', rating: 5, src: 'https://source.unsplash.com/800x800/?lasagna' },
+      { title: 'Hamburger', price: 'R62.00', rating: 4, src: 'https://source.unsplash.com/800x800/?hamburger' },
+      { title: 'Seafood', price: 'R87.00', rating: 3, src: 'https://source.unsplash.com/800x800/?seafood' },
+    ],
+    favourited: false,
   }),
   methods: {
     goToMenuItem (id) {
       this.$router.push('/menuItem/' + id)
+    },
+    changeFavouriteFab () {
+      this.favourited = !this.favourited
+    },
+  },
+  computed: {
+    activateFavourite () {
+      if (!this.favourited) {
+        return { color: 'primary', icon: 'mdi-heart-outline' }
+      } else {
+        return { color: 'primary', icon: 'mdi-heart' }
+      }
     },
   },
 }
