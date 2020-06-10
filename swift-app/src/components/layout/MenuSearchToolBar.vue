@@ -1,9 +1,20 @@
 <template>
   <div class="toolbar">
-    <v-card color="grey lighten-4" flat :height=toolbarHeight tile>
+    <v-card color="grey lighten-4" flat tile>
       <v-container>
         <v-row>
-          <v-col cols="12">
+          <v-col cols="12" class="pt-0 px-0">
+            <v-carousel height="200px" :show-arrows="false" hide-delimiter cycle hide-delimiters continuous>
+              <v-carousel-item gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.4)" v-for="(item,i) in restaurantImages" :key="i" :src="item.img">
+                  <v-row class="fill-height" align="center" justify="center">
+                    <div class="white--text display-1">Welcome to<br/> Mugg & Bean</div>
+                  </v-row>
+              </v-carousel-item>
+            </v-carousel>
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12" class="pt-0">
             <div class="title">What would you like to order?</div>
           </v-col>
         </v-row>
@@ -13,16 +24,14 @@
               <template v-slot:no-data>
                 <v-list-item>
                   <v-list-item-title>
-                    Search for your favorite
-                    <strong>food or drinks</strong>
+                    Search for a
+                    <strong>restaurant</strong>
                   </v-list-item-title>
                 </v-list-item>
               </template>
-              <template v-slot:selection="{ attr, on, item, selected }">
-                <!-- <v-chip v-bind="attr" :input-value="selected" color="blue-grey" class="white--text" v-on="on"> -->
+              <template v-slot:selection="{ attr, on, item }">
                   <v-icon left>mdi-coin</v-icon>
                   <span class="black--text" v-text="item.name"></span>
-                <!-- </v-chip> -->
               </template>
               <template v-slot:item="{ item }">
                 <v-list-item-avatar color="grey darken-4" size="35px">
@@ -121,6 +130,9 @@
       model: null,
       search: null,
       tab: null,
+      restaurantImages: [
+        { img: 'https://source.unsplash.com/GXXYkSwndP4/800x800/' },
+      ],
     }),
     methods: {
       showFilters () {

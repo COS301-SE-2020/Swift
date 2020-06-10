@@ -12,7 +12,7 @@
     data() {
       return {
         links: [
-          { icon: 'mdi-home-variant-outline', text: 'Menu', route: '/' },
+          { icon: 'mdi-home-variant-outline', text: 'Menu', route: '/menu' },
           { icon: 'mdi-file-document-outline', text: 'Orders', route: '/orders' },
           { icon: 'mdi-heart-outline', text: 'Favourites', route: '/favourites' },
           { icon: 'mdi-account-outline', text: 'Profile', route: '/profile' }

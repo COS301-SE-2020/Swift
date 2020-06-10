@@ -1,11 +1,7 @@
 <template>
   <v-card class="mx-auto" flat>
     <v-carousel height="200px" :show-arrows="false" hide-delimiter-background continuous>
-      <v-carousel-item
-        v-for="(item,i) in items"
-        :key="i"
-        :src="item.img"
-      ></v-carousel-item>
+      <v-carousel-item v-for="(item,i) in items" :key="i" :src="item.img"></v-carousel-item>
     </v-carousel>
     <v-btn width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 10px; left: 10px;">
       <v-icon>mdi-chevron-left</v-icon>
@@ -121,7 +117,7 @@
               </v-list>
               <v-expand-x-transition>
                 <v-btn block v-if="expandOrderBtn"  @click="changeOrderBtn" rounded class="py-6 mt-5" color="primary">Add To Order</v-btn>
-                <v-btn block v-else="!expandOrderBtn" @click="changeOrderBtn" rounded class="py-6 mt-5" color="accent">R240 | Place Order</v-btn>
+                <v-btn block v-if="!expandOrderBtn" @click="changeOrderBtn" rounded class="py-6 mt-5" color="accent">R240 | Place Order</v-btn>
               </v-expand-x-transition>
             </v-container>
           </v-card>
@@ -144,10 +140,10 @@ export default {
       menuItemId: this.$route.params.itemid,
       expandOrderBtn: true,
       items: [
-        { img: 'https://source.unsplash.com/800x800/?fruit' },
-        { img: 'https://source.unsplash.com/800x800/?salad' },
-        { img: 'https://source.unsplash.com/800x800/?spaghetti' },
-        { img: 'https://source.unsplash.com/800x800/?sandwich' },
+        { img: 'https://source.unsplash.com/hrlvr2ZlUNk/800x800/' },
+        { img: 'https://source.unsplash.com/1BZ8eDz7sAA/800x800/' },
+        { img: 'https://source.unsplash.com/8manzosDSGM/800x800/' },
+        { img: 'https://source.unsplash.com/nTZOILVZuOg/800x800/' },
       ],
       tab: null,
       favourited: false,

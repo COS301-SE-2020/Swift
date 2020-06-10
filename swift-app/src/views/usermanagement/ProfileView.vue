@@ -5,6 +5,7 @@
     <p>username: {{customerProfile.username}}</p>
     <p>email: {{customerProfile.email}}</p>
     <v-btn  @click=populateCustomer>Load Profile</v-btn>
+    <v-btn  @click=signOut>Sign Out</v-btn>
     <NavBar></NavBar>
   </div>
 
@@ -22,6 +23,9 @@ export default {
   methods: {
     populateCustomer () {
       this.loadCustomer
+    },
+    signOut () {
+      this.$router.push('/login')
     },
   },
   computed: {
