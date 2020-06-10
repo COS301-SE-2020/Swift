@@ -16,4 +16,10 @@ export default {
 };
 </script>
 
+<style> 
+* {
+  text-transform: none !important;
+}
+</style>
+
  
