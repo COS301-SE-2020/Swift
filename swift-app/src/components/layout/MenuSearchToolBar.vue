@@ -24,8 +24,8 @@
               <template v-slot:no-data>
                 <v-list-item>
                   <v-list-item-title>
-                    Search for a
-                    <strong>restaurant</strong>
+                    Search for
+                    <strong>food or drinks</strong>
                   </v-list-item-title>
                 </v-list-item>
               </template>

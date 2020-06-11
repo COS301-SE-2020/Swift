@@ -39,95 +39,106 @@
     </v-card-text>
 
     
-      <v-tabs v-model="tab" background-color="white" grow>
-        <v-tab>
-          Details
-        </v-tab>
-        <v-tab>
-          Reviews (0)
-        </v-tab>
-      </v-tabs>
+    <v-tabs v-model="tab" background-color="white" grow>
+      <v-tab>
+        Details
+      </v-tab>
+      <v-tab>
+        Reviews (0)
+      </v-tab>
+    </v-tabs>
 
-      <v-tabs-items v-model="tab">
-        <v-tab-item>
-          <v-card flat>
-            <v-card-title class="pb-0 pt-4">Customise Order</v-card-title>
-            <v-container>
-              <v-card-text class="py-0">
-                <v-row>
-                  <v-col class="pl-0" cols="3">
-                    <span class="subtitle-1" >Size:</span>
-                  </v-col>
-                  <v-col cols="auto" class="py-0">
-                    <v-chip-group v-model="selection" active-class="primary" mandatory>
-                      <v-chip>Small</v-chip>
-                      <v-chip>Medium</v-chip>
-                      <v-chip>Large</v-chip>
-                    </v-chip-group>
-                  </v-col>
-                </v-row>
-              </v-card-text>
+    <v-tabs-items v-model="tab">
+      <v-tab-item>
+        <v-card flat>
+          <v-card-title class="pb-0 pt-4">Customise Order</v-card-title>
+          <v-container>
+            <v-card-text class="py-0 pr-0">
+              <v-row>
+                <v-col class="pl-0" cols="3">
+                  <span class="subtitle-1" >Size:</span>
+                </v-col>
+                <v-col cols="9" class="py-0 d-flex  justify-end">
+                  <v-chip-group v-model="selection" active-class="primary" mandatory>
+                    <v-chip>Small</v-chip>
+                    <v-chip>Medium</v-chip>
+                    <v-chip>Large</v-chip>
+                  </v-chip-group>
+                </v-col>
+              </v-row>
+            </v-card-text>
+            <v-divider></v-divider>
+            <v-card-text @click="muesliSelected = !muesliSelected" v-ripple class="py-0 pr-0">
+              <v-row>
+                <v-col class="pl-0 pb-2" cols="3">
+                  <span class="subtitle-1" >Muesli:</span>
+                </v-col>
+                <v-col cols="9" class="pb-0 pt-1 d-flex justify-end">
+                  <v-btn icon>
+                    <v-icon color="secondary" v-text="muesliSelected ? 'mdi-radiobox-marked' : 'mdi-radiobox-blank'"></v-icon>
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </v-card-text>
+            <v-divider></v-divider>
+            <v-card-text  @click="honeySelected = !honeySelected"  v-ripple class="py-0 pr-0">
+              <v-row>
+                <v-col class="pl-0 pb-2" cols="3">
+                  <span class="subtitle-1" >Honey:</span>
+                </v-col>
+                <v-col cols="9" class="pb-0 pt-1 d-flex justify-end">
+                  <v-btn icon>
+                    <v-icon color="secondary" v-text="honeySelected ? 'mdi-radiobox-marked' : 'mdi-radiobox-blank'"></v-icon>
+                  </v-btn>
+                </v-col>
+              </v-row>
+            </v-card-text>
+            <v-divider></v-divider>
 
-              <v-divider></v-divider>
+            <v-list class="py-0">
+              <v-list-group  v-for="item in menuItemSelections" :key="item.title" v-model="item.active"  no-action>
+                <template expand v-slot:activator>
+                  <v-list-item-content>
+                    <v-list-item-title  v-text="item.title"></v-list-item-title>
+                  </v-list-item-content>
+                </template>
 
-              <v-card-text class="py-0">
-                <v-row>
-                  <v-col class="pl-0" cols="3">
-                    <span class="subtitle-1" >Quantity:</span>
-                  </v-col>
-                  <v-col cols="auto" class="py-0">
-                    <v-chip-group active-class="primary">
-                      <v-chip>
-                        <v-avatar>
-                          <v-icon>mdi-plus</v-icon>
-                        </v-avatar>
-                      </v-chip>
-                      <v-chip color="white" active-class="white">0</v-chip>
-                      <v-chip>
-                        <v-avatar>
-                          <v-icon>mdi-minus</v-icon>
-                        </v-avatar>
-                      </v-chip>
-                    </v-chip-group>
-                  </v-col>
-                </v-row>
-              </v-card-text>
-
-              <v-divider></v-divider>
-
-              <v-list class="py-0">
-                <v-list-group  v-for="item in menuItemSelections" :key="item.title" v-model="item.active"  no-action>
-                  <template v-slot:activator>
-                    <v-list-item-content>
-                      <v-list-item-title  v-text="item.title"></v-list-item-title>
-                    </v-list-item-content>
-                  </template>
-
-                  <v-list-item ripple v-for="subItem in item.items" :key="subItem.title" height="20px" class="pl-5 py-0 my-0">
-                    <v-list-item-content>
-                      <v-list-item-title v-text="subItem.title"></v-list-item-title>
-                    </v-list-item-content>
-                    <v-list-item-icon class="my-1">
-                      <v-btn icon>
-                        <v-icon color="secondary" v-text="subItem.icon"></v-icon>
-                      </v-btn>
-                    </v-list-item-icon>
-                  </v-list-item>
-                </v-list-group>
-              </v-list>
-              <v-expand-x-transition>
-                <v-btn block v-if="expandOrderBtn"  @click="changeOrderBtn" rounded class="py-6 mt-5" color="primary">Add To Order</v-btn>
-                <v-btn block v-if="!expandOrderBtn" @click="changeOrderBtn" rounded class="py-6 mt-5" color="accent">R240 | Place Order</v-btn>
-              </v-expand-x-transition>
-            </v-container>
-          </v-card>
-        </v-tab-item>
-        <v-tab-item>
-          <v-card flat>
-            <v-card-text>No reviews yet</v-card-text>
-          </v-card>
-        </v-tab-item>
-      </v-tabs-items>
+                <v-list-item @click="subItem.selected = !subItem.selected" ripple v-for="subItem in item.items" :key="subItem.title" height="20px" class="pl-5 py-0 my-0">
+                  <v-list-item-content>
+                    <v-list-item-title v-text="subItem.title"></v-list-item-title>
+                  </v-list-item-content>
+                  <v-list-item-icon class="my-1 ml-5 mr-0 pr-2">
+                    <span class="d-flex align-center">{{subItem.extra}}</span>
+                    <v-btn icon>
+                      <v-icon class="ml-2" color="secondary" v-text="subItem.selected ? 'mdi-check-box-outline' : 'mdi-checkbox-blank-outline'"></v-icon>
+                    </v-btn>
+                  </v-list-item-icon>
+                </v-list-item>
+              </v-list-group>
+              
+            </v-list>
+            <v-row>
+              <v-col cols="12" class="d-flex align-center justify-center">
+                <v-slide-x-transition>
+                  <div v-if="expandOrderBtn">
+                    <v-btn @click="changeOrderBtn" rounded class="py-6 mt-5" color="primary" width="150px">Add To Order</v-btn>
+                  </div>
+                  <div v-if="!expandOrderBtn">
+                    <v-btn @click="changeOrderBtn" rounded class="py-6 mt-5" color="grey">Remove</v-btn>
+                    <v-btn @click="changeOrderBtn" rounded class="py-6 mt-5 ml-5" color="accent">R120 | Place Order</v-btn>
+                  </div>
+                </v-slide-x-transition>
+              </v-col>
+            </v-row>
+          </v-container>
+        </v-card>
+      </v-tab-item>
+      <v-tab-item>
+        <v-card flat>
+          <v-card-text>No reviews yet</v-card-text>
+        </v-card>
+      </v-tab-item>
+    </v-tabs-items>
   </v-card>
 </template>
 
@@ -147,23 +158,16 @@ export default {
       ],
       tab: null,
       favourited: false,
+      muesliSelected: true,
+      honeySelected: false,
       menuItemSelections: [
         {
           title: 'Choose fruit:',
           active: false,
           items: [
-            { title: '- Strawberry', icon: 'mdi-check-box-outline', extra: '', selected: true },
+            { title: '- Strawberry', icon: 'mdi-check-box-outline', toggleIcon: '', extra: '', selected: true },
             { title: '- Mango', icon: 'mdi-check-box-outline', extra: '+ R2.00', selected: true },
-            { title: '- Berry', icon: 'mdi-checkbox-blank-outline', extra: '', selected: true },
-          ],
-        },
-        {
-          title: 'Choose nut type:',
-          active: false,
-          items: [
-            { title: '- Pecan', icon: 'mdi-radiobox-marked', extra: '', selected: true },
-            { title: '- Hazelnut', icon: 'mdi-radiobox-blank', extra: '+ R2.00', selected: true },
-            { title: '- Pistaccio', icon: 'mdi-radiobox-blank', extra: '', selected: true },
+            { title: '- Berry', icon: 'mdi-checkbox-blank-outline', extra: '', selected: false },
           ],
         },
         {
@@ -171,8 +175,8 @@ export default {
           active: false,
           items: [
             { title: '- Greek', icon: 'mdi-radiobox-marked', extra: '', selected: true },
-            { title: '- Bulgarian', icon: 'mdi-radiobox-blank', extra: '', selected: true },
-            { title: '- Strawberry', icon: 'mdi-radiobox-blank', extra: '+ R4.50', selected: true },
+            { title: '- Low Fat', icon: 'mdi-radiobox-blank', extra: '', selected: false },
+            { title: '- Strawberry', icon: 'mdi-radiobox-blank', extra: '+ R4.50', selected: false },
           ],
         },
       ],
@@ -219,3 +223,9 @@ export default {
   }
 }
 </script>
+<style >
+  .v-list-group__header {
+    padding-left: 4px;
+    padding-right: 5px;
+  }
+</style>
