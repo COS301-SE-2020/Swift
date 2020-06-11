@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import OrdersView from '../views/orders/OrdersView.vue'
-import OrdersViewEmpty from '../views/orders/OrdersViewEmpty.vue'
+import CartView from '../views/orders/CartView.vue'
 import FavouritesView from '../views/favourites/FavouritesView.vue'
 
 import CheckInView from '../views/home/CheckInView.vue'
@@ -23,7 +23,7 @@ const routes = [
   { path: '/register', name: 'register', component: RegisterView },
   { path: '/checkin', name: 'checkin', component: CheckInView },
   { path: '/orders', name: 'orders', component: OrdersView },
-  { path: '/emptyorders', name: 'emptyorders', component: OrdersViewEmpty },
+  { path: '/cart', name: 'cart', component: CartView },
   { path: '/favourites', name: 'favourites', component: FavouritesView },
   { path: '/profile', name: 'profile', component: ProfileView },
   { path: '/menuItem/:itemid', name: 'menuItem', component: MenuItemView },
