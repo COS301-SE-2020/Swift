@@ -4,8 +4,8 @@
     <p>name: {{customerProfile.name}}</p>
     <p>username: {{customerProfile.username}}</p>
     <p>email: {{customerProfile.email}}</p>
-    <v-btn  @click=populateCustomer>Load Profile</v-btn>
-    <v-btn  @click=signOut>Sign Out</v-btn>
+    <v-btn @click=populateCustomer>Load Profile</v-btn>
+    <v-btn @click=signOut>Sign Out</v-btn>
     <NavBar></NavBar>
   </div>
 
@@ -25,6 +25,7 @@ export default {
       this.loadCustomer
     },
     signOut () {
+      this.reset
       this.$router.push('/login')
     },
   },
@@ -34,6 +35,7 @@ export default {
     }),
     ...mapActions({
       loadCustomer: 'CustomerStore/loadCustomer', // loads customer the first time
+      reset: 'CustomerStore/reset', 
     })
   }
 }
