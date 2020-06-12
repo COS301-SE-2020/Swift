@@ -44,7 +44,7 @@ router.post('/', (req, res) => {
                 break;
             }
             default: {
-                var errResponse = {'status':'Bad Request'};
+                var errResponse = {'status':400,'reason':'Bad Request'};
                 res.status(400).send(errResponse);
             }
         }
