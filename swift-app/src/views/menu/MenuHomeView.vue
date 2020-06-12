@@ -99,11 +99,14 @@
         </v-slide-group>
       </v-sheet>
     </v-container>
+       <!--snackbar shows table number on successful checkin -->
+      <v-snackbar absolute centered color="primary" elevation="24" v-model="snackbar">{{ tableNumber }}</v-snackbar>
     <NavBar></NavBar>
   </div>
 </template>
 
 <script>
+import { Store, mapGetters } from "vuex";
 import NavBar from "@/components/layout/NavBar";
 import MenuSearchToolBar from "@/components/layout/MenuSearchToolBar";
 
@@ -187,7 +190,8 @@ export default {
         src: "https://source.unsplash.com/800x800/?seafood"
       }
     ],
-    favourited: false
+    favourited: false,
+    snackbar: true
   }),
   methods: {
     goToMenuItem(id) {
@@ -204,7 +208,10 @@ export default {
       } else {
         return { color: "primary", icon: "mdi-heart" };
       }
-    }
+    },
+    ...mapGetters({
+      tableNumber: "RestaurantStore/getTableNumber"
+    })
   }
 };
 </script>

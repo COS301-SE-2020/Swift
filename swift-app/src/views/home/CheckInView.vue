@@ -18,38 +18,28 @@
           <v-btn large rounded @click="goToRestaurant" color="primary">Enter Manually</v-btn>
         </v-col>
       </v-row>
-      <!-- TODO: Move Snackbar to MenuHomeView -->
-       <!--snackbar shows table number on successful checkin -->
-      <v-snackbar
-        absolute
-        centered
-        color="primary"
-        elevation="24"
-        v-model="snackbar"
-      >{{ qrResult }}</v-snackbar>
     </div>
   </v-container>
 </template>
 
 <script>
+import { Store, mapGetters, mapMutations } from "vuex";
+
 export default {
-  data: () => ({
-    snackbar: false,
-    qrResult: ""
-  }),
   methods: {
     goToRestaurant() {
-      this.$router.push("/menu");
+      this.$router.push("/menu")
     },
     goToHome() {
-      this.$router.push("/");
+      this.$router.push("/")
     },
     onQRDecode(result) {
-      this.snackbar = true;
-      this.qrResult = result;
-      setTimeout(() => {  this.goToRestaurant(); }, 2000);
-     
-    }
-  }
+      this.setTable(result)
+      this.goToRestaurant();
+    },
+    ...mapMutations({
+      setTable : 'RestaurantStore/setTableNumber'
+    })
+  },
 };
 </script>
