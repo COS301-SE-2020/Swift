@@ -1,8 +1,9 @@
 'use strict'
 
-const db = require('./db');
 const express = require('express');
 const router = express.Router();
+const resturantController = require('./restuarantController');
+const userController = require('./userController');
 
 // Handle DELETE request
 router.delete('/', (req, res) => {
@@ -18,8 +19,41 @@ router.get('/', (req, res) => {
 
 // Handle POST request
 router.post('/', (req, res) => {
-    var jsonResponse = {'request':'POST', 'response':'POST -> Swift API :)','user_agent':req.headers['user-agent']};
-    res.status(200).send(jsonResponse);
+    try {
+        const reqBody = req.body;
+        // Handle variable request types
+        switch(req.body.requestType) {
+            case 'register': {
+                userController.registerUser(req.body, res);
+                break;
+            }
+            case 'login': {
+                userController.loginUser(req.body, res);
+                break;
+            }
+            case 'allResturants': {
+                resturantController.getResturantList(req.body.token, res);
+                break;
+            }
+            case 'restaurantMenu': {
+                resturantController.getMenu(req.body.token, req.body.restaurantId, res);
+                break;
+            }
+            case 'addOrder': {
+                resturantController.addOrder(req.body.token, req.body.orderInfo, res);
+                break;
+            }
+            default: {
+                var errResponse = {'status':'Bad Request'};
+                res.status(400).send(errResponse);
+            }
+        }
+    } catch (err) {
+        // invalid request body, not in json format
+        console.log(err); // log error
+        var errResponse = {'status':'Bad Request'};
+        res.status(400).send(errResponse);
+    }
 });
 
 // Handle PUT request
