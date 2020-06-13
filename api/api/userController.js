@@ -28,7 +28,7 @@ module.exports = {
         db.query('SELECT userid, username, password FROM public.customer WHERE email = $1::text', [useremail]).then(res => {
             if(res.rows.length == 0) {
                 // user does not exist
-                return response.status(404).send({'status':404,'reason':'User Not Found'});
+                return response.status(404).send({'status':404,'reason':'Not Found'});
             } else {
                 // Check if credentials are correct
                 if(bcrypt.compareSync(password, res.rows[0].password)) {
