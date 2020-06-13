@@ -52,16 +52,15 @@ describe('Test API Endpoints', () => {
     /**
      * Test POST API
      */
-    it("POST Endpoint", (done) => {
+    it("POST Endpoint - Bad Request", (done) => {
         const jsonPattern = `{
-            "request": "POST",
-            "response": "POST -> Swift API :)",
-            "user_agent": /./
+            "status": 400,
+            "reason": "Bad Request"
         }`;
         chai.request(server)
         .post('/')
         .end((err, res) => {
-            res.should.have.status(200);
+            res.should.have.status(400);
             res.type.should.equal("application/json");
             res.body.should.matchPattern(jsonPattern);
             done();
