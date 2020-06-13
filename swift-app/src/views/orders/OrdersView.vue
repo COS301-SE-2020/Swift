@@ -24,43 +24,45 @@
             </v-col>
         </v-row>
         <v-row class="mt-2 ml-1 pr-0">
-            <v-col cols="5" class="pb-0">
-                <div class="mt-2 body-2 secondary--text">Order Placed</div>
-                <div class="secondary--text" style="font-size:10px"><v-icon size="13px" class="font-weight-light">mdi-clock-time-four-outline</v-icon> 10:30AM, 20 June 2020</div>
+            <v-col cols="5" class="pb-0 pl-0">
+                <div class="mt-2 body-2 secondary--text toggleVisibility orderPlacedText">Order Placed</div>
+                <div class="secondary--text toggleVisibility orderPlacedText" style="font-size:10px"><v-icon size="13px" class="font-weight-light">mdi-clock-time-four-outline</v-icon> 10:30AM, 20 June 2020</div>
             </v-col>
             <v-col cols="7" class="pb-0 pl-0">
-                <v-icon size="45px" class="pb-0 font-weight-light" color="primary">mdi-clock-time-four</v-icon>
+                <v-icon id="orderPlacedIcon" size="45px" class="pb-0 font-weight-light" color="primary">mdi-clock-time-four</v-icon>
             </v-col>
         </v-row>
-        <v-row style="text-align: center; line-height:0" v-for="i in 4" :key=i>
+        <v-row style="text-align: center; line-height:0" v-for="i in 4" :key="i">
             <v-col cols="12" class="ma-0 pa-0">
-                <v-icon size="13px" class="font-weight-light ma-0 pa-0" style="transform:rotate(90deg)" color="primary">mdi-minus</v-icon>
+                <v-icon size="13px" :value=i class="font-weight-light ma-0 pa-0 orderPlacedText toggleVisibility" style="transform:rotate(90deg)" color="primary">mdi-minus</v-icon>
             </v-col>
         </v-row>
         <v-row class="mt-2 ml-1 pr-0">
-            <v-col cols="5" class="mb-0 mt-0 pb-0 pt-0">
-                <div class="mt-2 body-2 secondary--text">Order Done</div>
-                <div class="secondary--text" style="font-size:10px"><v-icon size="13px" class="font-weight-light">mdi-clock-time-four-outline</v-icon> 35 minutes</div>
-                <div class="secondary--text" style="font-size:10px">Your food was prepared by Chef Andreas Alexis</div>
+            <v-col cols="5" class="mb-0 mt-0 pb-0 pt-0  pl-0">
+                <div class="mt-2 body-2 secondary--text orderDoneText toggleVisibility">Order Done</div>
+                <div class="secondary--text orderDoneText toggleVisibility" style="font-size:10px"><v-icon size="13px" class="font-weight-light">mdi-clock-time-four-outline</v-icon> 35 minutes</div>
             </v-col>
-            <v-col cols="7" class="mb-0 mt-0 pb-0 pt-0 pl-0">
-                <v-avatar color="primary" size="39px" class="ma-0 pa-0">
+            <v-col cols="2" class="mb-0 mt-0 pb-0 pt-0 pl-0">
+                <v-avatar color="primary" id="orderDoneIcon" size="39px" class="ma-0 pa-0 toggleVisibility">
                     <v-icon size="23px" class="font-weight-light ma-0 pa-0" color="white">mdi-pot-steam</v-icon>
                 </v-avatar>
             </v-col>
+            <v-col cols="5" class="mb-0 mt-0 pt-1 pb-0 pr-0">
+              <div class="secondary--text orderDoneText toggleVisibility" style="font-size:10px">Your food was prepared by Chef Andreas Alexis</div>
+            </v-col>
         </v-row>
-        <v-row style="text-align: center; line-height:0" v-for="i in 4" :key=i>
+        <v-row style="text-align: center; line-height:0" v-for="y in 4" :key="y">
             <v-col cols="12" class="ma-0 pa-0">
-                <v-icon size="13px" :value=i class="font-weight-light ma-0 pa-0" style="transform:rotate(90deg)" color="primary">mdi-minus</v-icon>
+                <v-icon size="13px" :value=y class="font-weight-light ma-0 pa-0 orderDoneText toggleVisibility" style="transform:rotate(90deg)" color="primary">mdi-minus</v-icon>
             </v-col>
         </v-row>
         <v-row class="mt-2 ml-1 pr-0">
-            <v-col cols="5" class="mb-0 mt-0 pb-0 pt-0">
-                <div class="mt-2 body-2 secondary--text">Order Received</div>
-                <div class="secondary--text" style="font-size:10px"><v-icon size="13px" class="font-weight-light">mdi-clock-time-four-outline</v-icon> 11:03AM, 20 June 2020</div>
+            <v-col cols="5" class="mb-0 mt-0 pb-0 pt-0 pl-0">
+                <div class="mt-2 body-2 secondary--text orderReceivedText toggleVisibility">Order Received</div>
+                <div class="secondary--text orderReceivedText toggleVisibility" style="font-size:10px"><v-icon size="13px" class="font-weight-light">mdi-clock-time-four-outline</v-icon> 11:03AM, 20 June 2020</div>
             </v-col>
             <v-col cols="7" class="mb-0 mt-0 pb-0 pt-0 pl-0">
-                <v-avatar color="primary" size="39px" class="ma-0 pa-0">
+                <v-avatar color="primary" id="orderReceivedIcon" size="39px" class="ma-0 pa-0 toggleVisibility">
                     <v-icon size="20px" class="font-weight-light ma-0 pa-0" color="white">mdi-chef-hat</v-icon>
                 </v-avatar>
             </v-col>
@@ -94,6 +96,30 @@
 </div>
 </template>
 
+<style>
+  /* @keyframes pulse {
+    from {transition: scale(1);}
+    to {transition: scale(1.5);}
+  } */
+
+ .toggleVisibility {
+    visibility: hidden;
+  }
+
+ .toggleScale {
+    /* animation: pulse 2s; */
+    transform: scale(1.1);
+  }
+
+  #orderPlacedIcon, #orderDoneIcon, #orderReceivedIcon {
+        /* -webkit-transition: opacity 400ms, visibility 400ms;
+        -ms-transition:     opacity 400ms, visibility 400ms;
+        transition:         opacity 400ms, visibility 400ms; */
+        transition: scale(1.6) 2s ease-in-out;
+        /* animation: pulse 2s; */
+  }
+</style>
+
 <script>
 import NavBar from '@/components/layout/NavBar';
 
@@ -107,10 +133,38 @@ export default {
   components: {
     'NavBar': NavBar
   },
+  mounted: async function() {
+    var self = this;
+    window.addEventListener("load", async function(event) {
+      await self.blinkOrder("orderPlaced");
+      await self.blinkOrder("orderDone");
+      await self.blinkOrder("orderReceived");
+    })
+  },
   methods: {
     goToHome () {
       this.$router.push('/')
     },
+    async blinkOrder (state) {
+      return new Promise((resolve, reject) => {
+        var x = 0;
+        var divTransition = document.getElementById(state + "Icon");
+        divTransition.style.visibility = "visible";
+        var backgroundInterval = setInterval(function(){
+          divTransition.classList.toggle("toggleScale");
+          if (++x === 5) {
+            window.clearInterval(backgroundInterval);
+            var elementsArr = document.getElementsByClassName(state + "Text");
+            elementsArr.forEach(element => {
+              element.style.visibility = "visible";
+            });
+            resolve();
+          }
+        },1300);
+          
+      })
+    },
   },
 }
 </script>
+
