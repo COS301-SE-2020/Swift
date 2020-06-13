@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import OrdersView from '../views/orders/OrdersView.vue'
 import CartView from '../views/orders/CartView.vue'
+import PaymentView from '../views/orders/PaymentView.vue'
 import FavouritesView from '../views/favourites/FavouritesView.vue'
 
 import CheckInView from '../views/home/CheckInView.vue'
@@ -24,6 +25,7 @@ const routes = [
   { path: '/checkin', name: 'checkin', component: CheckInView },
   { path: '/orders', name: 'orders', component: OrdersView },
   { path: '/cart', name: 'cart', component: CartView },
+  { path: '/pay', name: 'pay', component: PaymentView },
   { path: '/favourites', name: 'favourites', component: FavouritesView },
   { path: '/profile', name: 'profile', component: ProfileView },
   { path: '/menuItem/:itemid', name: 'menuItem', component: MenuItemView },
