@@ -20,7 +20,6 @@ router.get('/', (req, res) => {
 // Handle POST request
 router.post('/', (req, res) => {
     try {
-        const reqBody = req.body;
         // Handle variable request types
         switch(req.body.requestType) {
             case 'register': {
@@ -40,19 +39,17 @@ router.post('/', (req, res) => {
                 break;
             }
             case 'addOrder': {
-                restaurantController.addOrder(req.body.token, req.body.orderInfo, res);
+                restaurantController.addOrder(req.body, res);
                 break;
             }
             default: {
-                var errResponse = {'status':400,'reason':'Bad Request'};
-                res.status(400).send(errResponse);
+                res.status(400).send({'status':400,'reason':'Bad Request'});
             }
         }
     } catch (err) {
         // invalid request body, not in json format
-        console.log(err); // log error
-        var errResponse = {'status':'Bad Request'};
-        res.status(400).send(errResponse);
+        console.error(err); // log error
+        res.status(400).send({'status':400,'reason':'Bad Request'});
     }
 });
 
