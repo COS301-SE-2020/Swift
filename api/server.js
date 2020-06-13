@@ -1,6 +1,7 @@
 'use strict'
 
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const express = require('express');
 
 const app = express();
@@ -8,6 +9,9 @@ const SERVER_PORT = process.env.PORT || 3264;
 
 // Parse JSON bodies
 app.use(bodyParser.json());
+
+// Enable CORS
+app.use(cors());
 
 // Set Lumiqon server header
 app.use((req, res, next) => {
