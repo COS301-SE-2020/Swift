@@ -31,8 +31,8 @@ router.post('/', (req, res) => {
                 userController.loginUser(req.body, res);
                 break;
             }
-            case 'allResturants': {
-                resturantController.getResturantList(req.body.token, res);
+            case 'allRestaurants': {
+                resturantController.getResturantList(req.body, res);
                 break;
             }
             case 'restaurantMenu': {
