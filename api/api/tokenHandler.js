@@ -16,5 +16,9 @@ module.exports = {
             // runtime error - cannot validate
             return false;
         }
+    },
+    getCustomerId : (tok) => {
+        // TODO: Get customerId from token
+        return 5;
     }
 };
