@@ -129,9 +129,9 @@ module.exports = {
                 return response.status(409).send({'status':409,'reason':'Customer Already Exists'});
             } else {
                 // create new account
-                db.query('INSERT INTO public.customer (name, surname, email, username, password, theme) VALUES ($1::text, $2::text, $3::text, $4::text, $5::text, $6::text);', [firstname, surname, useremail, username, password, userTheme]).then(res => {
+                db.query('INSERT INTO public.customer (name, surname, email, username, password, theme) VALUES ($1::text, $2::text, $3::text, $4::text, $5::text, $6::text) RETURNING username;', [firstname, surname, useremail, username, password, userTheme]).then(res => {
                     // success
-                    return response.status(201).send({'token': userToken});
+                    return response.status(201).send({'token': userToken, 'username': res.rows[0].username});
                 }).catch(err => {
                     console.error('Error executing query', err.stack)
                     return response.status(400).send({'status':500,'reason':'Internal Server Error'});
