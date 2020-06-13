@@ -2,7 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
-const resturantController = require('./restuarantController');
+const restaurantController = require('./restaurantController');
 const userController = require('./userController');
 
 // Handle DELETE request
@@ -32,15 +32,15 @@ router.post('/', (req, res) => {
                 break;
             }
             case 'allRestaurants': {
-                resturantController.getResturantList(req.body, res);
+                restaurantController.getRestaurantList(req.body, res);
                 break;
             }
             case 'restaurantMenu': {
-                resturantController.getMenu(req.body.token, req.body.restaurantId, res);
+                restaurantController.getMenu(req.body.token, req.body.restaurantId, res);
                 break;
             }
             case 'addOrder': {
-                resturantController.addOrder(req.body.token, req.body.orderInfo, res);
+                restaurantController.addOrder(req.body.token, req.body.orderInfo, res);
                 break;
             }
             default: {

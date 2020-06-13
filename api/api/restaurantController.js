@@ -5,7 +5,7 @@ const tokenHandler = require('./tokenHandler');
 const { response } = require('express');
 
 module.exports = {
-    getResturantList : (reqBody, response) => {
+    getRestaurantList : (reqBody, response) => {
         // Check all keys are in place - no need to check request type at this point
         if(!reqBody.hasOwnProperty("token")) {
             return response.status(400).send({'status':400,'reason':'Bad Request'});
