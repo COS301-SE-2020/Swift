@@ -16,6 +16,16 @@ app.use((req, res, next) => {
     next();
 });
 
+// Handle malformed JSON requests
+app.use((err, req, res, next) => {
+    // check if this is a JSON parsing issue
+    if(err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+        console.error(err);
+        return res.status(400).send({'status':400,'reason':'Bad Request'});
+    }
+    next();
+});
+
 // API handle requests
 app.delete('/', require('./api/api'));
 app.get('/', require('./api/api'));
