@@ -7,19 +7,18 @@
     <div class="row d-flex flex-column align-center">
       <v-col cols="10" >
         <v-text-field
-          v-model="username"
+          v-model="email"
           :rules="[rules.required]"
-          name="username"
-          label="Username or Email"
+          label="Email"
           color="secondary"
         ></v-text-field>
       </v-col>
       <v-col cols="10">
         <v-text-field
+          v-model="password"
           :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-          :rules="[rules.required, rules.incorrectPassword]"
+          :rules="[rules.required]"
           :type="showPassword ? 'text' : 'password'"
-          name="password"
           label="Password"
           @click:append="showPassword = !showPassword"
           color="secondary"
@@ -63,7 +62,7 @@ export default {
       showPassword: false,
       showPlaceholder: false,
       password: '',
-      username: '',
+      email: '',
       rules: {
         required: value => !!value || '*Required.',
         incorrectPassword: () => ('*Incorrect Password'),
@@ -75,14 +74,18 @@ export default {
       this.$router.push('/register')
     },
     loginCustomer () {
-      // this.$store.dispatch(this.login, this.username.value)
-      this.login
+      let data = {
+        email: this.email,
+        password: this.password,
+      }
+      this.login(data)
     },
-  },
-  computed: {
     ...mapActions({
       login: 'CustomerStore/login',
-    })
+    }),
+  },
+  computed: {
+    
   }
 }
 </script>
