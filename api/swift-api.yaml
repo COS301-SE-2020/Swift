@@ -1,6 +1,11 @@
 # [START gae_quickstart_yaml]
 runtime: nodejs10
 
+handlers:
+    - url: /
+      http_headers:
+        Access-Control-Allow-Origin: '*'
+
 env_variables:
     DB_HOST: $DB_HOST
     DB_NAME: $DB_NAME
