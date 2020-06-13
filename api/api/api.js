@@ -36,7 +36,7 @@ router.post('/', (req, res) => {
                 break;
             }
             case 'restaurantMenu': {
-                restaurantController.getMenu(req.body.token, req.body.restaurantId, res);
+                restaurantController.getMenu(req.body, res);
                 break;
             }
             case 'addOrder': {
