@@ -16,16 +16,18 @@ const getters = {
 
 // Actions 
 const actions = {
-  login({commit}, username) {
-    // console.log(username)
-    axios.post('https://api.swiftapp.ml', {
-      "requestType": "login",
-      "email": "johnmay@gmail.com",
-      "password": "john123"
-    })
-    .then(result => {
-      console.log(result);
-      // commit('SAVE_CUSTOMER', result.data);
+  login({commit}, data) {
+    axios.post('https://api.swiftapp.ml', 
+      {
+        "requestType": "login",
+        // "email": data.email,
+        "email": "johnmay@gmail.com",
+        // "password": data.password
+        "password": "john123"
+      }
+    ).then(result => {
+      commit('SAVE_CUSTOMER', result.data);
+      console.log(result.data.username)
     })
     .catch(e => {
       throw new Error(`API ${e}`);
