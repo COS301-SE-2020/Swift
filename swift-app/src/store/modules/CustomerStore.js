@@ -16,13 +16,20 @@ const getters = {
 
 // Actions 
 const actions = {
-  loadCustomer({commit}) {
-    axios.get('https://jsonplaceholder.typicode.com/users/1').then(result => {
+  login({commit}, username) {
+    // console.log(username)
+    axios.post('https://api.swiftapp.ml', {
+      "requestType": "login",
+      "email": "johnmay@gmail.com",
+      "password": "john123"
+    })
+    .then(result => {
       console.log(result);
-      commit('SAVE_CUSTOMER', result.data);
-    }).catch(error => {
-      throw new Error(`API ${error}`);
-    });
+      // commit('SAVE_CUSTOMER', result.data);
+    })
+    .catch(e => {
+      throw new Error(`API ${e}`);
+    })
   },
 
   reset({ commit }) {

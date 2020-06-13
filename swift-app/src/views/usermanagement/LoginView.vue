@@ -7,6 +7,7 @@
     <div class="row d-flex flex-column align-center">
       <v-col cols="10" >
         <v-text-field
+          v-model="username"
           :rules="[rules.required]"
           name="username"
           label="Username or Email"
@@ -27,7 +28,7 @@
       </v-col>
     </div>
     <div class="row d-flex flex-column align-center mx-8">
-      <v-btn @click="goToHome" block rounded class="py-5" color="primary">Sign in</v-btn>
+      <v-btn @click="loginCustomer" block rounded class="py-5" color="primary">Sign in</v-btn>
     </div>
     <div class="row d-flex flex-col align-center justify-center">
       <v-col cols="2">
@@ -53,12 +54,16 @@
 </template>
 
 <script>
+import store from '@/store/store.js';
+import { mapActions, mapGetters } from 'vuex'
+
 export default {
   data () {
     return {
       showPassword: false,
       showPlaceholder: false,
       password: '',
+      username: '',
       rules: {
         required: value => !!value || '*Required.',
         incorrectPassword: () => ('*Incorrect Password'),
@@ -69,9 +74,15 @@ export default {
     goToRegister () {
       this.$router.push('/register')
     },
-    goToHome () {
-      this.$router.push('/')
+    loginCustomer () {
+      // this.$store.dispatch(this.login, this.username.value)
+      this.login
     },
   },
+  computed: {
+    ...mapActions({
+      login: 'CustomerStore/login',
+    })
+  }
 }
 </script>
