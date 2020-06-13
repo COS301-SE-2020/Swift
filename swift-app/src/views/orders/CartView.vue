@@ -86,7 +86,7 @@
                                 <div class="body-1 secondary--text font-weight-bold">Total</div>
                             </v-col>
                             <v-col cols="3">
-                                <div class="body-1 secondary--text d-flex justify-end font-weight-bold">R143.38</div>
+                                <div class="body-1 secondary--text d-flex justify-end font-weight-bold">R{{this.orderTotal}}</div>
                             </v-col>
                         </v-row>
                     </v-container>
@@ -98,7 +98,7 @@
                 <v-btn rounded color="primary" elevation="2" class="mr-2 body-2" width="100%">Order Now, Pay Later</v-btn>
             </v-col>
             <v-col cols="5" class="pa-0">
-                <v-btn rounded color="accent" elevation="2" class="mr-2 body-2" width="100%">Pay Now</v-btn>
+                <v-btn rounded color="accent" elevation="2" class="mr-2 body-2" width="100%" @click="goToPayment">Pay Now</v-btn>
             </v-col>
         </v-row>
     </v-container>
@@ -107,11 +107,13 @@
 </template>
 
 <script>
+import { Store, mapMutations } from "vuex";
 import NavBar from '@/components/layout/NavBar';
 
 export default {
   data () {
     return {
+        orderTotal: 143.38,
         tab: null,
         items: [
             { img: 'https://source.unsplash.com/uVPV_nV17Tw/800x800/', name: 'Buttermilk Chicken Burger', price: '85.00'},
@@ -126,6 +128,13 @@ export default {
     goToHome () {
       this.$router.push('/')
     },
+    goToPayment (){
+        this.setTotal(this.orderTotal)
+        this.$router.push('/pay')
+    },
+     ...mapMutations({
+      setTotal : 'OrderStore/setOrderTotal'
+    })
   },
 }
 </script>
