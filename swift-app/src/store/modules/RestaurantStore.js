@@ -1,6 +1,6 @@
 // State object
 const initialState = () => ({
-  tableNumber: "asd"
+  tableNumber: "Checked in manually"
 });
 
 const state = initialState();
