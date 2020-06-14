@@ -15,7 +15,7 @@
 </template>
 
 <script>
-import { Store, mapGetters } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 import NavBar from '@/components/layout/NavBar';
 
 export default {
@@ -42,8 +42,12 @@ export default {
             this.goToHome();
     },
     goToHome () {
-      this.$router.push('/')
+      this.updateOrderFlag(true);
+      this.$router.push('/orders')
     },
+    ...mapActions({
+      updateOrderFlag: 'OrderStore/updateOrderFlag',
+    }),
   },
   computed: {
     ...mapGetters({

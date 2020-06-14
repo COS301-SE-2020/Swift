@@ -21,7 +21,7 @@
           <span class="title black--text">{{menuItem.name}}</span>
         </v-col>
         <v-col cols="3" class="pl-0 pb-0">
-          <span class="title black--text">R120.00</span>
+          <span class="title black--text">R85.00</span>
         </v-col>
       </v-row>
     </v-card-text>
@@ -32,7 +32,7 @@
           <v-rating size="18" dense color="yellow darken-3" background-color="secondary" :value=menuItem.rating></v-rating>
         </v-col>
         <v-col cols="4" class="py-0">
-          <div color="secondary" class="ml-5 my-4"><v-icon color="secondary">mdi-clock</v-icon> 15 min</div>
+          <div color="secondary" class="ml-4 my-4"><v-icon color="secondary">mdi-clock</v-icon> 15 min</div>
         </v-col>
       </v-row>
       <div class="justify">{{menuItem.description}}</div>
@@ -125,7 +125,7 @@
                   </div>
                   <div v-if="!expandOrderBtn">
                     <v-btn @click="changeOrderBtn" rounded class="py-6 mt-5" color="grey">Remove</v-btn>
-                    <v-btn @click="changeOrderBtn" rounded class="py-6 mt-5 ml-5" color="accent">R120 | Place Order</v-btn>
+                    <v-btn @click="goToCart" rounded class="py-6 mt-5 ml-5" color="accent">R85 | Place Order</v-btn>
                   </div>
                 </v-slide-x-transition>
               </v-col>
@@ -205,6 +205,9 @@ export default {
           buttons: ['OK']
         })
         .then(a => a.present())  
+    },
+    goToCart(id) {
+      this.$router.push("/cart");
     },
   },
   computed: {
