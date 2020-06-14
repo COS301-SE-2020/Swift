@@ -163,17 +163,6 @@ export default {
   components: {
     'NavBar': NavBar
   },
-  mounted: async function() {
-    var self = this;
-    var checkOrder = setInterval(function(){ 
-      window.addEventListener("load", async function(event) {
-        clearInterval(checkOrder);
-        await self.blinkOrder("orderPlaced");
-        await self.blinkOrder("orderDone");
-        await self.blinkOrder("orderReceived");        
-      })
-    }, 500);
-  },
   methods: {
     goToMenu () {
       this.$router.push('/menu')
@@ -205,7 +194,15 @@ export default {
     ...mapGetters({
       orderPlaced: "OrderStore/getOrderFlag"
     })
-  }
+  },
+  mounted: function() {
+    var self = this;
+    setTimeout(async function(){ 
+      await self.blinkOrder("orderPlaced");
+      await self.blinkOrder("orderDone");
+      await self.blinkOrder("orderReceived");  
+    }, 2000);      
+  },
 }
 </script>
 
