@@ -67,6 +67,38 @@ describe('Test API Endpoints', () => {
         });
     });
 
+    it("POST Endpoint - Invalid Email", (done) => {
+        const jsonPattern = `{
+            "status": 403,
+            "reason": "Invalid Email"
+        }`;
+        chai.request(server)
+        .post('/')
+        .send({"requestType": "register", "name": "John", "surname": "Doe", "username": "john.doe", "email": "john.doe.com", "password": "john123"})
+        .end((err, res) => {
+            res.should.have.status(400);
+            res.type.should.equal("application/json");
+            res.body.should.matchPattern(jsonPattern);
+            done();
+        });
+    });
+
+    it("POST Endpoint - Unauthorised Access", (done) => {
+        const jsonPattern = `{
+            "status": 401,
+            "reason": "Unauthorised Access"
+        }`;
+        chai.request(server)
+        .post('/')
+        .send({"requestType": "allRestaurants", "token": "notoken"})
+        .end((err, res) => {
+            res.should.have.status(401);
+            res.type.should.equal("application/json");
+            res.body.should.matchPattern(jsonPattern);
+            done();
+        });
+    });
+
     /**
      * Test PUT API
      */
