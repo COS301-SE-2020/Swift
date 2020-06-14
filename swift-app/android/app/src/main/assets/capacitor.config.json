@@ -1,0 +1,13 @@
+{
+  "appId": "com.example.swiftapp",
+  "appName": "swift-app",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "dist",
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 0
+    }
+  },
+  "cordova": {}
+}
