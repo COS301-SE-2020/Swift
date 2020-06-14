@@ -5,7 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "test:unit": "vue-cli-service test:unit",
+    "test:unit": "vue-cli-service test:unit tests/unit/*.spec.js",
     "test:e2e": "vue-cli-service test:e2e"
   },
   "dependencies": {
@@ -16,6 +16,7 @@
     "@ionic/vue": "0.0.9",
     "axios": "^0.19.2",
     "core-js": "^3.6.5",
+    "null-loader": "^4.0.0",
     "vue": "^2.6.11",
     "vue-axios": "^2.1.5",
     "vue-qrcode-reader": "^2.3.0",
