@@ -1,9 +1,11 @@
 // State object
 const initialState = () => ({
-  orderTotal: 0
+  orderTotal: 0,
+  orderFlag: false
 });
 
 const state = initialState();
+
 
 // Setter functions
 
@@ -11,6 +13,10 @@ const state = initialState();
 const getters = {
   getOrderTotal(state) {
     return state.orderTotal;
+  },
+
+  getOrderFlag(state) {
+    return state.orderFlag;
   },
 }
 
@@ -28,6 +34,10 @@ const actions = {
       commit('SET_VARIABLE_1', data); 
       resolve();
     })
+  },
+
+  updateOrderFlag({commit}, orderFlag) {
+    commit('updateOrderFlag', orderFlag);
   }
 }
 
@@ -44,6 +54,10 @@ const mutations = {
   setOrderTotal(state, data) {
     state.orderTotal = data;
   },
+
+  updateOrderFlag(state, orderFlag) {
+    state.orderFlag = orderFlag;
+  }
 }
 export default {
   namespaced: true,

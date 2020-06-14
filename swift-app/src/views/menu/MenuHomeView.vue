@@ -62,7 +62,7 @@
       <v-sheet class="mx-auto" max-width="700">
         <v-slide-group multiple>
           <v-slide-item v-for="card in popularFood" :key="card.title">
-            <v-card ripple class="mr-3">
+            <v-card ripple class="mr-3" @click="goToMenuItem(1)">
               <v-img
                 :src="card.src"
                 class="white--text align-center"
@@ -166,10 +166,10 @@ export default {
     ],
     popularFood: [
       {
-        title: "Spaghetti",
-        price: "R82.00",
-        rating: 5,
-        src: "https://source.unsplash.com/800x800/?spaghetti"
+        title: "Fruit Salad",
+        price: "85.00",
+        rating: 4,
+        src: "https://source.unsplash.com/800x800/?fruit"
       },
       {
         title: "Lasagna",

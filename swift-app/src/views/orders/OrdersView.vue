@@ -16,7 +16,7 @@
   </v-container>
   <v-tabs-items v-model="tab" style="width:96%; height:96%;">
     <v-tab-item style="width:100%; height:100%;">
-      <v-container v-show="orderPlaced">
+      <v-container v-show="this.orderPlaced">
         <v-row class="overflow-y-auto mt-3" justify="center" style="text-align: center">
             <v-col cols="12">
                 <div class="headline mb-1 secondary--text">Order Status</div>
@@ -32,9 +32,9 @@
                 <v-icon id="orderPlacedIcon" size="45px" class="pb-0 font-weight-light" color="primary">mdi-clock-time-four</v-icon>
             </v-col>
         </v-row>
-        <v-row style="text-align: center; line-height:0" v-for="i in 4" :key="i">
+        <v-row style="text-align: center; line-height:0" v-for="z in 4" :key="z">
             <v-col cols="12" class="ma-0 pa-0">
-                <v-icon size="13px" :value=i class="font-weight-light ma-0 pa-0 orderPlacedText toggleVisibility" style="transform:rotate(90deg)" color="primary">mdi-minus</v-icon>
+                <v-icon size="13px" :value=z class="font-weight-light ma-0 pa-0 orderPlacedText toggleVisibility" style="transform:rotate(90deg)" color="primary">mdi-minus</v-icon>
             </v-col>
         </v-row>
         <v-row class="mt-2 ml-1 pr-0">
@@ -73,7 +73,7 @@
             </v-col>
         </v-row>
       </v-container>
-      <v-container v-show="!orderPlaced" fluid fill-height class="pa-0">
+      <v-container v-show="!this.orderPlaced" fluid fill-height class="pa-0">
         <div class="row d-flex flex-column align-self-center align-center">
           <v-avatar class="mb-8" height="140px" width="140px" fab color="primary">
             <v-icon size="65px" class="font-weight-light" color="white">mdi-cart-outline</v-icon>
@@ -121,13 +121,13 @@
 </style>
 
 <script>
+import { Store, mapGetters } from "vuex";
 import NavBar from '@/components/layout/NavBar';
 
 export default {
   data () {
     return {
       tab: null,
-      orderPlaced: true,
     }
   },
   components: {
@@ -165,6 +165,11 @@ export default {
       })
     },
   },
+  computed: {
+    ...mapGetters({
+      orderPlaced: "OrderStore/getOrderFlag"
+    })
+  }
 }
 </script>
 

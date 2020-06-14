@@ -59,7 +59,7 @@
                                 <div class="body-1 secondary--text">Subtotal</div>
                             </v-col>
                             <v-col cols="3" class="pb-0"> 
-                                <div class="body-1 secondary--text d-flex justify-end">R117.00</div>
+                                <div class="body-1 secondary--text d-flex justify-end">R180.00</div>
                             </v-col>
                         </v-row>
                         <v-row>
@@ -67,7 +67,7 @@
                                 <div class="body-1 secondary--text">Tax(14% VAT included)</div>
                             </v-col>
                             <v-col cols="3" class="pb-0">
-                                <div class="body-1 secondary--text d-flex justify-end">R16.38</div>
+                                <div class="body-1 secondary--text d-flex justify-end">R25.20</div>
                             </v-col>
                         </v-row>
                         <v-row>
@@ -75,7 +75,7 @@
                                 <div class="body-1 secondary--text">Waiter Tip</div>
                             </v-col>
                             <v-col cols="3">
-                                <div class="body-1 secondary--text d-flex justify-end">R10.00</div>
+                                <div class="body-1 secondary--text d-flex justify-end">R18.00</div>
                             </v-col>
                         </v-row>
                         <v-row>
@@ -86,7 +86,7 @@
                                 <div class="body-1 secondary--text font-weight-bold">Total</div>
                             </v-col>
                             <v-col cols="3">
-                                <div class="body-1 secondary--text d-flex justify-end font-weight-bold">R{{this.orderTotal}}</div>
+                                <div class="body-1 secondary--text d-flex justify-end font-weight-bold">R{{this.orderTotal.toFixed(2)}}</div>
                             </v-col>
                         </v-row>
                     </v-container>
@@ -113,11 +113,11 @@ import NavBar from '@/components/layout/NavBar';
 export default {
   data () {
     return {
-        orderTotal: 143.38,
+        orderTotal: 223.20,
         tab: null,
         items: [
-            { img: 'https://source.unsplash.com/uVPV_nV17Tw/800x800/', name: 'Buttermilk Chicken Burger', price: '85.00'},
-            { img: 'https://source.unsplash.com/llib1mkWXlE/800x800/', name: 'Iced Latte', price: '32.00'}
+            { img: 'https://source.unsplash.com/uVPV_nV17Tw/800x800/', name: 'Buttermilk Chicken Burger', price: '95.00'},
+            { img: 'https://source.unsplash.com/2NaeHe0-p1I/800x800/', name: 'Fruit Salad', price: '85.00'}
         ],
     }
   },
