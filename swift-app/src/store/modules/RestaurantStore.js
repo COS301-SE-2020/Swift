@@ -2,6 +2,7 @@
 const initialState = () => ({
   tableNumber: "Checked in manually",
   checkedIn: false,
+  displayNotification: false,
 });
 
 const state = initialState();
@@ -15,6 +16,9 @@ const getters = {
   },
   getCheckInFlag(state) {
     return state.checkedIn;
+  },
+  getDisplayNotification(state) {
+    return state.displayNotification;
   },
 }
 
@@ -36,6 +40,10 @@ const actions = {
 
   updateCheckInFlag({commit}, data) {
     commit('updateCheckInFlag', data);
+  },
+
+  updateDisplayNotification({commit}, data) {
+    commit('updateDisplayNotification', data);
   }
 }
 
@@ -55,6 +63,10 @@ const mutations = {
 
   updateCheckInFlag(state, data) {
     state.checkedIn = data;
+  },
+
+  updateDisplayNotification(state, data) {
+    state.displayNotification = data;
   },
 }
 export default {

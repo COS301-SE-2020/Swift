@@ -120,7 +120,7 @@
             <v-row>
               <v-col cols="12" class="d-flex align-center justify-center">
                 <v-slide-x-transition>
-                  <div v-if="expandOrderBtn">
+                  <div v-if="expandOrderBtn" id="orderButton">
                     <v-btn @click="changeOrderBtn" rounded class="py-6 mt-5" color="primary" width="150px">Add To Order</v-btn>
                   </div>
                   <div v-if="!expandOrderBtn">
@@ -144,6 +144,7 @@
 
 <script>
 import store from '@/store/store.js';
+import { mapActions, mapGetters, mapMutations } from "vuex";
 
 export default {
   data() {
@@ -210,6 +211,11 @@ export default {
       this.$router.push("/cart");
     },
   },
+  // mounted: function() {
+  //   if (this.checkedIn) {
+  //     document.getElementById("orderButton").style.display = "block";
+  //   }
+  // },
   computed: {
     menuItem() {
       return store.state.MenuItemsStore.menuItems.find(
@@ -223,6 +229,9 @@ export default {
         return { color: 'primary', icon: 'mdi-heart' }
       }
     },
+    // ...mapGetters({
+    //   checkedIn: "RestaurantStore/getCheckInFlag"
+    // })
   }
 }
 </script>
@@ -231,4 +240,8 @@ export default {
     padding-left: 4px;
     padding-right: 5px;
   }
+
+  /* #orderButton {
+    display: none;
+  } */
 </style>

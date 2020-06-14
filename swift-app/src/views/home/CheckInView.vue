@@ -28,6 +28,7 @@ import { mapActions, mapGetters, mapMutations } from "vuex";
 export default {
   methods: {
     goToRestaurant() {
+      this.updateDisplayNotification(true);
       this.updateCheckInFlag(true);
       this.$router.push("/menu")
     },
@@ -36,7 +37,6 @@ export default {
     },
     onQRDecode(result) {
       this.setTable(result);
-      
       this.goToRestaurant();
     },
     ...mapMutations({
@@ -44,6 +44,7 @@ export default {
     }),
     ...mapActions({
       updateCheckInFlag: 'RestaurantStore/updateCheckInFlag',
+      updateDisplayNotification: 'RestaurantStore/updateDisplayNotification',
     }),
   },
 };
