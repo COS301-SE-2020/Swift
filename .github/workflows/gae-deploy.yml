@@ -1,0 +1,41 @@
+# Deploy API to GCP App Engine
+
+name: Deploy to Google App Engine
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+      - api
+
+jobs:
+  setup-build-deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      # Swap environment vars
+      - name: YAML Environment Secrets
+        uses: ./.github/actions/yaml-env-secrets
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_PASS: ${{ secrets.DB_PASS }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          DB_USER: ${{ secrets.DB_USER }}
+
+      # Setup and configure gcloud CLI
+      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: '290.0.1'
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GAE_CREDENTIALS }}
+
+      # Deploy App to App Engine
+      - name: Deploy
+        run: |
+          gcloud app deploy ./api/swift-api.yaml --quiet --promote
