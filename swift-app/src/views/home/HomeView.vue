@@ -26,7 +26,7 @@
 
         <v-row style="max-width: 400px" class="overflow-y-auto">
           <v-col cols="12">
-            <div class="title">Restaurants Near You</div>
+            <div class="title restaurants">Restaurants Near You</div>
           </v-col>
         </v-row>
 
@@ -40,7 +40,7 @@
           </v-col>
         </v-row>
 
-      <v-btn @click=goToCheckin app color="primary" style="bottom: 20px; right: 20px;" absolute  fab  >
+      <v-btn class="checkInBtn" @click=goToCheckin app color="primary" style="bottom: 20px; right: 20px;" absolute  fab  >
         <v-icon>mdi-table-furniture</v-icon>
       </v-btn>
       </v-container>

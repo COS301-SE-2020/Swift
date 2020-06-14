@@ -80,7 +80,7 @@
           </v-avatar>
           <div class="headline mb-3 mt-12 secondary--text">Order Empty</div>
           <div class="subtitle-1 secondary--text">Order some food or drinks here:</div>
-          <v-btn @click="goToHome" class="mt-6" height="53px" width="100px" rounded large color="primary">Menu</v-btn>
+          <v-btn @click="goToMenu" class="mt-6" height="53px" width="100px" rounded large color="primary">Menu</v-btn>
         </div>
       </v-container>
     </v-tab-item>
@@ -175,8 +175,8 @@ export default {
     }, 500);
   },
   methods: {
-    goToHome () {
-      this.$router.push('/')
+    goToMenu () {
+      this.$router.push('/menu')
     },
     goToOrderHistory () {
       this.tab = 1;
