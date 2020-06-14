@@ -9,18 +9,18 @@
 
 ### Install the API dependencies
 
-```bash
+```npm
 npm install
 ```
 
 ### Start API
 
-```bash
+```npm
 npm start
 ```
 
 ### Run API unit tests
 
-```bash
+```npm
 npm test
 ```
