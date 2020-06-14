@@ -36,6 +36,9 @@ app.get('/', require('./api/api'));
 app.post('/', require('./api/api'));
 app.put('/', require('./api/api'));
 
+// Handle favicon requests
+app.get('/favicon.ico', (req, res) => {res.status(204).end()});
+
 // Start server
 var server = app.listen(SERVER_PORT, () => {
     console.log('Server listening on port: ' + server.address().port);

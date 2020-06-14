@@ -12,6 +12,18 @@ chai.use(chaiMatchPattern);
 
 describe('Test API Endpoints', () => {
     /**
+     * Favicon request
+     */
+    it("Favicon Request", (done) => {
+        chai.request(server)
+        .get('/favicon.ico')
+        .end((err, res) => {
+            res.should.have.status(204);
+            done();
+        });
+    });
+
+    /**
      * Test DELETE API
      */
     it("DELETE Endpoint", (done) => {
