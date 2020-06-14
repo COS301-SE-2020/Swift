@@ -95,7 +95,7 @@
         </v-row>
         <v-row class="d-flex justify-space-around" style="position: absolute; width:100%; bottom: 0; margin-bottom: 33px">
             <v-col cols="5" class="pa-0">
-                <v-btn rounded color="primary" elevation="2" class="mr-2 body-2" width="100%">Order Now, Pay Later</v-btn>
+                <v-btn rounded color="primary" elevation="2" class="mr-2 body-2" width="100%" @click="goToOrder">Order Now, Pay Later</v-btn>
             </v-col>
             <v-col cols="5" class="pa-0">
                 <v-btn rounded color="accent" elevation="2" class="mr-2 body-2" width="100%" @click="goToPayment">Pay Now</v-btn>
@@ -107,7 +107,7 @@
 </template>
 
 <script>
-import { Store, mapMutations } from "vuex";
+import { mapActions, mapMutations } from "vuex";
 import NavBar from '@/components/layout/NavBar';
 
 export default {
@@ -128,13 +128,20 @@ export default {
     goToHome () {
       this.$router.push('/')
     },
+    goToOrder () {
+        this.updateOrderFlag(true);
+        this.$router.push('/orders')
+    },
     goToPayment (){
         this.setTotal(this.orderTotal)
         this.$router.push('/pay')
     },
      ...mapMutations({
       setTotal : 'OrderStore/setOrderTotal'
-    })
+    }),
+    ...mapActions({
+      updateOrderFlag: 'OrderStore/updateOrderFlag',
+    }),
   },
 }
 </script>

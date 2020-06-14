@@ -189,7 +189,7 @@ export default {
   },
   methods: {
     backNavigation () {
-      this.$router.back()
+      this.$router.push('/menu')
     },
     changeFavouriteFab () {
       this.favourited = !this.favourited

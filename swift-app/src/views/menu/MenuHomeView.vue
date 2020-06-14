@@ -62,13 +62,14 @@
       <v-sheet class="mx-auto" max-width="700">
         <v-slide-group multiple>
           <v-slide-item v-for="card in popularFood" :key="card.title">
-            <v-card ripple class="mr-3" @click="goToMenuItem(1)">
+            <v-card ripple class="mr-3">
               <v-img
                 :src="card.src"
                 class="white--text align-center"
                 gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
                 width="170px"
                 height="100px"
+                @click="goToMenuItem(1)"
               >
                 <v-card-title class="pl-2 pt-1 body-1" v-text="card.title"></v-card-title>
                 <v-card-subtitle class="pl-2 white--text subtitle-2" v-text="card.price"></v-card-subtitle>
