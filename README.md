@@ -2,6 +2,11 @@
 
 Swift aims to create a convenient, flexible, and scalable interface suitable for both customers and restaurants giving users the opportunity to order, track and pay for their food immediately. The application will also use Augmented Reality to show real live photogrammetry models of the food, making the menu come to life.
 
+## Status
+
+![Swift API CI](https://github.com/COS301-SE-2020/Swift/workflows/Swift%20API%20CI/badge.svg)
+![Deploy to Google App Engine](https://github.com/COS301-SE-2020/Swift/workflows/Deploy%20to%20Google%20App%20Engine/badge.svg)
+
 ## Project Management Tools
 
 * :open_book: [Clickup](https://app.clickup.com/2546114/v/l/s/2693763)
