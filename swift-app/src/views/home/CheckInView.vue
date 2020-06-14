@@ -23,23 +23,28 @@
 </template>
 
 <script>
-import { Store, mapGetters, mapMutations } from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 
 export default {
   methods: {
     goToRestaurant() {
+      this.updateCheckInFlag(true);
       this.$router.push("/menu")
     },
     goToHome() {
       this.$router.push("/")
     },
     onQRDecode(result) {
-      this.setTable(result)
+      this.setTable(result);
+      
       this.goToRestaurant();
     },
     ...mapMutations({
-      setTable : 'RestaurantStore/setTableNumber'
-    })
+      setTable : 'RestaurantStore/setTableNumber',
+    }),
+    ...mapActions({
+      updateCheckInFlag: 'RestaurantStore/updateCheckInFlag',
+    }),
   },
 };
 </script>

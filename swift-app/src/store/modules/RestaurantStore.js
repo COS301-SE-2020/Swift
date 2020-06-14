@@ -1,6 +1,7 @@
 // State object
 const initialState = () => ({
-  tableNumber: "Checked in manually"
+  tableNumber: "Checked in manually",
+  checkedIn: false,
 });
 
 const state = initialState();
@@ -11,6 +12,9 @@ const state = initialState();
 const getters = {
   getTableNumber(state) {
     return state.tableNumber;
+  },
+  getCheckInFlag(state) {
+    return state.checkedIn;
   },
 }
 
@@ -28,6 +32,10 @@ const actions = {
       commit('SET_VARIABLE_1', data); 
       resolve();
     })
+  },
+
+  updateCheckInFlag({commit}, data) {
+    commit('updateCheckInFlag', data);
   }
 }
 
@@ -43,6 +51,10 @@ const mutations = {
 
   setTableNumber(state, data) {
     state.tableNumber = data;
+  },
+
+  updateCheckInFlag(state, data) {
+    state.checkedIn = data;
   },
 }
 export default {

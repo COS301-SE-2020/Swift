@@ -100,13 +100,13 @@
       </v-sheet>
     </v-container>
        <!--snackbar shows table number on successful checkin -->
-      <v-snackbar absolute centered color="primary" elevation="24" v-model="snackbar">{{ tableNumber }}</v-snackbar>
+      <v-snackbar id="notification" absolute centered color="primary" elevation="24" v-model="snackbar">{{ tableNumber }}</v-snackbar>
     <NavBar></NavBar>
   </div>
 </template>
 
 <script>
-import { Store, mapGetters } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 import NavBar from "@/components/layout/NavBar";
 import MenuSearchToolBar from "@/components/layout/MenuSearchToolBar";
 
@@ -199,6 +199,15 @@ export default {
     },
     changeFavouriteFab() {
       this.favourited = !this.favourited;
+    },
+    ...mapActions({
+      updateCheckInFlag: 'RestaurantStore/updateCheckInFlag',
+    }),
+  },
+  mounted: function() {
+    if (this.checkedIn) {
+      document.getElementById("notification").style.display = "block";
+      this.updateCheckInFlag(false);
     }
   },
   computed: {
@@ -210,8 +219,15 @@ export default {
       }
     },
     ...mapGetters({
-      tableNumber: "RestaurantStore/getTableNumber"
+      tableNumber: "RestaurantStore/getTableNumber",
+      checkedIn: "RestaurantStore/getCheckInFlag"
     })
   }
 };
 </script>
+
+<style>
+#notification {
+  display: none;
+}
+</style>

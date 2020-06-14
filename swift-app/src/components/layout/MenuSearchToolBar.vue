@@ -149,7 +149,7 @@
         }
       },
       backNavigation () {
-        this.$router.back()
+        this.$router.push("/");
       },
     },
     watch: {
