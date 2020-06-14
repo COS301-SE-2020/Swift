@@ -4,7 +4,7 @@ name: Swift API CI
 
 on:
   push:
-    branches: [ api ]
+    branches: [ master,develop,api ]
   pull_request:
     branches: [ develop,master ]
 

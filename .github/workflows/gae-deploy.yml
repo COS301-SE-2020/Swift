@@ -5,11 +5,9 @@ name: Deploy to Google App Engine
 on:
   push:
     branches:
-      - api
-  pull_request:
-    branches:
-      - develop
       - master
+      - develop
+      - api
 
 jobs:
   setup-build-deploy:
