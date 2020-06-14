@@ -69,7 +69,7 @@
         </v-row>
         <v-row class="overflow-y-auto mt-0 justify-space-between" style="text-align: center; position: absolute; width:100%; bottom: 0; margin-bottom: 25px">
             <v-col cols="12">
-                <v-btn @click="goToHome" style="text-align: center" class="body-2 align-self-center" height="53px" width="110px" rounded color="primary">View Order</v-btn>
+                <v-btn @click="goToOrderHistory" style="text-align: center" class="body-2 align-self-center" height="53px" width="110px" rounded color="primary">View Order</v-btn>
             </v-col>
         </v-row>
       </v-container>
@@ -85,7 +85,32 @@
       </v-container>
     </v-tab-item>
     <v-tab-item style="height:100%;">
-      <v-container fluid fill-height class="pa-0">
+      <v-container v-show="this.orderPlaced" style="height:100%">
+        <v-row v-for="(item, index) in items" :key="index">
+          <v-col class="d-flex justify-center pb-1">
+            <v-card width="95%">
+              <v-container py-0>
+                <v-row>
+                  <v-col cols="4">
+                    <v-avatar color="grey" size="65px">
+                      <img :src=item.img alt="">
+                    </v-avatar>
+                  </v-col>
+                  <v-col cols="8" class="pl-0">
+                    <v-row >
+                      <div class="body-2 secondary--text">{{item.name}}</div>
+                    </v-row>
+                    <v-row class="d-flex justify-space-between mt-2">
+                      <div class="body-2 secondary--text">R{{item.price}}</div>
+                    </v-row>
+                  </v-col>
+                </v-row>
+              </v-container>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+      <v-container v-show="!this.orderPlaced" fluid fill-height class="pa-0">
         <div class="row d-flex flex-column justify-center align-center">
           No orders
         </div>
@@ -127,7 +152,12 @@ import NavBar from '@/components/layout/NavBar';
 export default {
   data () {
     return {
-      tab: null,
+      orderTotal: 223.20,
+        tab: null,
+        items: [
+            { img: 'https://source.unsplash.com/uVPV_nV17Tw/800x800/', name: 'Buttermilk Chicken Burger', price: '95.00'},
+            { img: 'https://source.unsplash.com/2NaeHe0-p1I/800x800/', name: 'Fruit Salad', price: '85.00'}
+        ],
     }
   },
   components: {
@@ -135,15 +165,21 @@ export default {
   },
   mounted: async function() {
     var self = this;
-    window.addEventListener(["pageshow", "load"], async function(event) {
-      await self.blinkOrder("orderPlaced");
-      await self.blinkOrder("orderDone");
-      await self.blinkOrder("orderReceived");
-    })
+    var checkOrder = setInterval(function(){ 
+      window.addEventListener("load", async function(event) {
+        clearInterval(checkOrder);
+        await self.blinkOrder("orderPlaced");
+        await self.blinkOrder("orderDone");
+        await self.blinkOrder("orderReceived");        
+      })
+    }, 500);
   },
   methods: {
     goToHome () {
       this.$router.push('/')
+    },
+    goToOrderHistory () {
+      this.tab = 1;
     },
     async blinkOrder (state) {
       return new Promise((resolve, reject) => {

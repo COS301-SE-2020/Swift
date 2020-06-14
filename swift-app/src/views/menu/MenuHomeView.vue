@@ -100,7 +100,7 @@
       </v-sheet>
     </v-container>
        <!--snackbar shows table number on successful checkin -->
-      <v-snackbar id="notification" absolute centered color="primary" elevation="24" v-model="snackbar">{{ tableNumber }}</v-snackbar>
+      <v-snackbar id="notification" timeout=2000 transition centered color="primary" elevation="24" v-model="snackbar">{{ tableNumber }}</v-snackbar>
     <NavBar></NavBar>
   </div>
 </template>
@@ -201,13 +201,13 @@ export default {
       this.favourited = !this.favourited;
     },
     ...mapActions({
-      updateCheckInFlag: 'RestaurantStore/updateCheckInFlag',
+      updateDisplayNotification: 'RestaurantStore/updateDisplayNotification',
     }),
   },
   mounted: function() {
-    if (this.checkedIn) {
+    if (this.displayNotification) {
       document.getElementById("notification").style.display = "block";
-      this.updateCheckInFlag(false);
+      this.updateDisplayNotification(false);
     }
   },
   computed: {
@@ -220,7 +220,7 @@ export default {
     },
     ...mapGetters({
       tableNumber: "RestaurantStore/getTableNumber",
-      checkedIn: "RestaurantStore/getCheckInFlag"
+      displayNotification: "RestaurantStore/getDisplayNotification"
     })
   }
 };
@@ -229,5 +229,8 @@ export default {
 <style>
 #notification {
   display: none;
+  position: absolute; 
+  top: 0; 
+  margin-top: 20px;
 }
 </style>
