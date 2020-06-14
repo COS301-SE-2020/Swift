@@ -135,7 +135,7 @@ export default {
   },
   mounted: async function() {
     var self = this;
-    window.addEventListener("load", async function(event) {
+    window.addEventListener(["pageshow", "load"], async function(event) {
       await self.blinkOrder("orderPlaced");
       await self.blinkOrder("orderDone");
       await self.blinkOrder("orderReceived");
