@@ -4,6 +4,9 @@
       <v-container>
         <v-row>
           <v-col cols="12" class="pt-0 px-0">
+            <v-btn width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 20px; left: 10px;">
+              <v-icon>mdi-chevron-left</v-icon>
+            </v-btn>
             <v-carousel height="200px" :show-arrows="false" hide-delimiter cycle hide-delimiters continuous>
               <v-carousel-item gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.4)" v-for="(item,i) in restaurantImages" :key="i" :src="item.img">
                   <v-row class="fill-height" align="center" justify="center">
@@ -144,6 +147,9 @@
         } else {
           this.toolbarHeight = '200px';
         }
+      },
+      backNavigation () {
+        this.$router.back()
       },
     },
     watch: {
