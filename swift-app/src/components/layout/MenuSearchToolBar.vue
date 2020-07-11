@@ -2,20 +2,25 @@
   <div class="toolbar">
     <v-card color="grey lighten-4" flat tile>
       <v-container>
-        <v-row>
-          <v-col cols="12" class="pt-0 px-0">
-            <v-btn width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 20px; left: 10px;">
-              <v-icon>mdi-chevron-left</v-icon>
-            </v-btn>
-            <v-carousel height="200px" :show-arrows="false" hide-delimiter cycle hide-delimiters continuous>
-              <v-carousel-item gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.4)" v-for="(item,i) in restaurantImages" :key="i" :src="item.img">
-                  <v-row class="fill-height" align="center" justify="center">
-                    <div class="white--text display-1">Welcome to<br/> Mugg & Bean</div>
-                  </v-row>
-              </v-carousel-item>
-            </v-carousel>
-          </v-col>
-        </v-row>
+        <div class="backgroundImage" style="margin-top: 0px">
+          <v-row style="margin-top: -12px; margin-bottom: 10px"> 
+            <v-col cols="12" class="pt-0 px-0">
+              <!-- <v-btn width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 20px; left: 10px;">
+                <v-icon>mdi-chevron-left</v-icon>
+              </v-btn> -->
+              <v-carousel height="200px" :show-arrows="false" hide-delimiter cycle hide-delimiters continuous>
+                <v-carousel-item gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.4)" v-for="(item,i) in restaurantImages" :key="i" :src="item.img">
+                    <v-row class="fill-height" align="center" justify="center">
+                      <div class="white--text display-1">Welcome to<br/> Mugg & Bean</div>
+                    </v-row>
+                </v-carousel-item>
+              </v-carousel>
+              <v-btn width="30px" height="30px" @click="callWaiter" :key="activeCall.icon" :color="activeCall.color" absolute small fab style="top: 20px; right: 10px;">
+                <v-icon :style="called ? { 'transform': 'rotate(45deg)' } : { 'transform': 'rotate(0deg)' }">{{ activeCall.icon }}</v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+        </div>
         <v-row>
           <v-col cols="12" class="pt-0">
             <div class="title">What would you like to order?</div>
@@ -119,6 +124,12 @@
 </template>
 
 <script>
+  import $ from 'jquery';
+
+  $(window).scroll(function(){
+    $(".backgroundImage").css("opacity", 1 - $(window).scrollTop() / 250);
+  });
+
   export default {
     data: () => ({
       prices: ['low-high', 'high-low', 'R0-R49', 'R50-100'],
@@ -127,7 +138,7 @@
       toolbarExpanded: false,
       toolbarHeight: '140px',
       expand: false,
-
+      called: false,
       isLoading: false,
       items: [],
       model: null,
@@ -151,6 +162,9 @@
       backNavigation () {
         this.$router.push("/");
       },
+      callWaiter() {
+        this.called = !this.called;
+      }
     },
     watch: {
       model (val) {
@@ -173,5 +187,14 @@
           .finally(() => (this.isLoading = false))
       },
     },
+    computed: {
+      activeCall() {
+        if (!this.called) {
+          return { color: "white", icon: "mdi-bell-outline" };
+        } else {
+          return { color: "primary", icon: "mdi-bell-outline" };
+        }
+      },
+    }
   } 
 </script>
