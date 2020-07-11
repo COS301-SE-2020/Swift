@@ -10,21 +10,23 @@
           <div class="title">Categories</div>
         </v-col>
       </v-row>
-      <v-sheet class="mx-auto" max-width="700">
-        <v-slide-group multiple>
-          <v-slide-item v-for="(category, index) in categories" :key="index">
-            <div class="ml-0" align="center">
-              <v-btn dark width="50px" height="50px" min-width="50px" class="mx-2">
-                <v-avatar color="grey darken-4" size="35px">
-                  <img @click="goToMenuItem(1)" :src="category.img" alt />
-                </v-avatar>
-              </v-btn>
-              <div class="mt-1 caption">{{category.name}}</div>
-            </div>
-          </v-slide-item>
-        </v-slide-group>
-      </v-sheet>
-      <v-divider class="mt-2"></v-divider>
+      <div id="categories" >
+        <v-sheet class="mx-auto" max-width="700">
+          <v-slide-group multiple>
+            <v-slide-item v-for="(category, index) in categories" :key="index">
+              <div class="ml-0" align="center" style="margin-top: 10px">
+                <v-btn dark width="50px" height="50px" min-width="50px" class="mx-2">
+                  <v-avatar color="grey darken-4" size="35px">
+                    <img @click="goToMenuItem(1)" :src="category.img" alt />
+                  </v-avatar>
+                </v-btn>
+                <div class="mt-1 caption">{{category.name}}</div>
+              </div>
+            </v-slide-item>
+          </v-slide-group>
+        </v-sheet>
+        <v-divider class="mt-2"></v-divider>
+      </div>
 
       <v-row style="max-width: 400px" class="overflow-y-auto">
         <v-col cols="12">
@@ -49,6 +51,53 @@
               </v-btn>
               <div class="mt-1 subtitle-2">{{card.title}}</div>
             </div>
+          </v-slide-item>
+        </v-slide-group>
+      </v-sheet>
+
+      <v-row style="max-width: 400px" class="overflow-y-auto">
+        <v-col cols="12">
+          <div class="title">Popular Food</div>
+        </v-col>
+      </v-row>
+
+      <v-sheet class="mx-auto" max-width="700">
+        <v-slide-group multiple>
+          <v-slide-item v-for="card in popularFood" :key="card.title">
+            <v-card ripple class="mr-3">
+              <v-img
+                :src="card.src"
+                class="white--text align-center"
+                gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
+                width="170px"
+                height="100px"
+                @click="goToMenuItem(1)"
+              >
+                <v-card-title class="pl-2 pt-1 body-1" v-text="card.title"></v-card-title>
+                <v-card-subtitle class="pl-2 white--text subtitle-2" v-text="card.price"></v-card-subtitle>
+                <v-rating
+                  size="14"
+                  class="pl-2"
+                  dense
+                  color="yellow darken-3"
+                  background-color="secondary"
+                  :value="card.rating"
+                ></v-rating>
+                <v-fab-transition>
+                  <v-btn
+                    @click="changeFavouriteFab"
+                    :key="activateFavourite.icon"
+                    :color="activateFavourite.color"
+                    style="top: 3px; right: 3px; transform: scale(0.8);"
+                    absolute
+                    small
+                    fab
+                  >
+                    <v-icon>{{ activateFavourite.icon }}</v-icon>
+                  </v-btn>
+                </v-fab-transition>
+              </v-img>
+            </v-card>
           </v-slide-item>
         </v-slide-group>
       </v-sheet>
@@ -233,5 +282,13 @@ export default {
   position: absolute; 
   top: 0; 
   margin-top: 20px;
+}
+
+#categories {
+  position: sticky;
+  position: -webkit-sticky;
+  top: 0;
+  z-index: 100;
+  background-color: white;
 }
 </style>
