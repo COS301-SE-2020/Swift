@@ -29,10 +29,10 @@
     <v-card-text class="pt-0" >
       <v-row align="center" class="mx-0" >
         <v-col cols="8" class="px-0 py-0">
-          <v-rating size="18" dense color="yellow darken-3" background-color="secondary" :value=menuItem.rating></v-rating>
+          <v-rating readonly size="18" dense color="yellow darken-3" background-color="secondary" :value=menuItem.rating></v-rating>
         </v-col>
         <v-col cols="4" class="py-0">
-          <div color="secondary" class="ml-4 my-4"><v-icon color="secondary">mdi-clock</v-icon> 15 min</div>
+          <div color="secondary" class="ml-2 my-4"><v-icon color="secondary">mdi-clock</v-icon> 15 min</div>
         </v-col>
       </v-row>
       <div class="justify">{{menuItem.description}}</div>
@@ -44,7 +44,7 @@
         Details
       </v-tab>
       <v-tab>
-        Reviews (0)
+        Reviews ({{ comments.length }})
       </v-tab>
     </v-tabs>
 
@@ -135,7 +135,73 @@
       </v-tab-item>
       <v-tab-item>
         <v-card flat>
-          <v-card-text>No reviews yet</v-card-text>
+          <v-row v-for="(comment, index) in comments" :key="comment.commentDate">
+            <v-card-text class="pb-0 pt-3">
+              <v-row class="mx-0">
+                <v-col cols="3" class="mr-0">
+                  <v-avatar color="grey" size="50px">
+                    <img :src=comment.profileImage alt="">
+                  </v-avatar>
+                </v-col>
+                <v-col cols="9" class="pl-1">
+                  <v-row class="pt-0">
+                    <v-col cols="6" class="pt-0 pl-0 pb-0">
+                      <span class="subtitle-1 black--text">{{comment.name}} {{comment.surname}}</span>
+                    </v-col>
+                    <v-col cols="6" class="pt-0 pl-0 pb-0" style="text-align: right">
+                      <span style="font-size: 12px; text-align: right">{{comment.commentDate}}</span>
+                    </v-col>
+                  </v-row>
+                  <v-row class="pt-0">
+                    <v-col cols="8" class="py-0 pt-0 pl-0 pb-0">
+                      <v-rating readonly size="18" dense color="yellow darken-3" background-color="secondary" :value=comment.rating></v-rating>
+                    </v-col>
+                    <v-col cols="4" class="py-0 pt-0 pl-0 pb-0" style="text-align: right">
+                      <!-- <div style="color: rgba(0, 0, 0, 0.6)" class="ml-2 my-4 mr-0 mt-0">  -->
+                        <v-btn @click="changeFavouriteComment(comment)" :color="activateFavouriteComment(comment).color" class="pl-0 pr-1" text small min-width="0">
+                          <v-icon>{{ activateFavouriteComment(comment).icon }}</v-icon>
+                        </v-btn>
+                        <div v-if="comment.likes != '0'" style="display: inline">
+                          {{comment.likes}}
+                        </div>
+                    </v-col>
+                  </v-row>
+                  <v-row class="pt-0 pr-2 mt-3">
+                    <v-col cols="12" class="py-0 pt-0 pl-0 pb-0 mr-0">
+                      <div class="justify commentInfo" style="font-size: 12px" :id="'comment' + index">{{limitComment(comment, index).commentText}}</div>
+                    </v-col>
+                    <v-col style="text-align: center" class="pb-0 pt-1">
+                      <v-btn @click="revealComment(index)" :color="secondary" class="pl-0 pr-1" text small min-width="0">
+                        <v-icon size="35" v-if="getCommentLength(comment)">{{limitComment(comment, index).icon}}</v-icon>
+                      </v-btn>
+                    </v-col>
+                  </v-row>
+                  <v-row class="mt-3" v-if="comment.adminName != ''">
+                    <v-col cols="3" class="mr-0 ml-0 pl-0">
+                      <v-avatar color="grey" size="50px">
+                        <img :src=comment.adminProfileImage alt="">
+                      </v-avatar>
+                    </v-col>
+                    <v-col cols="9" class="pl-1">
+                      <v-row class="pt-0">
+                        <v-col cols="12" class="pt-0 pl-0 pb-0">
+                          <span class="subtitle-1 black--text">{{comment.adminName}}</span>
+                        </v-col>
+                        <v-col cols="12" class="pt-0 pl-0 pb-0">
+                          <span style="font-size: 12px;">{{comment.responseDate}}</span>
+                        </v-col>
+                      </v-row>
+                      <v-row class="pt-0 pr-2 mt-3">
+                        <v-col cols="12" class="py-0 pt-0 pl-0 pb-0 mr-0">
+                          <div class="justify" style="font-size: 12px">{{comment.response}}</div>
+                        </v-col>
+                      </v-row>
+                    </v-col>
+                  </v-row>
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-row>
         </v-card>
       </v-tab-item>
     </v-tabs-items>
@@ -148,15 +214,26 @@
     padding-right: 5px;
   }
 
+ 
+  /* .comment {
+    white-space: nowrap;
+    width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  } */
 </style>
 
 <script>
 import store from '@/store/store.js';
 import { mapActions, mapGetters, mapMutations } from "vuex";
+import $ from 'jquery';
+
+$('.commentInfo').text($('.commentInfo').text().substring(0,200))
 
 export default {
   data() {
     return {
+      activeComments: [],
       menuItemId: this.$route.params.itemid,
       expandOrderBtn: true,
       items: [
@@ -193,6 +270,48 @@ export default {
       text: 'small',
       selection: 0,
       prices: ['low-high', 'high-low', 'R0-R49', 'R50-100'],
+      comments: [
+        {
+          name: 'Peter',
+          surname: 'Jackson',
+          profileImage: 'https://source.unsplash.com/800x800/?man',
+          commentDate: '11:00 June 24, 2020',
+          rating: '4',
+          comment: 'The perfect fruit salad for a backyard bbq or any occasion. There are never leftovers! This is one of my favorite fruit salad recipes, as I think the sauce really makes it. This salad is tastier the longer you can let it soak in its juices. I prefer 3 to 4 hours in the refrigerator before I serve it. Enjoy.',
+          liked: false,
+          likes: '11',
+          adminName: 'Mugg and Bean',
+          adminProfileImage: 'https://source.unsplash.com/800x800/?restaurant',
+          response: 'Thank you for your feedback! We appreciate your help.',
+          responseDate: '09:30 June 25, 2020'
+        },
+        {
+          name: 'Sandra',
+          surname: 'Menice',
+          profileImage: 'https://source.unsplash.com/800x800/?woman',
+          commentDate: '15:00 June 22, 2020',
+          rating: '2',
+          comment: "Way too sweet. Does not need the brown sugar or vanilla. The fruit is sweet enough & has plenty of flavor on it's own.",
+          liked: true,
+          likes: '10',
+          adminName: '',
+          response: '',
+          responseDate: ''
+        },
+        {
+          name: 'Peter',
+          surname: 'Franklin',
+          profileImage: 'https://source.unsplash.com/800x800/?profile',
+          commentDate: '10:30 June 20, 2020',
+          rating: '5',
+          comment: "The perfect fruit salad for a backyard bbq or any occasion. There are never leftovers! This is one of my favorite fruit salad recipes, as I think the sauce really makes it. This salad is tastier the longer you can let it soak in its juices. I prefer 3 to 4 hours in the refrigerator before I serve it. Enjoy.",
+          liked: false,
+          likes: '0',
+          adminName: '',
+          response: '',
+          responseDate: ''
+        }
+      ]
     }
   },
   methods: {
@@ -202,8 +321,40 @@ export default {
     changeFavouriteFab () {
       this.favourited = !this.favourited
     },
+    changeFavouriteComment: function (comment) {
+      comment.liked = !comment.liked
+      if (comment.liked)
+        comment.likes = (Number(comment.likes) + 1).toString()
+      else 
+        if (comment.likes != '0')
+          comment.likes = (Number(comment.likes) - 1).toString()
+    },
+    activateFavouriteComment: function (comment) {
+      if (!comment.liked) {
+        return { color: 'secondary', icon: 'mdi-heart-outline' }
+      } else {
+        return { color: 'primary', icon: 'mdi-heart' }
+      }
+    },
+    getCommentLength: function (comment) {
+      if (comment.comment.length > 150)
+        return true
+      else 
+        return false
+    },
+    limitComment: function (userInput, index) {
+      if (userInput.comment.length > 150 && !this.activeComments.includes(index)) {
+        var truncated = userInput.comment.substr(0,150) + '...';
+        return { commentText: truncated, icon: 'mdi-chevron-down' }
+      } else {
+        return { commentText: userInput.comment, icon: 'mdi-chevron-up' }
+      }
+    },
     changeOrderBtn () {
       this.expandOrderBtn = !this.expandOrderBtn
+    },
+    revealComment: function (index) {
+      this.activeComments.includes(index) ? this.activeComments.splice(this.activeComments.indexOf(index), 1) : this.activeComments.push(index);
     },
     openARScanner() {
       return this.$ionic.alertController
@@ -232,6 +383,7 @@ export default {
         return { color: 'primary', icon: 'mdi-heart' }
       }
     },
+    
     ...mapGetters({
       checkedIn: "RestaurantStore/getCheckInFlag"
     })

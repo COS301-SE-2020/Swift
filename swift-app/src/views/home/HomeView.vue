@@ -71,11 +71,11 @@ export default {
     ],
     restaurants: [
       { title: 'Mugg & Bean', src: 'https://source.unsplash.com/800x800/?mcdonalds', flex: 4 },
-      { title: 'Roco Mamas', src: 'https://source.unsplash.com/800x800/?spaghetti', flex: 4 },
+      { title: 'RocoMamas', src: 'https://source.unsplash.com/800x800/?spaghetti', flex: 4 },
       { title: 'Burger King', src: 'https://source.unsplash.com/800x800/?burgerking', flex: 4 },
       { title: 'Varsity Bakery', src: 'https://source.unsplash.com/800x800/?bakery', flex: 4 },
       { title: 'Ocean Basket', src: 'https://source.unsplash.com/800x800/?burger', flex: 4 },
-      { title: 'Crawdaddys', src: 'https://source.unsplash.com/800x800/?seafood', flex: 4 },
+      { title: "Crawdaddy's", src: 'https://source.unsplash.com/800x800/?seafood', flex: 4 },
     ],
     favourited: false,
   }),
