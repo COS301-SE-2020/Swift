@@ -134,19 +134,34 @@
         </v-card>
       </v-tab-item>
       <v-tab-item>
-        <v-card flat>
+        <v-card flat class="mt-2 mb-5">
+          <v-row v-for="phrase in ratingPhrases" :key="phrase.phrase">
+            <v-card-text class="pb-0 pt-1 mt-0 ml-5">
+              <v-row class="mx-0 pb-0 pt-1">
+                <v-col cols="8" class="pt-0 pl-0 pb-0">
+                  <span class="black--text" style="font-size: 15px">{{phrase.phrase}}</span>
+                </v-col>
+                <v-col cols="4" class="py-0 pt-0 pl-0 pb-0">
+                  <v-rating readonly size="18" dense color="yellow darken-3" background-color="secondary" :value=phrase.rating></v-rating>
+                </v-col>
+              </v-row>
+            </v-card-text>
+          </v-row>
+        </v-card>
+        <v-divider style="opacity: 0.6"></v-divider>
+        <v-card flat class="mt-2">
           <v-row v-for="(comment, index) in comments" :key="comment.commentDate">
-            <v-card-text class="pb-0 pt-3">
-              <v-row class="mx-0">
-                <v-col cols="3" class="mr-0">
+            <v-card-text class="pb-0 pt-1 mt-0">
+              <v-row class="mx-0 pb-0 pt-3">
+                <v-col cols="3" class="mr-0 pb-0 pt-1">
                   <v-avatar color="grey" size="50px">
                     <img :src=comment.profileImage alt="">
                   </v-avatar>
                 </v-col>
-                <v-col cols="9" class="pl-1">
+                <v-col cols="9" class="pl-1 pb-0 pt-1">
                   <v-row class="pt-0">
                     <v-col cols="6" class="pt-0 pl-0 pb-0">
-                      <span class="subtitle-1 black--text">{{comment.name}} {{comment.surname}}</span>
+                      <span class="black--text" style="font-size: 15px">{{comment.name}} {{comment.surname}}</span>
                     </v-col>
                     <v-col cols="6" class="pt-0 pl-0 pb-0" style="text-align: right">
                       <span style="font-size: 12px; text-align: right">{{comment.commentDate}}</span>
@@ -157,7 +172,6 @@
                       <v-rating readonly size="18" dense color="yellow darken-3" background-color="secondary" :value=comment.rating></v-rating>
                     </v-col>
                     <v-col cols="4" class="py-0 pt-0 pl-0 pb-0" style="text-align: right">
-                      <!-- <div style="color: rgba(0, 0, 0, 0.6)" class="ml-2 my-4 mr-0 mt-0">  -->
                         <v-btn @click="changeFavouriteComment(comment)" :color="activateFavouriteComment(comment).color" class="pl-0 pr-1" text small min-width="0">
                           <v-icon>{{ activateFavouriteComment(comment).icon }}</v-icon>
                         </v-btn>
@@ -170,22 +184,22 @@
                     <v-col cols="12" class="py-0 pt-0 pl-0 pb-0 mr-0">
                       <div class="justify commentInfo" style="font-size: 12px" :id="'comment' + index">{{limitComment(comment, index).commentText}}</div>
                     </v-col>
-                    <v-col style="text-align: center" class="pb-0 pt-1">
+                    <v-col style="text-align: center" class="pb-0 pt-1" v-if="getCommentLength(comment)">
                       <v-btn @click="revealComment(index)" :color="secondary" class="pl-0 pr-1" text small min-width="0">
-                        <v-icon size="35" v-if="getCommentLength(comment)">{{limitComment(comment, index).icon}}</v-icon>
+                        <v-icon size="35">{{limitComment(comment, index).icon}}</v-icon>
                       </v-btn>
                     </v-col>
                   </v-row>
-                  <v-row class="mt-3" v-if="comment.adminName != ''">
-                    <v-col cols="3" class="mr-0 ml-0 pl-0">
+                  <v-row class="mt-2" v-if="comment.adminName != ''">
+                    <v-col cols="3" class="mr-0 ml-0 pl-0 pb-0 pt-1">
                       <v-avatar color="grey" size="50px">
                         <img :src=comment.adminProfileImage alt="">
                       </v-avatar>
                     </v-col>
-                    <v-col cols="9" class="pl-1">
+                    <v-col cols="9" class="pl-1 pb-0 pt-1">
                       <v-row class="pt-0">
                         <v-col cols="12" class="pt-0 pl-0 pb-0">
-                          <span class="subtitle-1 black--text">{{comment.adminName}}</span>
+                          <span class="black--text" style="font-size: 15px">{{comment.adminName}}</span>
                         </v-col>
                         <v-col cols="12" class="pt-0 pl-0 pb-0">
                           <span style="font-size: 12px;">{{comment.responseDate}}</span>
@@ -299,7 +313,7 @@ export default {
           responseDate: ''
         },
         {
-          name: 'Peter',
+          name: 'James',
           surname: 'Franklin',
           profileImage: 'https://source.unsplash.com/800x800/?profile',
           commentDate: '10:30 June 20, 2020',
@@ -310,6 +324,24 @@ export default {
           adminName: '',
           response: '',
           responseDate: ''
+        }
+      ],
+      ratingPhrases: [
+        {
+          phrase: 'Delicious',
+          rating: '4'
+        },
+        {
+          phrase: 'Value',
+          rating: '4'
+        },
+        {
+          phrase: 'Presentation',
+          rating: '5'
+        },
+        {
+          phrase: 'Service',
+          rating: '4'
         }
       ]
     }
