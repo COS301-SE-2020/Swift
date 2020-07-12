@@ -6,7 +6,7 @@
     <MenuSearchToolBar></MenuSearchToolBar>
     <v-container transition="slide-x-transition">
       <v-row style="max-width: 400px" class="overflow-y-auto">
-        <v-col cols="12">
+        <v-col cols="12" class="pt-0">
           <div class="title">Categories</div>
         </v-col>
       </v-row>
@@ -288,7 +288,7 @@ export default {
   position: sticky;
   position: -webkit-sticky;
   top: 0;
-  z-index: 100;
+  z-index: 10;
   background-color: white;
 }
 </style>

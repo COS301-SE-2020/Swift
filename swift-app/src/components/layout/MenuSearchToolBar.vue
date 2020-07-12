@@ -1,17 +1,47 @@
 <template>
   <div class="toolbar">
     <v-card color="grey lighten-4" flat tile>
-      <v-container>
+      <v-container class="pb-0">
         <div class="backgroundImage" style="margin-top: 0px">
           <v-row style="margin-top: -12px; margin-bottom: 10px"> 
-            <v-col cols="12" class="pt-0 px-0">
+            <v-col cols="12" class="pt-0 px-0 pb-0">
               <!-- <v-btn width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 20px; left: 10px;">
                 <v-icon>mdi-chevron-left</v-icon>
               </v-btn> -->
               <v-carousel height="200px" :show-arrows="false" hide-delimiter cycle hide-delimiters continuous>
                 <v-carousel-item gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.4)" v-for="(item,i) in restaurantImages" :key="i" :src="item.img">
-                    <v-row class="fill-height" align="center" justify="center">
+                    <v-row  align="center" justify="center" class="mt-6">
                       <div class="white--text display-1">Welcome to<br/> Mugg & Bean</div>
+                    </v-row>
+                    <v-row no-gutters d-flex flex-row align="center" justify="center" class="fill-height">
+                      <v-col cols="10" style="z-index: 11">
+                        <v-autocomplete style="bottom: 50px;" rounded background-color="white" color="secondary" v-model="model" :items="items" :loading="isLoading" :search-input.sync="search" chips clearable hide-details hide-selected item-text="name" item-value="symbol" label="What would you like to order?" prepend-inner-icon="mdi-magnify" solo>
+                          <template v-slot:no-data>
+                            <v-list-item>
+                              <v-list-item-title>
+                                Search for
+                                <strong>food or drinks</strong>
+                              </v-list-item-title>
+                            </v-list-item>
+                          </template>
+                          <template v-slot:selection="{ attr, on, item }">
+                              <v-icon left>mdi-coin</v-icon>
+                              <span class="black--text" v-text="item.name"></span>
+                          </template>
+                          <template v-slot:item="{ item }">
+                            <v-list-item-avatar color="grey darken-4" size="35px">
+                              <img src="https://source.unsplash.com/800x800/?cake" alt="" >
+                            </v-list-item-avatar>
+                            <v-list-item-content>
+                              <v-list-item-title v-text="item.name"></v-list-item-title>
+                              <v-list-item-subtitle v-text="item.symbol"></v-list-item-subtitle>
+                            </v-list-item-content>
+                            <v-list-item-action>
+                              <v-icon>mdi-coin</v-icon>
+                            </v-list-item-action>
+                          </template>
+                        </v-autocomplete>
+                      </v-col>
                     </v-row>
                 </v-carousel-item>
               </v-carousel>
@@ -21,14 +51,14 @@
             </v-col>
           </v-row>
         </div>
-        <v-row>
+        <!-- <v-row>
           <v-col cols="12" class="pt-0">
             <div class="title">What would you like to order?</div>
           </v-col>
-        </v-row>
-        <v-row no-gutters d-flex flex-row >
+        </v-row> -->
+        <!-- <v-row no-gutters d-flex flex-row >
           <v-col cols="12">
-            <v-autocomplete  v-model="model" :items="items" :loading="isLoading" :search-input.sync="search" chips clearable hide-details hide-selected item-text="name" item-value="symbol" label="Search..." solo>
+            <v-autocomplete  v-model="model" :items="items" :loading="isLoading" :search-input.sync="search" chips clearable hide-details hide-selected item-text="name" item-value="symbol" label="What would you like to order?" solo>
               <template v-slot:no-data>
                 <v-list-item>
                   <v-list-item-title>
@@ -55,7 +85,7 @@
               </template>
             </v-autocomplete>
           </v-col>
-        </v-row>
+        </v-row> -->
       </v-container>
     </v-card> 
   </div>
@@ -198,3 +228,18 @@
     }
   } 
 </script>
+
+<style>
+
+input, label, .mdi-magnify, .mdi-menu-down {
+  color: #343434 !important;
+}
+
+label {
+  opacity: 0.55;
+}
+
+.v-text-field--rounded > .v-input__control > .v-input__slot {
+  padding-left: 18px;
+}
+</style>
