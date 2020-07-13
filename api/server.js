@@ -39,7 +39,9 @@ app.get('/favicon.ico', (req, res) => { res.status(204).end(); });
 
 // Start server
 const server = app.listen(SERVER_PORT, () => {
-  console.log('Server listening on port: ' + server.address().port);
+  if (!process.env.PORT) {
+    console.log(`Server listening on port: ${server.address().port}`);
+  }
 });
 
 // return object for unit testing

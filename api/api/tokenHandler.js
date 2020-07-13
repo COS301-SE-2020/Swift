@@ -14,7 +14,7 @@ module.exports = {
   },
   getCustomerId: (tok) => {
     // TODO: Get customerId from token
-    console.log('Tok: ' + tok);
+    console.log(`Tok: ${tok}`);
     return 5;
   }
 };

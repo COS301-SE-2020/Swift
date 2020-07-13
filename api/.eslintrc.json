@@ -18,7 +18,6 @@
         "no-console": "off",
         "no-plusplus": "off",
         "no-shadow": "off",
-        "object-property-newline": ["error", { "allowAllPropertiesOnSameLine": true }],
-        "prefer-template": "off"
+        "object-property-newline": ["error", { "allowAllPropertiesOnSameLine": true }]
     }
 }
