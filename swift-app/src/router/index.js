@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import OrdersView from '../views/orders/OrdersView.vue'
+import RatingView from '../views/orders/RatingView.vue'
 import CartView from '../views/orders/CartView.vue'
 import PaymentView from '../views/orders/PaymentView.vue'
 import FavouritesView from '../views/favourites/FavouritesView.vue'
@@ -29,6 +30,7 @@ const routes = [
   { path: '/favourites', name: 'favourites', component: FavouritesView },
   { path: '/profile', name: 'profile', component: ProfileView },
   { path: '/menuItem/:itemid', name: 'menuItem', component: MenuItemView },
+  { path: '/rating', name: 'rating', component: RatingView },
 ]
 
 const router = new VueRouter({
