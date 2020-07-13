@@ -1,5 +1,3 @@
-'use strict'
-
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const express = require('express');
@@ -15,19 +13,19 @@ app.use(cors());
 
 // Set Lumiqon server header
 app.use((req, res, next) => {
-    //res.setHeader('Server', 'Lumiqon');
-    res.setHeader('X-Powered-By', 'Lumiqon');
-    next();
+  // res.setHeader('Server', 'Lumiqon');
+  res.setHeader('X-Powered-By', 'Lumiqon');
+  next();
 });
 
 // Handle malformed JSON requests
 app.use((err, req, res, next) => {
-    // check if this is a JSON parsing issue
-    if(err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-        console.error(err);
-        return res.status(400).send({'status':400,'reason':'Bad Request'});
-    }
-    next();
+  // check if this is a JSON parsing issue
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    console.error(err);
+    return res.status(400).send({ status: 400, reason: 'Bad Request' });
+  }
+  return next();
 });
 
 // API handle requests
@@ -37,11 +35,11 @@ app.post('/', require('./api/api'));
 app.put('/', require('./api/api'));
 
 // Handle favicon requests
-app.get('/favicon.ico', (req, res) => {res.status(204).end()});
+app.get('/favicon.ico', (req, res) => { res.status(204).end(); });
 
 // Start server
-var server = app.listen(SERVER_PORT, () => {
-    console.log('Server listening on port: ' + server.address().port);
+const server = app.listen(SERVER_PORT, () => {
+  console.log('Server listening on port: ' + server.address().port);
 });
 
 // return object for unit testing
