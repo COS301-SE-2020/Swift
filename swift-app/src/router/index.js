@@ -12,6 +12,7 @@ import HomeView from '../views/home/HomeView.vue'
 import ProfileView from '../views/usermanagement/ProfileView.vue'
 import LoginView from '../views/usermanagement/LoginView.vue'
 import RegisterView from '../views/usermanagement/RegisterView.vue'
+import LocationView from '../views/usermanagement/LocationView.vue'
 
 import MenuHomeView from '../views/menu/MenuHomeView.vue'
 import MenuItemView from '../views/menu/MenuItemView.vue'
@@ -29,6 +30,7 @@ const routes = [
   { path: '/pay', name: 'pay', component: PaymentView },
   { path: '/favourites', name: 'favourites', component: FavouritesView },
   { path: '/profile', name: 'profile', component: ProfileView },
+  { path: '/location', name: 'location', component: LocationView },
   { path: '/menuItem/:itemid', name: 'menuItem', component: MenuItemView },
   { path: '/rating', name: 'rating', component: RatingView },
 ]
