@@ -137,11 +137,24 @@
               </v-col>
               <v-col cols="5" class="pa-0" align="center">
                 <v-btn v-show="currentIndex != (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showNext">Next</v-btn>
-                <v-btn v-show="currentIndex == (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showNext">Submit</v-btn>
+                <v-btn v-show="currentIndex == (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="submitRating">Submit</v-btn>
               </v-col>
             </v-row>
           </v-col>
         </v-row>
+
+        <v-overlay relative opacity="0.25" :value="submitted" z-index="10">
+          <v-avatar elevation="3" color="accent" class="pl-0 pr-0" absolute style="position: absolute; z-index: 12">
+            <v-icon size="33px" color="white" v-text="'mdi-check'"></v-icon>
+          </v-avatar>
+          <v-alert :value="alert" color="white" transition="scale-transition" class="alert" align="center" style="margin-top: 20px">
+            <div style="font-size: 22px !important; color: #343434" class="pl-8 pr-8 mt-8">Review successful</div>
+            <div class="font-weight-light mt-2" style="font-size: 16px !important; color: #343434">Thank you for your feedback!</div>
+            <v-btn text @click="hideAlert" class="mt-6 mb-1">
+              <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline">Continue</div>
+            </v-btn>
+          </v-alert>
+        </v-overlay>
       </v-container>
     </v-row>
   </v-container>
@@ -155,6 +168,7 @@ export default {
     return {
       selectedRestaurant: false,
       selectedItemPublic: [],
+      submitted: false,
       icons: ['mdi-silverware-fork-knife', 'mdi-pasta', 'mdi-account',],
       currentIndex: 0,
       currentTab: 0,
@@ -219,6 +233,12 @@ export default {
     },
     changeTab: function(index) {
       currentTab = index;
+    },
+    submitRating () {
+      this.submitted = !this.submitted;
+    },
+    hideAlert () {
+      this.$router.push('/')
     }
   },
   computed: {
@@ -254,5 +274,12 @@ export default {
   padding-right: 0;
 }
 
-.v-tab--active.no-active::before { opacity: 0 !important; }
+.alert {
+  border-radius: 30px !important;
+}
+
+.v-overlay__content {
+  display: flex; 
+  justify-content: center;
+}
 </style>
