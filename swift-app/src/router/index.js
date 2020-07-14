@@ -13,6 +13,7 @@ import ProfileView from '../views/usermanagement/ProfileView.vue'
 import LoginView from '../views/usermanagement/LoginView.vue'
 import RegisterView from '../views/usermanagement/RegisterView.vue'
 import LocationView from '../views/usermanagement/LocationView.vue'
+import ForgotPasswordView from '../views/usermanagement/ForgotPasswordView.vue'
 
 import MenuHomeView from '../views/menu/MenuHomeView.vue'
 import MenuItemView from '../views/menu/MenuItemView.vue'
@@ -33,6 +34,7 @@ const routes = [
   { path: '/location', name: 'location', component: LocationView },
   { path: '/menuItem/:itemid', name: 'menuItem', component: MenuItemView },
   { path: '/rating', name: 'rating', component: RatingView },
+  { path: '/forgotPassword', name: 'forgotPassword', component: ForgotPasswordView },
 ]
 
 const router = new VueRouter({
