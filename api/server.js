@@ -40,6 +40,7 @@ app.get('/favicon.ico', (req, res) => { res.status(204).end(); });
 // Start server
 const server = app.listen(SERVER_PORT, () => {
   if (!process.env.PORT) {
+    // eslint-disable-next-line no-console
     console.log(`Server listening on port: ${server.address().port}`);
   }
 });

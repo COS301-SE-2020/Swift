@@ -1,5 +1,5 @@
-const tokenHandler = require('./tokenHandler');
-const db = require('./db');
+const tokenHandler = require('../helper/tokenHandler');
+const db = require('../db');
 // const { response } = require('express');
 
 module.exports = {

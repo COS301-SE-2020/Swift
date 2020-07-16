@@ -79,7 +79,7 @@ describe('Test API Endpoints', () => {
 
   it('POST Endpoint - Invalid Email', (done) => {
     const jsonPattern = `{
-            "status": 403,
+            "status": 400,
             "reason": "Invalid Email"
         }`;
     chai.request(server)

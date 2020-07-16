@@ -1,8 +1,7 @@
 const bcrypt = require('bcrypt');
 const validator = require('email-validator');
-// const { response } = require('express');
-
-const db = require('./db');
+const accCreator = require('../helper/accountCreator');
+const db = require('../db');
 
 // TODO: Remove hardcoded token
 const userToken = '728b540dae2a49b5f7f752a8b84037fb1';
@@ -119,53 +118,48 @@ module.exports = {
   registerUser: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'name') || !Object.prototype.hasOwnProperty.call(reqBody, 'surname')
-    || !Object.prototype.hasOwnProperty.call(reqBody, 'username') || !Object.prototype.hasOwnProperty.call(reqBody, 'email')
-    || !Object.prototype.hasOwnProperty.call(reqBody, 'password')) {
+    || !Object.prototype.hasOwnProperty.call(reqBody, 'email') || !Object.prototype.hasOwnProperty.call(reqBody, 'password')) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 
-    const firstname = reqBody.name;
-    const { surname } = reqBody;
-    const { username } = reqBody;
-    const useremail = reqBody.email;
-    const password = bcrypt.hashSync(reqBody.password, 10); // Hash password
-    const userTheme = 'Light'; // Default light theme
+    const newUserData = {};
+    newUserData.name = reqBody.name;
+    newUserData.surname = reqBody.surname;
+    newUserData.email = reqBody.email;
+    newUserData.password = bcrypt.hashSync(reqBody.password, 10); // Hash password
+    newUserData.userTheme = 'Light'; // Default light theme
+    newUserData.refreshToken = 'INACTIVE';
 
     // Check that email is valid
-    if (!validator.validate(useremail)) {
+    if (!validator.validate(newUserData.email)) {
       // invalid email
-      return response.status(400).send({ status: 403, reason: 'Invalid Email' });
+      return response.status(400).send({ status: 400, reason: 'Invalid Email' });
     }
 
     // check if user exists first - be careful of SQL injection
     return db.query(
-      'SELECT userid FROM public.customer WHERE username = $1::text OR email = $2::text',
-      [username, useremail]
+      'SELECT userid FROM public.person WHERE email = $1::text;',
+      [newUserData.email]
     )
       .then((res) => {
         if (res.rows.length > 0) {
           // user exists
-          return response.status(409).send({
-            status: 409, reason: 'Customer Already Exists', dsf: 5, dsfq: 5, dswf: 5, dersf: 5, drewsf: 5, dsrwef: 5, dwersf: 5, dsfdsf: 5, dfs: 554
-          });
+          return response.status(409).send({ status: 409, reason: 'Account Already Exists' });
         }
 
-        // create new account
-        return db.query(
-          'INSERT INTO public.customer (name, surname, email, username, password, theme) VALUES ($1::text, $2::text, $3::text, $4::text, $5::text, $6::text) RETURNING username;',
-          [firstname, surname, useremail, username, password, userTheme]
-        )
-          .then((res) => response.status(201).send({
-            token: userToken,
-            username: res.rows[0].username
-          }))
+        // Create new account
+        // Customer account
+        // TODO: Create admin/employee account
+        // TODO: Generate and send user account activation email
+        return accCreator.createCustomer(newUserData)
+          .then(() => response.status(201).send({ status: 201, reason: 'Customer Account Created' }))
           .catch((err) => {
-            console.error('Error executing query', err.stack);
+            console.error('Query Error [Register - Create Customer Account]', err.stack);
             return response.status(400).send({ status: 500, reason: 'Internal Server Error' });
           });
       })
       .catch((err) => {
-        console.error('Error executing query', err.stack);
+        console.error('Query Error [Register - Check Account Availability]', err.stack);
         return response.status(400).send({ status: 500, reason: 'Internal Server Error' });
       });
   }
