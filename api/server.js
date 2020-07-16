@@ -11,6 +11,9 @@ app.use(bodyParser.json());
 // Enable CORS
 app.use(cors());
 
+// Access user request info from GAE load balancer
+app.set('trust proxy', true);
+
 // Set Lumiqon server header
 app.use((req, res, next) => {
   // res.setHeader('Server', 'Lumiqon');
@@ -27,6 +30,17 @@ app.use((err, req, res, next) => {
   }
   return next();
 });
+
+// Block ALL non-secure requests in production
+if (typeof process.env.NODE_ENV !== 'undefined' && process.env.NODE_ENV.trim() === 'production') {
+  app.use((err, req, res, next) => {
+    // No need to log, just reject
+    if (req.protocol !== 'https') {
+      return res.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+    return next();
+  });
+}
 
 // API handle requests
 app.delete('/', require('./api/api'));

@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Team Lumiqon Swift API",
   "main": "server.js",
+  "engines": {
+    "node": "12.x.x"
+  },
   "scripts": {
     "dev": "nodemon server.js",
     "start": "node server.js",
