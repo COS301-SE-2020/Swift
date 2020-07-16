@@ -1,4 +1,4 @@
-# [START gae_quickstart_yaml]
+# [START gae_deployment_yaml]
 runtime: nodejs12
 
 env_variables:
@@ -12,4 +12,4 @@ handlers:
   - url: /.*
     secure: optional
     script: auto
-# [END gae_quickstart_yaml]
+# [END gae_deployment_yaml]
