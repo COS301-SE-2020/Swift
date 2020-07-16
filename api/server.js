@@ -38,6 +38,9 @@ if (typeof process.env.NODE_ENV !== 'undefined' && process.env.NODE_ENV.trim() =
     if (req.protocol !== 'https') {
       return res.status(400).send({ status: 400, reason: 'Bad Request' });
     }
+
+    // Set HSTS header
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
     return next();
   });
 }
