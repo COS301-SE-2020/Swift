@@ -33,7 +33,7 @@ app.use((err, req, res, next) => {
 
 // Block ALL non-secure requests in production
 if (typeof process.env.NODE_ENV !== 'undefined' && process.env.NODE_ENV.trim() === 'production') {
-  app.use((err, req, res, next) => {
+  app.use((req, res, next) => {
     // No need to log, just reject
     if (req.protocol !== 'https') {
       return res.status(400).send({ status: 400, reason: 'Bad Request' });
@@ -56,6 +56,8 @@ const server = app.listen(SERVER_PORT, () => {
   if (!process.env.PORT) {
     // eslint-disable-next-line no-console
     console.log(`Server listening on port: ${server.address().port}`);
+    // eslint-disable-next-line no-console
+    console.log('Press Ctrl+C to quit.');
   }
 });
 
