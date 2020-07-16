@@ -10,6 +10,6 @@ env_variables:
 
 handlers:
   - url: /.*
-    secure: always
+    secure: optional
     script: auto
 # [END gae_quickstart_yaml]
