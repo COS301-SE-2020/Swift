@@ -1,4 +1,4 @@
-# swift-app
+# swift-management
 
 ## Project setup
 ```
