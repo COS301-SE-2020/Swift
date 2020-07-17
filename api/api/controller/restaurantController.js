@@ -1,4 +1,4 @@
-const tokenHandler = require('../helper/tokenHandler');
+const { validateToken, getCustomerId } = require('../helper/tokenHandler');
 const db = require('../db');
 // const { response } = require('express');
 
@@ -12,7 +12,7 @@ module.exports = {
     // TODO: Remove hardcoded restaurant rating
     const restaurantRating = 4;
 
-    if (tokenHandler.validate(reqBody.token)) {
+    if (validateToken(reqBody.token)) {
       return db.query('SELECT restaurantid, restaurantname, location, coverimageurl FROM public.restaurant;').then((res) => {
         const restaurantResponse = {};
         restaurantResponse.restaurants = [];
@@ -41,7 +41,7 @@ module.exports = {
     }
 
     // Check token
-    if (tokenHandler.validate(reqBody.token)) {
+    if (validateToken(reqBody.token)) {
       // check if restaurant exists
       return db.query('SELECT restaurantname, location FROM public.restaurant WHERE restaurantid = $1::integer', [reqBody.restaurantId]).then((res) => {
         if (res.rows.length === 0) {
@@ -165,9 +165,9 @@ module.exports = {
     }
 
     // Check token
-    if (tokenHandler.validate(reqBody.token)) {
+    if (validateToken(reqBody.token)) {
       const { orderInfo } = reqBody;
-      const customerId = tokenHandler.getCustomerId(reqBody.token);
+      const customerId = getCustomerId(reqBody.token);
       // Check if orderInfo is valid
       if (!Object.prototype.hasOwnProperty.call(orderInfo, 'restaurantId') || !Object.prototype.hasOwnProperty.call(orderInfo, 'tableId')
       || !Object.prototype.hasOwnProperty.call(orderInfo, 'orderItems')) {

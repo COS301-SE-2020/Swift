@@ -100,7 +100,7 @@ describe('Test API Endpoints', () => {
       });
   });
 
-  it('POST Endpoint - Unauthorised Access', (done) => {
+  /* it('POST Endpoint - Unauthorised Access', (done) => {
     const jsonPattern = `{
             "status": 401,
             "reason": "Unauthorised Access"
@@ -117,7 +117,7 @@ describe('Test API Endpoints', () => {
         res.body.should.matchPattern(jsonPattern);
         done();
       });
-  });
+  }); */
 
   /**
      * Test PUT API
