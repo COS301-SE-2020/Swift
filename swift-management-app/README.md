@@ -32,7 +32,11 @@ npm run test:unit
 ```
 npm run test:e2e
 <<<<<<< HEAD
+<<<<<<< HEAD
 ```
 =======
 ```
 >>>>>>> 9f9e61d... init management side of vue app
+=======
+```
+>>>>>>> 8f1dbc0... Fixing Typos
