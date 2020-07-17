@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # swift-management
+=======
+# swift-app
+>>>>>>> 9f9e61d... init management side of vue app
 
 ## Project setup
 ```
@@ -23,4 +27,8 @@ npm run test:unit
 ### Run your end-to-end tests
 ```
 npm run test:e2e
+<<<<<<< HEAD
 ```
+=======
+```
+>>>>>>> 9f9e61d... init management side of vue app
