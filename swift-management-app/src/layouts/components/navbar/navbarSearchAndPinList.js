@@ -4,7 +4,7 @@ export default {
     key: "title",
     data: [
       {title: 'Dashboard',   url: '/',      icon: 'BarChartIcon', is_bookmarked: false},
-      {title: 'Orders',   url: '/orders',      icon: 'ListIcon', is_bookmarked: false},
+      {title: 'Orders',   url: '/orders',      icon: 'ListIcon', is_bookmarked: true},
       {title: 'Tables',   url: '/tables',      icon: 'CheckSquareIcon', is_bookmarked: false},
       {title: 'Statistics',   url: '/stats',      icon: 'ActivityIcon', is_bookmarked: false},
       {title: 'Menu Items',   url: '/menu-items',      icon: 'EditIcon', is_bookmarked: false},
