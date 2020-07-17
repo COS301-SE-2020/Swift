@@ -3,7 +3,7 @@
 
     <div class="text-right leading-tight hidden sm:block">
       <p class="font-semibold">{{ activeUserInfo.displayName }}</p>
-      <small>Available</small>
+      <small>Restaurant Owner</small>
     </div>
 
     <vs-dropdown vs-custom-content vs-trigger-click class="cursor-pointer">
