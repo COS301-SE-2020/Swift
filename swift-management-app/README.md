@@ -1,8 +1,12 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 # swift-management
 =======
 # swift-app
 >>>>>>> 9f9e61d... init management side of vue app
+=======
+# swift-management
+>>>>>>> b54d8a4... fix readme
 
 ## Project setup
 ```
