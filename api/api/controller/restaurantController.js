@@ -12,9 +12,9 @@ module.exports = {
     // TODO: Remove hardcoded restaurant rating and calculate it
     const restaurantRating = 4;
 
-    const tokenState = validateToken(reqBody.token, true);
+    const tokenState = validateToken(reqBody.token);
 
-    if (tokenState[0] === tokenStatus.valid) {
+    if (tokenState === tokenStatus.valid) {
       return db.query(
         'SELECT restaurantid, restaurantname, location, coverimageurl FROM public.restaurant;'
       )
@@ -37,7 +37,7 @@ module.exports = {
         });
     }
 
-    if (tokenState[0] === tokenStatus.refresh) {
+    if (tokenState === tokenStatus.refresh) {
       return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
     }
 
