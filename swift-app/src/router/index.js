@@ -3,7 +3,7 @@ import VueRouter from 'vue-router'
 import OrdersView from '../views/orders/OrdersView.vue'
 import RatingView from '../views/orders/RatingView.vue'
 import CartView from '../views/orders/CartView.vue'
-import PaymentView from '../views/orders/PaymentView.vue'
+
 import FavouritesView from '../views/favourites/FavouritesView.vue'
 
 import CheckInView from '../views/home/CheckInView.vue'
@@ -14,8 +14,10 @@ import LoginView from '../views/usermanagement/LoginView.vue'
 import RegisterView from '../views/usermanagement/RegisterView.vue'
 import LocationView from '../views/usermanagement/LocationView.vue'
 import ForgotPasswordView from '../views/usermanagement/ForgotPasswordView.vue'
-import PaymentInformationView from '../views/usermanagement/PaymentInformationView.vue'
-import AddCardView from '../views/usermanagement/AddCardView.vue'
+
+import PaymentView from '../views/payment/PaymentView.vue'
+import PaymentInformationView from '../views/payment/PaymentInformationView.vue'
+import AddCardView from '../views/payment/AddCardView.vue'
 
 import MenuHomeView from '../views/menu/MenuHomeView.vue'
 import MenuItemView from '../views/menu/MenuItemView.vue'
