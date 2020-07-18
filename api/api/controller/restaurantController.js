@@ -44,6 +44,75 @@ module.exports = {
     // Invalid token
     return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
   },
+  checkIn: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'qrcode')
+    || !Object.prototype.hasOwnProperty.call(reqBody, 'token')
+    || Object.keys(reqBody).length !== 3) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token validity
+    const tokenState = validateToken(reqBody.token, true);
+    if (tokenState[0] === tokenStatus.valid) {
+      return db.query(
+        'SELECT tableid, restaurantid, numseats, status FROM public.restauranttable'
+        + ' WHERE qrcode = $1::text;',
+        [reqBody.qrcode]
+      )
+        .then((res) => {
+          if (res.rows.length === 0) {
+            // qr code not found
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          let checkInUsers = [];
+          if (res.rows[0].status.toLowerCase() !== 'vacant') {
+            // get list of already checked in users
+            checkInUsers = res.rows[0].status.split(',');
+          }
+
+          if (checkInUsers.find((uid) => parseInt(uid, 10) === tokenState[1].userId)) {
+            // user already checked in
+            return response.status(205).send({
+              restaurantId: res.rows[0].restaurantid,
+              tableId: res.rows[0].tableid
+            });
+          }
+
+          if (res.rows[0].numseats === checkInUsers.length) {
+            // table is full
+            return response.status(409).send({ status: 409, reason: 'Table Full' });
+          }
+
+          // add user to checked in user list
+          checkInUsers.push(tokenState[1].userId);
+          return db.query(
+            'UPDATE public.restauranttable SET status = $1::text WHERE tableid = $2::integer;',
+            [checkInUsers.join(','), res.rows[0].tableid]
+          )
+            .then(() => response.status(200).send({
+              restaurantId: res.rows[0].restaurantid,
+              tableId: res.rows[0].tableid
+            }))
+            .catch((err) => {
+              console.error('Query Error [Restaurant - Update CheckIn Status]', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
+        })
+        .catch((err) => {
+          console.error('Query Error [Restaurant - Get CheckIn Details]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (tokenState[0] === tokenStatus.refresh) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
   getMenu: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token') || !Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')) {
