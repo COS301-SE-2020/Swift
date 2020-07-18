@@ -10,7 +10,8 @@ module.exports = {
   loginUser: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'email')
-    || !Object.prototype.hasOwnProperty.call(reqBody, 'password')) {
+    || !Object.prototype.hasOwnProperty.call(reqBody, 'password')
+    || Object.keys(reqBody).length !== 3) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 
@@ -145,7 +146,8 @@ module.exports = {
   },
   refreshToken: (reqBody, response) => {
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
-    || !Object.prototype.hasOwnProperty.call(reqBody, 'refreshToken')) {
+    || !Object.prototype.hasOwnProperty.call(reqBody, 'refreshToken')
+    || Object.keys(reqBody).length !== 3) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 
@@ -206,7 +208,8 @@ module.exports = {
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'name')
     || !Object.prototype.hasOwnProperty.call(reqBody, 'surname')
     || !Object.prototype.hasOwnProperty.call(reqBody, 'email')
-    || !Object.prototype.hasOwnProperty.call(reqBody, 'password')) {
+    || !Object.prototype.hasOwnProperty.call(reqBody, 'password')
+    || Object.keys(reqBody).length !== 5) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 

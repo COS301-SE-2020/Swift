@@ -80,7 +80,7 @@ describe('Test API Endpoints', () => {
   it('POST Endpoint - Invalid Email', (done) => {
     const jsonPattern = `{
             "status": 400,
-            "reason": "Invalid Email"
+            "reason": "Bad Request"
         }`;
     chai.request(server)
       .post('/')
@@ -100,7 +100,7 @@ describe('Test API Endpoints', () => {
       });
   });
 
-  /* it('POST Endpoint - Unauthorised Access', (done) => {
+  it('POST Endpoint - Unauthorised Access', (done) => {
     const jsonPattern = `{
             "status": 401,
             "reason": "Unauthorised Access"
@@ -117,7 +117,7 @@ describe('Test API Endpoints', () => {
         res.body.should.matchPattern(jsonPattern);
         done();
       });
-  }); */
+  });
 
   /**
      * Test PUT API

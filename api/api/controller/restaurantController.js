@@ -1,36 +1,46 @@
-const { validateToken, getCustomerId } = require('../helper/tokenHandler');
+const { validateToken, tokenStatus, getCustomerId } = require('../helper/tokenHandler');
 const db = require('../db');
-// const { response } = require('express');
 
 module.exports = {
   getRestaurantList: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
-    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')) {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+    || Object.keys(reqBody).length !== 2) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 
-    // TODO: Remove hardcoded restaurant rating
+    // TODO: Remove hardcoded restaurant rating and calculate it
     const restaurantRating = 4;
 
-    if (validateToken(reqBody.token)) {
-      return db.query('SELECT restaurantid, restaurantname, location, coverimageurl FROM public.restaurant;').then((res) => {
-        const restaurantResponse = {};
-        restaurantResponse.restaurants = [];
-        for (let r = 0; r < res.rows.length; r++) {
-          restaurantResponse.restaurants[r] = {};
-          restaurantResponse.restaurants[r].restaurantId = res.rows[r].restaurantid;
-          restaurantResponse.restaurants[r].name = res.rows[r].restaurantname;
-          restaurantResponse.restaurants[r].location = res.rows[r].location;
-          restaurantResponse.restaurants[r].image = res.rows[r].coverimageurl;
-          restaurantResponse.restaurants[r].rating = restaurantRating;
-        }
+    const tokenState = validateToken(reqBody.token, true);
 
-        return response.status(200).send(restaurantResponse);
-      }).catch((err) => {
-        console.error('Error executing query', err.stack);
-        return response.status(400).send({ status: 500, reason: 'Internal Server Error' });
-      });
+    if (tokenState[0] === tokenStatus.valid) {
+      return db.query(
+        'SELECT restaurantid, restaurantname, location, coverimageurl FROM public.restaurant;'
+      )
+        .then((res) => {
+          const restaurantResponse = {};
+          restaurantResponse.restaurants = [];
+          for (let r = 0; r < res.rows.length; r++) {
+            restaurantResponse.restaurants[r] = {};
+            restaurantResponse.restaurants[r].restaurantId = res.rows[r].restaurantid;
+            restaurantResponse.restaurants[r].name = res.rows[r].restaurantname;
+            restaurantResponse.restaurants[r].location = res.rows[r].location;
+            restaurantResponse.restaurants[r].image = res.rows[r].coverimageurl;
+            restaurantResponse.restaurants[r].rating = restaurantRating;
+          }
+
+          return response.status(200).send(restaurantResponse);
+        }).catch((err) => {
+          console.error('Query Error [Restaurant - Get Restaurant List]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
     }
+
+    if (tokenState[0] === tokenStatus.refresh) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
     // Invalid token
     return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
   },

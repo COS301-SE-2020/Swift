@@ -29,7 +29,7 @@ module.exports = {
     const token = JWT.sign(payload, privateKey, {
       audience: 'Swift API',
       issuer: 'Swift API',
-      expiresIn: '1s',
+      expiresIn: '300s',
       iat: true,
       header: {
         typ: 'JWT'
