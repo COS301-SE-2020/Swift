@@ -19,6 +19,8 @@ import AddCardView from '../views/usermanagement/AddCardView.vue'
 
 import MenuHomeView from '../views/menu/MenuHomeView.vue'
 import MenuItemView from '../views/menu/MenuItemView.vue'
+import NotificationsView from '../views/notifications/NotificationList.vue'
+
 
 Vue.use(VueRouter)
 
@@ -39,6 +41,7 @@ const routes = [
   { path: '/forgotPassword', name: 'forgotPassword', component: ForgotPasswordView },
   { path: '/paymentInformation', name: 'paymentInformation', component: PaymentInformationView },
   { path: '/addCard', name: 'addCard', component: AddCardView },
+  { path: '/notifications', name: 'notifications', component: NotificationsView },
 ]
 
 const router = new VueRouter({
