@@ -5,17 +5,16 @@
         <span style="font-size: 24px">My Favourites</span>
       </v-col>
     </v-row>
-    <v-data-iterator :items="items" :items-per-page.sync="itemsPerPage" :page="page" :search="search" :sort-desc="sortDesc" hide-default-footer>
+    <v-data-iterator :items="items" :search="search" hide-default-footer>
       <template v-slot:header>
-          <v-text-field v-model="search"  clearable flat solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search"></v-text-field>
+        <v-text-field style=":after {background-color: rgba(0, 0, 0, 0.06);}" v-model="search" clearable flat solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search"></v-text-field>
       </template>
 
       <template v-slot:default="props">
-        <v-subheader style="height: 20px" class="mt-3 mb-1"  :key="restaurant" v-text="restaurant"></v-subheader>
+        <v-subheader style="height: 20px" class="mt-3 mb-1 pl-1"  :key="restaurant" v-text="restaurant"></v-subheader>
         <v-list v-for="item in props.items" :key="item.title" class="py-0">
-          
-          <v-list-item ripple>
-            <v-list-item-avatar>
+          <v-list-item ripple class="py-1 pr-0">
+            <v-list-item-avatar tile  style="border-radius: 4px" size="45" >
               <v-img :src="item.avatar"></v-img>
             </v-list-item-avatar>
 
@@ -23,13 +22,13 @@
               <v-list-item-title v-html="item.title"></v-list-item-title>
               <v-list-item-subtitle v-html="item.description"></v-list-item-subtitle>
             </v-list-item-content>
-            <v-list-item-action>
+            <v-list-item-action class="ml-0 mt-0">
               <v-btn icon>
-                <v-icon color="grey lighten-1">mdi-information</v-icon>
+                <v-icon color="primary">mdi-heart</v-icon>
               </v-btn>
             </v-list-item-action>
           </v-list-item>
-          <v-divider divider inset></v-divider>
+          <v-divider divider class="ml-3" width="93%"></v-divider>
         </v-list>
       </template>
 
@@ -45,12 +44,8 @@ import NavBar from '@/components/layout/NavBar';
   export default {
     data () {
       return {
-        itemsPerPageArray: [4, 8, 12],
         search: '',
         filter: {},
-        sortDesc: false,
-        page: 1,
-        itemsPerPage: 4,
         sortBy: 'title',
         keys: [
           'Restaurant',
@@ -75,26 +70,13 @@ import NavBar from '@/components/layout/NavBar';
       }
     },
     computed: {
-      numberOfPages () {
-        return Math.ceil(this.items.length / this.itemsPerPage)
-      },
       filteredKeys () {
         return this.keys.filter(key => key !== `Title`)
-      },
-    },
-    methods: {
-      nextPage () {
-        if (this.page + 1 <= this.numberOfPages) this.page += 1
-      },
-      formerPage () {
-        if (this.page - 1 >= 1) this.page -= 1
-      },
-      updateItemsPerPage (number) {
-        this.itemsPerPage = number
       },
     },
     components: {
       'NavBar': NavBar
     }
+    
   }
 </script>
