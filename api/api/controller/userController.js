@@ -2,7 +2,9 @@ const bcrypt = require('bcrypt');
 const validator = require('email-validator');
 const accCreator = require('../helper/accountCreator');
 const db = require('../db');
-const { generateToken, validateToken } = require('../helper/tokenHandler');
+const { generateToken, validateToken, tokenStatus } = require('../helper/tokenHandler');
+
+const BC_SALT_ROUNDS = 10;
 
 module.exports = {
   loginUser: (reqBody, response) => {
@@ -21,6 +23,7 @@ module.exports = {
     }
 
     // Check if user exists
+    // TODO: Check if account is active
     // TODO: Get admin/employee info from db
     return db.query(
       'SELECT person.userid, person.name, person.surname, person.email, person.password,'
@@ -46,6 +49,17 @@ module.exports = {
           loginResponse.surname = res.rows[0].surname;
           loginResponse.email = res.rows[0].email;
           loginResponse.theme = res.rows[0].theme;
+
+          // TODO: Save promise and check status at end
+          // Update token in DB - async
+          db.query(
+            'UPDATE public.person SET refreshtoken = $1::text WHERE userid = $2::integer;',
+            [bcrypt.hashSync(newTokenPair.refreshToken, BC_SALT_ROUNDS), res.rows[0].userid]
+          )
+            .catch((err) => {
+              console.error('Query Error [Login - Update Account Token]', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
 
           // TODO: Add favourtites and order history to response
           loginResponse.favourites = [];
@@ -129,6 +143,64 @@ module.exports = {
         return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
       });
   },
+  refreshToken: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+    || !Object.prototype.hasOwnProperty.call(reqBody, 'refreshToken')) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Test token
+    const tokenState = validateToken(reqBody.token, true);
+    if (tokenState[0] === tokenStatus.valid) {
+      // Token still valid
+      return response.status(204).send({ status: 204, reason: 'Token Valid' });
+    }
+
+    if (tokenState[0] === tokenStatus.invalid) {
+      // Invalid token
+      return response.status(403).send({ status: 403, reason: 'Invalid Token Pair' });
+    }
+
+    // Check token pair
+    if (reqBody.refreshToken !== tokenState[1].refreshToken) {
+      // refresh tokens supplied do not match
+      return response.status(403).send({ status: 403, reason: 'Invalid Token Pair' });
+    }
+
+    // check refresh tokem is valid in DB
+    return db.query(
+      'SELECT refreshtoken FROM public.person WHERE userid = $1::integer;',
+      [tokenState[1].userId]
+    )
+      .then((res) => {
+        if (res.rows.length === 0) {
+        // user/token not found
+          return response.status(403).send({ status: 403, reason: 'Invalid Token Pair' });
+        }
+
+        if (!bcrypt.compareSync(tokenState[1].refreshToken, res.rows[0].refreshtoken)) {
+          return response.status(403).send({ status: 403, reason: 'Invalid Token Pair' });
+        }
+
+        // All checks passed, issue new token
+        const newTokenPair = generateToken(tokenState[1].userId);
+
+        // Update DB
+        return db.query(
+          'UPDATE public.person SET refreshtoken = $1::text WHERE userid = $2::integer;',
+          [bcrypt.hashSync(newTokenPair.refreshToken, BC_SALT_ROUNDS), tokenState[1].userId]
+        )
+          .then(() => response.status(201).send(newTokenPair))
+          .catch((err) => {
+            console.error('Query Error [Tok_Refresh - Update Account Token]', err.stack);
+            return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+          });
+      })
+      .catch((err) => {
+        console.error('Query Error [Tok_Refresh - Get Account Token]', err.stack);
+        return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+      });
+  },
   registerUser: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'name')
@@ -142,7 +214,7 @@ module.exports = {
     newUserData.name = reqBody.name;
     newUserData.surname = reqBody.surname;
     newUserData.email = reqBody.email;
-    newUserData.password = bcrypt.hashSync(reqBody.password, 10); // Hash password
+    newUserData.password = bcrypt.hashSync(reqBody.password, BC_SALT_ROUNDS); // Hash password
     newUserData.userTheme = 'light'; // Default light theme
     newUserData.refreshToken = 'inactive';
 

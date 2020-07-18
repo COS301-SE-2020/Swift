@@ -17,8 +17,6 @@ const tokenStatus = {
   refresh: 2
 };
 
-// const b62Decoded = b62.decode(cipherText).toString('utf8');
-
 module.exports = {
   tokenStatus,
   generateToken: (userId) => {
@@ -40,24 +38,34 @@ module.exports = {
 
     return { token: JWE.encrypt(token, privateKey), refreshToken: payload.refreshToken };
   },
-  validateToken: (token) => {
+  validateToken: (token, decodeToken = false) => {
+    let decryptedToken = null;
     try {
-      const decryptedToken = JWE.decrypt(token, privateKey).toString('utf8');
-      JWT.verify(decryptedToken, privateKey, {
+      decryptedToken = JWE.decrypt(token, privateKey).toString('utf8');
+      const tokenData = JWT.verify(decryptedToken, privateKey, {
         audience: 'Swift API',
         issuer: 'Swift API'
       });
 
       // Token valid
-      return tokenStatus.valid;
+      if (!decodeToken) {
+        return tokenStatus.valid;
+      }
+      return [tokenStatus.valid, tokenData];
     } catch (err) {
       if (err instanceof errors.JOSEError && err.code === 'ERR_JWT_EXPIRED') {
         // Token expired, request refresh token
-        return tokenStatus.refresh;
+        if (!decodeToken) {
+          return tokenStatus.refresh;
+        }
+        return [tokenStatus.refresh, JWT.decode(decryptedToken)];
       }
 
       // Token invalid - reject
-      return tokenStatus.invalid;
+      if (!decodeToken) {
+        return tokenStatus.invalid;
+      }
+      return [tokenStatus.invalid, null];
     }
   },
   getCustomerId: (tok) => {

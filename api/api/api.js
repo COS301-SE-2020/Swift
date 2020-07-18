@@ -37,6 +37,10 @@ router.post('/', (req, res) => {
         userController.loginUser(req.body, res);
         break;
       }
+      case 'refresh': {
+        userController.refreshToken(req.body, res);
+        break;
+      }
       case 'allRestaurants': {
         restaurantController.getRestaurantList(req.body, res);
         break;
