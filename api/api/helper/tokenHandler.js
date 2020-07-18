@@ -27,6 +27,7 @@ module.exports = {
       refreshToken: b62.encode(Buffer.from(uuidv4(), 'utf8'))
     };
 
+    // TODO: Change token length back to 1 hour
     const token = JWT.sign(payload, privateKey, {
       audience: 'Swift API',
       issuer: 'Swift API',

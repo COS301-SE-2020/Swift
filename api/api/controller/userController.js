@@ -39,11 +39,17 @@ module.exports = {
         if (bcrypt.compareSync(password, res.rows[0].password)) {
           // good credentials
           const loginResponse = {};
-          loginResponse.token = generateToken(res.rows[0].userid).token;
-          loginResponse.username = res.rows[0].username;
-          loginResponse.orderHistory = [];
+          const newTokenPair = generateToken(res.rows[0].userid);
+          loginResponse.token = newTokenPair.token;
+          loginResponse.refreshToken = newTokenPair.refreshToken;
+          loginResponse.name = res.rows[0].name;
+          loginResponse.surname = res.rows[0].surname;
+          loginResponse.email = res.rows[0].email;
+          loginResponse.theme = res.rows[0].theme;
 
-          validateToken(loginResponse.token);
+          // TODO: Add favourtites and order history to response
+          loginResponse.favourites = [];
+          loginResponse.orderHistory = [];
 
           return response.status(200).send(loginResponse);
 
@@ -137,8 +143,8 @@ module.exports = {
     newUserData.surname = reqBody.surname;
     newUserData.email = reqBody.email;
     newUserData.password = bcrypt.hashSync(reqBody.password, 10); // Hash password
-    newUserData.userTheme = 'Light'; // Default light theme
-    newUserData.refreshToken = 'INACTIVE';
+    newUserData.userTheme = 'light'; // Default light theme
+    newUserData.refreshToken = 'inactive';
 
     // Check that email is valid
     if (!validator.validate(newUserData.email)) {
