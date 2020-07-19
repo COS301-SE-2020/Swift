@@ -80,7 +80,7 @@ module.exports = {
             });
           }
 
-          if (res.rows[0].numseats === checkInUsers.length) {
+          if (res.rows[0].numseats <= checkInUsers.length) {
             // table is full
             return response.status(409).send({ status: 409, reason: 'Table Full' });
           }
