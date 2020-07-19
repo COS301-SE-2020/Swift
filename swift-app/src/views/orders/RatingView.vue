@@ -262,7 +262,7 @@ export default {
     border-radius:12px !important;
 }
 
-.v-text-field__details {
+.commentSection .v-text-field__details {
     display: none !important;
 }
 

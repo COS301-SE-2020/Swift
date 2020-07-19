@@ -7,7 +7,7 @@
     </v-row>
     <v-data-iterator :items="items" :search="search" hide-default-footer>
       <template v-slot:header>
-        <v-text-field style=":after {background-color: rgba(0, 0, 0, 0.06);}" v-model="search" clearable flat solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search"></v-text-field>
+        <v-text-field class="searchBarBg" v-model="search" clearable flat solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search"></v-text-field>
       </template>
 
       <template v-slot:default="props">
@@ -80,3 +80,10 @@ import NavBar from '@/components/layout/NavBar';
     
   }
 </script>
+<style>
+.searchBarBg .v-input__slot {
+  background: rgba(0, 0, 0, 0.06) !important;
+  caret-color: #343434 !important;
+  color: #343434 !important;
+}
+</style>
