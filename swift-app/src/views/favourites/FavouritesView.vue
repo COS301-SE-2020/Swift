@@ -7,7 +7,7 @@
     </v-row>
     <v-data-iterator :items="items" :search="search" hide-default-footer>
       <template v-slot:header>
-        <v-text-field class="searchBarBg" v-model="search" clearable flat solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search"></v-text-field>
+        <v-text-field class="searchBarBg" v-model="search" rounded clearable flat solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search"></v-text-field>
       </template>
 
       <template v-slot:default="props">
@@ -58,12 +58,12 @@ import NavBar from '@/components/layout/NavBar';
           {
             title: 'Egg and avo on toast',
             description: 'Made on whole grain toast with mashed avocado, a runny egg and a few dashes of hot sauce - it is...',
-            avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg',
+            avatar: 'https://source.unsplash.com/hrlvr2ZlUNk/800x800/',
           },
           {
             title: 'Pizza',
             description: 'Made on whole grain toast with mashed avocado, a runny egg and a few dashes of hot sauce - it is...',
-            avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg',
+            avatar: 'https://source.unsplash.com/800x800/?restaurant',
           },
           
         ],
