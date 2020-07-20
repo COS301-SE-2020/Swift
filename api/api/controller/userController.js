@@ -3,6 +3,7 @@ const validator = require('email-validator');
 const accCreator = require('../helper/accountCreator');
 const db = require('../db');
 const { generateToken, validateToken, tokenStatus } = require('../helper/tokenHandler');
+const { getFavourites } = require('../helper/objectBuilder');
 
 const BC_SALT_ROUNDS = 10;
 
@@ -51,22 +52,30 @@ module.exports = {
           loginResponse.email = res.rows[0].email;
           loginResponse.theme = res.rows[0].theme;
 
-          // TODO: Save promise and check status at end
           // Update token in DB - async
-          db.query(
+          const loginPromises = [];
+          loginPromises.push(db.query(
             'UPDATE public.person SET refreshtoken = $1::text WHERE userid = $2::integer;',
             [bcrypt.hashSync(newTokenPair.refreshToken, BC_SALT_ROUNDS), res.rows[0].userid]
           )
             .catch((err) => {
               console.error('Query Error [Login - Update Account Token]', err.stack);
               return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
-            });
+            }));
 
-          // TODO: Add favourtites and order history to response
-          loginResponse.favourites = [];
+          loginPromises.push(getFavourites(res.rows[0].userid).then((favourites) => {
+            loginResponse.favourites = favourites;
+          }));
+
           loginResponse.orderHistory = [];
 
-          return response.status(200).send(loginResponse);
+          Promise.all(loginPromises).then(() => response.status(200).send(loginResponse))
+            .catch((err) => {
+              console.error('Login Promise Error', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
+
+          // return response.status(200).send(loginResponse);
 
           /*
           const { userid } = res.rows[0];
@@ -134,15 +143,51 @@ module.exports = {
               return response.status(400).send({ status: 500, reason: 'Internal Server Error' });
             });
           */
+        } else {
+          // Access denied
+          return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
         }
-
-        // Access denied
-        return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
       })
       .catch((err) => {
         console.error('Query Error [Login - Check Account Existence]', err.stack);
         return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
       });
+  },
+  addFavourite: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+    || !Object.prototype.hasOwnProperty.call(reqBody, 'menuItemId')
+    || Object.keys(reqBody).length !== 3) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token validity
+    const tokenState = validateToken(reqBody.token, true);
+    if (tokenState[0] === tokenStatus.valid) {
+      return db.query(
+        'INSERT INTO public.favourite (menuitemid, customerid)'
+        + ' SELECT $1::integer, $2::integer WHERE NOT EXISTS'
+        + ' (SELECT 1 FROM public.favourite WHERE'
+        + ' menuitemid = $1::integer AND customerid = $2::integer);',
+        [reqBody.menuItemId, tokenState[1].userId]
+      )
+        .then(() => getFavourites(tokenState[1].userId)
+          .then((favourites) => response.status(200).send({ favourites }))
+          .catch((err) => {
+            console.error('Helper Error [Favourite - Get Favourites Object]', err.stack);
+            return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+          }))
+        .catch((err) => {
+          console.error('Query Error [Favourite - Add Favourite Item]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (tokenState[0] === tokenStatus.refresh) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
   },
   refreshToken: (reqBody, response) => {
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
@@ -169,7 +214,7 @@ module.exports = {
       return response.status(403).send({ status: 403, reason: 'Invalid Token Pair' });
     }
 
-    // check refresh tokem is valid in DB
+    // check refresh token is valid in DB
     return db.query(
       'SELECT refreshtoken FROM public.person WHERE userid = $1::integer;',
       [tokenState[1].userId]

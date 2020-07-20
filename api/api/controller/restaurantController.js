@@ -115,7 +115,9 @@ module.exports = {
   },
   getMenu: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
-    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token') || !Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')) {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+    || !Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')
+    || Object.keys(reqBody).length !== 3) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 

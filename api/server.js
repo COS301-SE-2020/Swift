@@ -25,7 +25,7 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
   // check if this is a JSON parsing issue
   if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-    console.error(err);
+    console.error(`Malformed JSON Middleware - ${err.type}:`, err.body);
     return res.status(400).send({ status: 400, reason: 'Bad Request' });
   }
   return next();

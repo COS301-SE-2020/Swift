@@ -41,6 +41,10 @@ router.post('/', (req, res) => {
         userController.refreshToken(req.body, res);
         break;
       }
+      case 'addFavourite': {
+        userController.addFavourite(req.body, res);
+        break;
+      }
       case 'allRestaurants': {
         restaurantController.getRestaurantList(req.body, res);
         break;
@@ -63,8 +67,8 @@ router.post('/', (req, res) => {
     }
   } catch (err) {
     // invalid request body, not in json format
-    console.error(err); // log error
-    res.status(400).send({ status: 400, reason: 'Bad Request' });
+    console.error('API Error [Post - Controller Router]', err.stack);
+    res.status(500).send({ status: 500, reason: 'Internal Server Error' });
   }
 });
 
