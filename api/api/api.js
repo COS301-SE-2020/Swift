@@ -45,6 +45,10 @@ router.post('/', (req, res) => {
         userController.addFavourite(req.body, res);
         break;
       }
+      case 'removeFavourite': {
+        userController.removeFavourite(req.body, res);
+        break;
+      }
       case 'allRestaurants': {
         restaurantController.getRestaurantList(req.body, res);
         break;

@@ -164,10 +164,58 @@ module.exports = {
     const tokenState = validateToken(reqBody.token, true);
     if (tokenState[0] === tokenStatus.valid) {
       return db.query(
-        'INSERT INTO public.favourite (menuitemid, customerid)'
-        + ' SELECT $1::integer, $2::integer WHERE NOT EXISTS'
-        + ' (SELECT 1 FROM public.favourite WHERE'
-        + ' menuitemid = $1::integer AND customerid = $2::integer);',
+        'SELECT menuitemid FROM public.menuitem WHERE menuitemid = $1::integer;',
+        [reqBody.menuItemId]
+      )
+        .then((res) => {
+          if (res.rows.length === 0) {
+            // Menu item does not exist
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          return db.query(
+            'INSERT INTO public.favourite (menuitemid, customerid)'
+            + ' SELECT $1::integer, $2::integer WHERE NOT EXISTS'
+            + ' (SELECT 1 FROM public.favourite WHERE'
+            + ' menuitemid = $1::integer AND customerid = $2::integer);',
+            [reqBody.menuItemId, tokenState[1].userId]
+          )
+            .then(() => getFavourites(tokenState[1].userId)
+              .then((favourites) => response.status(200).send({ favourites }))
+              .catch((err) => {
+                console.error('Helper Error [Favourite - Get Favourites Object]', err.stack);
+                return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+              }))
+            .catch((err) => {
+              console.error('Query Error [Favourite - Add Favourite Item]', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
+        })
+        .catch((err) => {
+          console.error('Query Error [Favourite - Check Menu Item]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (tokenState[0] === tokenStatus.refresh) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  removeFavourite: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+    || !Object.prototype.hasOwnProperty.call(reqBody, 'menuItemId')
+    || Object.keys(reqBody).length !== 3) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token validity
+    const tokenState = validateToken(reqBody.token, true);
+    if (tokenState[0] === tokenStatus.valid) {
+      return db.query(
+        'DELETE FROM public.favourite WHERE menuitemid = $1::integer AND customerid = $2::integer;',
         [reqBody.menuItemId, tokenState[1].userId]
       )
         .then(() => getFavourites(tokenState[1].userId)
@@ -177,7 +225,7 @@ module.exports = {
             return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
           }))
         .catch((err) => {
-          console.error('Query Error [Favourite - Add Favourite Item]', err.stack);
+          console.error('Query Error [Favourite - Remove Favourite Item]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }
