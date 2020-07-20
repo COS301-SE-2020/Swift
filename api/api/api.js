@@ -65,6 +65,10 @@ router.post('/', (req, res) => {
         restaurantController.addOrder(req.body, res);
         break;
       }
+      case 'payment': {
+        restaurantController.orderPayment(req.body, res);
+        break;
+      }
       default: {
         res.status(400).send({ status: 400, reason: 'Bad Request' });
       }

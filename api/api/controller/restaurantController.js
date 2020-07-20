@@ -329,5 +329,72 @@ module.exports = {
 
     // Invalid token
     return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  orderPayment: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+    || !Object.prototype.hasOwnProperty.call(reqBody, 'orderId')
+    || !Object.prototype.hasOwnProperty.call(reqBody, 'paymentMethod')
+    || !Object.prototype.hasOwnProperty.call(reqBody, 'amountPaid')
+    || Object.keys(reqBody).length !== 5
+    || reqBody.amountPaid < 0.0) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token
+    const tokenState = validateToken(reqBody.token, true);
+    // TODO: Check if refresh token is valid for extra security
+    if (tokenState[0] === tokenStatus.valid) {
+      // check if order exists
+      return db.query(
+        'SELECT orderstatus FROM public.customerorder'
+        + ' WHERE orderid = $1::integer;',
+        [reqBody.orderId]
+      )
+        .then((resOrderStatus) => {
+          if (resOrderStatus.rows.length === 0) {
+            // order does not exist
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          if (resOrderStatus.rows[0].orderstatus.toLowerCase() === 'paid') {
+            // order has already been paid for
+            return response.status(205).send();
+          }
+
+          // pay for order
+          const newOrderStatus = 'Paid';
+
+          return db.query(
+            'INSERT INTO public.payment (orderid, paymentmethod, paymentamount, paymentdatetime)'
+            + ' VALUES ($1::integer, $2::text, $3::real, NOW());',
+            [reqBody.orderId, reqBody.paymentMethod, reqBody.amountPaid]
+          )
+            .then(() => db.query(
+              'UPDATE public.customerorder SET orderstatus = $1::text WHERE orderid = $2::integer',
+              [newOrderStatus, reqBody.orderId]
+            )
+              .then(() => response.status(200).send())
+              .catch((err) => {
+                console.error('Query Error [Order Payment - Update Order Status]', err.stack);
+                return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+              }))
+            .catch((err) => {
+              console.error('Query Error [Order Payment - Create New Payment]', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
+        })
+        .catch((err) => {
+          console.error('Query Error [Order Payment - Check Order Existence]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (tokenState[0] === tokenStatus.refresh) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
   }
 };
