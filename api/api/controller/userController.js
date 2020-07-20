@@ -173,6 +173,7 @@ module.exports = {
             return response.status(404).send({ status: 404, reason: 'Not Found' });
           }
 
+          // add favourite if it has not already been added
           return db.query(
             'INSERT INTO public.favourite (menuitemid, customerid)'
             + ' SELECT $1::integer, $2::integer WHERE NOT EXISTS'

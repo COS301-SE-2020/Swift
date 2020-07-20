@@ -14,10 +14,8 @@
     },
     "rules": {
         "comma-dangle": "off",
-        "max-len": "off",
         "no-console": ["error", { "allow": ["error"] }],
         "no-plusplus": "off",
-        "no-shadow": "off",
         "object-property-newline": ["error", { "allowAllPropertiesOnSameLine": true }]
     }
 }
