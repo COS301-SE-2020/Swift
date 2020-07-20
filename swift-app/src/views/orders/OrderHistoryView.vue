@@ -24,8 +24,8 @@
             </template>
 
             <template v-slot:default="props" >
-              <v-subheader style="height: 20px" class="mt-3 mb-1 pl-1"  v-text="orderHistory[0].orderCategory.status"></v-subheader>
-              <v-list  v-for="item in props.items" :key="item.restaurant" class="py-2">
+              <v-subheader style="height: 20px" class="secondary--text subtitle-2 mt-3 mb-1 pl-1"  v-text="orderHistory[0].orderCategory.status"></v-subheader>
+              <v-list v-for="item in props.items" :key="item.restaurant" class="py-2">
                 <v-card>
                   <v-list-item ripple class="pt-1 pr-0">
                     <v-list-item-content>
@@ -38,7 +38,6 @@
                       <v-list-item-action-text v-text="item.date">11:00 June 24, 2020</v-list-item-action-text>
                       <v-list-item-action-text class="subtitle-1">R{{item.amount}}</v-list-item-action-text>
                     </v-list-item-action>
-                    
                   </v-list-item>
                   <v-row class="pt-0">
                     <v-col cols="12" align="end" class="pt-0 pr-5">
@@ -53,7 +52,7 @@
 
           <v-data-iterator :items="orderHistory[1].orderCategory.items"  :search="search" hide-default-footer>
             <template v-slot:default="props">
-              <v-subheader style="height: 20px" class="mt-3 mb-1 pl-1"  v-text="orderHistory[1].orderCategory.status"></v-subheader>
+              <v-subheader style="height: 20px" class="secondary--text subtitle-2 mt-3 mb-1 pl-1"  v-text="orderHistory[1].orderCategory.status"></v-subheader>
               <v-list v-for="item in props.items" :key="item.restaurant" class="py-2">
                 <v-card>
                   <v-list-item ripple class="py-1 pr-0">

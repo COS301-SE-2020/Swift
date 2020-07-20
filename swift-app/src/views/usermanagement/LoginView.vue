@@ -58,8 +58,8 @@ export default {
     return {
       showPassword: false,
       showPlaceholder: false,
-      password: '',
-      email: '',
+      password: 'john123',
+      email: 'john@doe.com',
       isLoading: false,
       errorMsg: '',
     }
@@ -85,14 +85,6 @@ export default {
         
         this.login(data)
         this.$router.push('/')
-
-       /*  if (this.isAuthenticated) {
-          this.isLoading = false
-          // this.$router.push('/')
-        } else if (!this.isAuthenticated) {
-          // this.isLoading = false
-          // this.errorMsg = 'Your email or password is incorrect.'
-        } */
       }
     },
     ...mapGetters({

@@ -24,18 +24,16 @@ const actions = {
     axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "login",
-        "email": data.email,
-        // "email": "johnmay@gmail.com",
-        "password": data.password
-        // "password": "john123"
+        // "email": data.email,
+        "email": "john@doe.com",
+        // "password": data.password
+        "password": "john123"
       }
     ).then(result => {
+      commit('SAVE_TOKEN', result.data.token);
       commit('SAVE_CUSTOMER', result.data);
-      commit('SET_AUTHENTICATION', true);
+      // this.getCustomerProfile();
     }).catch(({ response }) => {
-      if(response.status == 400 || response.status == 403 || response.status == 404){
-        commit('SET_AUTHENTICATION', false);
-      } 
     });
   },
 
@@ -65,8 +63,13 @@ const actions = {
 
 // Mutations
 const mutations = {
+  SAVE_TOKEN(state, token) {
+    state.token = token;
+  },
+
   SAVE_CUSTOMER(state, customer) {
     state.customer = customer;
+    console.log(state.customer);
   },
 
   SET_AUTHENTICATION(state, authentication_state) {
