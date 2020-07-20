@@ -1,5 +1,6 @@
-const { validateToken, tokenStatus, getCustomerId } = require('../helper/tokenHandler');
 const db = require('../db');
+const { validateToken, tokenStatus, getCustomerId } = require('../helper/tokenHandler');
+const { getReviews, getRatingPhrases, getMenuCategories } = require('../helper/objectBuilder');
 
 module.exports = {
   getRestaurantList: (reqBody, response) => {
@@ -9,9 +10,6 @@ module.exports = {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 
-    // TODO: Remove hardcoded restaurant rating and calculate it
-    const restaurantRating = 4;
-
     const tokenState = validateToken(reqBody.token);
 
     if (tokenState === tokenStatus.valid) {
@@ -20,6 +18,7 @@ module.exports = {
       )
         .then((res) => {
           const restaurantResponse = {};
+          const restaurantPromises = [];
           restaurantResponse.restaurants = [];
           for (let r = 0; r < res.rows.length; r++) {
             restaurantResponse.restaurants[r] = {};
@@ -27,10 +26,31 @@ module.exports = {
             restaurantResponse.restaurants[r].name = res.rows[r].restaurantname;
             restaurantResponse.restaurants[r].location = res.rows[r].location;
             restaurantResponse.restaurants[r].image = res.rows[r].coverimageurl;
-            restaurantResponse.restaurants[r].rating = restaurantRating;
+            restaurantPromises.push(db.query(
+              'SELECT AVG(ratingscore) AS "rating" FROM public.review'
+              + ' WHERE restaurantid = $1::integer AND ratingscore IS NOT NULL;',
+              [res.rows[r].restaurantid]
+            )
+              .then((ratingRes) => {
+                if (ratingRes.rows[0].rating != null) {
+                  restaurantResponse.restaurants[r].rating = ratingRes.rows[0].rating;
+                } else {
+                  // no rating available
+                  restaurantResponse.restaurants[r].rating = 0.0;
+                }
+              })
+              .catch((err) => {
+                console.error('Query Error [Restaurant - Get Restaurant Rating]', err.stack);
+                // zero rating on error
+                restaurantResponse.restaurants[r].rating = 0.0;
+              }));
           }
 
-          return response.status(200).send(restaurantResponse);
+          Promise.all(restaurantPromises).then(() => response.status(200).send(restaurantResponse))
+            .catch((err) => {
+              console.error('Restaurant Promise Error', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
         }).catch((err) => {
           console.error('Query Error [Restaurant - Get Restaurant List]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
@@ -122,118 +142,66 @@ module.exports = {
     }
 
     // Check token
-    if (validateToken(reqBody.token)) {
+    const tokenState = validateToken(reqBody.token);
+    if (tokenState === tokenStatus.valid) {
       // check if restaurant exists
-      return db.query('SELECT restaurantname, location FROM public.restaurant WHERE restaurantid = $1::integer', [reqBody.restaurantId]).then((res) => {
-        if (res.rows.length === 0) {
-          // restaurant does not exist
-          return response.status(404).send({ status: 404, reason: 'Not Found' });
-        }
-
-        // get menu
-        const menuResponse = {};
-        menuResponse.name = res.rows[0].restaurantname;
-        menuResponse.location = res.rows[0].location;
-        menuResponse.categories = [];
-
-        // menu item query promises
-        const menuQueries = [];
-        return db.query('SELECT categoryid, categoryname FROM public.category').then((res) => {
-          for (let c = 0; c < res.rows.length; c++) {
-            menuResponse.categories[c] = {};
-            menuResponse.categories[c].categoryId = res.rows[c].categoryid;
-            menuResponse.categories[c].categoryName = res.rows[c].categoryname;
-            menuResponse.categories[c].categoryItems = [];
-
-            // menu items
-            const asyncQueryCat = async (restaurantId, categoryId, catIndex) => {
-              const queryPromise = new Promise((resolve, reject) => {
-                const imageIngredientQueries = [];
-
-                db.query('SELECT menuitemid, menuitemname, price, estimatedwaitingtime, menuitemdescription FROM public.menuitem WHERE restaurantid = $1::integer AND categoryid = $2::integer', [restaurantId, categoryId]).then((res) => {
-                  for (let m = 0; m < res.rows.length; m++) {
-                    menuResponse.categories[catIndex].categoryItems[m] = {};
-                    menuResponse.categories[catIndex].categoryItems[m].id = res.rows[m].menuitemid;
-                    menuResponse.categories[catIndex].categoryItems[m].name = res.rows[m].menuitemname;
-                    menuResponse.categories[catIndex].categoryItems[m].price = res.rows[m].price;
-                    menuResponse.categories[catIndex].categoryItems[m].prepTime = res.rows[m].estimatedwaitingtime;
-                    menuResponse.categories[catIndex].categoryItems[m].description = res.rows[m].menuitemdescription;
-                    menuResponse.categories[catIndex].categoryItems[m].images = [];
-                    menuResponse.categories[catIndex].categoryItems[m].ingredients = [];
-
-                    // images
-                    const asyncQueryImg = async (menuItemId, catIndex, catItem) => {
-                      const queryPromise = new Promise((resolve, reject) => {
-                        db.query('SELECT imageurl FROM public.menuitemimages WHERE menuitemid = $1::integer', [menuItemId]).then((res) => {
-                          res.rows.forEach((img) => {
-                            menuResponse.categories[catIndex].categoryItems[catItem].images.push(img.imageurl);
-                          });
-                          resolve();
-                        }).catch((err) => {
-                          reject(err);
-                        });
-                      });
-
-                      // wait until the query is complete
-                      await queryPromise;
-                    };
-
-                    // ingredients
-                    const asyncQueryIngredient = async (menuItemId, catIndex, catItem) => {
-                      const queryPromise = new Promise((resolve, reject) => {
-                        db.query('SELECT ingredient.ingredientname, price FROM public.menuitemingredient INNER JOIN public.ingredient ON ingredient.ingredientid = menuitemingredient.ingredientid WHERE menuitemid = $1::integer', [menuItemId]).then((res) => {
-                          for (let ing = 0; ing < res.rows.length; ing++) {
-                            menuResponse.categories[catIndex].categoryItems[catItem].ingredients[ing] = {};
-                            menuResponse.categories[catIndex].categoryItems[catItem].ingredients[ing].name = res.rows[ing].ingredientname;
-                            const ingPrice = res.rows[ing].price == null ? 0 : res.rows[ing].price;
-                            const ingSelected = ingPrice === 0;
-                            menuResponse.categories[catIndex].categoryItems[catItem].ingredients[ing].price = ingPrice;
-                            menuResponse.categories[catIndex].categoryItems[catItem].ingredients[ing].selected = ingSelected;
-                            menuResponse.categories[catIndex].categoryItems[catItem].ingredients[ing].extraIngredients = [];
-                            // TODO: Add extra ingredients
-                          }
-                          resolve();
-                        }).catch((err) => {
-                          reject(err);
-                        });
-                      });
-
-                      // wait until the query is complete
-                      await queryPromise;
-                    };
-
-                    imageIngredientQueries.push(asyncQueryImg(menuResponse.categories[catIndex].categoryItems[m].id, catIndex, m));
-                    imageIngredientQueries.push(asyncQueryIngredient(menuResponse.categories[catIndex].categoryItems[m].id, catIndex, m));
-                  }
-
-                  Promise.all(imageIngredientQueries).then(() => {
-                    resolve();
-                  }).catch((err) => {
-                    reject(err);
-                  });
-                }).catch((err) => {
-                  reject(err);
-                });
-              });
-                // wait for query
-              await queryPromise;
-            };
-
-            menuQueries.push(asyncQueryCat(reqBody.restaurantId, menuResponse.categories[c].categoryId, c));
+      return db.query(
+        'SELECT restaurantname, location, coverimageurl FROM public.restaurant'
+        + ' WHERE restaurantid = $1::integer',
+        [reqBody.restaurantId]
+      )
+        // eslint-disable-next-line consistent-return
+        .then((res) => {
+          if (res.rows.length === 0) {
+            // restaurant does not exist
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
           }
 
-          Promise.all(menuQueries).then(() => response.status(200).send(menuResponse)).catch((err) => {
-            console.error('Error executing query', err.stack);
-            return response.status(400).send({ status: 500, reason: 'Internal Server Error' });
-          });
-        }).catch((err) => {
-          console.error('Error executing query', err.stack);
-          return response.status(400).send({ status: 500, reason: 'Internal Server Error' });
+          // get menu
+          const menuResponse = {};
+          const menuPromises = [];
+          menuResponse.name = res.rows[0].restaurantname;
+          menuResponse.location = res.rows[0].location;
+          menuResponse.image = res.rows[0].coverimageurl;
+
+          menuPromises.push(getReviews(reqBody.restaurantId).then((reviews) => {
+            menuResponse.reviews = reviews;
+          }));
+
+          menuPromises.push(getRatingPhrases(reqBody.restaurantId).then((rPhrase) => {
+            menuResponse.ratingPhrases = rPhrase;
+          }));
+
+          menuPromises.push(new Promise((resolve, reject) => {
+            menuPromises.push(getMenuCategories(reqBody.restaurantId).then((categoryPromise) => {
+              menuResponse.categories = [];
+              Promise.all(categoryPromise)
+                .then((categoryItem) => {
+                  categoryItem.forEach((catItem) => {
+                    menuResponse.categories.push(catItem);
+                  });
+                  resolve();
+                })
+                .catch((err) => {
+                  reject(err);
+                });
+            }));
+          }));
+
+          Promise.all(menuPromises).then(() => response.status(200).send(menuResponse))
+            .catch((err) => {
+              console.error('Get Menu Promise Error', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
+        })
+        .catch((err) => {
+          console.error('Query Error [Restaurant - Get Menu Details]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
-      }).catch((err) => {
-        console.error('Error executing query', err.stack);
-        return response.status(400).send({ status: 500, reason: 'Internal Server Error' });
-      });
+    }
+
+    if (tokenState === tokenStatus.refresh) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
     }
 
     // Invalid token

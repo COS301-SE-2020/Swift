@@ -21,12 +21,40 @@ const getOrderItems = async (oid = 0) => db.query(
       orderItem.quantity = ordItem.quantity;
       orderItem.orderselections = ordItem.orderselections;
       orderTotal += (orderItem.price * ordItem.quantity);
-      orderHistoryItems.push(ordItem);
+      orderHistoryItems.push(orderItem);
     });
     return { orderTotal, items: orderHistoryItems };
   })
   .catch((err) => {
     console.error('Query Error [Order Helper - Get Order Items]', err.stack);
+    return [];
+  });
+
+// helper to get individual menu items
+const getMenuItems = async (restaurantId = 0, categoryId = 0) => db.query(
+  'SELECT menuitemid, menuitemname, menuitemdescription, price, estimatedwaitingtime,'
+  + ' menuitem.attributes, arasset, availability FROM public.menuitem'
+  + ' WHERE restaurantid = $1::integer AND categoryid = $2::integer;',
+  [restaurantId, categoryId]
+)
+  .then((menuItems) => {
+    const menuItemsArr = [];
+    menuItems.rows.forEach((resMenuItem) => {
+      const menuItem = {};
+      menuItem.menuItemId = resMenuItem.menuitemid;
+      menuItem.menuItemName = resMenuItem.menuitemname;
+      menuItem.menuItemDescription = resMenuItem.menuitemdescription;
+      menuItem.price = resMenuItem.price;
+      menuItem.estimatedWaitingTime = resMenuItem.estimatedwaitingtime;
+      menuItem.attributes = resMenuItem.attributes;
+      menuItem.arAsset = resMenuItem.arasset;
+      menuItem.availability = resMenuItem.availability;
+      menuItemsArr.push(menuItem);
+    });
+    return { menuItemsArr };
+  })
+  .catch((err) => {
+    console.error('Query Error [Menu Helper - Get Menu Items]', err.stack);
     return [];
   });
 
@@ -92,5 +120,81 @@ module.exports = {
     .catch((err) => {
       console.error('Query Error [Order History - Get User Order History]', err.stack);
       return Promise.reject(err);
+    }),
+  getReviews: (restaurantId = 0) => db.query(
+    'SELECT review.comment, review.reviewdatetime, review.public, review.adminid, review.response'
+    + ' FROM public.review WHERE review.restaurantid = $1::integer AND review.comment IS NOT NULL;',
+    [restaurantId]
+  )
+    .then((res) => {
+      const reviewsArr = [];
+      res.rows.forEach((review) => {
+        const reviewItem = {};
+        reviewItem.comment = review.comment;
+        reviewItem.reviewDateTime = review.reviewdatetime;
+        reviewItem.public = review.public;
+        reviewItem.adminId = review.adminid;
+        reviewItem.response = review.response;
+        reviewsArr.push(reviewItem);
+      });
+      return reviewsArr;
+    })
+    .catch((err) => {
+      console.error('Query Error [Reviews - Get Restaurant Reviews]', err.stack);
+      return [];
+    }),
+  getRatingPhrases: (restaurantId = 0) => db.query(
+    'SELECT ratingphrase.phrasedescription, AVG(customerphraserating.ratingscore) AS "rating"'
+    + ' FROM public.customerphraserating'
+    + ' INNER JOIN public.ratingphrase ON ratingphrase.phraseid = customerphraserating.phraseid'
+    + ' INNER JOIN public.review ON customerphraserating.reviewid = review.reviewid'
+    + ' WHERE review.restaurantid = $1::integer'
+    + ' GROUP BY ratingphrase.phrasedescription;',
+    [restaurantId]
+  )
+    .then((res) => {
+      const ratingPhrassesArr = [];
+      res.rows.forEach((ratePhrase) => {
+        const ratingphraseItem = {};
+        ratingphraseItem.phrase = ratePhrase.phrasedescription;
+        ratingphraseItem.rating = ratePhrase.rating;
+        ratingPhrassesArr.push(ratingphraseItem);
+      });
+      return ratingPhrassesArr;
+    })
+    .catch((err) => {
+      console.error('Query Error [Rating Phrases - Get Restaurant Ratings]', err.stack);
+      return [];
+    }),
+  getMenuCategories: (restaurantId = 0) => db.query(
+    'SELECT categoryid, categoryname, categorydescription, parentcategoryid, categorytype'
+    + ' FROM public.category'
+    + ' WHERE restaurantid = $1::integer;',
+    [restaurantId]
+  )
+    .then((res) => {
+      const menuItemPromises = [];
+      res.rows.forEach((menuCategory) => {
+        menuItemPromises.push(getMenuItems(restaurantId, menuCategory.categoryid)
+          .then((resMenuItem) => {
+            const categoryItem = {};
+            categoryItem.categoryName = menuCategory.categoryname;
+            categoryItem.description = menuCategory.categorydescription;
+            categoryItem.parentCategoryId = menuCategory.parentcategoryid;
+            categoryItem.type = menuCategory.categorytype;
+            categoryItem.menuItems = resMenuItem.menuItemsArr;
+            return categoryItem;
+          })
+          .catch((err) => {
+            console.error('Query Error [Restaurant Helper - Get Restaurant Menu Item]', err.stack);
+            // empty on error
+            return [];
+          }));
+      });
+      return menuItemPromises;
+    })
+    .catch((err) => {
+      console.error('Query Error [Categories - Get Restaurant Menu Categories]', err.stack);
+      return [];
     })
 };
