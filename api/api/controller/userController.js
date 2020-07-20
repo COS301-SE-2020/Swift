@@ -3,7 +3,7 @@ const validator = require('email-validator');
 const accCreator = require('../helper/accountCreator');
 const db = require('../db');
 const { generateToken, validateToken, tokenStatus } = require('../helper/tokenHandler');
-const { getFavourites } = require('../helper/objectBuilder');
+const { getFavourites, getOrderHistory } = require('../helper/objectBuilder');
 
 const BC_SALT_ROUNDS = 10;
 
@@ -34,6 +34,7 @@ module.exports = {
       + ' WHERE person.email = $1::text',
       [email]
     )
+      // eslint-disable-next-line consistent-return
       .then((res) => {
         if (res.rows.length === 0) {
           // user does not exist
@@ -67,82 +68,27 @@ module.exports = {
             loginResponse.favourites = favourites;
           }));
 
-          loginResponse.orderHistory = [];
+          loginPromises.push(new Promise((resolve, reject) => {
+            loginPromises.push(getOrderHistory(res.rows[0].userid).then((orderHistoryPromise) => {
+              loginResponse.orderHistory = [];
+              Promise.all(orderHistoryPromise)
+                .then((orderHistoryItem) => {
+                  orderHistoryItem.forEach((ordHistItem) => {
+                    loginResponse.orderHistory.push(ordHistItem);
+                  });
+                  resolve();
+                })
+                .catch((err) => {
+                  reject(err);
+                });
+            }));
+          }));
 
           Promise.all(loginPromises).then(() => response.status(200).send(loginResponse))
             .catch((err) => {
               console.error('Login Promise Error', err.stack);
               return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
             });
-
-          // return response.status(200).send(loginResponse);
-
-          /*
-          const { userid } = res.rows[0];
-          // order query promises
-          const orderQueries = [];
-
-          return db.query(
-            'SELECT orderid, orderstatus, orderdatetime, restaurant.restaurantname, restaurant.location FROM public.foodorder INNER JOIN public.restauranttable ON public.foodorder.tableid = public.restauranttable.tableid INNER JOIN public.restaurant ON public.restaurant.restaurantid = public.restauranttable.restaurantid WHERE customerid = $1::integer;',
-            [userid]
-          )
-            .then((res) => {
-            // get data
-              for (let i = 0; i < res.rows.length; i++) {
-                loginResponse.orderHistory[i] = {};
-                loginResponse.orderHistory[i].total = 0.0;
-                loginResponse.orderHistory[i].orderNumber = res.rows[i].orderid;
-                loginResponse.orderHistory[i].restaurant = res.rows[i].restaurantname;
-                loginResponse.orderHistory[i].location = res.rows[i].location;
-                loginResponse.orderHistory[i].date = res.rows[i].orderdatetime;
-                loginResponse.orderHistory[i].orderItems = [];
-
-                const orderid = loginResponse.orderHistory[i].orderNumber;
-
-                const orderQuery = async (index, orderid) => {
-                  const queryPromise = new Promise((resolve, reject) => {
-                    db.query(
-                      'SELECT menuitemname, price, orderitem.quantity, menuitemimages.imageurl FROM public.menuitem INNER JOIN public.orderitem ON public.orderitem.menuitemid = public.menuitem.menuitemid LEFT JOIN public.menuitemimages ON public.menuitemimages.menuitemid = public.menuitem.menuitemid WHERE orderitem.orderid = $1::integer;',
-                      [orderid]
-                    )
-                      .then((res) => {
-                        // each item ordered
-                        for (let m = 0; m < res.rows.length; m++) {
-                          loginResponse.orderHistory[index].orderItems[m] = {};
-                          loginResponse.orderHistory[index].orderItems[m].name = res.rows[m].menuitemname;
-                          loginResponse.orderHistory[index].orderItems[m].quantity = res.rows[m].quantity;
-                          loginResponse.orderHistory[index].orderItems[m].price = res.rows[m].price;
-                          loginResponse.orderHistory[index].orderItems[m].image = res.rows[m].imageurl;
-                          // update total price
-                          loginResponse.orderHistory[index].total += (
-                            res.rows[m].price * res.rows[m].quantity
-                          );
-                        }
-                        resolve();
-                      })
-                      .catch((err) => {
-                        reject(err);
-                      });
-                  });
-
-                  // wait until the query is complete
-                  await queryPromise;
-                };
-
-                orderQueries.push(orderQuery(i, orderid));
-              }
-
-              Promise.all(orderQueries).then(() => response.status(200).send(loginResponse))
-                .catch((err) => {
-                  console.error('Error executing query', err.stack);
-                  return response.status(400).send({ status: 500, reason: 'Internal Server Error' });
-                });
-            })
-            .catch((err) => {
-              console.error('Error executing query', err.stack);
-              return response.status(400).send({ status: 500, reason: 'Internal Server Error' });
-            });
-          */
         } else {
           // Access denied
           return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
