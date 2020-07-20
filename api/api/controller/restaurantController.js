@@ -1,6 +1,11 @@
 const db = require('../db');
-const { validateToken, tokenStatus, getCustomerId } = require('../helper/tokenHandler');
-const { getReviews, getRatingPhrases, getMenuCategories } = require('../helper/objectBuilder');
+const { validateToken, tokenStatus } = require('../helper/tokenHandler');
+const {
+  getReviews,
+  getRatingPhrases,
+  getMenuCategories,
+  getOrderHistory
+} = require('../helper/objectBuilder');
 
 module.exports = {
   getRestaurantList: (reqBody, response) => {
@@ -209,16 +214,22 @@ module.exports = {
   },
   addOrder: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
-    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token') || !Object.prototype.hasOwnProperty.call(reqBody, 'orderInfo')) {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+    || !Object.prototype.hasOwnProperty.call(reqBody, 'orderInfo')
+    || Object.keys(reqBody).length !== 3) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 
     // Check token
-    if (validateToken(reqBody.token)) {
+    const tokenState = validateToken(reqBody.token, true);
+    // TODO: Check if refresh token is valid for extra security
+    if (tokenState[0] === tokenStatus.valid) {
       const { orderInfo } = reqBody;
-      const customerId = getCustomerId(reqBody.token);
+      const customerId = tokenState[1].userId;
+
       // Check if orderInfo is valid
-      if (!Object.prototype.hasOwnProperty.call(orderInfo, 'restaurantId') || !Object.prototype.hasOwnProperty.call(orderInfo, 'tableId')
+      if (!Object.prototype.hasOwnProperty.call(orderInfo, 'restaurantId')
+      || !Object.prototype.hasOwnProperty.call(orderInfo, 'tableId')
       || !Object.prototype.hasOwnProperty.call(orderInfo, 'orderItems')) {
         return response.status(400).send({ status: 400, reason: 'Bad Request' });
       }
@@ -228,104 +239,92 @@ module.exports = {
         return response.status(400).send({ status: 400, reason: 'Bad Request' });
       }
 
+      // TODO: Get restaurant and table information from check in records
       // check if restaurant exists
       return db.query(
-        'SELECT restaurantname FROM public.restaurant INNER JOIN public.restauranttable ON public.restaurant.restaurantid = public.restauranttable.restaurantid WHERE restaurant.restaurantid = $1::integer AND restauranttable.tableid = $2::integer',
+        'SELECT restaurantname FROM public.restaurant'
+        + ' INNER JOIN public.restauranttable ON restaurant.restaurantid = restauranttable.restaurantid'
+        + ' WHERE restaurant.restaurantid = $1::integer AND restauranttable.tableid = $2::integer',
         [orderInfo.restaurantId, orderInfo.tableId]
       )
         // eslint-disable-next-line consistent-return
         .then((res) => {
           if (res.rows.length === 0) {
-            // restaurant does not exist
+            // restaurant and/or table does not exist
             return response.status(404).send({ status: 404, reason: 'Not Found' });
           }
 
           // time to place order
-          // TODO: Remove employee ID hardcoding
-          const employeeId = 1;
           const orderStatus = 'in-progress';
 
           // create order
+          // TODO: Work of order completion time
           db.query(
-            'INSERT INTO public.foodorder (customerid, employeeid, orderdatetime, orderstatus, tableid) VALUES ($1::integer, $2::integer, NOW(), $3::text, $4::integer) RETURNING orderid',
-            [customerId, employeeId, orderStatus, orderInfo.tableId]
+            'INSERT INTO public.customerorder (customerid, employeeid, tableid, orderdatetime,'
+            + ' ordercompletiontime, orderstatus)'
+            + ' VALUES ($1::integer, $2::integer, $3::integer, NOW(), NOW(), $4::text)'
+            + ' RETURNING orderid',
+            [customerId, orderInfo.employeeId, orderInfo.tableId, orderStatus]
           )
-            .then((res) => {
+            .then((resOrderId) => {
               orderInfo.orderItems.forEach((orderItem) => {
                 // add items to order
                 db.query(
-                  'INSERT INTO public.orderitem (orderid, menuitemid, quantity) VALUES ($1::integer, $2::integer, $3::integer)',
-                  [res.rows[0].orderid, orderItem.menuItemId, orderItem.quantity]
+                  'INSERT INTO public.itemordered (orderid, menuitemid, quantity, orderselections)'
+                  + ' VALUES ($1::integer, $2::integer, $3::integer, $4::json)',
+                  [
+                    resOrderId.rows[0].orderid,
+                    orderItem.menuItemId,
+                    orderItem.quantity,
+                    // eslint-disable-next-line max-len
+                    Object.keys(orderItem.orderSelections).length === 0 ? null : orderItem.orderSelections
+                  ]
                 )
-                  .then(() => {}).catch((err) => {
-                    console.error('Error executing query', err.stack);
-                    return response.status(400).send({ status: 500, reason: 'Internal Server Error' });
+                  .then(() => {})
+                  .catch((err) => {
+                    console.error('Query Error [Add Order - Add Order Items]', err.stack);
+                    return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
                   });
               });
             })
             .catch((err) => {
-              console.error('Error executing query', err.stack);
-              return response.status(400).send({ status: 500, reason: 'Internal Server Error' });
+              console.error('Query Error [Add Order - Create Customer Order]', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
             });
 
           // Get order history
           const orderResponse = {};
-          orderResponse.orderHistory = [];
-          const orderHistoryQueries = []; // promise keeper
+          const orderPromises = [];
 
-          db.query('SELECT orderid, orderstatus, orderdatetime, restaurant.restaurantname, restaurant.location FROM public.foodorder INNER JOIN public.restauranttable ON public.foodorder.tableid = public.restauranttable.tableid INNER JOIN public.restaurant ON public.restaurant.restaurantid = public.restauranttable.restaurantid WHERE customerid = $1::integer;', [customerId]).then((res) => {
-          // get data
-            for (let i = 0; i < res.rows.length; i++) {
-              orderResponse.orderHistory[i] = {};
-              orderResponse.orderHistory[i].total = 0.0;
-              orderResponse.orderHistory[i].orderNumber = res.rows[i].orderid;
-              orderResponse.orderHistory[i].restaurant = res.rows[i].restaurantname;
-              orderResponse.orderHistory[i].location = res.rows[i].location;
-              orderResponse.orderHistory[i].date = res.rows[i].orderdatetime;
-              orderResponse.orderHistory[i].orderItems = [];
-
-              const orderid = orderResponse.orderHistory[i].orderNumber;
-
-              const orderQuery = async (index, orderid) => {
-                const queryPromise = new Promise((resolve, reject) => {
-                  db.query('SELECT menuitemname, price, orderitem.quantity, menuitemimages.imageurl FROM public.menuitem INNER JOIN public.orderitem ON public.orderitem.menuitemid = public.menuitem.menuitemid LEFT JOIN public.menuitemimages ON public.menuitemimages.menuitemid = public.menuitem.menuitemid WHERE orderitem.orderid = $1::integer;', [orderid]).then((res) => {
-                  // each item ordered
-                    for (let m = 0; m < res.rows.length; m++) {
-                      orderResponse.orderHistory[index].orderItems[m] = {};
-                      orderResponse.orderHistory[index].orderItems[m].name = res.rows[m].menuitemname;
-                      orderResponse.orderHistory[index].orderItems[m].quantity = res.rows[m].quantity;
-                      orderResponse.orderHistory[index].orderItems[m].price = res.rows[m].price;
-                      orderResponse.orderHistory[index].orderItems[m].image = res.rows[m].imageurl;
-                      // update total price
-                      orderResponse.orderHistory[index].total += (res.rows[m].price * res.rows[m].quantity);
-                    }
-                    resolve();
-                  }).catch((err) => {
-                    reject(err);
+          orderPromises.push(new Promise((resolve, reject) => {
+            orderPromises.push(getOrderHistory(customerId).then((orderHistoryPromise) => {
+              orderResponse.orderHistory = [];
+              Promise.all(orderHistoryPromise)
+                .then((orderHistoryItem) => {
+                  orderHistoryItem.forEach((ordHistItem) => {
+                    orderResponse.orderHistory.push(ordHistItem);
                   });
+                  resolve();
+                })
+                .catch((err) => {
+                  reject(err);
                 });
+            }));
+          }));
 
-                // wait until the query is complete
-                await queryPromise;
-              };
-
-              orderHistoryQueries.push(orderQuery(i, orderid));
-            }
-
-            Promise.all(orderHistoryQueries)
-              .then(() => response.status(200).send(orderResponse))
-              .catch((err) => {
-                console.error('Error executing query', err.stack);
-                return response.status(400).send({ status: 500, reason: 'Internal Server Error' });
-              });
-          }).catch((err) => {
-            console.error('Error executing query', err.stack);
-            return response.status(400).send({ status: 500, reason: 'Internal Server Error' });
-          });
+          Promise.all(orderPromises).then(() => response.status(201).send(orderResponse))
+            .catch((err) => {
+              console.error('Add Order Promise Error', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
         }).catch((err) => {
-          console.error('Error executing query', err.stack);
-          return response.status(400).send({ status: 500, reason: 'Internal Server Error' });
+          console.error('Query Error [Add Order - Check Restaurant Existence]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
+    }
+
+    if (tokenState[0] === tokenStatus.refresh) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
     }
 
     // Invalid token

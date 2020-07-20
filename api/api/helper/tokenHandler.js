@@ -66,11 +66,5 @@ module.exports = {
       }
       return [tokenStatus.invalid, null];
     }
-  },
-  getCustomerId: (tok) => {
-    // TODO: Get customerId from token
-    // eslint-disable-next-line no-console
-    console.log(`Tok: ${tok}`);
-    return 5;
   }
 };
