@@ -79,7 +79,7 @@
                       </v-col>
                       <v-col cols="5" class="pa-0" align="center">
                         <v-btn v-show="currentIndex != (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showNext">Next</v-btn>
-                        <v-btn v-show="currentIndex == (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showNext">Submit</v-btn>
+                        <v-btn v-show="currentIndex == (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="submitRating">Submit</v-btn>
                       </v-col>
                     </v-row>
                   </v-col>
@@ -148,7 +148,7 @@
                   </v-col>
                   <v-col cols="5" class="pa-0" align="center">
                     <v-btn v-show="currentIndex != (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showNext">Next</v-btn>
-                    <v-btn v-show="currentIndex == (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showNext">Submit</v-btn>
+                    <v-btn v-show="currentIndex == (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="submitRating">Submit</v-btn>
                   </v-col>
                 </v-row>
               </v-col>
