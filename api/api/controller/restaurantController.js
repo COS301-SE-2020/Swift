@@ -11,7 +11,7 @@ module.exports = {
   getRestaurantList: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
-    || Object.keys(reqBody).length !== 2) {
+      || Object.keys(reqBody).length !== 2) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 
@@ -72,8 +72,8 @@ module.exports = {
   checkIn: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'qrcode')
-    || !Object.prototype.hasOwnProperty.call(reqBody, 'token')
-    || Object.keys(reqBody).length !== 3) {
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || Object.keys(reqBody).length !== 3) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 
@@ -141,8 +141,8 @@ module.exports = {
   getMenu: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
-    || !Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')
-    || Object.keys(reqBody).length < 3) {
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')
+      || Object.keys(reqBody).length < 3) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 
@@ -168,27 +168,32 @@ module.exports = {
           menuResponse.name = res.rows[0].restaurantname;
           menuResponse.location = res.rows[0].location;
 
-          //allow option to disable multiple fields usefull to decrease request size
-          if(Object.prototype.hasOwnProperty.call(reqBody, 'disableFields'))
-            var disableFields = true;
-          
-          if(disableFields && reqBody.disableFields.includes("image"))
-            menuResponse.image = "disabled";
-          else
+          // allow option to disable multiple fields usefull to decrease request size
+          let disableFields = false;
+          if (Object.prototype.hasOwnProperty.call(reqBody, 'disableFields')) {
+            disableFields = true;
+          }
+
+          if (disableFields && reqBody.disableFields.includes('image')) {
+            menuResponse.image = 'disabled';
+          } else {
             menuResponse.image = res.rows[0].coverimageurl;
+          }
 
           menuPromises.push(getReviews(reqBody.restaurantId).then((reviews) => {
-            if(disableFields && reqBody.disableFields.includes("reviews"))
-              menuResponse.reviews = "disabled";
-            else
+            if (disableFields && reqBody.disableFields.includes('reviews')) {
+              menuResponse.reviews = 'disabled';
+            } else {
               menuResponse.reviews = reviews;
+            }
           }));
 
           menuPromises.push(getRatingPhrases(reqBody.restaurantId).then((rPhrase) => {
-            if(disableFields && reqBody.disableFields.includes("ratingPhrases"))
-              menuResponse.ratingPhrases = "disabled";
-            else
+            if (disableFields && reqBody.disableFields.includes('ratingPhrases')) {
+              menuResponse.ratingPhrases = 'disabled';
+            } else {
               menuResponse.ratingPhrases = rPhrase;
+            }
           }));
 
           menuPromises.push(new Promise((resolve, reject) => {
@@ -229,8 +234,8 @@ module.exports = {
   addOrder: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
-    || !Object.prototype.hasOwnProperty.call(reqBody, 'orderInfo')
-    || Object.keys(reqBody).length !== 3) {
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'orderInfo')
+      || Object.keys(reqBody).length !== 3) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 
@@ -243,8 +248,8 @@ module.exports = {
 
       // Check if orderInfo is valid
       if (!Object.prototype.hasOwnProperty.call(orderInfo, 'restaurantId')
-      || !Object.prototype.hasOwnProperty.call(orderInfo, 'tableId')
-      || !Object.prototype.hasOwnProperty.call(orderInfo, 'orderItems')) {
+        || !Object.prototype.hasOwnProperty.call(orderInfo, 'tableId')
+        || !Object.prototype.hasOwnProperty.call(orderInfo, 'orderItems')) {
         return response.status(400).send({ status: 400, reason: 'Bad Request' });
       }
 
@@ -294,7 +299,7 @@ module.exports = {
                     Object.keys(orderItem.orderSelections).length === 0 ? null : orderItem.orderSelections
                   ]
                 )
-                  .then(() => {})
+                  .then(() => { })
                   .catch((err) => {
                     console.error('Query Error [Add Order - Add Order Items]', err.stack);
                     return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
@@ -347,11 +352,11 @@ module.exports = {
   orderPayment: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
-    || !Object.prototype.hasOwnProperty.call(reqBody, 'orderId')
-    || !Object.prototype.hasOwnProperty.call(reqBody, 'paymentMethod')
-    || !Object.prototype.hasOwnProperty.call(reqBody, 'amountPaid')
-    || Object.keys(reqBody).length !== 5
-    || reqBody.amountPaid < 0.0) {
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'orderId')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'paymentMethod')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'amountPaid')
+      || Object.keys(reqBody).length !== 5
+      || reqBody.amountPaid < 0.0) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 
