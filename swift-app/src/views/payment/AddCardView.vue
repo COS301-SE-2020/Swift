@@ -72,6 +72,9 @@ export default {
     backNavigation () {
       this.$router.go(-1)
     },
+    addCard () {
+      this.$router.push('paymentInformation')
+    }
   },
   computed: {
   

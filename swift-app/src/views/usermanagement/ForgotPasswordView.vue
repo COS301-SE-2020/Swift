@@ -34,6 +34,7 @@
           <v-col cols="11" class="pt-0 mb-10" width="100%" style="position: absolute; bottom: 0;">
            <div class="row d-flex flex-column align-center mx-8">
               <v-btn @click="resetPass" block rounded class="py-5 body-2 font-weight-light" color="primary" style="font-size: 17px !important">Reset Password</v-btn>
+              <v-progress-circular v-show=isLoading indeterminate color="primary"></v-progress-circular>
            </div>
           </v-col>
         </v-row>
@@ -60,7 +61,7 @@
               <span  style="font-size: 25px">Verify your email</span>
             </v-row>
             <v-row justify="center" class="mt-4 mb-6">
-              <span style="font-size: 16px; text-align: center; opacity: 0.9" class="font-weight-light">Please enter the 4 digit code sent to {{email}}</span>
+              <span style="font-size: 16px; text-align: center; opacity: 0.9" class="font-weight-light">Please enter the 4 digit code sent to {{enteredEmail}}</span>
             </v-row>
             <v-row justify="center" class="mt-4 mb-6" style="text-align:center">
               <v-col cols="2" class="pl-1 pr-1" style="text-align: center">
@@ -85,6 +86,7 @@
           <v-col cols="11" class="pt-0 mb-10" width="100%" style="position: absolute; bottom: 0;">
            <div class="row d-flex flex-column align-center mx-8">
               <v-btn @click="confirmEmail" block rounded class="py-5 body-2 font-weight-light" color="primary" style="font-size: 17px !important">Confirm</v-btn>
+              <v-progress-circular v-show=isLoading indeterminate color="primary"></v-progress-circular>
            </div>
           </v-col>
         </v-row>
@@ -136,12 +138,24 @@
 
 <script>
 import { mapActions, mapGetters, mapMutations } from "vuex";
+import { validationMixin } from 'vuelidate'
+import { required, maxLength, email } from 'vuelidate/lib/validators'
 
 export default {
-    data() {
+  mixins: [validationMixin],
+  validations: {
+    email: { required, email },
+    password: { required },
+  },
+  data() {
     return {
-     email: 'peterjames@gmail.com',
-     step: 1
+     email: '',
+     enteredEmail: 'peterjames@gmail.com',
+     showPassword: false,
+     step: 1,
+     errorMsg: '',
+     password: '',
+     isLoading: false,
     }
   },
   methods: {
@@ -152,17 +166,58 @@ export default {
         this.step = this.step - 1;
     },
     resetPass () {
-      this.step = this.step + 1;
+      this.isLoading = true
+      if (this.emailErrors.length > 0  || this.email.length == 0) {
+        this.$v.$touch()
+        this.isLoading = false
+      } else {
+        this.isLoading = false
+        // let data = {
+        //   email: this.email,
+        //   password: this.password,
+        // }
+        
+        this.step = this.step + 1;
+      }
+
+      
     },
     confirmEmail () {
       this.step = this.step + 1;
     },
     submitPass () {
-      this.$router.push('login')
-    }
+      this.isLoading = true
+      if (this.passwordErrors.length > 0  || this.password.length == 0) {
+        this.$v.$touch()
+        this.isLoading = false
+      } else {
+        this.isLoading = false
+        this.$router.push('login')
+      }
+    },
+    resendEmail () {
+      
+    },
+    ...mapGetters({
+      isAuthenticated: 'isAuthenticated',
+      errors: 'getErrors',
+    }),
+
   },
   computed: {
-  
+    emailErrors () {
+      const errors = []
+      if (!this.$v.email.$dirty) return errors
+      !this.$v.email.email && errors.push('Must be a valid email')
+      !this.$v.email.required && errors.push('Email is required.')
+      return errors
+    },
+    passwordErrors () {
+      const errors = []
+      if (!this.$v.password.$dirty) return errors
+      !this.$v.password.required && errors.push('Password is required.')
+      return errors
+    },
   },
 };
 </script>

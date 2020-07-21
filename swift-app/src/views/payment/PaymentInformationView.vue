@@ -16,7 +16,7 @@
     <v-card flat class="mx-auto">
       <v-row justify="center" class="mt-3 mb-3" style="text-align:center">
         <v-col cols="3" class="pl-1 pr-1" style="text-align: center">
-          <v-btn :target="false" retain-focus-on-click @click="changeType('Card')" fab elevation="2" size="60px" :color="type == 'Card' ? 'white' : 'black'" justify="center">
+          <v-btn retain-focus-on-click @click="changeType('Card')" fab elevation="2" size="60px" :color="type == 'Card' ? 'white' : 'black'" justify="center">
             <v-icon :color="type == 'Card' ? 'primary' : 'white'" class="lockIcon" size="30">mdi-credit-card-outline</v-icon>
           </v-btn>
           <div style="font-size: 17px" class="font-weight-light mt-1">Card</div>
@@ -195,6 +195,9 @@ export default {
     },
     addCard() {
       this.$router.push('addCard')
+    },
+    backNavigation () {
+      this.$router.go(-1)
     }
   },
   computed: {
