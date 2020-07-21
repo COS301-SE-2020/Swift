@@ -142,7 +142,7 @@ module.exports = {
     // Check all keys are in place - no need to check request type at this point
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
     || !Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')
-    || Object.keys(reqBody).length !== 3) {
+    || Object.keys(reqBody).length < 3) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 
@@ -167,14 +167,28 @@ module.exports = {
           const menuPromises = [];
           menuResponse.name = res.rows[0].restaurantname;
           menuResponse.location = res.rows[0].location;
-          menuResponse.image = res.rows[0].coverimageurl;
+
+          //allow option to disable multiple fields usefull to decrease request size
+          if(Object.prototype.hasOwnProperty.call(reqBody, 'disableFields'))
+            var disableFields = true;
+          
+          if(disableFields && reqBody.disableFields.includes("image"))
+            menuResponse.image = "disabled";
+          else
+            menuResponse.image = res.rows[0].coverimageurl;
 
           menuPromises.push(getReviews(reqBody.restaurantId).then((reviews) => {
-            menuResponse.reviews = reviews;
+            if(disableFields && reqBody.disableFields.includes("reviews"))
+              menuResponse.reviews = "disabled";
+            else
+              menuResponse.reviews = reviews;
           }));
 
           menuPromises.push(getRatingPhrases(reqBody.restaurantId).then((rPhrase) => {
-            menuResponse.ratingPhrases = rPhrase;
+            if(disableFields && reqBody.disableFields.includes("ratingPhrases"))
+              menuResponse.ratingPhrases = "disabled";
+            else
+              menuResponse.ratingPhrases = rPhrase;
           }));
 
           menuPromises.push(new Promise((resolve, reject) => {
