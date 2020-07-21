@@ -29,17 +29,21 @@ const getters = {
 // Actions 
 const actions = {
   allRestaurants({commit}, data) {
-    console.log("sdfsdf");
+    var token = this.getters['CustomerStore/getToken']
     axios.post('https://api.swiftapp.ml', 
     {
       "requestType": "allRestaurants",
-      "token": "eyJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiYWxnIjoiRUNESC1FUyIsImVwayI6eyJrdHkiOiJFQyIsImNydiI6IlAtNTIxIiwieCI6IkFIcGlOenhVUy05S2NmMUNRbnVvYTFCWnlIajg5N2NOXzdIeDFvR1dWc0h0Vk5QdmUtamRRck1ncFhVRW9IajVhTkVsdTVzdFBfaEpUMjZ3VTBGWDBoYjAiLCJ5IjoiQVhrdjNkb0N4Y2VCSlNMLUlNSDlfUXMtWkxtSndIYVpmYjJzdGUzclp1V1IxWFpXand5a0NlR1hQMHlNa04wbjAxQ0JJQXl0aUJaVVJiempUWlp5empPUiJ9fQ..DfncSVJ0sN8TLzBLMj5c9g.7RUd7fTncqDO5JJw-cK1MqFoYd_bbMun_NUo16jrKwVAwjnaKN2xMKTT-Y0KEvU11spU6_YLKQUltIEVg5bPlWolP2OM0oWRYChnlw6BEJ0fuos2eLXexvWyIOfWkgOFZJINpnSVjOI58HugBo5J1bstSz9CfQq3NsYctzMsuAvF7gRiWNfgGUnc0JwWXvcWHk6ZMUK8gg6osLPeZaSOgVdClWqz9dtKRovwhrD6UB0lAHPReBaZGSRB852cz3zNlxJVAMIIo-4KD-wzSty6kuba9aGap-aPHH2iN-9CTam21t1nYFocoK77V4uilAzcKVtKVKhovCdvWQCXPWeoZ4xtthgMmWM4h_2UwpzVWvNAU5Pse24xA8ENH0Ck80tmCisnNw7UacPmgAkwuDlFvEXHW0NRBKykW3CKiuYzWlZeD8VS_l6GGuLUAW0oRXxdAFBL77K4SA2eFDuRzIQifC2PIlJnIeZHu0rg-nQswspniMg_cTcBCIAzkRMgPRxTJdYe6mvvE47YEt7tVu406Jnb-h1KY_xyJQNMJzgOwdyPQuLd6Cx8C0n8cvOQDaCRVZR8K-nqmu5ZH8jyv2t32o6XOPKypb0ZKvxba86786iV9I085cuSVAAx2TWwW0TOdzLM6SS5Ah423CkA6qzYaA.dtLnjg3pz3rUZPcnAJu4tw"
+      "token": token,
     }
     ).then(result => {
-      commit('SAVE_ALL_RESTAURANTS', result.data);
-      console.log(result.data);
+      commit('SAVE_ALL_RESTAURANTS', result.data.restaurants);
+      console.log(result.data.restaurants);
     }).catch(({ response }) => {
     });
+  },
+
+  retrieveRestaurantMenu({commit, dispatch}, restaurantId) {
+    this.dispatch('MenuStore/retrieveMenu', restaurantId);
   },
 
   // Used to reset the store

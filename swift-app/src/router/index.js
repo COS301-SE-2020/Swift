@@ -29,7 +29,7 @@ Vue.use(VueRouter)
 
 const routes = [
   { path: '/', name: 'explore', component: ExploreView },
-  { path: '/menu', name: 'menu', component: MenuHomeView },
+  { path: '/menu/:menuId', name: 'menu', component: MenuHomeView },
   { path: '/login', name: 'login', component: LoginView },
   { path: '/register', name: 'register', component: RegisterView },
   { path: '/checkin', name: 'checkin', component: CheckInView },

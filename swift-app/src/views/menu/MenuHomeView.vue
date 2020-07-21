@@ -1,8 +1,5 @@
 <template>
   <div class="homemenu">
-    <!-- <v-carousel height="200px" :show-arrows="false" hide-delimiter-background continuous>
-      <v-carousel-item v-for="(item,i) in restaurantImages" :key="i" :src="item.img"></v-carousel-item>
-    </v-carousel>-->
     <MenuSearchToolBar></MenuSearchToolBar>
     <v-container transition="slide-x-transition">
       <v-row style="max-width: 400px" class="overflow-y-auto">
@@ -13,14 +10,15 @@
       <div id="categories" >
         <v-sheet class="mx-auto" max-width="700">
           <v-slide-group multiple>
-            <v-slide-item v-for="(category, index) in categories" :key="index">
-              <div class="ml-0" align="center" style="margin-top: 10px">
+            <v-slide-item v-for="(category, index) in menu.categories" :key="index">
+              <div class="ml-0" align="center" style="margin-top: 10px;">
                 <v-btn dark width="50px" height="50px" min-width="50px" class="mx-2">
                   <v-avatar color="grey darken-4" size="35px">
-                    <img @click="goToMenuItem(1)" :src="category.img" alt />
+                    <img @click="goToMenuItem(1)" src="https://source.unsplash.com/800x800/?fruit" alt />
+                    <!-- <img @click="goToMenuItem(1)" :src="category.img" alt /> -->
                   </v-avatar>
                 </v-btn>
-                <div class="mt-1 caption">{{category.name}}</div>
+                <div class="mt-1 caption">{{category.categoryName}}</div>
               </div>
             </v-slide-item>
           </v-slide-group>
@@ -65,34 +63,12 @@
         <v-slide-group multiple>
           <v-slide-item v-for="card in popularFood" :key="card.title">
             <v-card ripple class="mr-3">
-              <v-img
-                :src="card.src"
-                class="white--text align-center"
-                gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
-                width="170px"
-                height="100px"
-                @click="goToMenuItem(1)"
-              >
+              <v-img :src="card.src" @click="goToMenuItem(1)" class="white--text align-center" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" width="170px" height="100px" >
                 <v-card-title class="pl-2 pt-1 body-1" v-text="card.title"></v-card-title>
                 <v-card-subtitle class="pl-2 white--text subtitle-2" v-text="card.price"></v-card-subtitle>
-                <v-rating
-                  size="14"
-                  class="pl-2"
-                  dense
-                  color="yellow darken-3"
-                  background-color="secondary"
-                  :value="card.rating"
-                ></v-rating>
+                <v-rating :value="card.rating" size="14" class="pl-2" dense color="yellow darken-3" background-color="secondary"></v-rating>
                 <v-fab-transition>
-                  <v-btn
-                    @click="changeFavouriteFab"
-                    :key="activateFavourite.icon"
-                    :color="activateFavourite.color"
-                    style="top: 3px; right: 3px; transform: scale(0.8);"
-                    absolute
-                    small
-                    fab
-                  >
+                  <v-btn @click="changeFavouriteFab" :key="activateFavourite.icon" :color="activateFavourite.color" style="top: 3px; right: 3px; transform: scale(0.8);" absolute small fab>
                     <v-icon>{{ activateFavourite.icon }}</v-icon>
                   </v-btn>
                 </v-fab-transition>
@@ -102,240 +78,6 @@
         </v-slide-group>
       </v-sheet>
 
-      <v-row style="max-width: 400px" class="overflow-y-auto">
-        <v-col cols="12">
-          <div class="title">Popular Food</div>
-        </v-col>
-      </v-row>
-
-      <v-sheet class="mx-auto" max-width="700">
-        <v-slide-group multiple>
-          <v-slide-item v-for="card in popularFood" :key="card.title">
-            <v-card ripple class="mr-3">
-              <v-img
-                :src="card.src"
-                class="white--text align-center"
-                gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
-                width="170px"
-                height="100px"
-                @click="goToMenuItem(1)"
-              >
-                <v-card-title class="pl-2 pt-1 body-1" v-text="card.title"></v-card-title>
-                <v-card-subtitle class="pl-2 white--text subtitle-2" v-text="card.price"></v-card-subtitle>
-                <v-rating
-                  size="14"
-                  class="pl-2"
-                  dense
-                  color="yellow darken-3"
-                  background-color="secondary"
-                  :value="card.rating"
-                ></v-rating>
-                <v-fab-transition>
-                  <v-btn
-                    @click="changeFavouriteFab"
-                    :key="activateFavourite.icon"
-                    :color="activateFavourite.color"
-                    style="top: 3px; right: 3px; transform: scale(0.8);"
-                    absolute
-                    small
-                    fab
-                  >
-                    <v-icon>{{ activateFavourite.icon }}</v-icon>
-                  </v-btn>
-                </v-fab-transition>
-              </v-img>
-            </v-card>
-          </v-slide-item>
-        </v-slide-group>
-      </v-sheet>
-
-            <v-row style="max-width: 400px" class="overflow-y-auto">
-        <v-col cols="12">
-          <div class="title">Popular Food</div>
-        </v-col>
-      </v-row>
-
-      <v-sheet class="mx-auto" max-width="700">
-        <v-slide-group multiple>
-          <v-slide-item v-for="card in popularFood" :key="card.title">
-            <v-card ripple class="mr-3">
-              <v-img
-                :src="card.src"
-                class="white--text align-center"
-                gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
-                width="170px"
-                height="100px"
-                @click="goToMenuItem(1)"
-              >
-                <v-card-title class="pl-2 pt-1 body-1" v-text="card.title"></v-card-title>
-                <v-card-subtitle class="pl-2 white--text subtitle-2" v-text="card.price"></v-card-subtitle>
-                <v-rating
-                  size="14"
-                  class="pl-2"
-                  dense
-                  color="yellow darken-3"
-                  background-color="secondary"
-                  :value="card.rating"
-                ></v-rating>
-                <v-fab-transition>
-                  <v-btn
-                    @click="changeFavouriteFab"
-                    :key="activateFavourite.icon"
-                    :color="activateFavourite.color"
-                    style="top: 3px; right: 3px; transform: scale(0.8);"
-                    absolute
-                    small
-                    fab
-                  >
-                    <v-icon>{{ activateFavourite.icon }}</v-icon>
-                  </v-btn>
-                </v-fab-transition>
-              </v-img>
-            </v-card>
-          </v-slide-item>
-        </v-slide-group>
-      </v-sheet>
-
-      <v-row style="max-width: 400px" class="overflow-y-auto">
-        <v-col cols="12">
-          <div class="title">Popular Food</div>
-        </v-col>
-      </v-row>
-
-      <v-sheet class="mx-auto" max-width="700">
-        <v-slide-group multiple>
-          <v-slide-item v-for="card in popularFood" :key="card.title">
-            <v-card ripple class="mr-3">
-              <v-img
-                :src="card.src"
-                class="white--text align-center"
-                gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
-                width="170px"
-                height="100px"
-                @click="goToMenuItem(1)"
-              >
-                <v-card-title class="pl-2 pt-1 body-1" v-text="card.title"></v-card-title>
-                <v-card-subtitle class="pl-2 white--text subtitle-2" v-text="card.price"></v-card-subtitle>
-                <v-rating
-                  size="14"
-                  class="pl-2"
-                  dense
-                  color="yellow darken-3"
-                  background-color="secondary"
-                  :value="card.rating"
-                ></v-rating>
-                <v-fab-transition>
-                  <v-btn
-                    @click="changeFavouriteFab"
-                    :key="activateFavourite.icon"
-                    :color="activateFavourite.color"
-                    style="top: 3px; right: 3px; transform: scale(0.8);"
-                    absolute
-                    small
-                    fab
-                  >
-                    <v-icon>{{ activateFavourite.icon }}</v-icon>
-                  </v-btn>
-                </v-fab-transition>
-              </v-img>
-            </v-card>
-          </v-slide-item>
-        </v-slide-group>
-      </v-sheet>
-
-            <v-row style="max-width: 400px" class="overflow-y-auto">
-        <v-col cols="12">
-          <div class="title">Popular Food</div>
-        </v-col>
-      </v-row>
-
-      <v-sheet class="mx-auto" max-width="700">
-        <v-slide-group multiple>
-          <v-slide-item v-for="card in popularFood" :key="card.title">
-            <v-card ripple class="mr-3">
-              <v-img
-                :src="card.src"
-                class="white--text align-center"
-                gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
-                width="170px"
-                height="100px"
-                @click="goToMenuItem(1)"
-              >
-                <v-card-title class="pl-2 pt-1 body-1" v-text="card.title"></v-card-title>
-                <v-card-subtitle class="pl-2 white--text subtitle-2" v-text="card.price"></v-card-subtitle>
-                <v-rating
-                  size="14"
-                  class="pl-2"
-                  dense
-                  color="yellow darken-3"
-                  background-color="secondary"
-                  :value="card.rating"
-                ></v-rating>
-                <v-fab-transition>
-                  <v-btn
-                    @click="changeFavouriteFab"
-                    :key="activateFavourite.icon"
-                    :color="activateFavourite.color"
-                    style="top: 3px; right: 3px; transform: scale(0.8);"
-                    absolute
-                    small
-                    fab
-                  >
-                    <v-icon>{{ activateFavourite.icon }}</v-icon>
-                  </v-btn>
-                </v-fab-transition>
-              </v-img>
-            </v-card>
-          </v-slide-item>
-        </v-slide-group>
-      </v-sheet>
-
-            <v-row style="max-width: 400px" class="overflow-y-auto">
-        <v-col cols="12">
-          <div class="title">Popular Food</div>
-        </v-col>
-      </v-row>
-
-      <v-sheet class="mx-auto" max-width="700">
-        <v-slide-group multiple>
-          <v-slide-item v-for="card in popularFood" :key="card.title">
-            <v-card ripple class="mr-3">
-              <v-img
-                :src="card.src"
-                class="white--text align-center"
-                gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)"
-                width="170px"
-                height="100px"
-                @click="goToMenuItem(1)"
-              >
-                <v-card-title class="pl-2 pt-1 body-1" v-text="card.title"></v-card-title>
-                <v-card-subtitle class="pl-2 white--text subtitle-2" v-text="card.price"></v-card-subtitle>
-                <v-rating
-                  size="14"
-                  class="pl-2"
-                  dense
-                  color="yellow darken-3"
-                  background-color="secondary"
-                  :value="card.rating"
-                ></v-rating>
-                <v-fab-transition>
-                  <v-btn
-                    @click="changeFavouriteFab"
-                    :key="activateFavourite.icon"
-                    :color="activateFavourite.color"
-                    style="top: 3px; right: 3px; transform: scale(0.8);"
-                    absolute
-                    small
-                    fab
-                  >
-                    <v-icon>{{ activateFavourite.icon }}</v-icon>
-                  </v-btn>
-                </v-fab-transition>
-              </v-img>
-            </v-card>
-          </v-slide-item>
-        </v-slide-group>
-      </v-sheet>
     </v-container>
        <!--snackbar shows table number on successful checkin -->
       <v-snackbar id="notification" timeout=2000 transition centered color="primary" elevation="24" v-model="snackbar">{{ tableNumber }}</v-snackbar>
@@ -438,9 +180,7 @@ export default {
     changeFavouriteFab() {
       this.favourited = !this.favourited;
     },
-    ...mapActions({
-      updateDisplayNotification: 'RestaurantsStore/updateDisplayNotification',
-    }),
+    
   },
   mounted: function() {
     if (this.displayNotification) {
@@ -456,9 +196,14 @@ export default {
         return { color: "primary", icon: "mdi-heart" };
       }
     },
+    ...mapActions({
+      updateDisplayNotification: 'RestaurantsStore/updateDisplayNotification',
+      retrieveMenu: 'MenuStore/retrieveMenu',
+    }),
     ...mapGetters({
       tableNumber: "RestaurantsStore/getTableNumber",
-      displayNotification: "RestaurantsStore/getDisplayNotification"
+      displayNotification: "RestaurantsStore/getDisplayNotification",
+      menu: "MenuStore/getMenu"
     })
   }
 };

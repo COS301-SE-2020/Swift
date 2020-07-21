@@ -33,20 +33,13 @@
         <v-row dense>
           <v-col v-for="restaurant in allRestaurants" :key="restaurant.name" cols="4">
             <v-card ripple>
-                <v-card-title class="body-1 pa-2">{{restaurant.name}}</v-card-title>
-            </v-card>
-          </v-col>
-        </v-row>
-
-        <!-- <v-row dense>
-          <v-col v-for="restaurant in restaurants" :key="restaurant.title" :cols="restaurant.flex">
-            <v-card ripple>
-              <v-img @click=goToRestaurant :src="restaurant.src" class="white--text align-center" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="120px">
-                <v-card-title class="body-1 pa-2" v-text="restaurant.title"></v-card-title>
+              <v-img @click="goToRestaurant(restaurant.restaurantId)" :src="restaurant.image" class="white--text align-center" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="120px">
+                <v-card-title class="body-1 pa-2" v-text="restaurant.name"></v-card-title>
+                <v-card-text><v-rating :value="restaurant.rating" readonly size="18" dense color="yellow darken-3" background-color="secondary" ></v-rating></v-card-text>
               </v-img>
             </v-card>
           </v-col>
-        </v-row> -->
+        </v-row>
 
       <v-btn class="checkInBtn" @click=goToCheckin app color="primary" style="bottom: 20px; right: 20px;" absolute  fab  >
         <v-icon>mdi-table-furniture</v-icon>
@@ -90,8 +83,9 @@ export default {
     favourited: false,
   }),
   methods: {
-    goToRestaurant () {
-      this.$router.push('/menu') // change to restaurant id
+    goToRestaurant (id) {
+      this.$store.dispatch('RestaurantsStore/retrieveRestaurantMenu', id);
+      this.$router.push("/menu/" + id);
     },
     goToCheckin () {
       this.$router.push('/checkin')
@@ -105,7 +99,7 @@ export default {
       allRestaurants: 'RestaurantsStore/getAllRestaurants',
     }),
     ...mapActions({
-      // allRestaurants: 'RestaurantsStore/allRestaurants',
+      // retrieveRestaurantMenu: ('RestaurantsStore/retrieveRestaurantMenu'),
     }),
     activateFavourite () {
       if (!this.favourited) {
