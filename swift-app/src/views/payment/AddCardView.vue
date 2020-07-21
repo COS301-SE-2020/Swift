@@ -95,4 +95,3 @@ export default {
 .v-text-field--rounded > .v-input__control > .v-input__slot {
   padding-right: 10px;
 }
-</style>

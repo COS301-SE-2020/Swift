@@ -28,33 +28,6 @@
 
       <v-row style="max-width: 400px" class="overflow-y-auto">
         <v-col cols="12">
-          <div class="title">Popular Drinks</div>
-        </v-col>
-      </v-row>
-
-      <v-sheet class="mx-auto" max-width="700">
-        <v-slide-group multiple>
-          <v-slide-item v-for="card in popularDrinks" :key="card.title">
-            <div class="ml-0" align="center">
-              <v-btn
-                style="background: none;"
-                width="100px"
-                height="100px"
-                min-width="100px"
-                class="ml-0 mr-1"
-              >
-                <v-avatar size="80px">
-                  <img :src="card.src" alt />
-                </v-avatar>
-              </v-btn>
-              <div class="mt-1 subtitle-2">{{card.title}}</div>
-            </div>
-          </v-slide-item>
-        </v-slide-group>
-      </v-sheet>
-
-      <v-row style="max-width: 400px" class="overflow-y-auto">
-        <v-col cols="12">
           <div class="title">Popular Food</div>
         </v-col>
       </v-row>
