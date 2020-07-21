@@ -76,6 +76,11 @@
               <v-col cols="2" class="pl-1 pr-1">
                 <v-textarea maxlength="1" class="centered-input text--darken-3 mt-3 digits" height="4" solo single-line outlined></v-textarea>
               </v-col>
+
+              <!-- <input maxlength="1" class="centered-input text--darken-3 mt-3 digits" height="4" solo single-line outlined v-on:keyup="$event.target.nextElementSibling.focus()" type="text">
+              <input v-on:keyup="$event.target.nextElementSibling.focus()" type="text">
+              <input v-on:keyup="$event.target.nextElementSibling.focus()" type="text">
+              <input v-on:keyup="$event.target.nextElementSibling.focus()" type="text"> -->
             </v-row>
           </v-card>
           <v-btn text @click="resendEmail" class="mt-0 mb-1">
@@ -140,6 +145,7 @@
 import { mapActions, mapGetters, mapMutations } from "vuex";
 import { validationMixin } from 'vuelidate'
 import { required, maxLength, email } from 'vuelidate/lib/validators'
+import $ from 'jquery';
 
 export default {
   mixins: [validationMixin],
@@ -232,7 +238,7 @@ export default {
   font-size: 30px;
 }
 
-.v-application--is-ltr .v-textarea.v-text-field--enclosed .v-text-field__slot textarea {
+.digits .v-application--is-ltr .v-textarea.v-text-field--enclosed .v-text-field__slot textarea {
   text-align: center;
   line-height: 40px;
 }

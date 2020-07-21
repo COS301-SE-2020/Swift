@@ -1,5 +1,5 @@
 <template>
-  <v-container class="pl-0 pt-0 pr-0 pb-0 overflow-y-auto" fluid>
+  <v-container class="pl-0 pt-0 pr-0 pb-0 overflow-y-auto overflow-x-hidden" fluid>
     <v-card class="mx-auto pr-0 pl-0 pt-0 mt-0" height="65px" elevation="1" style="line-height: 2.9; border-radius: 0">
       <v-row class="mt-0 pt-0" align="center">
         <v-col cols="3" class="mt-0 pt-1 pr-0 pb-0">
@@ -124,11 +124,27 @@
     <v-card flat class="mx-auto mt-4" >
       <v-row>
         <v-col cols="12" class="pr-0 pt-1 pb-0" align="center">
-          <div style="font-size: 27px; text-align: center" class="mt-1">Total: R85.99</div>
-          <v-btn @click="goToMenu" class="mt-6 subtitle-1" height="50px" width="180px" rounded large color="accent">{{type == 'Cash' ? 'Request Bill' : 'Pay Now'}}</v-btn>
+          <div style="font-size: 27px; text-align: center" class="mt-1">Total: R{{orderTotal}}</div>
+          <v-btn @click="requestReceipt" v-if="type == 'Cash'" class="mt-6 subtitle-1" height="50px" width="180px" rounded large color="accent">Request Bill</v-btn>
+          <v-btn @click="goToPayment" v-else class="mt-6 subtitle-1" height="50px" width="180px" rounded large color="accent">Pay Now</v-btn>
         </v-col>
       </v-row>
     </v-card>
+
+    <v-overlay relative opacity="0.25" :value="paymentMade" z-index="10">
+      <v-avatar elevation="3" color="accent" class="pl-0 pr-0" absolute style="position: absolute; z-index: 12">
+        <v-icon size="33px" color="white" v-text="'mdi-check'"></v-icon>
+      </v-avatar>
+      <v-alert color="white" transition="scale-transition" class="alert" align="center" style="margin-top: 20px">
+        <div style="font-size: 22px !important; color: #343434" class="pl-8 pr-8 mt-8">Payment successful</div>
+        <div class="mt-2" style="font-size: 16px !important; color: #343434">You successfully paid for your order.</div>
+        <div class="mt-2" style="font-size: 22px !important; color: #343434">R{{orderTotal}}</div>
+        <v-btn text @click="hideAlert" class="mt-6 mb-1">
+          <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline">Continue</div>
+        </v-btn>
+      </v-alert>
+    </v-overlay>
+
     <NavBar></NavBar>
   </v-container>
 </template>
@@ -145,8 +161,10 @@ export default {
     data() {
     return {
       selected: false,
+      paymentMade: false,
       type: "Card",
       selectedItemPublic: [],
+      orderTotal: 85.99,
       creditCardInformation: [
         {
           type: "MasterCard",
@@ -177,7 +195,7 @@ export default {
     }
   },
   methods: {
-    goToMenu () {
+    requestReceipt () {
 
     },
     changeType: function(newType) {
@@ -198,7 +216,18 @@ export default {
     },
     backNavigation () {
       this.$router.go(-1)
-    }
+    },
+    hideAlert () {
+      this.$router.push('orders')
+    },
+    goToPayment (){
+      this.setTotal(this.orderTotal)
+      // this.paymentMade = !this.paymentMade
+      this.$router.push('pay')
+    },
+    ...mapMutations({
+      setTotal : 'OrderStore/setOrderTotal'
+    }),
   },
   computed: {
     selectTab () {

@@ -133,7 +133,7 @@
           </v-container>
         </v-card>
       </v-tab-item>
-      <v-tab-item>
+      <v-tab-item class="overflow-x-hidden">
         <v-card flat class="mt-2 mb-5">
           <v-row v-for="phrase in ratingPhrases" :key="phrase.phrase">
             <v-card-text class="pb-0 pt-1 mt-0 ml-5">

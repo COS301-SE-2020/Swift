@@ -1,5 +1,5 @@
 <template>
-<div class="cart" style="height:92%">
+<v-container class="pl-0 pt-0 pr-0 pb-0 overflow-y-auto" fluid>
     <v-toolbar elevation='2'>
         <v-container>
             <v-row>
@@ -98,12 +98,33 @@
                 <v-btn rounded color="primary" elevation="2" class="mr-2 body-2" width="100%" @click="goToOrder">Order Now, Pay Later</v-btn>
             </v-col>
             <v-col cols="5" class="pa-0">
-                <v-btn rounded color="accent" elevation="2" class="mr-2 body-2" width="100%" @click="goToPayment">Pay Now</v-btn>
+                <v-btn rounded color="accent" elevation="2" class="mr-2 body-2" width="100%" @click="toggleAlert">Pay Now</v-btn>
             </v-col>
         </v-row>
     </v-container>
+
+        <v-overlay relative opacity="0.25" :value="paymentMade" z-index="10">
+            <v-avatar elevation="3" color="accent" class="pl-0 pr-0" absolute style="position: absolute; z-index: 12">
+                <v-icon size="33px" color="white" v-text="'mdi-check'"></v-icon>
+            </v-avatar>
+            <v-alert color="white" transition="scale-transition" class="alert" align="center" style="margin-top: 20px;">
+                <div style="font-size: 22px !important; color: #343434;" class="pl-8 pr-8 mt-8">Proceed with payment?</div>
+                <div class="mt-2" style="font-size: 16px !important; color: #343434">Please note that once you make payment, <br/>you will be checked out of the system.</div>
+                <v-row justify="center">
+                    <v-col cols="12" class="d-flex justify-space-around" flat>
+                        <v-btn text @click="toggleAlert" class="mt-6 mb-1">
+                            <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline; text-align: center">Cancel</div>
+                        </v-btn>
+                        <v-btn text @click="goToPayment" class="mt-6 mb-1">
+                            <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline; text-align: center">Continue</div>
+                        </v-btn>
+                    </v-col>
+                </v-row>
+            </v-alert>
+        </v-overlay>
+
     <NavBar></NavBar>
-</div>
+</v-container>
 </template>
 
 <script>
@@ -115,6 +136,7 @@ export default {
     return {
         orderTotal: 223.20,
         tab: null,
+        paymentMade: false,
         items: [
             { img: 'https://source.unsplash.com/uVPV_nV17Tw/800x800/', name: 'Buttermilk Chicken Burger', price: '95.00'},
             { img: 'https://source.unsplash.com/2NaeHe0-p1I/800x800/', name: 'Fruit Salad', price: '85.00'}
@@ -132,13 +154,12 @@ export default {
         this.updateOrderFlag(true);
         this.$router.push('/orders')
     },
-    goToPayment (){
-        this.setTotal(this.orderTotal)
-        this.$router.push('/pay')
+    toggleAlert() {
+        this.paymentMade = !this.paymentMade
     },
-     ...mapMutations({
-      setTotal : 'OrderStore/setOrderTotal'
-    }),
+    goToPayment () {
+        this.$router.push('/paymentInformation')
+    },
     ...mapActions({
       updateOrderFlag: 'OrderStore/updateOrderFlag',
     }),

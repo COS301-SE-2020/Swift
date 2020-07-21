@@ -14,8 +14,8 @@
             </v-col>
           </v-row>
         </v-card>
-        <v-tabs width="auto" v-model="tab" hide-slider centered>
-          <v-tab v-show="ratingType.info.length > 1" active-class="no-active" v-for="(item, ind) in ratingType.info" :key="ind" :href="`#tab-${ind}`" class="ratingItems">
+        <v-tabs v-if="Array.isArray(ratingType.info)" height="20px" width="auto" v-model="tab" hide-slider centered>
+          <v-tab active-class="no-active" v-for="(item, ind) in ratingType.info" :key="ind" :href="`#tab-${ind}`" class="ratingItems">
             <v-icon size="10px" v-if="icons">mdi-circle-outline</v-icon>
           </v-tab>
           <v-tab-item v-for="(item, ind) in ratingType.info" :key="ind" :value="'tab-' + ind">
@@ -60,10 +60,10 @@
                 </v-row>
                 <v-row justify="center">
                   <v-col cols="11" class="pt-0 pb-0">
-                    <v-textarea class="commentSection" label="Tell us what you liked..." solo single-line auto-grow  rows="5" row-height="20"></v-textarea>
+                    <v-textarea class="commentSection" label="Tell us what you liked..." outlined single-line auto-grow rows="5" row-height="20"></v-textarea>
                   </v-col>
                 </v-row>
-                <v-row class="mt-1" justify="center" v-show="currentIndex != (rating.length - 1)">
+                <v-row class="mt-1" justify="center" v-if="currentIndex != (rating.length - 1)">
                   <v-col cols="11" class="pt-0" width="100%">
                     <v-btn icon @click="togglePublic(ind)">
                       <v-icon color="secondary" v-text="(selectedItemPublic.includes(ind) ? 'mdi-check-box-outline' : 'mdi-checkbox-blank-outline')"></v-icon>
@@ -71,9 +71,75 @@
                     <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">Share with public</span>
                   </v-col>
                 </v-row>
+                <v-row class="mt-6 mb-4" justify="center">
+                  <v-col cols="11" class="pt-0" width="100%">
+                    <v-row class="d-flex justify-space-around">
+                      <v-col cols="5" class="pa-0" align="center">
+                        <v-btn v-show="currentIndex != 0" rounded color="#F5F5F5" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showPrevious">Previous</v-btn>
+                      </v-col>
+                      <v-col cols="5" class="pa-0" align="center">
+                        <v-btn v-show="currentIndex != (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showNext">Next</v-btn>
+                        <v-btn v-show="currentIndex == (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showNext">Submit</v-btn>
+                      </v-col>
+                    </v-row>
+                  </v-col>
+                </v-row>
               </v-card>
             </v-card>
-          
+          </v-tab-item>
+        </v-tabs>
+        <v-card v-else flat tile>
+          <v-card class="mx-auto" flat>
+            <v-row justify="center" class="mt-2">
+              <v-avatar size="110px" color="#F5F5F5" justify="center">
+                <v-icon v-if="ratingType.info.img == ''" color="primary" size="65">{{icons[index]}}</v-icon>
+                <img v-else :src="ratingType.info.img" alt />
+              </v-avatar>
+            </v-row>
+            <v-row class="mt-8" justify="center">
+              <span  style="font-size: 25px">{{ratingType.info.name}}</span>
+            </v-row>
+            <v-row justify="center" class="mt-3">
+              <v-rating size="30" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
+            </v-row>
+            <v-row justify="center" class="mt-3 mb-6">
+              <span style="font-size: 17px; opacity: 0.7" class="font-weight-light">Good</span>
+            </v-row>
+            <v-divider></v-divider>
+          </v-card>
+          <v-card class="mx-auto mt-6" flat>
+            <v-row v-for="(rating, i) in ratingType.ratingPhrases" :key="i" justify="center">
+              <v-col cols="11" class="pt-1">
+                <v-card class="mx-auto mt-0 rounded-card" flat width="100%" height="50px" color="#F5F5F5">
+                  <v-row>
+                    <v-col cols="7" align="left" class="pl-8">
+                      <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">{{rating}}</span>
+                    </v-col>
+                    <v-col cols="5" class="pr-6">
+                      <v-rating size="18" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
+                    </v-col>
+                  </v-row>
+                </v-card>
+              </v-col>
+            </v-row>
+            <v-row justify="center" class="mt-4">
+              <v-col cols="11" class="pt-1 pb-2" width="100%">
+                <span class="subtitle-1 " style="font-size: 17px !important;">Share your feedback</span>
+              </v-col>
+            </v-row>
+            <v-row justify="center">
+              <v-col cols="11" class="pt-0 pb-0">
+                <v-textarea class="commentSection" label="Tell us what you liked..." outlined single-line auto-grow  rows="5" row-height="20"></v-textarea>
+              </v-col>
+            </v-row>
+            <v-row class="mt-1" justify="center" v-if="currentIndex != (rating.length - 1)">
+              <v-col cols="11" class="pt-0" width="100%">
+                <v-btn icon @click="togglePublicRestaurant">
+                  <v-icon color="secondary" v-text="(selectedRestaurant ? 'mdi-check-box-outline' : 'mdi-checkbox-blank-outline')"></v-icon>
+                </v-btn>
+                <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">Share with public</span>
+              </v-col>
+            </v-row>
             <v-row class="mt-6 mb-4" justify="center">
               <v-col cols="11" class="pt-0" width="100%">
                 <v-row class="d-flex justify-space-around">
@@ -82,13 +148,13 @@
                   </v-col>
                   <v-col cols="5" class="pa-0" align="center">
                     <v-btn v-show="currentIndex != (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showNext">Next</v-btn>
-                    <v-btn v-show="currentIndex == (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="submitRating">Submit</v-btn>
+                    <v-btn v-show="currentIndex == (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showNext">Submit</v-btn>
                   </v-col>
                 </v-row>
               </v-col>
             </v-row>
-          </v-tab-item>
-        </v-tabs>
+          </v-card>
+        </v-card>
 
         <v-overlay relative opacity="0.25" :value="submitted" z-index="10">
           <v-avatar elevation="3" color="accent" class="pl-0 pr-0" absolute style="position: absolute; z-index: 12">
@@ -123,12 +189,10 @@ export default {
       rating: [
         {
           type: 'Restaurant',
-          info: [
-            {
-              name: 'Mugg and Bean',
-              img: '',
-            },
-          ],
+          info: {
+            name: 'Mugg and Bean',
+            img: '',
+          },
           ratingPhrases: [
             'Atmosphere', 'Good Food', 'Service'
           ],
@@ -155,12 +219,10 @@ export default {
         },
         {
           type: 'Waiter',
-          info: [
-            {
-              name: 'John Doe',
-              img: 'https://source.unsplash.com/800x800/?man',
-            },
-          ],
+          info: {
+            name: 'John Doe',
+            img: 'https://source.unsplash.com/800x800/?man',
+          },
           ratingPhrases: [
             'Quick', 'Attentive', 'Service'
           ],
@@ -219,6 +281,10 @@ export default {
 
 .commentSection .v-text-field__details {
     display: none !important;
+}
+
+.commentSection .v-application .primary--text {
+  color: black !important;
 }
 
 .ratingItems {

@@ -39,11 +39,11 @@ export default {
         //On redirect 3 payment has been completed.
         this.loadCount++;
         if(this.loadCount == 3)
-            this.goToHome();
+          this.goToHome();
     },
     goToHome () {
       this.updateOrderFlag(true);
-      this.$router.push('/orders')
+      this.$router.go('/paymentInformation')
     },
     ...mapActions({
       updateOrderFlag: 'OrderStore/updateOrderFlag',

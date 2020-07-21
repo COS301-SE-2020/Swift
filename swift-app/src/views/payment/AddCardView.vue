@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="pl-0 pr-0 pb-0 overflow-y-auto" style="height: 100vh; display: flex; flex-direction: column">
+  <v-container fluid class="pl-0 pr-0 pb-0 overflow-y-auto overflow-x-hidden" style="height: 100vh; display: flex; flex-direction: column">
     <v-card class="mx-auto ml-0" flat>
         <v-row class="mt-3">
           <v-col cols="3" class="mt-0 pt-0 pr-0 pl-4">
