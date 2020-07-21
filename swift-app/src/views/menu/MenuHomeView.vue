@@ -439,7 +439,7 @@ export default {
       this.favourited = !this.favourited;
     },
     ...mapActions({
-      updateDisplayNotification: 'RestaurantStore/updateDisplayNotification',
+      updateDisplayNotification: 'RestaurantsStore/updateDisplayNotification',
     }),
   },
   mounted: function() {
@@ -457,8 +457,8 @@ export default {
       }
     },
     ...mapGetters({
-      tableNumber: "RestaurantStore/getTableNumber",
-      displayNotification: "RestaurantStore/getDisplayNotification"
+      tableNumber: "RestaurantsStore/getTableNumber",
+      displayNotification: "RestaurantsStore/getDisplayNotification"
     })
   }
 };

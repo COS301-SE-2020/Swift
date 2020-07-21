@@ -31,6 +31,14 @@
         </v-row>
 
         <v-row dense>
+          <v-col v-for="restaurant in allRestaurants" :key="restaurant.name" cols="4">
+            <v-card ripple>
+                <v-card-title class="body-1 pa-2">{{restaurant.name}}</v-card-title>
+            </v-card>
+          </v-col>
+        </v-row>
+
+        <!-- <v-row dense>
           <v-col v-for="restaurant in restaurants" :key="restaurant.title" :cols="restaurant.flex">
             <v-card ripple>
               <v-img @click=goToRestaurant :src="restaurant.src" class="white--text align-center" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="120px">
@@ -38,7 +46,7 @@
               </v-img>
             </v-card>
           </v-col>
-        </v-row>
+        </v-row> -->
 
       <v-btn class="checkInBtn" @click=goToCheckin app color="primary" style="bottom: 20px; right: 20px;" absolute  fab  >
         <v-icon>mdi-table-furniture</v-icon>
@@ -52,6 +60,8 @@
 <script>
 import NavBar from '@/components/layout/NavBar';
 import RestaurantSearchToolBar from '@/components/layout/RestaurantSearchToolBar';
+import store from '@/store/store.js';
+import { mapActions, mapGetters } from 'vuex'
 
 export default {
   components: {
@@ -69,19 +79,19 @@ export default {
       { icon: 'mdi-food-croissant', name: 'Bakery' },
       { icon: 'mdi-coffee', name: 'Cafe' },
     ],
-    restaurants: [
+    /* restaurants: [
       { title: 'Mugg & Bean', src: 'https://source.unsplash.com/800x800/?mcdonalds', flex: 4 },
       { title: 'RocoMamas', src: 'https://source.unsplash.com/800x800/?spaghetti', flex: 4 },
       { title: 'Burger King', src: 'https://source.unsplash.com/800x800/?burgerking', flex: 4 },
       { title: 'Varsity Bakery', src: 'https://source.unsplash.com/800x800/?bakery', flex: 4 },
       { title: 'Ocean Basket', src: 'https://source.unsplash.com/800x800/?burger', flex: 4 },
       { title: "Crawdaddy's", src: 'https://source.unsplash.com/800x800/?seafood', flex: 4 },
-    ],
+    ], */
     favourited: false,
   }),
   methods: {
     goToRestaurant () {
-      this.$router.push('/menu')
+      this.$router.push('/menu') // change to restaurant id
     },
     goToCheckin () {
       this.$router.push('/checkin')
@@ -91,6 +101,12 @@ export default {
     },
   },
   computed: {
+    ...mapGetters({
+      allRestaurants: 'RestaurantsStore/getAllRestaurants',
+    }),
+    ...mapActions({
+      // allRestaurants: 'RestaurantsStore/allRestaurants',
+    }),
     activateFavourite () {
       if (!this.favourited) {
         return { color: 'primary', icon: 'mdi-heart-outline' }

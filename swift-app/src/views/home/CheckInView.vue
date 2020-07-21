@@ -40,11 +40,11 @@ export default {
       this.goToRestaurant();
     },
     ...mapMutations({
-      setTable : 'RestaurantStore/setTableNumber',
+      setTable : 'RestaurantsStore/setTableNumber',
     }),
     ...mapActions({
-      updateCheckInFlag: 'RestaurantStore/updateCheckInFlag',
-      updateDisplayNotification: 'RestaurantStore/updateDisplayNotification',
+      updateCheckInFlag: 'RestaurantsStore/updateCheckInFlag',
+      updateDisplayNotification: 'RestaurantsStore/updateDisplayNotification',
     }),
   },
 };

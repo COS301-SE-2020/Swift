@@ -4,6 +4,7 @@ import axios from 'axios'
 const initialState = () => ({
   customer: {},
   isAuthenticated: false,
+  token: null,
 });
 
 const state = initialState();
@@ -13,6 +14,9 @@ const getters = {
   getCustomerProfile( state ) {
     return state.customer;
   },
+  getToken( state ) {
+    return state.token;
+  },
   isAuthenticated(state) {
     return state.isAuthenticated;
   }
@@ -20,7 +24,7 @@ const getters = {
 
 // Actions 
 const actions = {
-  login({commit}, data) {
+  login({commit, dispatch}, data) {
     axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "login",
@@ -32,7 +36,7 @@ const actions = {
     ).then(result => {
       commit('SAVE_TOKEN', result.data.token);
       commit('SAVE_CUSTOMER', result.data);
-      // this.getCustomerProfile();
+      this.dispatch('RestaurantsStore/allRestaurants');
     }).catch(({ response }) => {
     });
   },
@@ -69,7 +73,6 @@ const mutations = {
 
   SAVE_CUSTOMER(state, customer) {
     state.customer = customer;
-    console.log(state.customer);
   },
 
   SET_AUTHENTICATION(state, authentication_state) {

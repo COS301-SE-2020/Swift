@@ -38,13 +38,6 @@ import NavBar from '@/components/layout/NavBar';
 import store from '@/store/store.js';
 import { mapActions, mapGetters } from 'vuex'
 
-class Favourite {
-  constructor(menuItemName, menuItemDescription) {
-    this.menuItemName
-    this.menuItemDescription
-  }
-};
-
 export default {
   data () {
     return {

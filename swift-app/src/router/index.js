@@ -8,7 +8,7 @@ import CartView from '../views/orders/CartView.vue'
 import FavouritesView from '../views/favourites/FavouritesView.vue'
 
 import CheckInView from '../views/home/CheckInView.vue'
-import HomeView from '../views/home/HomeView.vue'
+import ExploreView from '../views/home/ExploreView.vue'
 
 import ProfileView from '../views/usermanagement/ProfileView.vue'
 import LoginView from '../views/usermanagement/LoginView.vue'
@@ -28,7 +28,7 @@ import MenuItemView from '../views/menu/MenuItemView.vue'
 Vue.use(VueRouter)
 
 const routes = [
-  { path: '/', name: 'home', component: HomeView },
+  { path: '/', name: 'explore', component: ExploreView },
   { path: '/menu', name: 'menu', component: MenuHomeView },
   { path: '/login', name: 'login', component: LoginView },
   { path: '/register', name: 'register', component: RegisterView },

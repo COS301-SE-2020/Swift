@@ -417,7 +417,7 @@ export default {
     },
     
     ...mapGetters({
-      checkedIn: "RestaurantStore/getCheckInFlag"
+      checkedIn: "RestaurantsStore/getCheckInFlag"
     })
   },
 }
