@@ -28,7 +28,7 @@ module.exports = {
     const token = JWT.sign(payload, privateKey, {
       audience: 'Swift API',
       issuer: 'Swift API',
-      expiresIn: '1 hour',
+      // expiresIn: '1 hour', // TODO: Enable token expiration
       iat: true,
       header: {
         typ: 'JWT'
