@@ -8,9 +8,7 @@ const router = express.Router();
 // Handle DELETE request
 router.delete('/', (req, res) => {
   const jsonResponse = {
-    request: 'DELETE',
-    response: 'DELETE -> Swift API :)',
-    user_agent: req.headers['user-agent']
+    whoami: 'Swift API :)',
   };
   res.status(200).send(jsonResponse);
 });
@@ -18,9 +16,7 @@ router.delete('/', (req, res) => {
 // Handle GET request
 router.get('/', (req, res) => {
   const jsonResponse = {
-    request: 'GET',
-    response: 'GET -> Swift API :)',
-    user_agent: req.headers['user-agent']
+    whoami: 'Swift API :)',
   };
   res.status(200).send(jsonResponse);
 });
@@ -120,9 +116,7 @@ router.post('/', (req, res) => {
 // Handle PUT request
 router.put('/', (req, res) => {
   const jsonResponse = {
-    request: 'PUT',
-    response: 'PUT -> Swift API :)',
-    user_agent: req.headers['user-agent']
+    whoami: 'Swift API :)',
   };
   res.status(200).send(jsonResponse);
 });

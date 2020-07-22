@@ -25,11 +25,7 @@ describe('Test API Endpoints', () => {
      * Test DELETE API
      */
   it('DELETE Endpoint', (done) => {
-    const jsonPattern = `{
-            "request": "DELETE",
-            "response": "DELETE -> Swift API :)",
-            "user_agent": /./
-        }`;
+    const jsonPattern = '{"whoami": "Swift API :)"}';
     chai.request(server)
       .delete('/')
       .end((err, res) => {
@@ -44,11 +40,7 @@ describe('Test API Endpoints', () => {
      * Test GET API
      */
   it('GET Endpoint', (done) => {
-    const jsonPattern = `{
-            "request": "GET",
-            "response": "GET -> Swift API :)",
-            "user_agent": /./
-        }`;
+    const jsonPattern = '{"whoami": "Swift API :)"}';
     chai.request(server)
       .get('/')
       .end((err, res) => {
@@ -123,11 +115,7 @@ describe('Test API Endpoints', () => {
      * Test PUT API
      */
   it('PUT Endpoint', (done) => {
-    const jsonPattern = `{
-            "request": "PUT",
-            "response": "PUT -> Swift API :)",
-            "user_agent": /./
-        }`;
+    const jsonPattern = '{"whoami": "Swift API :)"}';
     chai.request(server)
       .put('/')
       .end((err, res) => {
