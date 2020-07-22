@@ -186,7 +186,7 @@ export default {
       moduleDataList.isRegistered = true
 	}
 	this.listMenuItems();
-    this.$store.dispatch("dataList/fetchDataListItems")
+  //  this.$store.dispatch("dataList/fetchDataListItems")
   },
   mounted() {
     this.isMounted = true;
