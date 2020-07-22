@@ -1,13 +1,13 @@
 <template>
   <div class="homemenu">
     <MenuSearchToolBar></MenuSearchToolBar>
-    <v-container transition="slide-x-transition">
+    <v-container class="px-0 overflow-x-hidden" transition="slide-x-transition">
       <v-row style="max-width: 400px" class="overflow-y-auto">
         <v-col cols="12" class="pt-0">
-          <div class="title">Categories</div>
+          <div class="title pl-3">Categories</div>
         </v-col>
       </v-row>
-      <div id="categories" >
+      <div id="categories" class="pl-3">
         <v-sheet class="mx-auto" max-width="700">
           <v-slide-group multiple>
             <v-slide-item v-for="(category, index) in menu.categories" :key="index">
@@ -26,13 +26,40 @@
         <v-divider class="mt-2"></v-divider>
       </div>
 
-      <v-row style="max-width: 400px" class="overflow-y-auto">
+      <div v-for="(category, index) in menu.categories" :key="index">
+        <v-list v-for="(menuItem, i) in category.menuItems" :key="i" class="py-0">
+          <v-list-item @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1">
+            <v-list-item-avatar tile  style="border-radius: 4px" size="45" >
+              <v-img src="https://source.unsplash.com/hrlvr2ZlUNk/800x800/"></v-img>
+            </v-list-item-avatar>
+            <v-list-item-content>
+              <v-list-item-title v-html="menuItem.menuItemName"></v-list-item-title>
+              <!-- <v-list-item-subtitle v-html="menuItem.menuItemDescription"></v-list-item-subtitle> -->
+            </v-list-item-content>
+          </v-list-item>
+          <v-divider divider class="ml-3" width="93%"></v-divider>
+        </v-list>
+      </div>
+
+      <!-- <v-tabs v-model="secondaryCategoryTab" background-color="secondary" color="primary" dark>
+        <v-tab v-for="item in items" :key="item.tab">
+          {{ item.tab }}
+        </v-tab>
+      </v-tabs>
+
+      <v-tabs-items v-model="secondaryCategoryTab">
+        <v-tab-item v-for="item in items" :key="item.tab">
+            <v-card-text>{{ item.content }}</v-card-text>
+        </v-tab-item>
+      </v-tabs-items> -->
+
+      <v-row  style="max-width: 400px" class="overflow-y-auto pl-3">
         <v-col cols="12">
           <div class="title">Popular Food</div>
         </v-col>
       </v-row>
 
-      <v-sheet class="mx-auto" max-width="700">
+      <v-sheet class="mx-auto pl-3" max-width="700">
         <v-slide-group multiple>
           <v-slide-item v-for="card in popularFood" :key="card.title">
             <v-card ripple class="mr-3">
@@ -69,6 +96,14 @@ export default {
     MenuSearchToolBar: MenuSearchToolBar
   },
   data: () => ({
+    primaryCategoryTab: null,
+    secondaryCategoryTab: null,
+    items: [
+      { tab: 'Coffee and Tea', content: 'Tab 1 Content' },
+      { tab: 'Soft Drinks', content: 'Tab 2 Content' },
+      { tab: 'Alcohol', content: 'Tab 3 Content' },
+    ],
+
     restaurantImages: [
       { img: "https://source.unsplash.com/800x800/?fruit" },
       { img: "https://source.unsplash.com/800x800/?salad" },
@@ -148,6 +183,7 @@ export default {
   }),
   methods: {
     goToMenuItem(id) {
+      // insert call to fetch menu item
       this.$router.push("/menuItem/" + id);
     },
     changeFavouriteFab() {

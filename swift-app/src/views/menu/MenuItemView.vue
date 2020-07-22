@@ -18,10 +18,10 @@
     <v-card-text class="pb-0 pt-3">
       <v-row class="mx-0">
         <v-col cols="9" class="pl-0 pb-0">
-          <span class="title black--text">{{menuItem.name}}</span>
+          <span class="title black--text">{{newMenuItem.menuItemName}}</span>
         </v-col>
         <v-col cols="3" class="pl-0 pb-0">
-          <span class="title black--text">R85.00</span>
+          <span class="title black--text">R{{newMenuItem.price}}0</span>
         </v-col>
       </v-row>
     </v-card-text>
@@ -29,18 +29,18 @@
     <v-card-text class="pt-0" >
       <v-row align="center" class="mx-0" >
         <v-col cols="8" class="px-0 py-0">
-          <v-rating readonly size="18" dense color="yellow darken-3" background-color="secondary" :value=menuItem.rating></v-rating>
+          <v-rating readonly size="18" dense color="yellow darken-3" background-color="secondary" value="4"></v-rating>
         </v-col>
         <v-col cols="4" class="py-0">
-          <div color="secondary" class="ml-2 my-4"><v-icon color="secondary">mdi-clock</v-icon> 15 min</div>
+          <div color="secondary" class="ml-2 my-4"><v-icon color="secondary">mdi-clock</v-icon> {{newMenuItem.estimatedWaitingTime}}</div>
         </v-col>
       </v-row>
-      <div class="justify">{{menuItem.description}}</div>
+      <div class="justify">{{newMenuItem.menuItemDescription}}</div>
     </v-card-text>
 
     
     <v-tabs v-model="tab" background-color="white" grow>
-      <v-tab>
+      <v-tab v-if="newMenuItem.attributes != null">
         Details
       </v-tab>
       <v-tab>
@@ -49,10 +49,49 @@
     </v-tabs>
 
     <v-tabs-items v-model="tab">
-      <v-tab-item>
+      <v-tab-item v-if="newMenuItem.attributes != null">
         <v-card flat>
           <v-card-title class="pb-0 pt-4">Customise Order</v-card-title>
           <v-container>
+            <div>
+              <v-list class="py-0">
+                <v-list-group  v-for="(attribute, i) in newMenuItem.attributes.attributes" :key="i" v-model="attribute.active"  no-action>
+                  <template expand v-slot:activator>
+                    <v-list-item-content>
+                      <v-list-item-title  v-text="attribute.name"></v-list-item-title>
+                    </v-list-item-content>
+                  </template>
+
+                  <v-list-item @click="value.selected = !value.selected" ripple v-for="(value, j) in attribute.values" :key="j" height="20px" class="pl-5 py-0 my-0">
+                    <v-list-item-content>
+                      <v-list-item-title v-text="value.name"></v-list-item-title>
+                    </v-list-item-content>
+                    <v-list-item-icon class="my-1 ml-5 mr-0 pr-2">
+                      <span v-if="Object.keys(value).includes('fee')" class="d-flex align-center">+ R{{value.fee}}0</span>
+                      <v-btn icon>
+                        <v-icon class="ml-2" color="secondary" v-text="value.selected ? optionIcon(attribute.field.type).selected : optionIcon(attribute.field.type).unselected"></v-icon>
+                      </v-btn>
+                    </v-list-item-icon>
+                  </v-list-item>
+                </v-list-group>
+              </v-list>
+            </div>
+            <v-row>
+              <v-col cols="12" class="d-flex align-center justify-center">
+                <v-slide-x-transition>
+                  <div v-if="expandOrderBtn" id="orderButton">
+                    <v-btn @click="changeOrderBtn" rounded class="py-6 mt-5" color="primary" width="150px">Add To Order</v-btn>
+                  </div>
+                  <div v-if="!expandOrderBtn">
+                    <v-btn @click="changeOrderBtn" rounded class="py-6 mt-5" color="grey">Remove</v-btn>
+                    <v-btn @click="goToCart" rounded class="py-6 mt-5 ml-5" color="accent">R85 | Place Order</v-btn>
+                  </div>
+                </v-slide-x-transition>
+              </v-col>
+            </v-row>
+          </v-container>
+          
+          <!-- <v-container>
             <v-card-text class="py-0 pr-0">
               <v-row>
                 <v-col class="pl-0" cols="3">
@@ -130,7 +169,7 @@
                 </v-slide-x-transition>
               </v-col>
             </v-row>
-          </v-container>
+          </v-container> -->
         </v-card>
       </v-tab-item>
       <v-tab-item class="overflow-x-hidden">
@@ -368,6 +407,13 @@ export default {
         return { color: 'primary', icon: 'mdi-heart' }
       }
     },
+    optionIcon: function (type) {
+      if (type == "checkbox") {
+        return { selected: 'mdi-check-box-outline', unselected: 'mdi-checkbox-blank-outline' }
+      } else if (type == "radio") {
+        return { selected: 'mdi-radiobox-marked', unselected: 'mdi-radiobox-blank' }
+      }
+    },
     getCommentLength: function (comment) {
       if (comment.comment.length > 150)
         return true
@@ -406,7 +452,16 @@ export default {
     menuItem() {
       return store.state.MenuItemsStore.menuItems.find(
         menuItem => menuItem.id === this.menuItemId
+      )      
+    },
+    findCategory() {
+      return store.state.MenuStore.menu.categories.find(
+        category => category.menuItems.find(menuItem => menuItem.menuItemId === parseInt(this.menuItemId) )
       )
+    },
+    newMenuItem() {
+      console.log("id" + this.findCategory)
+      return this.findCategory.menuItems.find(menuItem => menuItem.menuItemId === parseInt(this.menuItemId) )
     },
     activateFavourite () {
       if (!this.favourited) {
@@ -417,7 +472,8 @@ export default {
     },
     
     ...mapGetters({
-      checkedIn: "RestaurantsStore/getCheckInFlag"
+      checkedIn: "RestaurantsStore/getCheckInFlag",
+      menu: "MenuStore/getMenu"
     })
   },
 }
