@@ -74,6 +74,10 @@ router.post('/', (req, res) => {
         restaurantController.addOrder(req.body, res);
         break;
       }
+      case 'listOrders': {
+        restaurantController.listOrders(req.body, res);
+        break;
+      }
       case 'payment': {
         restaurantController.orderPayment(req.body, res);
         break;

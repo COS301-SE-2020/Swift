@@ -84,6 +84,7 @@ module.exports = {
       console.error('Query Error [Favourites - Get User Favourites]', err.stack);
       return [];
     }),
+  getOrderItems,
   getOrderHistory: (userId = 0) => db.query(
     'SELECT customerorder.orderid, restaurant.restaurantid, restaurant.restaurantname,'
     + ' restaurant.location, customerorder.orderdatetime, customerorder.ordercompletiontime,'

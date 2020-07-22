@@ -4,7 +4,8 @@ const {
   getReviews,
   getRatingPhrases,
   getMenuCategories,
-  getOrderHistory
+  getOrderHistory,
+  getOrderItems
 } = require('../helper/objectBuilder');
 
 // TODO: Check that the restaurant id is not a placeholder (id == 0)
@@ -342,6 +343,83 @@ module.exports = {
             });
         }).catch((err) => {
           console.error('Query Error [Add Order - Check Restaurant Existence]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  listOrders: async (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'getAllOrders')
+      || Object.keys(reqBody).length !== 4) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      return db.query(
+        'SELECT restaurantname FROM public.restaurant WHERE restaurant.restaurantid = $1::integer',
+        [reqBody.restaurantId]
+      )
+        // eslint-disable-next-line consistent-return
+        .then((resCheck) => {
+          if (resCheck.rows.length === 0) {
+            // restaurant and/or table does not exist
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          let oQuery = 'SELECT customerorder.orderid, customerorder.orderstatus,'
+            + ' restauranttable.tableid, restauranttable.tablenumber,'
+            + ' employee.userid AS "employeeid", employee.employeenumber,'
+            + ' employee.name AS "ename", employee.surname AS "esurname",'
+            + ' customerorder.orderdatetime, customerorder.ordercompletiontime'
+            + ' FROM public.customerorder'
+            + ' INNER JOIN public.restauranttable ON customerorder.tableid = restauranttable.tableid'
+            + ' INNER JOIN public.employee ON customerorder.employeeid = employee.userid'
+            + ' WHERE restauranttable.restaurantid = $1::integer';
+
+          // check if past orders should be included
+          if (reqBody.getAllOrders === false) {
+            oQuery += " AND NOT (LOWER(orderstatus) = 'paid' OR LOWER(orderstatus) = 'complete')";
+          }
+
+          return db.query(oQuery, [reqBody.restaurantId])
+            .then(async (res) => {
+              const orderResponse = {};
+              orderResponse.orders = [];
+              await Promise.all(res.rows.map(async (orderItem) => {
+                const orderDetails = {};
+                orderDetails.orderId = orderItem.orderid;
+                orderDetails.orderStatus = orderItem.orderstatus;
+                orderDetails.orderDateTime = orderItem.orderdatetime;
+                orderDetails.orderCompletionTime = orderItem.ordercompletiontime;
+                orderDetails.tableId = orderItem.tableid;
+                orderDetails.tableNumber = orderItem.tablenumber;
+                orderDetails.employeeId = orderItem.employeeid;
+                orderDetails.employeeNumber = orderItem.employeenumber;
+                orderDetails.employeeName = orderItem.ename;
+                orderDetails.employeeSurname = orderItem.esurname;
+                orderDetails.orderDetails = await getOrderItems(orderItem.orderid);
+                orderResponse.orders.push(orderDetails);
+              }));
+              return response.status(200).send(orderResponse);
+            })
+            .catch((err) => {
+              console.error('Query Error [List Orders - Get Orders]', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
+        })
+        .catch((err) => {
+          console.error('Query Error [List Orders - Check Restaurant Existence]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }
