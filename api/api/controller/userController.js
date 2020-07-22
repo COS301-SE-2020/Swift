@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const validator = require('email-validator');
 const db = require('../db');
 const accCreator = require('../helper/accountCreator');
-const { generateToken, validateToken, tokenStatus } = require('../helper/tokenHandler');
+const { generateToken, validateToken, tokenState } = require('../helper/tokenHandler');
 const { getFavourites, getOrderHistory } = require('../helper/objectBuilder');
 
 const BC_SALT_ROUNDS = 10;
@@ -107,8 +107,8 @@ module.exports = {
     }
 
     // Check token validity
-    const tokenState = validateToken(reqBody.token, true);
-    if (tokenState[0] === tokenStatus.valid) {
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.valid) {
       return db.query(
         'SELECT menuitemid FROM public.menuitem WHERE menuitemid = $1::integer;',
         [reqBody.menuItemId]
@@ -125,9 +125,9 @@ module.exports = {
             + ' SELECT $1::integer, $2::integer WHERE NOT EXISTS'
             + ' (SELECT 1 FROM public.favourite WHERE'
             + ' menuitemid = $1::integer AND customerid = $2::integer);',
-            [reqBody.menuItemId, tokenState[1].userId]
+            [reqBody.menuItemId, userToken.data.userId]
           )
-            .then(() => getFavourites(tokenState[1].userId)
+            .then(() => getFavourites(userToken.data.userId)
               .then((favourites) => response.status(200).send({ favourites }))
               .catch((err) => {
                 console.error('Helper Error [Favourite - Get Favourites Object]', err.stack);
@@ -144,7 +144,7 @@ module.exports = {
         });
     }
 
-    if (tokenState[0] === tokenStatus.refresh) {
+    if (userToken.state === tokenState.refresh) {
       return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
     }
 
@@ -159,13 +159,13 @@ module.exports = {
     }
 
     // Check token validity
-    const tokenState = validateToken(reqBody.token, true);
-    if (tokenState[0] === tokenStatus.valid) {
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.valid) {
       return db.query(
         'DELETE FROM public.favourite WHERE menuitemid = $1::integer AND customerid = $2::integer;',
-        [reqBody.menuItemId, tokenState[1].userId]
+        [reqBody.menuItemId, userToken.data.userId]
       )
-        .then(() => getFavourites(tokenState[1].userId)
+        .then(() => getFavourites(userToken.data.userId)
           .then((favourites) => response.status(200).send({ favourites }))
           .catch((err) => {
             console.error('Helper Error [Favourite - Get Favourites Object]', err.stack);
@@ -177,7 +177,7 @@ module.exports = {
         });
     }
 
-    if (tokenState[0] === tokenStatus.refresh) {
+    if (userToken.state === tokenState.refresh) {
       return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
     }
 
@@ -192,19 +192,19 @@ module.exports = {
     }
 
     // Test token
-    const tokenState = validateToken(reqBody.token, true);
-    if (tokenState[0] === tokenStatus.valid) {
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.valid) {
       // Token still valid
       return response.status(204).send({ status: 204, reason: 'Token Valid' });
     }
 
-    if (tokenState[0] === tokenStatus.invalid) {
+    if (userToken.state === tokenState.invalid) {
       // Invalid token
       return response.status(403).send({ status: 403, reason: 'Invalid Token Pair' });
     }
 
     // Check token pair
-    if (reqBody.refreshToken !== tokenState[1].refreshToken) {
+    if (reqBody.refreshToken !== userToken.data.refreshToken) {
       // refresh tokens supplied do not match
       return response.status(403).send({ status: 403, reason: 'Invalid Token Pair' });
     }
@@ -212,7 +212,7 @@ module.exports = {
     // check refresh token is valid in DB
     return db.query(
       'SELECT refreshtoken FROM public.person WHERE userid = $1::integer;',
-      [tokenState[1].userId]
+      [userToken.data.userId]
     )
       .then((res) => {
         if (res.rows.length === 0) {
@@ -220,17 +220,17 @@ module.exports = {
           return response.status(403).send({ status: 403, reason: 'Invalid Token Pair' });
         }
 
-        if (!bcrypt.compareSync(tokenState[1].refreshToken, res.rows[0].refreshtoken)) {
+        if (!bcrypt.compareSync(userToken.data.refreshToken, res.rows[0].refreshtoken)) {
           return response.status(403).send({ status: 403, reason: 'Invalid Token Pair' });
         }
 
         // All checks passed, issue new token
-        const newTokenPair = generateToken(tokenState[1].userId);
+        const newTokenPair = generateToken(userToken.data.userId);
 
         // Update DB
         return db.query(
           'UPDATE public.person SET refreshtoken = $1::text WHERE userid = $2::integer;',
-          [bcrypt.hashSync(newTokenPair.refreshToken, BC_SALT_ROUNDS), tokenState[1].userId]
+          [bcrypt.hashSync(newTokenPair.refreshToken, BC_SALT_ROUNDS), userToken.data.userId]
         )
           .then(() => response.status(201).send(newTokenPair))
           .catch((err) => {

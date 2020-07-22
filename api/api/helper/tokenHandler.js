@@ -11,14 +11,14 @@ const tokenKey = require('../tokenKey.json');
 
 const privateKey = JWK.asKey(tokenKey);
 
-const tokenStatus = {
+const tokenState = {
   valid: 0,
   invalid: 1,
   refresh: 2
 };
 
 module.exports = {
-  tokenStatus,
+  tokenState,
   generateToken: (userId) => {
     const payload = {
       userId,
@@ -48,23 +48,23 @@ module.exports = {
 
       // Token valid
       if (!decodeToken) {
-        return tokenStatus.valid;
+        return { state: tokenState.valid, data: null };
       }
-      return [tokenStatus.valid, tokenData];
+      return { state: tokenState.valid, data: tokenData };
     } catch (err) {
       if (err instanceof errors.JOSEError && err.code === 'ERR_JWT_EXPIRED') {
         // Token expired, request refresh token
         if (!decodeToken) {
-          return tokenStatus.refresh;
+          return { state: tokenState.refresh, data: null };
         }
-        return [tokenStatus.refresh, JWT.decode(decryptedToken)];
+        return { state: tokenState.refresh, data: JWT.decode(decryptedToken) };
       }
 
       // Token invalid - reject
       if (!decodeToken) {
-        return tokenStatus.invalid;
+        return { state: tokenState.invalid, data: null };
       }
-      return [tokenStatus.invalid, null];
+      return { state: tokenState.invalid, data: null };
     }
   }
 };

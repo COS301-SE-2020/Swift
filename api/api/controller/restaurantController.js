@@ -1,5 +1,5 @@
 const db = require('../db');
-const { validateToken, tokenStatus } = require('../helper/tokenHandler');
+const { validateToken, tokenState } = require('../helper/tokenHandler');
 const {
   getReviews,
   getRatingPhrases,
@@ -15,9 +15,9 @@ module.exports = {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 
-    const tokenState = validateToken(reqBody.token);
+    const userToken = validateToken(reqBody.token);
 
-    if (tokenState === tokenStatus.valid) {
+    if (userToken.state === tokenState.valid) {
       return db.query(
         'SELECT restaurantid, restaurantname, location, coverimageurl FROM public.restaurant;'
       )
@@ -62,7 +62,7 @@ module.exports = {
         });
     }
 
-    if (tokenState === tokenStatus.refresh) {
+    if (userToken.state === tokenState.refresh) {
       return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
     }
 
@@ -78,8 +78,8 @@ module.exports = {
     }
 
     // Check token validity
-    const tokenState = validateToken(reqBody.token, true);
-    if (tokenState[0] === tokenStatus.valid) {
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.valid) {
       return db.query(
         'SELECT tableid, restaurantid, numseats, status FROM public.restauranttable'
         + ' WHERE qrcode = $1::text;',
@@ -97,7 +97,7 @@ module.exports = {
             checkInUsers = res.rows[0].status.split(',');
           }
 
-          if (checkInUsers.find((uid) => parseInt(uid, 10) === tokenState[1].userId)) {
+          if (checkInUsers.find((uid) => parseInt(uid, 10) === userToken.data.userId)) {
             // user already checked in
             return response.status(205).send({
               restaurantId: res.rows[0].restaurantid,
@@ -111,7 +111,7 @@ module.exports = {
           }
 
           // add user to checked in user list
-          checkInUsers.push(tokenState[1].userId);
+          checkInUsers.push(userToken.data.userId);
           return db.query(
             'UPDATE public.restauranttable SET status = $1::text WHERE tableid = $2::integer;',
             [checkInUsers.join(','), res.rows[0].tableid]
@@ -131,7 +131,7 @@ module.exports = {
         });
     }
 
-    if (tokenState[0] === tokenStatus.refresh) {
+    if (userToken.state === tokenState.refresh) {
       return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
     }
 
@@ -148,8 +148,8 @@ module.exports = {
     }
 
     // Check token
-    const tokenState = validateToken(reqBody.token);
-    if (tokenState === tokenStatus.valid) {
+    const userToken = validateToken(reqBody.token);
+    if (userToken.state === tokenState.valid) {
       // check if restaurant exists
       return db.query(
         'SELECT restaurantname, location, coverimageurl FROM public.restaurant'
@@ -225,7 +225,7 @@ module.exports = {
         });
     }
 
-    if (tokenState === tokenStatus.refresh) {
+    if (userToken.state === tokenState.refresh) {
       return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
     }
 
@@ -241,11 +241,11 @@ module.exports = {
     }
 
     // Check token
-    const tokenState = validateToken(reqBody.token, true);
+    const userToken = validateToken(reqBody.token, true);
     // TODO: Check if refresh token is valid for extra security
-    if (tokenState[0] === tokenStatus.valid) {
+    if (userToken.state === tokenState.valid) {
       const { orderInfo } = reqBody;
-      const customerId = tokenState[1].userId;
+      const customerId = userToken.data.userId;
 
       // Check if orderInfo is valid
       if (!Object.prototype.hasOwnProperty.call(orderInfo, 'restaurantId')
@@ -343,7 +343,7 @@ module.exports = {
         });
     }
 
-    if (tokenState[0] === tokenStatus.refresh) {
+    if (userToken.state === tokenState.refresh) {
       return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
     }
 
@@ -362,9 +362,9 @@ module.exports = {
     }
 
     // Check token
-    const tokenState = validateToken(reqBody.token, true);
+    const userToken = validateToken(reqBody.token, true);
     // TODO: Check if refresh token is valid for extra security
-    if (tokenState[0] === tokenStatus.valid) {
+    if (userToken.state === tokenState.valid) {
       // check if order exists
       return db.query(
         'SELECT orderstatus FROM public.customerorder'
@@ -410,7 +410,7 @@ module.exports = {
         });
     }
 
-    if (tokenState[0] === tokenStatus.refresh) {
+    if (userToken.state === tokenState.refresh) {
       return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
     }
 
