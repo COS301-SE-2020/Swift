@@ -142,7 +142,13 @@ export default {
       return 0
     },
     products() {
-      return this.$store.state.dataList.products
+      return this.$store.state.dataList.products;
+    },
+    productsCount() {
+      		if(this.$store.state.dataList)
+      return this.$store.state.dataList.products.length;
+		else
+			return null
     },
     queriedItems() {
       return this.$refs.table ? this.$refs.table.queriedResults.length : this.products.length
@@ -184,14 +190,21 @@ export default {
     if(!moduleDataList.isRegistered) {
       this.$store.registerModule('dataList', moduleDataList)
       moduleDataList.isRegistered = true
-	}
+  }
+  if(!this.productsCount > 0)
+    //this.$vs.loading();
+
 	this.listMenuItems();
-  //  this.$store.dispatch("dataList/fetchDataListItems")
   },
   mounted() {
     this.isMounted = true;
+  },
+  watch:{
+    productCount(newCount, oldCount) {
+     // this.$vs.loading.close();
+   }
   }
-}
+};
 </script>
 
 <style lang="scss">

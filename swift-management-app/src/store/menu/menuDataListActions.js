@@ -88,7 +88,7 @@ export default {
                        }
             commit('ADD_ITEM', item);
           }); 
-      });     
+      });    
       }).catch(({ response }) => {
       });
     },

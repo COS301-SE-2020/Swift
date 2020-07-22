@@ -1,6 +1,12 @@
 export default {
   ADD_ITEM(state, item) {
-    if(! state.products.includes(item))
+    let exists = false;
+    state.products.forEach(function (menuItem) {
+      if (item.name === menuItem.name)
+        exists = true;
+    });
+
+    if (!exists)
       state.products.unshift(item)
   },
   SET_PRODUCTS(state, products) {

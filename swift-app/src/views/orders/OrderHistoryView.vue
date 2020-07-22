@@ -52,7 +52,7 @@
 
         </v-container>
       </v-tab-item>
-      <v-tab-item style="width:100%; height:100%;">
+      <!-- <v-tab-item style="width:100%; height:100%;">
         <v-container fluid fill-height class="pa-0">
           <div class="row d-flex flex-column align-self-center align-center">
             <v-avatar class="mb-8" height="140px" width="140px" fab color="primary">
@@ -63,7 +63,58 @@
             <v-btn @click="goToMenu" class="mt-6" height="53px" width="100px" rounded large color="primary">Menu</v-btn>
           </div>
         </v-container>
+      </v-tab-item> -->
+
+
+      <v-tab-item style="width:100%;">
+        <v-container fluid fill-height class="pa-0 d-flex align-start">
+          <v-row class="overflow-y-auto mt-3">
+            <v-col cols="12" class="d-flex justify-center">
+                <div class="body-1 secondary--text">Order No: 53234</div>
+            </v-col>
+          </v-row>
+
+          <v-row class="mt-12 mb-0 py-0 mx-1">
+            <v-col cols="5" class="pb-0 pl-4 py-0">
+                <div class="mt-2 body-1 secondary--text">Order Placed</div>
+                <div class="secondary--text" style="font-size:10px"><v-icon size="13px" class="font-weight-light">mdi-clock-time-four-outline</v-icon> 10:30, 20 June 2020</div>
+            </v-col>
+            <v-col cols="2" class="pb-0 pl-0 py-0" style="margin-left: 2px;">
+                <v-icon id="orderPlacedIcon" size="50" class="pb-0 font-weight-light" color="primary">mdi-clock-time-four</v-icon>
+            </v-col>
+          </v-row>
+
+          <v-row class="my-0 py-0 mx-0">
+            <v-col cols="6" class="py-0 px-0 mx-0" style="display: table;">
+              <div style="height: 0; padding: 43% 0;">
+                <v-progress-linear value="33" style="display: block; transform-origin: top right; transform: rotate(90deg); margin-top: 50%; white-space: nowrap; progressBar"></v-progress-linear>
+              </div>
+            </v-col>
+            <v-col cols="6" class="pb-0 pl-5">
+                <div class="mt-2 body-1 secondary--text d-flex justify-center">Complete</div>
+                <div class="secondary--text d-flex justify-center" style="font-size:35px">{{progressValue}}%</div>
+                <div class="body-2 secondary--text d-flex justify-center">{{itemsCompleted}}/{{totalItems}} Items completed</div>
+            </v-col>
+          </v-row>
+
+          <v-row class="mt-0 mb-0 py-0 mx-1">
+            <v-col cols="5" class="pb-0 pl-4">
+                <div class="mt-2 body-1 secondary--text">Order Busy</div>
+            </v-col>
+            <v-col cols="1" class="pb-0 pl-0" style="margin-left: 4px;">
+                <v-avatar color="primary" id="orderDoneIcon" size="45" class="ma-0 pa-0" >
+                  <v-icon size="32" class="font-weight-light ma-0 pa-0" color="white">mdi-pot-steam</v-icon>
+                </v-avatar>
+            </v-col>
+            <v-col cols="5" class="pb-0 pl-7 pr-0">
+                <div class="secondary--text" style="font-size:12px">Our chef is busy preparing your order</div>
+            </v-col>
+          </v-row>
+        </v-container>
       </v-tab-item>
+
+
+
     </v-tabs-items>
     <NavBar></NavBar>
   </div>
@@ -79,6 +130,9 @@ export default {
   data () {
     return {
       tab: null,
+      progressValue: 33,
+      itemsCompleted: 3,
+      totalItems: 9,
       search: '',
       filter: {},
       sortBy: 'restaurant',
@@ -139,6 +193,13 @@ export default {
   },
   components: {
     'NavBar': NavBar
+  },
+  mounted: {
+    updateProgressBar () {
+      setInterval(() => {
+        this.progressValue++;
+      }, 1000);
+    }
   }
   
 }
