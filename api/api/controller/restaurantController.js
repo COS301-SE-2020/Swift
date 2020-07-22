@@ -721,7 +721,8 @@ module.exports = {
                 singleTableStatus.tableNumber = table.tablenumber;
                 singleTableStatus.numSeats = table.numseats;
                 if (table.status.toLowerCase() !== 'vacant') {
-                  singleTableStatus.status = `${table.status.split(',').length} Customers`;
+                  const custCount = table.status.split(',').length;
+                  singleTableStatus.status = `${custCount} Customer${custCount > 1 ? 's' : ''}`;
                 } else {
                   singleTableStatus.status = table.status;
                 }
