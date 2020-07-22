@@ -10,11 +10,14 @@
         :subtitle="'Placed: ' + order.timePlaced"
         @refresh="closeCardAnimationDemo"
         collapse-action
+        :data-item-count="order.items.length"
+        :data-progress="order.orderProgress"
+        :id="'OrderCard'+order.orderId"
       >
         <vs-chip class="employeeName" color="success">Waiter: {{order.employeeAssigned}}</vs-chip>
         <vs-divider border-style="solid" color="white"></vs-divider>
         <p>Order Progress:</p>
-        <vs-progress :height="8" :percent="order.orderProgress" :color="getOrderStatusColor(order.orderProgress)"></vs-progress>
+        <vs-progress :height="8" :percent="parseInt(order.orderProgress)" :color="getStatusColor(order.orderProgress)"></vs-progress>
         <vs-list>
           <vs-list-header :title="'Order Total: R'+order.orderTotal"></vs-list-header>
           <div v-for="menuItem in order.items" :key="menuItem.menuItemName" class="singleMenuItem">
@@ -24,7 +27,7 @@
               :title="menuItem.menuItemName"
               :subtitle="menuItem.menuItemDescription"
             >
-              <vs-button size="small" :color="getOrderStatusColor(menuItem.menuItemProgress)"  @click.stop="updateMenuItemProgress(order.orderId,menuItem.menuItemId)">{{getMenuItemStatus(menuItem.menuItemProgress)}}</vs-button>
+              <vs-button :id="'ItemProgressOrderID'+order.orderId+'ItemID'+menuItem.menuItemId" :data-progress="menuItem.menuItemProgress" size="small" :color="getStatusColor(menuItem.menuItemProgress)"  @click.stop="updateMenuItemProgress(order.orderId,menuItem.menuItemId)">{{getMenuItemStatus(menuItem.menuItemProgress)}}</vs-button>
             </vs-list-item>
         </div>
         </vs-list>
@@ -36,6 +39,8 @@
 
 <script>
 import moduleDataList from "@/store/orders/orderDataList.js";
+import $ from 'jquery';
+
 
 export default {
   data() {
@@ -57,8 +62,8 @@ export default {
     }
   },
   methods: {
-     increaseItemPercentage() {
-      this.$store.dispatch("orderList/increaseItemPercentage");
+     increaseItemPercentage(orderId, percentage) {
+      this.$store.dispatch("orderList/increaseItemPercentage", {orderId : orderId, percentage : percentage});
     },
       listOrders() {
       this.$store.dispatch("orderList/listOrders");
@@ -66,22 +71,46 @@ export default {
     closeCardAnimationDemo(card) {
       card.removeRefreshAnimation(3000);
     },
-    getOrderStatusColor(percentage){
+    getStatusColor(percentage){
       if(percentage < 10)
         return "danger"
-      if(percentage < 60)
+      if(percentage < 80)
         return "warning"
       return "success"
     },
     getMenuItemStatus(percentage){
       if(percentage < 10)
         return "Item In Progress"
-      if(percentage < 60)
+      if(percentage < 80)
         return "Item Nearly Complete"
       return "Item Complete"
     },
     updateMenuItemProgress(orderId, itemId){
-      this.increaseItemPercentage(orderId, itemId, 100);
+      var currentProgress = parseInt($("#ItemProgressOrderID"+orderId+'ItemID'+itemId).attr("data-progress"));
+  
+      let progress = currentProgress + (100/3);
+      if(progress > 99)
+        progress = 100;
+
+       $("#ItemProgressOrderID"+orderId+'ItemID'+itemId).attr("data-progress", progress);
+       $("#ItemProgressOrderID"+orderId+'ItemID'+itemId).attr("style","background:  rgba(var(--vs-"+this.getStatusColor(progress)+"),1)!important;");
+        //TODO:Change hover color as well
+       $("#ItemProgressOrderID"+orderId+'ItemID'+itemId + " .vs-button--text").text(this.getMenuItemStatus(progress));
+
+
+      if(currentProgress < 100){
+        let totalOrderProgress = parseInt($("#OrderCard"+orderId).attr("data-progress"));
+        let OrderMenuItemCount = parseInt($("#OrderCard"+orderId).attr("data-item-count"));
+
+        totalOrderProgress += (100/3)*(1/OrderMenuItemCount);
+        if(totalOrderProgress > 95)
+          totalOrderProgress = 100;
+
+        $("#OrderCard"+orderId).attr("data-progress", totalOrderProgress);
+        $("#OrderCard"+orderId+" .vs-progress--foreground").attr("style", "background: rgba(var(--vs-"+this.getStatusColor(totalOrderProgress)+"),1)!important;width: "+totalOrderProgress+"%");
+
+        this.increaseItemPercentage(orderId, totalOrderProgress);
+      }
     },
   },
   created() {

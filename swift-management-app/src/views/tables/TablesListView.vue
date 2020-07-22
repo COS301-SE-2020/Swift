@@ -17,10 +17,10 @@
           collapse-action
         >
           <vs-chip color="primary">Seats: {{table.numSeats}}</vs-chip>
-          <vs-chip color="primary">Checked In: 0</vs-chip>
+          <vs-chip color="primary">Checked In:  {{getCheckInCount(table.status)}}</vs-chip>
           <vs-divider border-style="solid" color="white"></vs-divider>
 		  <qrcode-vue class="tableQR" :value="table.qrcode" :size="qrSize" level="H"></qrcode-vue>
-          <vs-button :disabled="table.status === 'Vacant'" color="primary" type="filled">View order</vs-button>
+          <vs-button :disabled="table.status === 'Vacant'" color="primary" @click="goToOrder(table.tableId)" type="filled">View order</vs-button>
         </vx-card>
       </div>
 
@@ -99,7 +99,16 @@ export default {
       });
       this.addTablePopupActive = false;
       this.rowUpdateNum = this.rowUpdateNum + 1;
-    }
+	},
+	getCheckInCount(status){
+		if(status == "Vacant")
+			return 0
+		else 
+			return status.split(" ")[0];
+  },
+  goToOrder(tableId){
+    this.$router.push('/orders');
+  }
   },
   created() {
     if (!moduleDataList.isRegistered) {
