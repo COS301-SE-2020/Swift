@@ -37,20 +37,45 @@ const getMenuItems = async (restaurantId = 0, categoryId = 0) => db.query(
   + ' WHERE restaurantid = $1::integer AND categoryid = $2::integer;',
   [restaurantId, categoryId]
 )
-  .then((menuItems) => {
+  .then(async (menuItems) => {
     const menuItemsArr = [];
-    menuItems.rows.forEach((resMenuItem) => {
+    await Promise.all(menuItems.rows.map(async (resMenuItem) => {
       const menuItem = {};
       menuItem.menuItemId = resMenuItem.menuitemid;
       menuItem.menuItemName = resMenuItem.menuitemname;
       menuItem.menuItemDescription = resMenuItem.menuitemdescription;
       menuItem.price = resMenuItem.price;
       menuItem.estimatedWaitingTime = resMenuItem.estimatedwaitingtime;
+
+      // get menu item reviews
+      menuItem.reviews = await db.query(
+        'SELECT review.comment, review.reviewdatetime, review.public, review.adminid, review.response'
+          + ' FROM public.review WHERE review.menuitemid = $1::integer AND review.comment IS NOT NULL;',
+        [resMenuItem.menuitemid]
+      )
+        .then((res) => {
+          const reviewsArr = [];
+          res.rows.forEach((review) => {
+            const reviewItem = {};
+            reviewItem.comment = review.comment;
+            reviewItem.reviewDateTime = review.reviewdatetime;
+            reviewItem.public = review.public;
+            reviewItem.adminId = review.adminid;
+            reviewItem.response = review.response;
+            reviewsArr.push(reviewItem);
+          });
+          return reviewsArr;
+        })
+        .catch((err) => {
+          console.error('Query Error [Reviews - Get Menu Item Reviews]', err.stack);
+          return [];
+        });
+
       menuItem.attributes = resMenuItem.attributes;
       menuItem.arAsset = resMenuItem.arasset;
       menuItem.availability = resMenuItem.availability;
       menuItemsArr.push(menuItem);
-    });
+    }));
     return { menuItemsArr };
   })
   .catch((err) => {
