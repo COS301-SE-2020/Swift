@@ -522,6 +522,58 @@ module.exports = {
     // Invalid token
     return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
   },
+  createRestaurant: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'name')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'description')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'location')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'coverImageURL')
+      || Object.keys(reqBody).length !== 6) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      // check admin status
+      // TODO: check more admin information [security]
+      // TODO: allow user to be an admin for more than one restaurant
+      if (userToken.data.isAdmin) {
+        return db.query(
+          'INSERT INTO public.restaurant (restaurantName, restaurantDescription, location, coverimageurl)'
+          + ' VALUES ($1::text, $2::text, $3::text, $4::text)'
+          + ' RETURNING restaurantid',
+          [
+            reqBody.name,
+            reqBody.description,
+            reqBody.location,
+            reqBody.coverImageURL
+          ]
+        )
+          .then((res) => db.query(
+            'UPDATE public.adminuser SET restaurantid = $1::integer'
+            + ' WHERE userid = $2::integer;',
+            [res.rows[0].restaurantid, userToken.data.userId]
+          )
+            .then(() => response.status(201).send({ restaurantId: res.rows[0].restaurantid }))
+            .catch((err) => {
+              console.error('Query Error [Restaurant - Update Restaurant Admin]', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            }))
+          .catch((err) => {
+            console.error('Query Error [Restaurant - Create Restaurant]', err.stack);
+            return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+          });
+      }
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
   createTable: (reqBody, response) => {
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')
