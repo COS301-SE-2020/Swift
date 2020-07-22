@@ -26,6 +26,7 @@
     "perfect-scrollbar": "^1.4.0",
     "postcss-rtl": "^1.5.0",
     "prismjs": "^1.16.0",
+    "qrcode.vue": "^1.7.0",
     "vee-validate": "^2.2.8",
     "vue": "^2.6.10",
     "vue-acl": "4.0.7",
