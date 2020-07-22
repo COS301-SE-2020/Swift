@@ -140,9 +140,10 @@ module.exports = {
   },
   getMenu: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
+    const maxBodyKeys = Object.prototype.hasOwnProperty.call(reqBody, 'disableFields') ? 4 : 3;
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')
-      || Object.keys(reqBody).length < 3) {
+      || Object.keys(reqBody).length === maxBodyKeys) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 
