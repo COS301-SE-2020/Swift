@@ -370,10 +370,9 @@ module.exports = {
         'SELECT restaurantname FROM public.restaurant WHERE restaurant.restaurantid = $1::integer',
         [reqBody.restaurantId]
       )
-        // eslint-disable-next-line consistent-return
         .then((resCheck) => {
           if (resCheck.rows.length === 0) {
-            // restaurant and/or table does not exist
+            // restaurant does not exist
             return response.status(404).send({ status: 404, reason: 'Not Found' });
           }
 
@@ -420,6 +419,97 @@ module.exports = {
         })
         .catch((err) => {
           console.error('Query Error [List Orders - Check Restaurant Existence]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  updateOrderStatus: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'orderId')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'percentage')
+      || Object.keys(reqBody).length !== 4) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      return db.query(
+        'SELECT orderstatus FROM public.customerorder WHERE orderid = $1::integer;',
+        [reqBody.orderId]
+      )
+        .then((resCheck) => {
+          if (resCheck.rows.length === 0) {
+            // order does not exist
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          // check if the order has been paid for
+          if (resCheck.rows[0].orderstatus.toLowerCase() === 'paid') {
+            return response.status(205).send({ status: 205, reason: 'Order Already Paid' });
+          }
+
+          return db.query(
+            'UPDATE public.customerorder SET orderstatus = $1::text'
+            + ' WHERE orderid = $2::integer;',
+            [reqBody.percentage, reqBody.orderId]
+          )
+            .then(() => response.status(200).send())
+            .catch((err) => {
+              console.error('Query Error [Update Order Status - Update Order Status]', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
+        })
+        .catch((err) => {
+          console.error('Query Error [Update Order Status - Check Order Existence]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  getOrderStatus: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'orderId')
+      || Object.keys(reqBody).length !== 3) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      return db.query(
+        'SELECT orderstatus FROM public.customerorder WHERE orderid = $1::integer;',
+        [reqBody.orderId]
+      )
+        .then((res) => {
+          if (res.rows.length === 0) {
+            // order does not exist
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          if (Number.isNaN(parseInt(res.rows[0].orderstatus, 10))) {
+            return response.status(200).send({ orderStatus: res.rows[0].orderstatus });
+          }
+
+          return response.status(200).send({ orderStatus: parseInt(res.rows[0].orderstatus, 10) });
+        })
+        .catch((err) => {
+          console.error('Query Error [Update Order Status - Check Order Existence]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }

@@ -78,6 +78,14 @@ router.post('/', (req, res) => {
         restaurantController.listOrders(req.body, res);
         break;
       }
+      case 'orderStatusUpdate': {
+        restaurantController.updateOrderStatus(req.body, res);
+        break;
+      }
+      case 'orderStatus': {
+        restaurantController.getOrderStatus(req.body, res);
+        break;
+      }
       case 'payment': {
         restaurantController.orderPayment(req.body, res);
         break;
