@@ -31,7 +31,7 @@ const getOrderItems = async (oid = 0) => db.query(
   });
 
 // helper to get individual menu items
-const getMenuItems = async (restaurantId = 0, categoryId = 0) => db.query(
+const getMenuItems = (restaurantId = 0, categoryId = 0) => db.query(
   'SELECT menuitemid, menuitemname, menuitemdescription, price, estimatedwaitingtime,'
   + ' menuitem.attributes, arasset, availability FROM public.menuitem'
   + ' WHERE restaurantid = $1::integer AND categoryid = $2::integer;',
@@ -46,6 +46,24 @@ const getMenuItems = async (restaurantId = 0, categoryId = 0) => db.query(
       menuItem.menuItemDescription = resMenuItem.menuitemdescription;
       menuItem.price = resMenuItem.price;
       menuItem.estimatedWaitingTime = resMenuItem.estimatedwaitingtime;
+
+      // get menu item rating
+      menuItem.rating = await db.query(
+        'SELECT AVG(ratingscore) AS "rating" FROM public.review'
+        + ' WHERE menuitemid = $1::integer AND ratingscore IS NOT NULL;',
+        [resMenuItem.menuitemid]
+      )
+        .then((rtRes) => {
+          if (rtRes.rows.length === 0) {
+            return 0.0;
+          }
+
+          return parseFloat(rtRes.rows[0].rating);
+        })
+        .catch((err) => {
+          console.error('Query Error [Reviews - Get Menu Item Reviews]', err.stack);
+          return 0;
+        });
 
       // get menu item reviews
       menuItem.reviews = await db.query(
@@ -68,6 +86,31 @@ const getMenuItems = async (restaurantId = 0, categoryId = 0) => db.query(
         })
         .catch((err) => {
           console.error('Query Error [Reviews - Get Menu Item Reviews]', err.stack);
+          return [];
+        });
+
+      // get rating phrases
+      menuItem.ratingPhrases = await db.query(
+        'SELECT ratingphrase.phrasedescription, AVG(customerphraserating.ratingscore) AS "rating"'
+        + ' FROM public.customerphraserating'
+        + ' INNER JOIN public.ratingphrase ON ratingphrase.phraseid = customerphraserating.phraseid'
+        + ' INNER JOIN public.review ON customerphraserating.reviewid = review.reviewid'
+        + " WHERE review.menuitemid = $1::integer AND LOWER(ratingphrase.type) = 'item'"
+        + ' GROUP BY ratingphrase.phrasedescription;',
+        [resMenuItem.menuitemid]
+      )
+        .then((rpRes) => {
+          const ratingPhrassesArr = [];
+          rpRes.rows.forEach((ratePhrase) => {
+            const ratingphraseItem = {};
+            ratingphraseItem.phrase = ratePhrase.phrasedescription;
+            ratingphraseItem.rating = ratePhrase.rating;
+            ratingPhrassesArr.push(ratingphraseItem);
+          });
+          return ratingPhrassesArr;
+        })
+        .catch((err) => {
+          console.error('Query Error [Rating Phrases - Get Restaurant Ratings]', err.stack);
           return [];
         });
 
@@ -174,7 +217,8 @@ module.exports = {
     + ' FROM public.customerphraserating'
     + ' INNER JOIN public.ratingphrase ON ratingphrase.phraseid = customerphraserating.phraseid'
     + ' INNER JOIN public.review ON customerphraserating.reviewid = review.reviewid'
-    + ' WHERE review.restaurantid = $1::integer'
+    + " WHERE review.restaurantid = $1::integer AND (LOWER(ratingphrase.type) = 'restaurant'"
+    + " OR LOWER(ratingphrase.type) = 'waiter' OR LOWER(ratingphrase.type) = 'waitess')"
     + ' GROUP BY ratingphrase.phrasedescription;',
     [restaurantId]
   )
