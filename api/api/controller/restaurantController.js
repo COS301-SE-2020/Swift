@@ -146,7 +146,7 @@ module.exports = {
     const maxBodyKeys = Object.prototype.hasOwnProperty.call(reqBody, 'disableFields') ? 4 : 3;
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')
-      || Object.keys(reqBody).length === maxBodyKeys) {
+      || Object.keys(reqBody).length !== maxBodyKeys) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 
