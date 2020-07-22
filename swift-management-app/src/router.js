@@ -69,6 +69,16 @@ const router = new Router({
       component: () => import('@/layouts/full-page/FullPage.vue'),
       children: [
        //TODO: login will come here
+       {
+        path: '/login',
+        name: 'login',
+        component: () => import('./views/usermanagement/UMView.vue')
+      },
+      {
+        path: '/reset-password',
+        name: 'reset-password',
+        component: () => import('./views/usermanagement/UMResetPasswordView.vue')
+      },
       ]
     },
     //404 redirects to home for now

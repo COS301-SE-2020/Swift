@@ -1,12 +1,5 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 # swift-management
 =======
-# swift-app
->>>>>>> 9f9e61d... init management side of vue app
-=======
-# swift-management
->>>>>>> b54d8a4... fix readme
 
 ## Project setup
 ```
@@ -31,12 +24,3 @@ npm run test:unit
 ### Run your end-to-end tests
 ```
 npm run test:e2e
-<<<<<<< HEAD
-<<<<<<< HEAD
-```
-=======
-```
->>>>>>> 9f9e61d... init management side of vue app
-=======
-```
->>>>>>> 8f1dbc0... Fixing Typos

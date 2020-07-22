@@ -3,15 +3,7 @@
 
     <div class="text-right leading-tight hidden sm:block">
       <p class="font-semibold">{{ activeUserInfo.displayName }}</p>
-<<<<<<< HEAD
-<<<<<<< HEAD
       <small>Restaurant Owner</small>
-=======
-      <small>Available</small>
->>>>>>> 9f9e61d... init management side of vue app
-=======
-      <small>Restaurant Owner</small>
->>>>>>> b312b21... Change User Status
     </div>
 
     <vs-dropdown vs-custom-content vs-trigger-click class="cursor-pointer">
