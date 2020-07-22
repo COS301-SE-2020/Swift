@@ -1,8 +1,8 @@
 <template>
   <div class="vx-row">
     <div
-      v-for="order in tests"
-      :key="order.tableNumber"
+      v-for="order in orders"
+      :key="order.orderId"
       class="vx-col w-full md:w-1/3 lg:w-1/3 xl:w-1/3 mb-base"
     >
       <vx-card
@@ -11,10 +11,10 @@
         @refresh="closeCardAnimationDemo"
         collapse-action
       >
-        <vs-chip class="employeeName" color="success">Employee: {{order.employeeAssigned}}</vs-chip>
+        <vs-chip class="employeeName" color="success">Waiter: {{order.employeeAssigned}}</vs-chip>
         <vs-divider border-style="solid" color="white"></vs-divider>
         <p>Order Progress:</p>
-        <vs-progress :height="8" :percent="order.orderProgress" color="warning"></vs-progress>
+        <vs-progress :height="8" :percent="order.orderProgress" :color="getOrderStatusColor(order.orderProgress)"></vs-progress>
         <vs-list>
           <vs-list-header :title="'Order Total: R'+order.orderTotal"></vs-list-header>
           <div v-for="menuItem in order.items" :key="menuItem.menuItemName" class="singleMenuItem">
@@ -24,7 +24,7 @@
               :title="menuItem.menuItemName"
               :subtitle="menuItem.menuItemDescription"
             >
-              <vs-button size="small" color="warning">{{menuItem.menuItemStatus}}</vs-button>
+              <vs-button size="small" :color="getOrderStatusColor(menuItem.menuItemProgress)"  @click.stop="updateMenuItemProgress(order.orderId,menuItem.menuItemId)">{{getMenuItemStatus(menuItem.menuItemProgress)}}</vs-button>
             </vs-list-item>
         </div>
         </vs-list>
@@ -40,81 +40,68 @@ import moduleDataList from "@/store/orders/orderDataList.js";
 export default {
   data() {
     return {
-      tests: [
-        {
-          orderId: 5,
-          tableNumber: "23",
-          timePlaced: "2020-07-18T18:49:32.706Z",
-          employeeAssigned: "James Richards",
-          orderProgress: 0,
-          orderTotal: "394.40",
-          items: [
-            {
-              menuItemName: "Low-Carb Breakfast",
-              menuItemDescription:
-                "Two poached eggs, grilled halloumi, avo*, sautéed baby spinach & pan - roasted rosemary cherry tomatoes.",
-              menuItemPrice: 69.9,
-              menuItemQty: 2,
-              menuItemStatus: "Order Placed"
-            },
-            {
-              menuItemName: "Toasted Chicken Mayo & Easy Cappuccino",
-              menuItemDescription: null,
-              menuItemPrice: 69.9,
-              menuItemQty: 1,
-              menuItemStatus: "Order Placed"
-            },
-            {
-              menuItemName: "Buttermilk Fried Chicken",
-              menuItemDescription:
-                "Sesame-crusted buttermilk fried chicken strips with sweet chilli dipping sauce.",
-              menuItemPrice: 49.9,
-              menuItemQty: 2,
-              menuItemStatus: "Order Placed"
-            },
-            {
-              menuItemName: "BBQ",
-              menuItemDescription:
-                "Chargrilled beef patty with our own BBQ basting sauce, layered with gherkins, tomato, burger mayo, red onion & lettuce.",
-              menuItemPrice: 84.9,
-              menuItemQty: 1,
-              menuItemStatus: "Order Placed"
-            }
-          ]
-        },
-              ]
+      isMounted: false,
     };
   },
   computed: {
     orders() {
-     // return this.$store.state.orderDataList.orders;
+      if(this.$store.state.orderList)
+        return this.$store.state.orderList.orders;
+      else return null
+  },
+	orderCount () {
+		if(this.$store.state.orderList)
+			  return this.$store.state.orderList.orders.length
+		else
+			return null
     }
   },
   methods: {
+     increaseItemPercentage() {
+      this.$store.dispatch("orderList/increaseItemPercentage");
+    },
+      listOrders() {
+      this.$store.dispatch("orderList/listOrders");
+    },
     closeCardAnimationDemo(card) {
       card.removeRefreshAnimation(3000);
     },
-    listOrders() {
-      this.$store.dispatch("orderDataList/listOrders");
-    }
+    getOrderStatusColor(percentage){
+      if(percentage < 10)
+        return "danger"
+      if(percentage < 60)
+        return "warning"
+      return "success"
+    },
+    getMenuItemStatus(percentage){
+      if(percentage < 10)
+        return "Item In Progress"
+      if(percentage < 60)
+        return "Item Nearly Complete"
+      return "Item Complete"
+    },
+    updateMenuItemProgress(orderId, itemId){
+      this.increaseItemPercentage(orderId, itemId, 100);
+    },
   },
   created() {
     if (!moduleDataList.isRegistered) {
-      this.$store.registerModule("orderDataList", moduleDataList);
+      this.$store.registerModule("orderList", moduleDataList);
       moduleDataList.isRegistered = true;
-	}
-	this.listOrders();
-//	alert(this.$store.state.orderDataList.orders);
+  }
+  if(!this.orderCount > 0)
+    this.$vs.loading();
+
+  this.listOrders();
   },
-   watch: {
-    orders: {
-      immediate: true,
-      deep: false,
-      handler(newValue, oldValue) {
-        console.log(newValue);
-      }
-    }
+   mounted() {
+    this.isMounted = true;
   },
+  watch:{
+    orderCount (newCount, oldCount) {
+      this.$vs.loading.close();
+   }
+  }
 };
 </script>
 
