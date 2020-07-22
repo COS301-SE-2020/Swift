@@ -70,6 +70,18 @@ router.post('/', (req, res) => {
         restaurantController.getMenu(req.body, res);
         break;
       }
+      case 'createTable': {
+        restaurantController.createTable(req.body, res);
+        break;
+      }
+      case 'getTableQR': {
+        restaurantController.getTableQRCode(req.body, res);
+        break;
+      }
+      case 'getTableStatus': {
+        restaurantController.getTableStatus(req.body, res);
+        break;
+      }
       case 'addOrder': {
         restaurantController.addOrder(req.body, res);
         break;

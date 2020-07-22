@@ -1,3 +1,4 @@
+const { v4: uuidv4 } = require('uuid');
 const db = require('../db');
 const { validateToken, tokenState } = require('../helper/tokenHandler');
 const {
@@ -510,6 +511,181 @@ module.exports = {
         })
         .catch((err) => {
           console.error('Query Error [Update Order Status - Check Order Existence]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  createTable: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'tableNumber')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'seatCount')
+      || Object.keys(reqBody).length !== 5
+      || Number.isNaN(reqBody.seatCount)
+      || reqBody.seatCount < 1) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      return db.query(
+        'SELECT restaurantname FROM public.restaurant WHERE restaurant.restaurantid = $1::integer',
+        [reqBody.restaurantId]
+      )
+        .then((resCheck) => {
+          if (resCheck.rows.length === 0) {
+            // restaurant does not exist
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          const newTableStatus = 'Vacant';
+          // UUID version 4 with dashes removes
+          const qrcode = uuidv4().replace(/-/g, '');
+          return db.query(
+            'INSERT INTO public.restauranttable'
+            + ' (restaurantid, numseats, tablenumber, status, qrcode)'
+            + ' VALUES ($1::integer, $2::integer, $3::text, $4::text, $5::text)'
+            + ' RETURNING tableid;',
+            [
+              reqBody.restaurantId,
+              parseInt(reqBody.seatCount, 10),
+              reqBody.tableNumber,
+              newTableStatus,
+              qrcode
+            ]
+          )
+            .then((res) => response.status(201).send({ tableId: res.rows[0].tableid, qrcode }))
+            .catch((err) => {
+              console.error('Query Error [Restaurant - Create Restaurant Table]', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
+        })
+        .catch((err) => {
+          console.error('Query Error [Create Table - Check Restaurant Existence]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  getTableQRCode: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'tableId')
+      || Object.keys(reqBody).length !== 3) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      return db.query(
+        'SELECT qrcode FROM public.restauranttable WHERE tableid = $1::integer',
+        [reqBody.tableId]
+      )
+        .then((res) => {
+          if (res.rows.length === 0) {
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          return response.status(200).send({ qroce: res.rows[0].qrcode });
+        })
+        .catch((err) => {
+          console.error('Query Error [Restaurant - Get Table QR code]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  getTableStatus: async (reqBody, response) => {
+    // restaurant and table ids can not be used simultaneously
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      // eslint-disable-next-line no-mixed-operators
+      && (!Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'tableId'))
+      // eslint-disable-next-line no-mixed-operators
+      || Object.keys(reqBody).length !== 3) {
+      return response.status(400).send({ status: 400, reason: 'Bad Requesst' });
+    }
+
+    // Check token
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      let allTablesStatus = false;
+      if (Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')) {
+        allTablesStatus = true;
+      }
+
+      // check if restaurant or table exists
+      let ecQuery = 'SELECT tableid FROM public.restauranttable';
+      let queryID = null;
+      if (allTablesStatus) {
+        ecQuery += ' WHERE restaurantid = $1::integer';
+        queryID = reqBody.restaurantId;
+      } else {
+        ecQuery += ' WHERE tableid = $1::integer';
+        queryID = reqBody.tableId;
+      }
+
+      return db.query(ecQuery, [queryID])
+        .then((resCheck) => {
+          if (resCheck.rows.length === 0) {
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          let sQuery = 'SELECT tableid, tablenumber, numseats, status, qrcode';
+          sQuery += ' FROM public.restauranttable';
+          if (allTablesStatus) {
+            sQuery += ' WHERE restaurantid = $1::integer;';
+          } else {
+            sQuery += ' WHERE tableid = $1::integer;';
+          }
+
+          return db.query(sQuery, [queryID])
+            .then((tables) => {
+              const tableStatusResponse = {};
+              tableStatusResponse.result = [];
+              tables.rows.forEach((table) => {
+                const singleTableStatus = {};
+                singleTableStatus.tableId = table.tableid;
+                singleTableStatus.tableNumber = table.tablenumber;
+                singleTableStatus.numSeats = table.numseats;
+                if (table.status.toLowerCase() !== 'vacant') {
+                  singleTableStatus.status = `${table.status.split(',').length} Customers`;
+                } else {
+                  singleTableStatus.status = table.status;
+                }
+
+                singleTableStatus.qrcode = table.qrcode;
+                tableStatusResponse.result.push(singleTableStatus);
+              });
+              return response.status(200).send(tableStatusResponse);
+            })
+            .catch((err) => {
+              console.error('Query Error [Table Staus - Get All Tables Statuses]', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
+        })
+        .catch((err) => {
+          console.error('Query Error [Table Status  - Check Restaurant/Table Exists]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }
