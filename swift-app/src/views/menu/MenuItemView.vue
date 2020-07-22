@@ -79,12 +79,16 @@
             <v-row>
               <v-col cols="12" class="d-flex align-center justify-center">
                 <v-slide-x-transition>
-                  <div v-if="expandOrderBtn" id="orderButton">
-                    <v-btn @click="changeOrderBtn" rounded class="py-6 mt-5" color="primary" width="150px">Add To Order</v-btn>
-                  </div>
-                  <div v-if="!expandOrderBtn">
-                    <v-btn @click="changeOrderBtn" rounded class="py-6 mt-5" color="grey">Remove</v-btn>
-                    <v-btn @click="goToCart" rounded class="py-6 mt-5 ml-5" color="accent">R85 | Place Order</v-btn>
+                  <div v-if="expandOrderBtn">
+                    <!-- <v-btn @click="changeOrderBtn" rounded class="py-6 mt-5" color="grey">Remove</v-btn> -->
+                    <v-btn @click="quantity--" fab elevation="2" width="22px" height="22px" class="mr-2">
+                        <v-icon size="15px">mdi-minus</v-icon>
+                    </v-btn>
+                    <div class="body-2 secondary--text" style="display: inline;">{{quantity}}</div>
+                    <v-btn @click="quantity++" fab elevation="2" width="22px" height="22px" class="ml-2">
+                        <v-icon size="15px">mdi-plus</v-icon>
+                    </v-btn>
+                    <v-btn @click="goToCart" rounded class="py-6 mt-5 ml-5" color="accent">R {{calculatePrice(newMenuItem.price)}} | Add to order</v-btn>
                   </div>
                 </v-slide-x-transition>
               </v-col>
@@ -286,6 +290,7 @@ $('.commentInfo').text($('.commentInfo').text().substring(0,200))
 export default {
   data() {
     return {
+      quantity: 1,
       activeComments: [],
       menuItemId: this.$route.params.itemid,
       expandOrderBtn: true,
@@ -420,6 +425,9 @@ export default {
       else 
         return false
     },
+    calculatePrice (price) {
+      return (price * this.quantity).toFixed(2)
+    },
     limitComment: function (userInput, index) {
       if (userInput.comment.length > 150 && !this.activeComments.includes(index)) {
         var truncated = userInput.comment.substr(0,150) + '...';
@@ -470,7 +478,6 @@ export default {
         return { color: 'primary', icon: 'mdi-heart' }
       }
     },
-    
     ...mapGetters({
       checkedIn: "RestaurantsStore/getCheckInFlag",
       menu: "MenuStore/getMenu"
