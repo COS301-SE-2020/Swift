@@ -1,6 +1,7 @@
 // State object
 const initialState = () => ({
   orderInfo: {},
+  orderHistory: {},
   orderTotal: 0,
   orderFlag: false
 });
@@ -16,6 +17,10 @@ const getters = {
     return state.orderInfo;
   },
 
+  getOrderHistory(state) {
+    return state.orderHistory;
+  },
+
   getOrderTotal(state) {
     return state.orderTotal;
   },
@@ -28,17 +33,15 @@ const getters = {
 // Actions 
 const actions = {
   submitOrder({commit}, orderInfo) {
-    /* var token = this.getters['CustomerStore/getToken']
-    axios.post('https://api.swiftapp.ml', 
-      {
-        "requestType": "addOrder",
-        "token": token,
-        "orderInfo": this.getOrderInfo(),
-      }
-    ).then(result => {
-      console.log("MENU: ", result.data)
-      commit('SAVE_MENU', result.data);
-    }).catch(({ response }) => {}); */
+  },
+
+  initOrderHistory({commit, state}) {
+    var orderHistory = this.getters['CustomerStore/getCustomerOrderHistory']
+    commit('SET_ORDER_HISTORY', orderHistory);
+  },
+
+  updateOrderHistory({commit, state}) {
+    // commit('SET_ORDER_HISTORY', orderHistory);
   },
 
   // Used to reset the store
@@ -55,6 +58,10 @@ const actions = {
 const mutations = {
   addItemToOrderInfo(state, data) {
     // state.orderTotal = data;
+  },
+
+  SET_ORDER_HISTORY(state, orderHistory) {
+    state.orderHistory = orderHistory;
   },
 
   // Used to reset the store

@@ -14,6 +14,9 @@ const getters = {
   getCustomerProfile( state ) {
     return state.customer;
   },
+  getCustomerOrderHistory( state ) {
+    return state.customer.orderHistory;
+  },
   getToken( state ) {
     return state.token;
   },
@@ -37,6 +40,7 @@ const actions = {
       commit('SAVE_TOKEN', result.data.token);
       commit('SAVE_CUSTOMER', result.data);
       this.dispatch('RestaurantsStore/allRestaurants');
+      this.dispatch('OrderStore/initOrderHistory');
     }).catch(({ response }) => {
     });
   },

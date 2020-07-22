@@ -37,7 +37,6 @@ const actions = {
     }
     ).then(result => {
       commit('SAVE_ALL_RESTAURANTS', result.data.restaurants);
-      console.log(result.data.restaurants);
     }).catch(({ response }) => {
     });
   },

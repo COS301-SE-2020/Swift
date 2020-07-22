@@ -468,7 +468,6 @@ export default {
       )
     },
     newMenuItem() {
-      console.log("id" + this.findCategory)
       return this.findCategory.menuItems.find(menuItem => menuItem.menuItemId === parseInt(this.menuItemId) )
     },
     activateFavourite () {
