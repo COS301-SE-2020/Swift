@@ -12,16 +12,17 @@ const tokenKey = require('../tokenKey.json');
 const privateKey = JWK.asKey(tokenKey);
 
 const tokenState = {
-  valid: 0,
-  invalid: 1,
-  refresh: 2
+  VALID: 0,
+  INVALID: 1,
+  REFRESH: 2
 };
 
 module.exports = {
   tokenState,
-  generateToken: (userId) => {
+  generateToken: (userId, isAdmin = false) => {
     const payload = {
       userId,
+      isAdmin,
       refreshToken: b62.encode(Buffer.from(uuidv4(), 'utf8'))
     };
 
@@ -48,23 +49,23 @@ module.exports = {
 
       // Token valid
       if (!decodeToken) {
-        return { state: tokenState.valid, data: null };
+        return { state: tokenState.VALID, data: null };
       }
-      return { state: tokenState.valid, data: tokenData };
+      return { state: tokenState.VALID, data: tokenData };
     } catch (err) {
       if (err instanceof errors.JOSEError && err.code === 'ERR_JWT_EXPIRED') {
         // Token expired, request refresh token
         if (!decodeToken) {
-          return { state: tokenState.refresh, data: null };
+          return { state: tokenState.REFRESH, data: null };
         }
-        return { state: tokenState.refresh, data: JWT.decode(decryptedToken) };
+        return { state: tokenState.REFRESH, data: JWT.decode(decryptedToken) };
       }
 
       // Token invalid - reject
       if (!decodeToken) {
-        return { state: tokenState.invalid, data: null };
+        return { state: tokenState.INVALID, data: null };
       }
-      return { state: tokenState.invalid, data: null };
+      return { state: tokenState.INVALID, data: null };
     }
   }
 };

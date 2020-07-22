@@ -26,11 +26,10 @@ module.exports = {
 
     // Check if user exists
     // TODO: Check if account is active
-    // TODO: Get admin/employee info from db
     return db.query(
       'SELECT person.userid, person.name, person.surname, person.email, person.password,'
       + ' customer.theme FROM public.person'
-      + ' FULL OUTER JOIN public.customer ON customer.userid = person.userid'
+      + ' INNER JOIN public.customer ON customer.userid = person.userid'
       + ' WHERE person.email = $1::text',
       [email]
     )
@@ -108,7 +107,7 @@ module.exports = {
 
     // Check token validity
     const userToken = validateToken(reqBody.token, true);
-    if (userToken.state === tokenState.valid) {
+    if (userToken.state === tokenState.VALID) {
       return db.query(
         'SELECT menuitemid FROM public.menuitem WHERE menuitemid = $1::integer;',
         [reqBody.menuItemId]
@@ -144,7 +143,7 @@ module.exports = {
         });
     }
 
-    if (userToken.state === tokenState.refresh) {
+    if (userToken.state === tokenState.REFRESH) {
       return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
     }
 
@@ -160,7 +159,7 @@ module.exports = {
 
     // Check token validity
     const userToken = validateToken(reqBody.token, true);
-    if (userToken.state === tokenState.valid) {
+    if (userToken.state === tokenState.VALID) {
       return db.query(
         'DELETE FROM public.favourite WHERE menuitemid = $1::integer AND customerid = $2::integer;',
         [reqBody.menuItemId, userToken.data.userId]
@@ -177,7 +176,7 @@ module.exports = {
         });
     }
 
-    if (userToken.state === tokenState.refresh) {
+    if (userToken.state === tokenState.REFRESH) {
       return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
     }
 
@@ -193,12 +192,12 @@ module.exports = {
 
     // Test token
     const userToken = validateToken(reqBody.token, true);
-    if (userToken.state === tokenState.valid) {
+    if (userToken.state === tokenState.VALID) {
       // Token still valid
       return response.status(204).send({ status: 204, reason: 'Token Valid' });
     }
 
-    if (userToken.state === tokenState.invalid) {
+    if (userToken.state === tokenState.INVALID) {
       // Invalid token
       return response.status(403).send({ status: 403, reason: 'Invalid Token Pair' });
     }
@@ -279,18 +278,16 @@ module.exports = {
         }
 
         // Create new account
-        // Customer account
-        // TODO: Create admin/employee account
         // TODO: Generate and send user account activation email
         return accCreator.createCustomer(newUserData)
           .then(() => response.status(201).send({ status: 201, reason: 'Customer Account Created' }))
           .catch((err) => {
-            console.error('Query Error [Register - Create Customer Account]', err.stack);
+            console.error('Query Error [Register Customer - Create Customer Account]', err.stack);
             return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
           });
       })
       .catch((err) => {
-        console.error('Query Error [Register - Check Account Availability]', err.stack);
+        console.error('Query Error [Register Customer - Check Account Availability]', err.stack);
         return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
       });
   }

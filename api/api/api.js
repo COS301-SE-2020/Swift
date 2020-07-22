@@ -1,4 +1,5 @@
 const express = require('express');
+const adminController = require('./controller/adminController');
 const restaurantController = require('./controller/restaurantController');
 const userController = require('./controller/userController');
 
@@ -33,8 +34,16 @@ router.post('/', (req, res) => {
         userController.registerUser(req.body, res);
         break;
       }
+      case 'registerAdmin': {
+        adminController.registerAdmin(req.body, res);
+        break;
+      }
       case 'login': {
         userController.loginUser(req.body, res);
+        break;
+      }
+      case 'loginAdmin': {
+        adminController.loginAdmin(req.body, res);
         break;
       }
       case 'refresh': {

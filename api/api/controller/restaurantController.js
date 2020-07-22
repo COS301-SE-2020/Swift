@@ -7,6 +7,8 @@ const {
   getOrderHistory
 } = require('../helper/objectBuilder');
 
+// TODO: Check that the restaurant id is not a placeholder (id == 0)
+
 module.exports = {
   getRestaurantList: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
@@ -17,9 +19,10 @@ module.exports = {
 
     const userToken = validateToken(reqBody.token);
 
-    if (userToken.state === tokenState.valid) {
+    if (userToken.state === tokenState.VALID) {
       return db.query(
-        'SELECT restaurantid, restaurantname, location, coverimageurl FROM public.restaurant;'
+        'SELECT restaurantid, restaurantname, location, coverimageurl FROM public.restaurant'
+        + ' WHERE restaurantid != 0;'
       )
         .then((res) => {
           const restaurantResponse = {};
@@ -62,7 +65,7 @@ module.exports = {
         });
     }
 
-    if (userToken.state === tokenState.refresh) {
+    if (userToken.state === tokenState.REFRESH) {
       return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
     }
 
@@ -79,7 +82,7 @@ module.exports = {
 
     // Check token validity
     const userToken = validateToken(reqBody.token, true);
-    if (userToken.state === tokenState.valid) {
+    if (userToken.state === tokenState.VALID) {
       return db.query(
         'SELECT tableid, restaurantid, numseats, status FROM public.restauranttable'
         + ' WHERE qrcode = $1::text;',
@@ -131,7 +134,7 @@ module.exports = {
         });
     }
 
-    if (userToken.state === tokenState.refresh) {
+    if (userToken.state === tokenState.REFRESH) {
       return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
     }
 
@@ -149,7 +152,7 @@ module.exports = {
 
     // Check token
     const userToken = validateToken(reqBody.token);
-    if (userToken.state === tokenState.valid) {
+    if (userToken.state === tokenState.VALID) {
       // check if restaurant exists
       return db.query(
         'SELECT restaurantname, location, coverimageurl FROM public.restaurant'
@@ -225,7 +228,7 @@ module.exports = {
         });
     }
 
-    if (userToken.state === tokenState.refresh) {
+    if (userToken.state === tokenState.REFRESH) {
       return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
     }
 
@@ -243,7 +246,7 @@ module.exports = {
     // Check token
     const userToken = validateToken(reqBody.token, true);
     // TODO: Check if refresh token is valid for extra security
-    if (userToken.state === tokenState.valid) {
+    if (userToken.state === tokenState.VALID) {
       const { orderInfo } = reqBody;
       const customerId = userToken.data.userId;
 
@@ -343,7 +346,7 @@ module.exports = {
         });
     }
 
-    if (userToken.state === tokenState.refresh) {
+    if (userToken.state === tokenState.REFRESH) {
       return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
     }
 
@@ -364,7 +367,7 @@ module.exports = {
     // Check token
     const userToken = validateToken(reqBody.token, true);
     // TODO: Check if refresh token is valid for extra security
-    if (userToken.state === tokenState.valid) {
+    if (userToken.state === tokenState.VALID) {
       // check if order exists
       return db.query(
         'SELECT orderstatus FROM public.customerorder'
@@ -410,7 +413,7 @@ module.exports = {
         });
     }
 
-    if (userToken.state === tokenState.refresh) {
+    if (userToken.state === tokenState.REFRESH) {
       return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
     }
 
