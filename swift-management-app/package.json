@@ -21,6 +21,7 @@
     "file-saver": "2.0.1",
     "firebase": "^7.16.1",
     "instantsearch.css": "^7.3.1",
+    "jquery": "^3.5.1",
     "jsonwebtoken": "^8.5.1",
     "material-icons": "^0.3.1",
     "perfect-scrollbar": "^1.4.0",
