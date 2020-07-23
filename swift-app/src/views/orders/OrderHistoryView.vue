@@ -145,7 +145,7 @@ export default {
 
     itemsForStatus(status) {
       return this.orderHistory.filter(orderItem => {
-        if (status == 'Completed' && orderItem != null) {
+        if (status == 'Completed') {
           return orderItem.restaurantName.toLowerCase().includes(this.search != null ? this.search.toLowerCase() : '') && (orderItem.orderStatus == "Paid" || orderItem.orderStatus == "100")
         } else { 
           return orderItem.restaurantName.toLowerCase().includes(this.search != null ? this.search.toLowerCase() : '') && (parseInt(orderItem.orderStatus) < 100 || orderItem.orderStatus == "in-progress")
@@ -162,12 +162,12 @@ export default {
     updateOrderStatus() {
       var self = this;
       setInterval(() => { 
-        if (self.getOrderStatusItem() != null) {
+        // if (self.getOrderStatusItem() != null) {
           var data = {
             "orderId": self.getOrderStatusItem().orderId
           }
           self.orderStatus(data)
-        }
+        // }
       }, 3000);  
     },
     ...mapActions({

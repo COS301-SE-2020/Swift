@@ -59,6 +59,7 @@ const actions = {
   retrieveOrderStatus({commit}, data) {
     var token = this.getters['CustomerStore/getToken'];
     var orderId = data.orderId;
+    console.log(orderId)
     axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "orderStatus",
@@ -71,7 +72,7 @@ const actions = {
         "orderStatus": result.data.orderStatus 
       }
       
-      // commit('UPDATE_ORDER_STATUS', data);
+      commit('UPDATE_ORDER_STATUS', data);
     }).catch(({ response }) => {
     });
   },
