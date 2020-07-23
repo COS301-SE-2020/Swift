@@ -23,32 +23,34 @@
             <v-text-field class="searchBarBg" v-model="search" rounded clearable flat solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search"></v-text-field>
           </div>
           <template>
-            <div v-for="status in statusList" :key="status" v-if="itemsForStatus(status).length != 0">
-              <v-subheader style="height: 20px" class="mt-3 mb-1 pl-1" v-text="status"></v-subheader>
-              <v-list v-for="item in itemsForStatus(status)" :key="item.restaurantName" class="py-2">
-                <v-card>
-                  <v-list-item ripple class="pt-1 pr-0">
-                    <v-list-item-content>
-                      <v-list-item-title class="mb-2" v-text="item.restaurantName"></v-list-item-title>
-                      <div v-for="(orderItem, index) in item.items" :key="index">
-                        <v-list-item-subtitle>- {{orderItem.menuItemName}}</v-list-item-subtitle>
-                      </div>
-                    </v-list-item-content>
-                    <v-list-item-action class="mr-3">
-                      <v-list-item-action-text v-text="item.orderDateTime"></v-list-item-action-text>
-                      <v-list-item-action-text class="subtitle-1">R{{item.total}}0</v-list-item-action-text>
-                    </v-list-item-action>
-                  </v-list-item>
-                  <v-row class="pt-0">
-                    <v-col cols="12" align="end" class="pt-0 pr-5">
-                      <v-btn v-if="parseInt(item.orderStatus) < 100" rounded small color="primary" class="mr-2">Track Order</v-btn>
-                      <v-btn v-else-if="item.orderStatus == '100'" rounded small color="primary" class="mr-2">Pay</v-btn>
-                      <v-btn v-else rounded small color="primary" class="mr-2">Rate Order</v-btn>
-                      <v-btn rounded small>View</v-btn>
-                    </v-col>
-                  </v-row>
-                </v-card>
-              </v-list>
+            <div v-for="status in statusList" :key="status">
+              <div v-if="itemsForStatus(status).length != 0">
+                <v-subheader style="height: 20px" class="mt-3 mb-1 pl-1" v-text="status"></v-subheader>
+                <v-list v-for="(item, index) in itemsForStatus(status)" :key="index" class="py-2">
+                  <v-card>
+                    <v-list-item ripple class="pt-1 pr-0">
+                      <v-list-item-content>
+                        <v-list-item-title class="mb-2" v-text="item.restaurantName"></v-list-item-title>
+                        <div v-for="(orderItem, index) in item.items" :key="index">
+                          <v-list-item-subtitle>- {{orderItem.menuItemName}}</v-list-item-subtitle>
+                        </div>
+                      </v-list-item-content>
+                      <v-list-item-action class="mr-3">
+                        <v-list-item-action-text v-text="item.orderDateTime"></v-list-item-action-text>
+                        <v-list-item-action-text class="subtitle-1">R{{item.total}}0</v-list-item-action-text>
+                      </v-list-item-action>
+                    </v-list-item>
+                    <v-row class="pt-0">
+                      <v-col cols="12" align="end" class="pt-0 pr-5">
+                        <v-btn v-if="parseInt(item.orderStatus) < 100" rounded small color="primary" class="mr-2">Track Order</v-btn>
+                        <v-btn v-else-if="item.orderStatus == '100'" rounded small color="primary" class="mr-2">Pay</v-btn>
+                        <v-btn v-else rounded small color="primary" class="mr-2">Rate Order</v-btn>
+                        <v-btn rounded small>View</v-btn>
+                      </v-col>
+                    </v-row>
+                  </v-card>
+                </v-list>
+              </div>
             </div>
           </template>
 
@@ -76,7 +78,7 @@
           <v-row class="my-0 py-0 mx-0">
             <v-col cols="6" class="py-0 px-0 mx-0" style="display: table;">
               <div style="height: 0; padding: 43% 0;">
-                <v-progress-linear value="33" style="display: block; transform-origin: top right; transform: rotate(90deg); margin-top: 50%; white-space: nowrap; progressBar"></v-progress-linear>
+                <v-progress-linear :value="orderHistory[0].orderStatus" style="display: block; transform-origin: top right; transform: rotate(90deg); margin-top: 50%; white-space: nowrap; progressBar"></v-progress-linear>
               </div>
             </v-col>
             <v-col cols="6" class="pb-0 pl-5">
@@ -131,9 +133,9 @@ export default {
     itemsForStatus(status) {
       return this.orderHistory.filter(orderItem => {
         if (status == 'Completed')
-          return orderItem.restaurantName.toLowerCase().includes(this.search.toLowerCase()) && (orderItem.orderStatus == "Paid" || orderItem.orderStatus == "100")
+          return orderItem.restaurantName.toLowerCase().includes(this.search != null ? this.search.toLowerCase() : '') && (orderItem.orderStatus == "Paid" || orderItem.orderStatus == "100")
         else 
-          return orderItem.restaurantName.toLowerCase().includes(this.search.toLowerCase()) && (parseInt(orderItem.orderStatus) < 100 || orderItem.orderStatus == "in-progress")
+          return orderItem.restaurantName.toLowerCase().includes(this.search != null ? this.search.toLowerCase() : '') && (parseInt(orderItem.orderStatus) < 100 || orderItem.orderStatus == "in-progress")
       }) 
     },
     updateOrderStatus() {
@@ -143,10 +145,11 @@ export default {
           "orderId": self.orderHistory[0].orderId
         }
         self.orderStatus(data)
-      }, 2000);  
+      }, 3000);  
     },
     ...mapActions({
       orderStatus: 'OrderStore/retrieveOrderStatus',
+      // getStatus: 'OrderStore/getOrderStatus',
     }),
   },
   computed: {
@@ -154,19 +157,6 @@ export default {
       return this.orderHistory.filter(orderItem => {
         return orderItem.restaurantName.toLowerCase().includes(this.search.toLowerCase())
       })
-    },
-    updateStatus() {
-      /* setInterval(() => { 
-        // this.methods.updateOrderStatus(16)
-        var data = {
-          "orderId": ptr.orderHistory[0].orderId
-        }
-        ptr.orderStatus(data)
-      }, 3000); */
-      var data = {
-        "orderId": this.orderHistory[0].orderId
-      }
-      this.orderStatus(data)
     },
     ...mapGetters({
       orderHistory: 'OrderStore/getOrderHistory',
@@ -183,7 +173,7 @@ export default {
       }, 1000);
     },
   } */
-  beforeMount() {
+  beforeMount: function() {
     this.updateOrderStatus()
   },
   

@@ -64,8 +64,9 @@ const actions = {
         "orderId": orderId,
         "orderStatus": result.data.orderStatus 
       }
-
+      
       commit('UPDATE_ORDER_STATUS', data);
+      console.log(result.data.orderStatus);
     }).catch(({ response }) => {
     });
   },
