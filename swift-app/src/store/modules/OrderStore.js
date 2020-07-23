@@ -66,7 +66,6 @@ const actions = {
       }
       
       commit('UPDATE_ORDER_STATUS', data);
-      console.log(result.data.orderStatus);
     }).catch(({ response }) => {
     });
   },

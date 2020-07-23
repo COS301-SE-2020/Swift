@@ -78,13 +78,13 @@
           <v-row class="my-0 py-0 mx-0">
             <v-col cols="6" class="py-0 px-0 mx-0" style="display: table;">
               <div style="height: 0; padding: 43% 0;">
-                <v-progress-linear :value="orderHistory[0].orderStatus" style="display: block; transform-origin: top right; transform: rotate(90deg); margin-top: 50%; white-space: nowrap; progressBar"></v-progress-linear>
+                <v-progress-linear stream buffer-value="0" :value="getOrderStatusItem().orderStatus == 'in-progress' ? 0 : getOrderStatusItem().orderStatus" style="display: block; transform-origin: top right; transform: rotate(90deg); margin-top: 50%; white-space: nowrap; progressBar"></v-progress-linear>
               </div>
             </v-col>
             <v-col cols="6" class="pb-0 pl-5">
                 <div class="mt-2 body-1 secondary--text d-flex justify-center">Complete</div>
-                <div class="secondary--text d-flex justify-center" style="font-size:35px">{{orderHistory[0].orderStatus}}%</div>
-                <!-- <div class="body-2 secondary--text d-flex justify-center">{{0}}/{{orderHistory[0].items.length}} Items completed</div> -->
+                <div class="secondary--text d-flex justify-center" style="font-size:35px">{{getOrderStatusItem().orderStatus == 'in-progress' ? 0 : getOrderStatusItem().orderStatus}}%</div>
+                <!-- <div class="body-2 secondary--text d-flex justify-center">{{0}}/{{getOrderStatusItem().items.length}} Items completed</div> -->
             </v-col>
           </v-row>
 
@@ -138,11 +138,16 @@ export default {
           return orderItem.restaurantName.toLowerCase().includes(this.search != null ? this.search.toLowerCase() : '') && (parseInt(orderItem.orderStatus) < 100 || orderItem.orderStatus == "in-progress")
       }) 
     },
+    getOrderStatusItem() {
+      return this.orderHistory.find(orderItem => {
+        return parseInt(orderItem.orderStatus) < 100 || orderItem.orderStatus == "in-progress"
+      })
+    },
     updateOrderStatus() {
       var self = this;
       setInterval(() => { 
         var data = {
-          "orderId": self.orderHistory[0].orderId
+          "orderId": self.getOrderStatusItem().orderId
         }
         self.orderStatus(data)
       }, 3000);  
