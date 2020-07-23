@@ -20,7 +20,7 @@
             <v-list-item-subtitle v-html="item.menuItemDescription"></v-list-item-subtitle>
           </v-list-item-content>
           <v-list-item-action class="ml-0 mt-0">
-            <v-btn icon>
+            <v-btn icon @click="removeFav(item.menuItemId)">
               <v-icon color="primary">mdi-heart</v-icon>
             </v-btn>
           </v-list-item-action>
@@ -51,17 +51,22 @@ export default {
     }
   },
   methods: {
-    removeFavourite() {
-      removeFavourite
-    }
+    removeFav(menuItemId) {
+      // console.log(menuItemId)
+      let data = {
+        menuItemId: menuItemId
+      }
+      this.removeFavourite(data)
+    },
+    ...mapActions({
+      removeFavourite: 'CustomerStore/removeFavourite',
+    }),
   },
   computed: {
     ...mapGetters({
       customerInfo: 'CustomerStore/getCustomerProfile',
     }),
-    ...mapActions({
-      // removeFavourite: 'CustomerStore/removeFavourite',
-    }),
+    
     filteredKeys () {
       return this.keys.filter(key => key !== `menuItemName`)
     },
