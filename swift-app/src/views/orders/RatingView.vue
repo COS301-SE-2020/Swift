@@ -199,20 +199,10 @@ export default {
         },
         {
           type: 'Items',
-          info: [
-            {
-              name: 'Avo & Egg on Toast',
-              img: ''
-            },
-            {
-              name: 'Filter Coffee',
-              img: ''
-            },
-            {
-              name: 'Fruit Salad',
-              img: ''
-            }
-          ],
+          info: [{
+            name: 'Classic Eggs Benedict',
+            img: '',
+          },],
           ratingPhrases: [
             'Taste', 'Presentation', 'Value'
           ],
@@ -256,7 +246,10 @@ export default {
     },
     backNavigation () {
       this.$router.go(-1)
-    }
+    },
+    ...mapGetters({
+      orderHistory: 'OrderStore/getOrderHistory',
+    }),
   },
   computed: {
     selectTab () {
@@ -266,7 +259,17 @@ export default {
         return 'mdi-heart'
       }
     },
+    filteredList: function (id) {
+      return this.orderHistory().find(orderItem => {
+        return orderItem.orderId == id
+      })
+    },
+    
   },
+  mounted: function () {
+    this.rating[0].info.name = this.filteredList(16).restaurantName
+    this.rating[2].info.name = this.filteredList(16).orderEmployeeName + ' ' + this.filteredList(16).orderEmployeeSurname
+  }
 };
 </script>
 
