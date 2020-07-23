@@ -4,7 +4,7 @@ import OrdersView from '../views/orders/OrdersView.vue'
 import OrderHistoryView from '../views/orders/OrderHistoryView.vue'
 import RatingView from '../views/orders/RatingView.vue'
 import CartView from '../views/orders/CartView.vue'
-
+import PaymentView from '../views/orders/PaymentView.vue'
 import FavouritesView from '../views/favourites/FavouritesView.vue'
 
 import CheckInView from '../views/home/CheckInView.vue'

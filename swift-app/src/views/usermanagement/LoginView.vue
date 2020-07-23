@@ -10,9 +10,7 @@
       </v-col>
       <v-col cols="10" >
         <v-text-field v-model="password" :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'" :error-messages="passwordErrors" :type="showPassword ? 'text' : 'password'" label="Password" required @blur="$v.password.$touch()" @click:append="showPassword = !showPassword"></v-text-field>
-        <v-btn text @click="forgotPass" class="pr-0" style="float: right !important;">
-          <p class="body-2 float-right" color="secondary"><u>Forgot Password?</u></p>
-        </v-btn>
+        <p class="body-2 float-right" color="secondary"><u>Forgot Password?</u></p>
       </v-col>
     </div>
     <div class="row d-flex flex-column align-center mx-8">
@@ -58,8 +56,8 @@ export default {
     return {
       showPassword: false,
       showPlaceholder: false,
-      password: 'john123',
-      email: 'john@doe.com',
+      password: '',
+      email: '',
       isLoading: false,
       errorMsg: '',
     }
@@ -67,9 +65,6 @@ export default {
   methods: {
     goToRegister () {
       this.$router.push('/register')
-    },
-    forgotPass () {
-      this.$router.push('/forgotPassword')
     },
     loginCustomer ()  {
       this.isLoading = true
@@ -85,6 +80,14 @@ export default {
         
         this.login(data)
         this.$router.push('/')
+
+       /*  if (this.isAuthenticated) {
+          this.isLoading = false
+          // this.$router.push('/')
+        } else if (!this.isAuthenticated) {
+          // this.isLoading = false
+          // this.errorMsg = 'Your email or password is incorrect.'
+        } */
       }
     },
     ...mapGetters({

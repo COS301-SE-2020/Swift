@@ -4,7 +4,6 @@ import axios from 'axios'
 const initialState = () => ({
   customer: {},
   isAuthenticated: false,
-  token: null,
 });
 
 const state = initialState();
@@ -14,12 +13,6 @@ const getters = {
   getCustomerProfile( state ) {
     return state.customer;
   },
-  getCustomerOrderHistory( state ) {
-    return state.customer.orderHistory;
-  },
-  getToken( state ) {
-    return state.token;
-  },
   isAuthenticated(state) {
     return state.isAuthenticated;
   }
@@ -27,21 +20,22 @@ const getters = {
 
 // Actions 
 const actions = {
-  login({commit, dispatch}, data) {
+  login({commit}, data) {
     axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "login",
-        // "email": data.email,
-        "email": "john@doe.com",
-        // "password": data.password
-        "password": "john123"
+        "email": data.email,
+        // "email": "johnmay@gmail.com",
+        "password": data.password
+        // "password": "john123"
       }
     ).then(result => {
-      commit('SAVE_TOKEN', result.data.token);
       commit('SAVE_CUSTOMER', result.data);
-      this.dispatch('RestaurantsStore/allRestaurants');
-      this.dispatch('OrderStore/initOrderHistory');
+      commit('SET_AUTHENTICATION', true);
     }).catch(({ response }) => {
+      if(response.status == 400 || response.status == 403 || response.status == 404){
+        commit('SET_AUTHENTICATION', false);
+      } 
     });
   },
 
@@ -105,11 +99,14 @@ const mutations = {
     state.customer = customer;
   },
 
+<<<<<<< HEAD
   UPDATE_FAVOURITES(state, data) {
     state.customer.favourites = data;
   },
 
 
+=======
+>>>>>>> master
   SET_AUTHENTICATION(state, authentication_state) {
     state.isAuthenticated = authentication_state;
   },

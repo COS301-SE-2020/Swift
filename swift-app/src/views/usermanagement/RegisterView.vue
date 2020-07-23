@@ -73,7 +73,7 @@ export default {
         }
         
         this.register(data)
-        this.$router.push('/location')
+        this.$router.push('/')
       }
     },
     ...mapActions({

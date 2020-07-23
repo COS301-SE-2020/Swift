@@ -21,7 +21,7 @@
           <span class="title black--text">{{newMenuItem.menuItemName}}</span>
         </v-col>
         <v-col cols="3" class="pl-0 pb-0">
-          <span class="title black--text">R{{newMenuItem.price}}0</span>
+          <span class="title black--text">R85.00</span>
         </v-col>
       </v-row>
     </v-card-text>
@@ -32,7 +32,7 @@
           <v-rating readonly size="18" dense color="yellow darken-3" background-color="secondary" :value="newMenuItem.rating"></v-rating>
         </v-col>
         <v-col cols="4" class="py-0">
-          <div color="secondary" class="ml-2 my-4"><v-icon color="secondary">mdi-clock</v-icon> {{newMenuItem.estimatedWaitingTime}}</div>
+          <div color="secondary" class="ml-4 my-4"><v-icon color="secondary">mdi-clock</v-icon> 15 min</div>
         </v-col>
       </v-row>
       <div class="justify">{{newMenuItem.menuItemDescription}}</div>
@@ -172,7 +172,7 @@
                   </div>
                   <div v-if="!expandOrderBtn">
                     <v-btn @click="changeOrderBtn" rounded class="py-6 mt-5" color="grey">Remove</v-btn>
-                    <v-btn @click="addToOrder" rounded class="py-6 mt-5 ml-5" color="accent">R85 | Place Order</v-btn>
+                    <v-btn @click="goToCart" rounded class="py-6 mt-5 ml-5" color="accent">R85 | Place Order</v-btn>
                   </div>
                 </v-slide-x-transition>
               </v-col>
@@ -275,21 +275,11 @@
     padding-right: 5px;
   }
 
- 
-  /* .comment {
-    white-space: nowrap;
-    width: 150px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  } */
 </style>
 
 <script>
 import store from '@/store/store.js';
 import { mapActions, mapGetters, mapMutations } from "vuex";
-import $ from 'jquery';
-
-$('.commentInfo').text($('.commentInfo').text().substring(0,200))
 
 export default {
   data() {
@@ -397,7 +387,7 @@ export default {
   },
   methods: {
     backNavigation () {
-      this.$router.back()
+      this.$router.push('/menu')
     },
     
     changeFavouriteComment: function (comment) {
@@ -455,57 +445,9 @@ export default {
         })
         .then(a => a.present())  
     },
-    addToOrder() {
-      let data = {
-        "orderInfo": {
-          "restaurantId": 1,
-          "tableId": 1,
-          "employeeId": 7,
-          "orderItems": [
-            {
-              "menuItemId": this.newMenuItem.menuItemId,
-              "quantity": this.quantity,
-              "orderSelections": {
-                "selections": [
-                  {
-                    "name": "Preparation of Eggs",
-                    "values": ["poached"]
-                  },
-                  {
-                    "name": "Eggs Done",
-                    "values": ["Hard"]
-                  },
-                  {
-                    "name": "Toast",
-                    "values": ["White Toast"]
-                  },
-                  {
-                    "name": "Add-on",
-                    "values": ["Chicken Strips"]
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        "menuItemName": this.newMenuItem.menuItemName,
-        "total": this.itemTotal * this.quantity,
-      }
-      
-      this.addItemToOrder(data)
+    goToCart(id) {
       this.$router.push("/cart");
     },
-    changeFavourite () {
-      let data = {
-        menuItemId: this.menuItemId
-      }
-      this.isFavourite ? this.removeFavourite(data) : this.addFavourite(data)
-    },
-    ...mapActions({
-      addFavourite: "CustomerStore/addFavourite",
-      removeFavourite: "CustomerStore/removeFavourite",
-      addItemToOrder: "OrderStore/addItemToOrder"
-    }),
   },
   computed: {
     menuItem() {
@@ -535,13 +477,8 @@ export default {
       }
     },
     ...mapGetters({
-      checkedIn: "RestaurantsStore/getCheckInFlag",
-      menu: "MenuStore/getMenu",
-      customer: "CustomerStore/getCustomerProfile"
-    }),
+      checkedIn: "RestaurantStore/getCheckInFlag"
+    })
   },
-  mounted: function() {
-    this.itemTotal = this.newMenuItem.price
-  }
 }
 </script>

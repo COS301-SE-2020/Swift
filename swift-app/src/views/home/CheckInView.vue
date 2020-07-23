@@ -30,7 +30,7 @@ export default {
     goToRestaurant() {
       this.updateDisplayNotification(true);
       this.updateCheckInFlag(true);
-      this.$router.push("/menu/2")
+      this.$router.push("/menu")
     },
     goToHome() {
       this.$router.push("/")
@@ -40,11 +40,11 @@ export default {
       this.goToRestaurant();
     },
     ...mapMutations({
-      setTable : 'RestaurantsStore/setTableNumber',
+      setTable : 'RestaurantStore/setTableNumber',
     }),
     ...mapActions({
-      updateCheckInFlag: 'RestaurantsStore/updateCheckInFlag',
-      updateDisplayNotification: 'RestaurantsStore/updateDisplayNotification',
+      updateCheckInFlag: 'RestaurantStore/updateCheckInFlag',
+      updateDisplayNotification: 'RestaurantStore/updateDisplayNotification',
     }),
   },
 };

@@ -1,22 +1,24 @@
 // State object
 const initialState = () => ({
-  orderTotal: 0,
-  orderFlag: false
+  tableNumber: "Checked in manually",
+  checkedIn: false,
+  displayNotification: false,
 });
 
 const state = initialState();
-
 
 // Setter functions
 
 // Getter functions
 const getters = {
-  getOrderTotal(state) {
-    return state.orderTotal;
+  getTableNumber(state) {
+    return state.tableNumber;
   },
-
-  getOrderFlag(state) {
-    return state.orderFlag;
+  getCheckInFlag(state) {
+    return state.checkedIn;
+  },
+  getDisplayNotification(state) {
+    return state.displayNotification;
   },
 }
 
@@ -36,8 +38,12 @@ const actions = {
     })
   },
 
-  updateOrderFlag({commit}, orderFlag) {
-    commit('updateOrderFlag', orderFlag);
+  updateCheckInFlag({commit}, data) {
+    commit('updateCheckInFlag', data);
+  },
+
+  updateDisplayNotification({commit}, data) {
+    commit('updateDisplayNotification', data);
   }
 }
 
@@ -51,13 +57,17 @@ const mutations = {
     });
   },
 
-  setOrderTotal(state, data) {
-    state.orderTotal = data;
+  setTableNumber(state, data) {
+    state.tableNumber = data;
   },
 
-  updateOrderFlag(state, orderFlag) {
-    state.orderFlag = orderFlag;
-  }
+  updateCheckInFlag(state, data) {
+    state.checkedIn = data;
+  },
+
+  updateDisplayNotification(state, data) {
+    state.displayNotification = data;
+  },
 }
 export default {
   namespaced: true,

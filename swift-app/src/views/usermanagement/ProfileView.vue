@@ -11,7 +11,7 @@
           </v-btn>
         </v-card-title>
         <v-card-title class="white--text pl-12 pt-12">
-          <div class="display-1 pl-12 pt-12">{{customerInfo.name}} {{customerInfo.surname}}</div>
+          <div class="display-1 pl-12 pt-12">{{customerInfo.username}}</div>
         </v-card-title>
       </v-row>
     </v-img>
@@ -82,10 +82,16 @@ export default {
     ],
     tab: null,
   }),
+  created() {
+    this.customerInfo
+  },
   components: {
     'NavBar': NavBar
   },
   methods: {
+    populateCustomer () {
+      this.customerInfo
+    },
     signOut (title) {
       if (title == 'Logout') {
         this.reset
