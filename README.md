@@ -14,7 +14,7 @@ Swift aims to create a convenient, flexible, and scalable interface suitable for
 
 ## Demo 2
 
-* :tv: [Demo Video]
+* :tv: [Demo Video](https://drive.google.com/file/d/16YMjF8z-J9YkiuJH0O94VUH7TRyhrEdc/view?usp=sharing)
 * :open_book: [Overleaf Document](https://www.overleaf.com/read/gdpwvqbghvkj)
 * :open_book: [User Manual](https://drive.google.com/file/d/126JpUB3yG6GSfKJJ3Hnvljq6qBqULci_/view?usp=sharing)
 * :computer: [Coding Standards](https://github.com/COS301-SE-2020/Swift/blob/master/CODING.md#coding-standards)
