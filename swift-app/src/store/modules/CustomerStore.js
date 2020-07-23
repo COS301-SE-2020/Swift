@@ -76,7 +76,7 @@ const actions = {
       "menuItemId": data.menuItemId
     } 
     ).then(result => {
-      commit('UPDATE_CUSTOMER', result.data.favourites, 'favourites');
+      commit('UPDATE_FAVOURITES', result.data.favourites);
     }).catch(({ response }) => {
     });
   },
@@ -89,7 +89,7 @@ const actions = {
       "menuItemId": data.menuItemId
     } 
     ).then(result => {
-      commit('UPDATE_CUSTOMER', result.data.favourites, 'favourites');
+      commit('UPDATE_FAVOURITES', result.data.favourites);
     }).catch(({ response }) => {
     });
   }
@@ -105,7 +105,7 @@ const mutations = {
     state.customer = customer;
   },
 
-  UPDATE_CUSTOMER(state, data, type) {
+  UPDATE_FAVOURITES(state, data) {
     state.customer.favourites = data;
   },
 
