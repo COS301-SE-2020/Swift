@@ -41,8 +41,10 @@
                             </v-list-item-action>
                           </template>
                         </v-autocomplete>
+                        
                       </v-col>
                     </v-row>
+                    
                 </v-carousel-item>
               </v-carousel>
               <v-btn width="30px" height="30px" @click="callWaiter" :key="activeCall.icon" :color="activeCall.color" absolute small fab style="top: 20px; right: 10px;">
@@ -136,5 +138,10 @@ label {
 
 .v-text-field--rounded > .v-input__control > .v-input__slot {
   padding-left: 18px;
+}
+.searchBarBg .v-input__slot {
+  background: rgba(0, 0, 0, 0.06) !important;
+  caret-color: #343434 !important;
+  color: #343434 !important;
 }
 </style>

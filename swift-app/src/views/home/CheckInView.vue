@@ -30,7 +30,7 @@ export default {
     goToRestaurant() {
       this.updateDisplayNotification(true);
       this.updateCheckInFlag(true);
-      this.$router.push("/menu")
+      this.$router.push("/menu/2")
     },
     goToHome() {
       this.$router.push("/")

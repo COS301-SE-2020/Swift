@@ -36,7 +36,7 @@
                         </div>
                       </v-list-item-content>
                       <v-list-item-action class="mr-3">
-                        <v-list-item-action-text v-text="item.orderDateTime"></v-list-item-action-text>
+                        <v-list-item-action-text v-text="item.orderDateTime.toString().slice(0, 10)"></v-list-item-action-text>
                         <v-list-item-action-text class="subtitle-1">R{{item.total}}0</v-list-item-action-text>
                       </v-list-item-action>
                     </v-list-item>
@@ -50,7 +50,7 @@
                         <v-btn rounded small>View</v-btn>
                       </v-col>
                       <v-col v-else cols="12" align="end" class="pt-0 pr-5">
-                        <v-btn rounded small color="primary" class="mr-2">Rate Order</v-btn>
+                        <v-btn @click="goToRating" rounded small color="primary" class="mr-2">Rate Order</v-btn>
                         <v-btn rounded small>View</v-btn>
                       </v-col>
                     </v-row>
@@ -139,6 +139,10 @@ export default {
     goToCart () {
       this.$router.push('/cart')
     },
+    goToRating () {
+      this.$router.push('/rating')
+    },
+
     itemsForStatus(status) {
       return this.orderHistory.filter(orderItem => {
         if (status == 'Completed')

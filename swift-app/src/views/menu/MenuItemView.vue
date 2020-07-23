@@ -300,8 +300,8 @@ export default {
       menuItemId: this.$route.params.itemid,
       expandOrderBtn: true,
       items: [
+        { img: 'https://source.unsplash.com/kZeUekYF9Jw/800x800/' },
         { img: 'https://source.unsplash.com/hrlvr2ZlUNk/800x800/' },
-        { img: 'https://source.unsplash.com/1BZ8eDz7sAA/800x800/' },
         { img: 'https://source.unsplash.com/8manzosDSGM/800x800/' },
         { img: 'https://source.unsplash.com/nTZOILVZuOg/800x800/' },
       ],
@@ -481,7 +481,7 @@ export default {
                   },
                   {
                     "name": "Add-on",
-                    "values": ["Chicken Strips", "Tomato"]
+                    "values": ["Chicken Strips"]
                   }
                 ]
               }
@@ -489,11 +489,11 @@ export default {
           ]
         },
         "menuItemName": this.newMenuItem.menuItemName,
-        "total": this.newMenuItem.price * this.quantity,
+        "total": this.itemTotal * this.quantity,
       }
       
       this.addItemToOrder(data)
-      this.$router.back();
+      this.$router.push("/orders");
     },
     changeFavourite () {
       let data = {

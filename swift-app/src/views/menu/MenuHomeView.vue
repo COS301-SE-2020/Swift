@@ -7,7 +7,7 @@
           <div class="title pl-3">Categories</div>
         </v-col>
       </v-row>
-      <div id="categories" class="pl-3">
+      <!-- <div id="categories" class="pl-3">
         <v-sheet class="mx-auto" max-width="700">
           <v-slide-group multiple>
             <v-slide-item v-for="(category, index) in menu.categories" :key="index">
@@ -15,7 +15,6 @@
                 <v-btn dark width="50px" height="50px" min-width="50px" class="mx-2">
                   <v-avatar color="grey darken-4" size="35px">
                     <img @click="goToMenuItem(1)" src="https://source.unsplash.com/800x800/?fruit" alt />
-                    <!-- <img @click="goToMenuItem(1)" :src="category.img" alt /> -->
                   </v-avatar>
                 </v-btn>
                 <div class="mt-1 caption">{{category.categoryName}}</div>
@@ -24,9 +23,36 @@
           </v-slide-group>
         </v-sheet>
         <v-divider class="mt-2"></v-divider>
-      </div>
+      </div> -->
 
-      <div v-for="(category, index) in menu.categories" :key="index">
+        <v-tabs  v-model="secondaryCategoryTab" background-color="secondary" color="primary" dark>
+          <v-tab v-for="(category, index) in menu.categories" :key="index">
+            {{ category.categoryName }}
+          </v-tab>
+        </v-tabs>
+
+        <v-tabs-items v-model="secondaryCategoryTab">
+          <v-tab-item v-for="(category, index) in menu.categories" :key="i">
+            <v-list v-for="(menuItem, i) in category.menuItems"  class="py-0">
+              <v-list-item @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1">
+                <v-list-item-avatar tile  style="border-radius: 4px" size="45" >
+                  <!-- <v-img src="https://source.unsplash.com/hrlvr2ZlUNk/800x800/"></v-img> -->
+                  <img src="https://source.unsplash.com/collection/767186/800x800">
+                </v-list-item-avatar>
+                <v-list-item-content>
+                  <v-list-item-title v-html="menuItem.menuItemName"></v-list-item-title>
+                  <v-list-item-subtitle v-html="menuItem.menuItemDescription"></v-list-item-subtitle>
+                </v-list-item-content>
+                <v-list-item-action-text class="subtitle-1">R{{menuItem.price}}0</v-list-item-action-text>
+                
+
+              </v-list-item>
+              <v-divider divider class="ml-3" width="93%"></v-divider>
+            </v-list>
+          </v-tab-item>
+        </v-tabs-items>
+
+      <!-- <div v-for="(category, index) in menu.categories" :key="index">
         <v-list v-for="(menuItem, i) in category.menuItems" :key="i" class="py-0">
           <v-list-item @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1">
             <v-list-item-avatar tile  style="border-radius: 4px" size="45" >
@@ -34,49 +60,15 @@
             </v-list-item-avatar>
             <v-list-item-content>
               <v-list-item-title v-html="menuItem.menuItemName"></v-list-item-title>
-              <!-- <v-list-item-subtitle v-html="menuItem.menuItemDescription"></v-list-item-subtitle> -->
             </v-list-item-content>
           </v-list-item>
           <v-divider divider class="ml-3" width="93%"></v-divider>
         </v-list>
-      </div>
+      </div> -->
 
-      <!-- <v-tabs v-model="secondaryCategoryTab" background-color="secondary" color="primary" dark>
-        <v-tab v-for="item in items" :key="item.tab">
-          {{ item.tab }}
-        </v-tab>
-      </v-tabs>
+      
 
-      <v-tabs-items v-model="secondaryCategoryTab">
-        <v-tab-item v-for="item in items" :key="item.tab">
-            <v-card-text>{{ item.content }}</v-card-text>
-        </v-tab-item>
-      </v-tabs-items> -->
-
-      <v-row  style="max-width: 400px" class="overflow-y-auto pl-3">
-        <v-col cols="12">
-          <div class="title">Popular Food</div>
-        </v-col>
-      </v-row>
-
-      <v-sheet class="mx-auto pl-3" max-width="700">
-        <v-slide-group multiple>
-          <v-slide-item v-for="card in popularFood" :key="card.title">
-            <v-card ripple class="mr-3">
-              <v-img :src="card.src" @click="goToMenuItem(1)" class="white--text align-center" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" width="170px" height="100px" >
-                <v-card-title class="pl-2 pt-1 body-1" v-text="card.title"></v-card-title>
-                <v-card-subtitle class="pl-2 white--text subtitle-2" v-text="card.price"></v-card-subtitle>
-                <v-rating :value="card.rating" size="14" class="pl-2" dense color="yellow darken-3" background-color="secondary"></v-rating>
-                <v-fab-transition>
-                  <v-btn @click="changeFavouriteFab" :key="activateFavourite.icon" :color="activateFavourite.color" style="top: 3px; right: 3px; transform: scale(0.8);" absolute small fab>
-                    <v-icon>{{ activateFavourite.icon }}</v-icon>
-                  </v-btn>
-                </v-fab-transition>
-              </v-img>
-            </v-card>
-          </v-slide-item>
-        </v-slide-group>
-      </v-sheet>
+      
 
     </v-container>
        <!--snackbar shows table number on successful checkin -->
@@ -152,32 +144,7 @@ export default {
         src: "https://source.unsplash.com/800x800/?juice"
       }
     ],
-    popularFood: [
-      {
-        title: "Fruit Salad",
-        price: "85.00",
-        rating: 4,
-        src: "https://source.unsplash.com/800x800/?fruit"
-      },
-      {
-        title: "Lasagna",
-        price: "R52.00",
-        rating: 5,
-        src: "https://source.unsplash.com/800x800/?lasagna"
-      },
-      {
-        title: "Hamburger",
-        price: "R62.00",
-        rating: 4,
-        src: "https://source.unsplash.com/800x800/?hamburger"
-      },
-      {
-        title: "Seafood",
-        price: "R87.00",
-        rating: 3,
-        src: "https://source.unsplash.com/800x800/?seafood"
-      }
-    ],
+    
     favourited: false,
     snackbar: true
   }),
