@@ -51,6 +51,9 @@ app.get('/', require('./api/api'));
 app.post('/', require('./api/api'));
 app.put('/', require('./api/api'));
 
+// health check endpoint
+app.get('/status', require('./api/api'));
+
 // Handle favicon requests
 app.get('/favicon.ico', (req, res) => { res.status(204).end(); });
 

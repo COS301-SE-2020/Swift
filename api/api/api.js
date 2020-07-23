@@ -2,6 +2,7 @@ const express = require('express');
 const adminController = require('./controller/adminController');
 const restaurantController = require('./controller/restaurantController');
 const userController = require('./controller/userController');
+const healthCheck = require('./helper/healthCheck');
 
 const router = express.Router();
 
@@ -20,6 +21,9 @@ router.get('/', (req, res) => {
   };
   res.status(200).send(jsonResponse);
 });
+
+// Health Check
+router.get('/status', (req, res) => healthCheck.getServiceStatus(res));
 
 // Handle POST request
 router.post('/', (req, res) => {
