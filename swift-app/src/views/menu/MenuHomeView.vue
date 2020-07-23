@@ -32,9 +32,9 @@
         </v-tabs>
 
         <v-tabs-items v-model="secondaryCategoryTab">
-          <v-tab-item v-for="(category, index) in menu.categories" :key="i">
-            <v-list v-for="(menuItem, i) in category.menuItems"  class="py-0">
-              <v-list-item @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1">
+          <v-tab-item v-for="(category, index) in menu.categories" :key="index">
+            <v-list v-for="(menuItem, i) in category.menuItems" :key="i" class="py-0">
+              <v-list-item @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1 ">
                 <v-list-item-avatar tile  style="border-radius: 4px" size="45" >
                   <!-- <v-img src="https://source.unsplash.com/hrlvr2ZlUNk/800x800/"></v-img> -->
                   <img src="https://source.unsplash.com/collection/767186/800x800">
@@ -199,5 +199,9 @@ export default {
   top: 0;
   z-index: 10;
   background-color: white;
+}
+
+.v-tabs:not(.v-tabs--vertical):not(.v-tabs--right) > .v-slide-group--is-overflowing.v-tabs-bar--is-mobile:not(.v-tabs-bar--show-arrows):not(.v-slide-group--has-affixes) .v-slide-group__prev {
+  display: none
 }
 </style>
