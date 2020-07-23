@@ -12,6 +12,11 @@ Swift aims to create a convenient, flexible, and scalable interface suitable for
 * :tv: [Demo Video](https://drive.google.com/open?id=1g0fqyLqzCHTh3am9SoxcRQSSlTxp0vDy)
 * :open_book: [Overleaf Document](https://www.overleaf.com/read/bwqfjmwgcnxf)
 
+## Demo 2
+
+* :tv: [Demo Video]
+* :open_book: [Overleaf Document](https://www.overleaf.com/read/gdpwvqbghvkj)
+
 ## Project Management Tools
 
 * :open_book: [Clickup](https://app.clickup.com/2546114/v/l/s/2693763)
