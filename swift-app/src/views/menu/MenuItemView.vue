@@ -10,7 +10,7 @@
       <v-icon>mdi-cube-scan</v-icon>
     </v-btn>
     <v-fab-transition>
-      <v-btn @click="changeFavouriteFab" :key="activateFavourite.icon" :color="activateFavourite.color" style="top: 175px;" absolute small fab  right >
+      <v-btn @click="changeFavourite" :key="activateFavourite.icon" :color="activateFavourite.color" style="top: 175px;" absolute small fab  right >
         <v-icon>{{ activateFavourite.icon }}</v-icon>
       </v-btn>
     </v-fab-transition>
@@ -29,7 +29,7 @@
     <v-card-text class="pt-0" >
       <v-row align="center" class="mx-0" >
         <v-col cols="8" class="px-0 py-0">
-          <v-rating readonly size="18" dense color="yellow darken-3" background-color="secondary" value="4"></v-rating>
+          <v-rating readonly size="18" dense color="yellow darken-3" background-color="secondary" :value="newMenuItem.rating"></v-rating>
         </v-col>
         <v-col cols="4" class="py-0">
           <div color="secondary" class="ml-2 my-4"><v-icon color="secondary">mdi-clock</v-icon> {{newMenuItem.estimatedWaitingTime}}</div>
@@ -185,7 +185,7 @@
                   <span class="black--text" style="font-size: 15px">{{phrase.phrase}}</span>
                 </v-col>
                 <v-col cols="4" class="py-0 pt-0 pl-0 pb-0">
-                  <v-rating readonly size="18" dense color="yellow darken-3" background-color="secondary" :value=phrase.rating></v-rating>
+                  <v-rating readonly size="18" dense color="yellow darken-3" background-color="secondary" :value="parseInt(phrase.rating)"></v-rating>
                 </v-col>
               </v-row>
             </v-card-text>
@@ -212,7 +212,7 @@
                   </v-row>
                   <v-row class="pt-0">
                     <v-col cols="8" class="py-0 pt-0 pl-0 pb-0">
-                      <v-rating readonly size="18" dense color="yellow darken-3" background-color="secondary" :value=comment.rating></v-rating>
+                      <v-rating readonly size="18" dense color="yellow darken-3" background-color="secondary" :value="parseInt(comment.rating)"></v-rating>
                     </v-col>
                     <v-col cols="4" class="py-0 pt-0 pl-0 pb-0" style="text-align: right">
                         <v-btn @click="changeFavouriteComment(comment)" :color="activateFavouriteComment(comment).color" class="pl-0 pr-1" text small min-width="0">
@@ -228,7 +228,7 @@
                       <div class="justify commentInfo" style="font-size: 12px" :id="'comment' + index">{{limitComment(comment, index).commentText}}</div>
                     </v-col>
                     <v-col style="text-align: center" class="pb-0 pt-1" v-if="getCommentLength(comment)">
-                      <v-btn @click="revealComment(index)" :color="secondary" class="pl-0 pr-1" text small min-width="0">
+                      <v-btn @click="revealComment(index)" color="secondary" class="pl-0 pr-1" text small min-width="0">
                         <v-icon size="35">{{limitComment(comment, index).icon}}</v-icon>
                       </v-btn>
                     </v-col>
@@ -394,9 +394,7 @@ export default {
     backNavigation () {
       this.$router.push('/menu')
     },
-    changeFavouriteFab () {
-      this.favourited = !this.favourited
-    },
+    
     changeFavouriteComment: function (comment) {
       comment.liked = !comment.liked
       if (comment.liked)
@@ -455,6 +453,16 @@ export default {
     goToCart(id) {
       this.$router.push("/cart");
     },
+    changeFavourite () {
+      let data = {
+        menuItemId: this.menuItemId
+      }
+      this.isFavourite ? this.removeFavourite(data) : this.addFavourite(data)
+    },
+    ...mapActions({
+      addFavourite: "CustomerStore/addFavourite",
+      removeFavourite: "CustomerStore/removeFavourite"
+    }),
   },
   computed: {
     menuItem() {
@@ -463,24 +471,33 @@ export default {
       )      
     },
     findCategory() {
-      return store.state.MenuStore.menu.categories.find(
+      return this.menu.categories.find(
         category => category.menuItems.find(menuItem => menuItem.menuItemId === parseInt(this.menuItemId) )
       )
+    },
+    isFavourite() {
+      // console.log(this.customer.favourites)
+      if (this.customer.favourites.length != 0)
+        return this.customer.favourites.some(favourite => favourite.menuItemId === parseInt(this.menuItemId))
+      return false
     },
     newMenuItem() {
       return this.findCategory.menuItems.find(menuItem => menuItem.menuItemId === parseInt(this.menuItemId) )
     },
     activateFavourite () {
-      if (!this.favourited) {
+      if (!this.isFavourite) {
         return { color: 'primary', icon: 'mdi-heart-outline' }
       } else {
         return { color: 'primary', icon: 'mdi-heart' }
       }
     },
+    
     ...mapGetters({
       checkedIn: "RestaurantsStore/getCheckInFlag",
-      menu: "MenuStore/getMenu"
-    })
+      menu: "MenuStore/getMenu",
+      customer: "CustomerStore/getCustomerProfile"
+    }),
+    
   },
 }
 </script>

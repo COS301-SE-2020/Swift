@@ -67,6 +67,32 @@ const actions = {
   reset({ commit }) {
     commit('RESET');
   },
+
+  addFavourite({commit}, data) {
+    axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "addFavourite",
+      "token": this.getters['CustomerStore/getToken'],
+      "menuItemId": data.menuItemId
+    } 
+    ).then(result => {
+      commit('UPDATE_CUSTOMER', result.data.favourites, 'favourites');
+    }).catch(({ response }) => {
+    });
+  },
+
+  removeFavourite({commit}, data) {
+    axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "removeFavourite",
+      "token": this.getters['CustomerStore/getToken'],
+      "menuItemId": data.menuItemId
+    } 
+    ).then(result => {
+      commit('UPDATE_CUSTOMER', result.data.favourites, 'favourites');
+    }).catch(({ response }) => {
+    });
+  }
 }
 
 // Mutations
@@ -78,6 +104,11 @@ const mutations = {
   SAVE_CUSTOMER(state, customer) {
     state.customer = customer;
   },
+
+  UPDATE_CUSTOMER(state, data, type) {
+    state.customer.favourites = data;
+  },
+
 
   SET_AUTHENTICATION(state, authentication_state) {
     state.isAuthenticated = authentication_state;
