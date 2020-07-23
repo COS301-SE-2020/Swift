@@ -16,6 +16,8 @@ Swift aims to create a convenient, flexible, and scalable interface suitable for
 
 * :tv: [Demo Video]
 * :open_book: [Overleaf Document](https://www.overleaf.com/read/gdpwvqbghvkj)
+* :open_book: [User Manual](https://drive.google.com/file/d/126JpUB3yG6GSfKJJ3Hnvljq6qBqULci_/view?usp=sharing)
+* :computer: [Coding Standards](https://github.com/COS301-SE-2020/Swift/blob/master/CODING.md#coding-standards)
 
 ## Project Management Tools
 
