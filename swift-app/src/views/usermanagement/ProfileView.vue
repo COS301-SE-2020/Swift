@@ -11,7 +11,7 @@
           </v-btn>
         </v-card-title>
         <v-card-title class="white--text pl-12 pt-12">
-          <div class="display-1 pl-12 pt-12">{{customerInfo.email}}</div>
+          <div class="display-1 pl-12 pt-12">{{customerInfo.name}} {{customerInfo.surname}}</div>
         </v-card-title>
       </v-row>
     </v-img>

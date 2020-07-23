@@ -196,7 +196,7 @@
           </v-row>
         </v-card>
         <v-divider style="opacity: 0.6"></v-divider>
-        <v-card flat class="mt-2">
+        <v-card flat class="mt-2 mb-5">
           <v-row v-for="(comment, index) in comments" :key="comment.commentDate">
             <v-card-text class="pb-0 pt-1 mt-0">
               <v-row class="mx-0 pb-0 pt-3">
@@ -340,7 +340,7 @@ export default {
           profileImage: 'https://source.unsplash.com/800x800/?man',
           commentDate: '11:00 June 24, 2020',
           rating: '4',
-          comment: 'The perfect fruit salad for a backyard bbq or any occasion. There are never leftovers! This is one of my favorite fruit salad recipes, as I think the sauce really makes it. This salad is tastier the longer you can let it soak in its juices. I prefer 3 to 4 hours in the refrigerator before I serve it. Enjoy.',
+          comment: 'The perfect breakfast to start your day. There are never leftovers when I order this! This is one of my favorite dishes, as I think the grilled tomato and hashbrown really tie everything together. This breakfast is a must if you visit Mugg and Bean. All my friends love it as well. Enjoy.',
           liked: false,
           likes: '11',
           adminName: 'Mugg and Bean',
@@ -354,7 +354,7 @@ export default {
           profileImage: 'https://source.unsplash.com/800x800/?woman',
           commentDate: '15:00 June 22, 2020',
           rating: '2',
-          comment: "Way too sweet. Does not need the brown sugar or vanilla. The fruit is sweet enough & has plenty of flavor on it's own.",
+          comment: "My eggs were overdone when I requested them to be soft and the portion was very small for the price.",
           liked: true,
           likes: '10',
           adminName: '',
@@ -367,7 +367,7 @@ export default {
           profileImage: 'https://source.unsplash.com/800x800/?profile',
           commentDate: '10:30 June 20, 2020',
           rating: '5',
-          comment: "The perfect fruit salad for a backyard bbq or any occasion. There are never leftovers! This is one of my favorite fruit salad recipes, as I think the sauce really makes it. This salad is tastier the longer you can let it soak in its juices. I prefer 3 to 4 hours in the refrigerator before I serve it. Enjoy.",
+          comment: "I love this breakfast item. It is always prepared well and it is very filling!",
           liked: false,
           likes: '0',
           adminName: '',
