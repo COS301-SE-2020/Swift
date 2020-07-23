@@ -55,7 +55,7 @@
           <v-container>
             <div>
               <v-list class="py-0">
-                <v-list-group  v-for="(attribute, i) in newMenuItem.attributes.attributes" :key="i" v-model="attribute.active"  no-action>
+                <v-list-group  v-for="(attribute, i) in newMenuItem.attributes.attributes" :key="i" no-action>
                   <template expand v-slot:activator>
                     <v-list-item-content>
                       <v-list-item-title  v-text="attribute.name"></v-list-item-title>
@@ -68,7 +68,7 @@
                     </v-list-item-content>
                     <v-list-item-icon class="my-1 ml-5 mr-0 pr-2">
                       <span v-if="Object.keys(value).includes('fee')" class="d-flex align-center">+ R{{value.fee}}0</span>
-                      <v-btn icon>
+                      <v-btn @click="Object.keys(value).includes('fee') ? (value.selected ? itemTotal -= parseInt(value.fee) : itemTotal += parseInt(value.fee)) : itemTotal" icon>
                         <v-icon class="ml-2" color="secondary" v-text="value.selected ? optionIcon(attribute.field.type).selected : optionIcon(attribute.field.type).unselected"></v-icon>
                       </v-btn>
                     </v-list-item-icon>
@@ -76,23 +76,27 @@
                 </v-list-group>
               </v-list>
             </div>
-            <v-row>
-              <v-col cols="12" class="d-flex align-center justify-center">
-                <v-slide-x-transition>
-                  <div v-if="expandOrderBtn">
+            <!-- <v-row> -->
+              <!-- <v-col cols="12" class="d-flex align-center justify-center"> -->
+                <!-- <v-slide-x-transition> -->
+                  <v-row v-if="expandOrderBtn" class="d-flex justify-space-between">
                     <!-- <v-btn @click="changeOrderBtn" rounded class="py-6 mt-5" color="grey">Remove</v-btn> -->
-                    <v-btn @click="quantity--" fab elevation="2" width="22px" height="22px" class="mr-2">
-                        <v-icon size="15px">mdi-minus</v-icon>
-                    </v-btn>
-                    <div class="body-2 secondary--text" style="display: inline;">{{quantity}}</div>
-                    <v-btn @click="quantity++" fab elevation="2" width="22px" height="22px" class="ml-2">
-                        <v-icon size="15px">mdi-plus</v-icon>
-                    </v-btn>
-                    <v-btn @click="goToCart" rounded class="py-6 mt-5 ml-5" color="accent">R {{calculatePrice(newMenuItem.price)}} | Add to order</v-btn>
-                  </div>
-                </v-slide-x-transition>
-              </v-col>
-            </v-row>
+                    <v-col cols="4" class="mt-2 px-0 d-flex justify-center">
+                      <v-btn @click="quantity--" fab elevation="2" width="22px" height="22px" class="mr-2">
+                          <v-icon size="15px">mdi-minus</v-icon>
+                      </v-btn>
+                      <div class="body-2 secondary--text" style="display: inline;">{{quantity}}</div>
+                      <v-btn @click="quantity++" fab elevation="2" width="22px" height="22px" class="ml-2">
+                          <v-icon size="15px">mdi-plus</v-icon>
+                      </v-btn>
+                    </v-col>
+                    <v-col cols="8" class="d-flex justify-center px-0">
+                      <v-btn @click="addToOrder" rounded class="" color="accent">R {{calculatePrice(itemTotal)}} | Add to order</v-btn>
+                    </v-col>
+                  </v-row>
+                <!-- </v-slide-x-transition> -->
+              <!-- </v-col> -->
+            <!-- </v-row> -->
           </v-container>
           
           <!-- <v-container>
@@ -168,7 +172,7 @@
                   </div>
                   <div v-if="!expandOrderBtn">
                     <v-btn @click="changeOrderBtn" rounded class="py-6 mt-5" color="grey">Remove</v-btn>
-                    <v-btn @click="goToCart" rounded class="py-6 mt-5 ml-5" color="accent">R85 | Place Order</v-btn>
+                    <v-btn @click="addToOrder" rounded class="py-6 mt-5 ml-5" color="accent">R85 | Place Order</v-btn>
                   </div>
                 </v-slide-x-transition>
               </v-col>
@@ -291,6 +295,7 @@ export default {
   data() {
     return {
       quantity: 1,
+      itemTotal: 0,
       activeComments: [],
       menuItemId: this.$route.params.itemid,
       expandOrderBtn: true,
@@ -392,7 +397,7 @@ export default {
   },
   methods: {
     backNavigation () {
-      this.$router.push('/menu')
+      this.$router.back()
     },
     
     changeFavouriteComment: function (comment) {
@@ -450,8 +455,45 @@ export default {
         })
         .then(a => a.present())  
     },
-    goToCart(id) {
-      this.$router.push("/cart");
+    addToOrder() {
+      let data = {
+        "orderInfo": {
+          "restaurantId": 1,
+          "tableId": 1,
+          "employeeId": 7,
+          "orderItems": [
+            {
+              "menuItemId": this.newMenuItem.menuItemId,
+              "quantity": this.quantity,
+              "orderSelections": {
+                "selections": [
+                  {
+                    "name": "Preparation of Eggs",
+                    "values": ["poached"]
+                  },
+                  {
+                    "name": "Eggs Done",
+                    "values": ["Hard"]
+                  },
+                  {
+                    "name": "Toast",
+                    "values": ["White Toast"]
+                  },
+                  {
+                    "name": "Add-on",
+                    "values": ["Chicken Strips", "Tomato"]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "menuItemName": this.newMenuItem.menuItemName,
+        "total": this.newMenuItem.price * this.quantity,
+      }
+      
+      this.addItemToOrder(data)
+      this.$router.back();
     },
     changeFavourite () {
       let data = {
@@ -461,7 +503,8 @@ export default {
     },
     ...mapActions({
       addFavourite: "CustomerStore/addFavourite",
-      removeFavourite: "CustomerStore/removeFavourite"
+      removeFavourite: "CustomerStore/removeFavourite",
+      addItemToOrder: "OrderStore/addItemToOrder"
     }),
   },
   computed: {
@@ -491,13 +534,14 @@ export default {
         return { color: 'primary', icon: 'mdi-heart' }
       }
     },
-    
     ...mapGetters({
       checkedIn: "RestaurantsStore/getCheckInFlag",
       menu: "MenuStore/getMenu",
       customer: "CustomerStore/getCustomerProfile"
     }),
-    
   },
+  mounted: function() {
+    this.itemTotal = this.newMenuItem.price
+  }
 }
 </script>

@@ -41,10 +41,16 @@
                       </v-list-item-action>
                     </v-list-item>
                     <v-row class="pt-0">
-                      <v-col cols="12" align="end" class="pt-0 pr-5">
-                        <v-btn v-if="parseInt(item.orderStatus) < 100" rounded small color="primary" class="mr-2">Track Order</v-btn>
-                        <v-btn v-else-if="item.orderStatus == '100'" rounded small color="primary" class="mr-2">Pay</v-btn>
-                        <v-btn v-else rounded small color="primary" class="mr-2">Rate Order</v-btn>
+                      <v-col v-if="parseInt(item.orderStatus) < 100" cols="12" align="end" class="pt-0 pr-5">
+                        <v-btn rounded small color="primary" class="mr-2">Track Order</v-btn>
+                        <v-btn @click="goToCart" rounded small>Cart</v-btn>
+                      </v-col>
+                      <v-col v-else-if="item.orderStatus == '100'"  cols="12" align="end" class="pt-0 pr-5">
+                        <v-btn rounded small color="primary" class="mr-2">Pay</v-btn>
+                        <v-btn rounded small>View</v-btn>
+                      </v-col>
+                      <v-col v-else cols="12" align="end" class="pt-0 pr-5">
+                        <v-btn rounded small color="primary" class="mr-2">Rate Order</v-btn>
                         <v-btn rounded small>View</v-btn>
                       </v-col>
                     </v-row>
@@ -130,6 +136,9 @@ export default {
     goToMenu () {
       this.$router.push('/menu')
     },
+    goToCart () {
+      this.$router.push('/cart')
+    },
     itemsForStatus(status) {
       return this.orderHistory.filter(orderItem => {
         if (status == 'Completed')
@@ -154,7 +163,6 @@ export default {
     },
     ...mapActions({
       orderStatus: 'OrderStore/retrieveOrderStatus',
-      // getStatus: 'OrderStore/getOrderStatus',
     }),
   },
   computed: {
@@ -171,13 +179,6 @@ export default {
   components: {
     'NavBar': NavBar
   },
-  /* mounted: {
-    updateProgressBar () {
-      setInterval(() => {
-        this.progressValue++;
-      }, 1000);
-    },
-  } */
   beforeMount: function() {
     this.updateOrderStatus()
   },

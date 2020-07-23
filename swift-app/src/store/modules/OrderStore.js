@@ -5,7 +5,7 @@ const initialState = () => ({
   orderInfo: {},
   orderHistory: {},
   orderTotal: 0,
-  orderFlag: false
+  orderFlag: false,
 });
 
 const state = initialState();
@@ -35,6 +35,16 @@ const getters = {
 // Actions 
 const actions = {
   submitOrder({commit}, orderInfo) {
+    axios.post('https://api.swiftapp.ml', 
+      {
+        "requestType": "addOrder",
+        "token": this.getters['CustomerStore/getToken'],
+        "orderInfo": this.getters['OrderStore/getOrderInfo'].orderInfo
+      }
+    ).then(result => {
+      commit('UPDATE_ORDER_HISTORY', result.data.orderHistory);
+    }).catch(({ response }) => {
+    });
   },
 
   initOrderHistory({commit, state}) {
@@ -42,12 +52,8 @@ const actions = {
     commit('SET_ORDER_HISTORY', orderHistory);
   },
 
-  addItemToOrder({commit, state}, orderItemInfo) {
+  addItemToOrder({commit,}, orderItemInfo) {
     commit('ADD_ITEM_TO_ORDER', orderItemInfo);
-  },
-
-  updateOrderHistory({commit, state}) {
-    // commit('SET_ORDER_HISTORY', orderHistory);
   },
 
   retrieveOrderStatus({commit}, data) {
@@ -65,7 +71,7 @@ const actions = {
         "orderStatus": result.data.orderStatus 
       }
       
-      commit('UPDATE_ORDER_STATUS', data);
+      // commit('UPDATE_ORDER_STATUS', data);
     }).catch(({ response }) => {
     });
   },
@@ -90,7 +96,7 @@ const mutations = {
   },
 
   ADD_ITEM_TO_ORDER(state, orderItemInfo) {
-    // Append order to OrderInfo
+    state.orderInfo = orderItemInfo;
   },
   
   UPDATE_ORDER_STATUS(state, data) {
@@ -101,6 +107,10 @@ const mutations = {
     )
 
     item.orderStatus = data.orderStatus;
+  },
+
+  UPDATE_ORDER_HISTORY({commit}, orderInformation) {
+    this.getters['CustomerStore/getCustomer'].orderHistory = orderInformation;
   },
 
   // Used to reset the store
@@ -117,7 +127,7 @@ const mutations = {
 
   updateOrderFlag(state, orderFlag) {
     state.orderFlag = orderFlag;
-  }
+  },
 }
 export default {
   namespaced: true,
