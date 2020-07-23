@@ -4,12 +4,12 @@
       <v-container>
         <v-row>
           <v-col cols="12">
-            <div class="title">Where would you like to eat?</div>
+            <div class="title">Welcome, {{customerInfo.name}} {{customerInfo.surname}}</div>
           </v-col>
         </v-row>
         <v-row no-gutters d-flex flex-row >
           <v-col cols="12">
-            <v-autocomplete  v-model="model" :items="items" :loading="isLoading" :search-input.sync="search" chips clearable hide-details hide-selected item-text="name" item-value="symbol" label="Search..." solo>
+            <v-autocomplete rounded  v-model="model" :items="items" :loading="isLoading" :search-input.sync="search" chips clearable hide-details hide-selected item-text="name" item-value="symbol" label="Search..." solo>
               <template v-slot:no-data>
                 <v-list-item>
                   <v-list-item-title>
@@ -43,6 +43,8 @@
 </template>
 
 <script>
+import { mapActions, mapGetters } from 'vuex'
+
   export default {
     data: () => ({
       prices: ['low-high', 'high-low', 'R0-R49', 'R50-100'],
@@ -91,5 +93,10 @@
           .finally(() => (this.isLoading = false))
       },
     },
-  } 
+    computed: {
+    ...mapGetters({
+      customerInfo: 'CustomerStore/getCustomerProfile',
+    }),
+  },
+} 
 </script>

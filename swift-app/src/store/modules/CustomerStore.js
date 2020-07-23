@@ -61,14 +61,52 @@ const actions = {
   reset({ commit }) {
     commit('RESET');
   },
+
+  addFavourite({commit}, data) {
+    axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "addFavourite",
+      "token": this.getters['CustomerStore/getToken'],
+      "menuItemId": data.menuItemId
+    } 
+    ).then(result => {
+      commit('UPDATE_FAVOURITES', result.data.favourites);
+    }).catch(({ response }) => {
+    });
+  },
+
+  removeFavourite({commit}, data) {
+    axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "removeFavourite",
+      "token": this.getters['CustomerStore/getToken'],
+      "menuItemId": data.menuItemId
+    } 
+    ).then(result => {
+      commit('UPDATE_FAVOURITES', result.data.favourites);
+    }).catch(({ response }) => {
+    });
+  }
 }
 
 // Mutations
 const mutations = {
+  SAVE_TOKEN(state, token) {
+    state.token = token;
+  },
+
   SAVE_CUSTOMER(state, customer) {
     state.customer = customer;
   },
 
+<<<<<<< HEAD
+  UPDATE_FAVOURITES(state, data) {
+    state.customer.favourites = data;
+  },
+
+
+=======
+>>>>>>> master
   SET_AUTHENTICATION(state, authentication_state) {
     state.isAuthenticated = authentication_state;
   },

@@ -112,21 +112,15 @@
               <v-select prepend-icon="mdi-sort-variant" color="grey darken-4" :items="sorting" label="Sort" solo dense></v-select>
             </v-col>
           </v-row>
-        </v-expand-transition>
+        </div>
       </v-container>
     </v-card> 
-  </div> -->
+  </div>
 </template>
 
 <script>
-  export default {
-    data: () => ({
-      prices: ['low-high', 'high-low', 'R0-R49', 'R50-100'],
-      sorting: ['rating', 'favourites', 'popular', 'free'],
-      prepTimes: ['10 min', '20 min', '30 min', '30+ min'],
-      toolbarExpanded: false,
-      toolbarHeight: '140px',
-      expand: false,
+import $ from 'jquery';
+import { mapActions, mapGetters } from "vuex";
 
       isLoading: false,
       items: [],
@@ -152,26 +146,65 @@
         this.$router.push("/");
       },
     },
-    watch: {
-      model (val) {
-        if (val != null) this.tab = 0
-        else this.tab = null
-      },
-      search (val) {
-        if (this.items.length > 0) return
-
-        this.isLoading = true
-
-        fetch('https://api.coingecko.com/api/v3/coins/list')
-          .then(res => res.clone().json())
-          .then(res => {
-            this.items = res
-          })
-          .catch(err => {
-            console.log(err)
-          })
-          .finally(() => (this.isLoading = false))
-      },
+    backNavigation () {
+      this.$router.push("/");
     },
-  } 
+    callWaiter() {
+      this.called = !this.called;
+    }
+  },
+  watch: {
+    model (val) {
+      if (val != null) this.tab = 0
+      else this.tab = null
+    },
+    search (val) {
+      if (this.items.length > 0) return
+
+      this.isLoading = true
+
+      fetch('https://api.coingecko.com/api/v3/coins/list')
+        .then(res => res.clone().json())
+        .then(res => {
+          this.items = res
+        })
+        .catch(err => {
+          console.log(err)
+        })
+        .finally(() => (this.isLoading = false))
+    },
+  },
+  computed: {
+    ...mapGetters({
+      menu: "MenuStore/getMenu"
+    }),
+    activeCall() {
+      if (!this.called) {
+        return { color: "white", icon: "mdi-bell-outline" };
+      } else {
+        return { color: "primary", icon: "mdi-bell-outline" };
+      }
+    },
+  }
+} 
 </script>
+
+<style>
+
+input, label, .mdi-magnify, .mdi-menu-down {
+  color: #343434 !important;
+}
+
+label {
+  opacity: 0.55;
+}
+
+.v-text-field--rounded > .v-input__control > .v-input__slot {
+  padding-left: 18px;
+}
+.searchBarBg .v-input__slot {
+  background: rgba(0, 0, 0, 0.06) !important;
+  caret-color: #343434 !important;
+  color: #343434 !important;
+}
+</style>
