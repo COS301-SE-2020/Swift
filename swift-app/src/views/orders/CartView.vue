@@ -45,13 +45,13 @@
           </template>
       <v-row class="mt-5">
         <v-col class="d-flex justify-center pb-1">
-          <v-card width="95%" class="pa-1">
+          <v-card width="95%" class="pa-1 pr-2">
             <v-container py-0>
               <v-row>
                 <v-col cols="9" class="pb-0">
                   <div class="body-1 secondary--text">Subtotal</div>
                 </v-col>
-                <v-col cols="3" class="pb-0 pl-0"> 
+                <v-col cols="3" class="pb-0 px-0"> 
                   <div class="body-1 secondary--text d-flex justify-end">R {{subtotal.toFixed(2)}}</div>
                 </v-col>
               </v-row>
@@ -59,7 +59,7 @@
                 <v-col cols="9" class="pb-0">
                   <div class="body-1 secondary--text">Tax(14% VAT included)</div>
                 </v-col>
-                <v-col cols="3" class="pb-0 pl-0">
+                <v-col cols="3" class="pb-0 px-0">
                   <div class="body-1 secondary--text d-flex justify-end">R {{(subtotal * 0.14).toFixed(2)}}</div>
                 </v-col>
               </v-row>
@@ -67,7 +67,7 @@
                 <v-col cols="9">
                   <div class="body-1 secondary--text">Waiter Tip</div>
                 </v-col>
-                <v-col cols="3" class="pl-0">
+                <v-col cols="3" class="px-0">
                   <div class="body-1 secondary--text d-flex justify-end">R {{(subtotal * 0.1).toFixed(2)}}</div>
                 </v-col>
               </v-row>
@@ -78,7 +78,7 @@
                 <v-col cols="9">
                   <div class="body-1 secondary--text font-weight-bold">Total</div>
                 </v-col>
-                <v-col cols="3" class="pl-0">
+                <v-col cols="3" class="px-0">
                   <div class="body-1 secondary--text d-flex justify-end font-weight-bold">R {{calculateTotal()}}</div>
                 </v-col>
               </v-row>

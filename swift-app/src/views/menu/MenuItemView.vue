@@ -493,7 +493,7 @@ export default {
       }
       
       this.addItemToOrder(data)
-      this.$router.push("/orders");
+      this.$router.push("/cart");
     },
     changeFavourite () {
       let data = {

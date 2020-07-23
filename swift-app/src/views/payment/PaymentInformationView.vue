@@ -164,7 +164,7 @@ export default {
       paymentMade: false,
       type: "Card",
       selectedItemPublic: [],
-      orderTotal: 85.99,
+      orderTotal: 126.36,
       creditCardInformation: [
         {
           type: "MasterCard",
