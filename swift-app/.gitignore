@@ -1,3 +1,12 @@
+# Dependency directories
+node_modules/
+
+# VS Code
+.vscode/
+
+# DB Credentials
+api/config.json
+
 .DS_Store
 node_modules
 /dist
