@@ -41,6 +41,7 @@ const actions = {
       commit('SAVE_CUSTOMER', result.data);
       this.dispatch('RestaurantsStore/allRestaurants');
       this.dispatch('OrderStore/initOrderHistory');
+      // this.dispatch('OrderStore/retrieveOrderStatus');
     }).catch(({ response }) => {
     });
   },

@@ -1,3 +1,5 @@
+import axios from 'axios'
+
 // State object
 const initialState = () => ({
   orderInfo: {},
@@ -40,11 +42,34 @@ const actions = {
     commit('SET_ORDER_HISTORY', orderHistory);
   },
 
+  addItemToOrder({commit, state}, orderItemInfo) {
+    commit('ADD_ITEM_TO_ORDER', orderItemInfo);
+  },
+
   updateOrderHistory({commit, state}) {
     // commit('SET_ORDER_HISTORY', orderHistory);
   },
 
-  // Used to reset the store
+  retrieveOrderStatus({commit}, data) {
+    var token = this.getters['CustomerStore/getToken'];
+    var orderId = data.orderId;
+    axios.post('https://api.swiftapp.ml', 
+      {
+        "requestType": "orderStatus",
+        "orderId": orderId,
+        "token": token
+      }
+    ).then(result => {
+      var data = {
+        "orderId": orderId,
+        "orderStatus": result.data.orderStatus 
+      }
+
+      commit('UPDATE_ORDER_STATUS', data);
+    }).catch(({ response }) => {
+    });
+  },
+
   reset({ commit }) {
     commit('RESET');
   },
@@ -62,6 +87,20 @@ const mutations = {
 
   SET_ORDER_HISTORY(state, orderHistory) {
     state.orderHistory = orderHistory;
+  },
+
+  ADD_ITEM_TO_ORDER(state, orderItemInfo) {
+    // Append order to OrderInfo
+  },
+  
+  UPDATE_ORDER_STATUS(state, data) {
+    var orderHistory = this.getters['OrderStore/getOrderHistory'];
+
+    var item = orderHistory.find(orderItem => 
+      orderItem.orderId == data.orderId
+    )
+
+    item.orderStatus = data.orderStatus;
   },
 
   // Used to reset the store

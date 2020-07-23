@@ -81,8 +81,8 @@
             </v-col>
             <v-col cols="6" class="pb-0 pl-5">
                 <div class="mt-2 body-1 secondary--text d-flex justify-center">Complete</div>
-                <div class="secondary--text d-flex justify-center" style="font-size:35px">{{progressValue}}%</div>
-                <div class="body-2 secondary--text d-flex justify-center">{{itemsCompleted}}/{{totalItems}} Items completed</div>
+                <div class="secondary--text d-flex justify-center" style="font-size:35px">{{orderHistory[0].orderStatus}}%</div>
+                <!-- <div class="body-2 secondary--text d-flex justify-center">{{0}}/{{orderHistory[0].items.length}} Items completed</div> -->
             </v-col>
           </v-row>
 
@@ -121,6 +121,7 @@ export default {
       totalItems: 9,
       search: '',
       filter: {},
+      ptr: this,
     }
   },
   methods: {
@@ -128,34 +129,63 @@ export default {
       this.$router.push('/menu')
     },
     itemsForStatus(status) {
-      return this.newOrderHistory.filter(orderItem => {
+      return this.orderHistory.filter(orderItem => {
         if (status == 'Completed')
           return orderItem.restaurantName.toLowerCase().includes(this.search.toLowerCase()) && (orderItem.orderStatus == "Paid" || orderItem.orderStatus == "100")
         else 
           return orderItem.restaurantName.toLowerCase().includes(this.search.toLowerCase()) && (parseInt(orderItem.orderStatus) < 100 || orderItem.orderStatus == "in-progress")
       }) 
-    }
+    },
+    updateOrderStatus() {
+      var self = this;
+      setInterval(() => { 
+        var data = {
+          "orderId": self.orderHistory[0].orderId
+        }
+        self.orderStatus(data)
+      }, 2000);  
+    },
+    ...mapActions({
+      orderStatus: 'OrderStore/retrieveOrderStatus',
+    }),
   },
   computed: {
-    ...mapGetters({
-      newOrderHistory: 'OrderStore/getOrderHistory',
-    }),
     filteredList() {
-      return this.newOrderHistory.filter(orderItem => {
+      return this.orderHistory.filter(orderItem => {
         return orderItem.restaurantName.toLowerCase().includes(this.search.toLowerCase())
       })
-    }
+    },
+    updateStatus() {
+      /* setInterval(() => { 
+        // this.methods.updateOrderStatus(16)
+        var data = {
+          "orderId": ptr.orderHistory[0].orderId
+        }
+        ptr.orderStatus(data)
+      }, 3000); */
+      var data = {
+        "orderId": this.orderHistory[0].orderId
+      }
+      this.orderStatus(data)
+    },
+    ...mapGetters({
+      orderHistory: 'OrderStore/getOrderHistory',
+    }),
+    
   },
   components: {
     'NavBar': NavBar
   },
-  mounted: {
+  /* mounted: {
     updateProgressBar () {
       setInterval(() => {
         this.progressValue++;
       }, 1000);
-    }
-  }
+    },
+  } */
+  beforeMount() {
+    this.updateOrderStatus()
+  },
   
 }
 </script>
