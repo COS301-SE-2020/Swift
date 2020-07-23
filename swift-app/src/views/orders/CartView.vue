@@ -145,10 +145,9 @@ export default {
       this.$router.back()
     },
     goToOrder () {
-      console.log(this.orderInfo());
-        this.updateOrderFlag(true);
-        this.submitOrder();
-        // this.$router.push('/orders')
+      this.updateOrderFlag(true);
+      this.submitOrder();
+      this.$router.push('/orders')
     },
     toggleAlert() {
         this.paymentMade = !this.paymentMade

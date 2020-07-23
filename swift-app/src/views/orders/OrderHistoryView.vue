@@ -37,7 +37,7 @@
                       </v-list-item-content>
                       <v-list-item-action class="mr-3">
                         <v-list-item-action-text v-text="item.orderDateTime.toString().slice(0, 10)"></v-list-item-action-text>
-                        <v-list-item-action-text class="subtitle-1">R{{item.total}}0</v-list-item-action-text>
+                        <v-list-item-action-text class="subtitle-1">R{{(item.total + 27.9).toFixed(2)}}</v-list-item-action-text>
                       </v-list-item-action>
                     </v-list-item>
                     <v-row class="pt-0">
@@ -63,7 +63,7 @@
         </v-container>
       </v-tab-item>
 
-      <v-tab-item style="width:100%;">
+      <v-tab-item style="width:100%;" v-if="getOrderStatusItem() != null">
         <v-container fluid fill-height class="pa-0 d-flex align-start">
           <v-row class="overflow-y-auto mt-3">
             <v-col cols="12" class="d-flex justify-center">
@@ -145,24 +145,29 @@ export default {
 
     itemsForStatus(status) {
       return this.orderHistory.filter(orderItem => {
-        if (status == 'Completed')
+        if (status == 'Completed' && orderItem != null) {
           return orderItem.restaurantName.toLowerCase().includes(this.search != null ? this.search.toLowerCase() : '') && (orderItem.orderStatus == "Paid" || orderItem.orderStatus == "100")
-        else 
+        } else { 
           return orderItem.restaurantName.toLowerCase().includes(this.search != null ? this.search.toLowerCase() : '') && (parseInt(orderItem.orderStatus) < 100 || orderItem.orderStatus == "in-progress")
-      }) 
+        }
+      })
     },
     getOrderStatusItem() {
-      return this.orderHistory.find(orderItem => {
+      // console.log(this.orderHistory)
+      return (this.orderHistory.find(orderItem => {
+        // console.log(parseInt(orderItem.orderStatus) < 100)
         return parseInt(orderItem.orderStatus) < 100 || orderItem.orderStatus == "in-progress"
-      })
+      }))
     },
     updateOrderStatus() {
       var self = this;
       setInterval(() => { 
-        var data = {
-          "orderId": self.getOrderStatusItem().orderId
+        if (self.getOrderStatusItem() != null) {
+          var data = {
+            "orderId": self.getOrderStatusItem().orderId
+          }
+          self.orderStatus(data)
         }
-        self.orderStatus(data)
       }, 3000);  
     },
     ...mapActions({
@@ -176,7 +181,7 @@ export default {
       })
     },
     ...mapGetters({
-      orderHistory: 'OrderStore/getOrderHistory',
+      orderHistory: 'CustomerStore/getCustomerOrderHistory',
     }),
     
   },

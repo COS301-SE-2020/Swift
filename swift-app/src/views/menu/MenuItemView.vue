@@ -68,7 +68,7 @@
                     </v-list-item-content>
                     <v-list-item-icon class="my-1 ml-5 mr-0 pr-2">
                       <span v-if="Object.keys(value).includes('fee')" class="d-flex align-center">+ R{{value.fee}}0</span>
-                      <v-btn @click="Object.keys(value).includes('fee') ? (value.selected ? itemTotal -= parseInt(value.fee) : itemTotal += parseInt(value.fee)) : itemTotal" icon>
+                      <v-btn @click="Object.keys(value).includes('fee') ? (value.selected ? itemTotal = itemTotal -= parseInt(value.fee) : itemTotal = itemTotal += parseInt(value.fee)) : itemTotal" icon>
                         <v-icon class="ml-2" color="secondary" v-text="value.selected ? optionIcon(attribute.field.type).selected : optionIcon(attribute.field.type).unselected"></v-icon>
                       </v-btn>
                     </v-list-item-icon>
