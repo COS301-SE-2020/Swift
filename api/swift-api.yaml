@@ -1,5 +1,6 @@
 # [START gae_deployment_yaml]
 runtime: nodejs12
+service: swift-api
 
 env_variables:
   DB_HOST: $DB_HOST
