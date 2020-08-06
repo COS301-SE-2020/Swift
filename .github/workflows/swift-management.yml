@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Build
+    name: Build and Deploy
     runs-on: self-hosted
     steps:
     - name: Checkout Repo
@@ -23,31 +23,9 @@ jobs:
       run: npm --prefix ./swift-management-app ci
     - name: Build
       run: npm --prefix ./swift-management-app run build
-    - name: Archive Production Artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: dist
-        path: dist
-  deploy:
-    name: Deploy
-    needs: build
-    runs-on: self-hosted
-    steps:
-    - name: Checkout Repo
-      uses: actions/checkout@v2
-    - name: Download Production Artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: dist
-        path: dist
     - name: Deploy to Firebase
       uses: w9jds/firebase-action@master
       with:
         args: deploy --only hosting:lumiqon-swift-management
       env:
         FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-    - name: Cleanup Production Artifact
-      uses: geekyeggo/delete-artifact@v1
-      with:
-        name: dist
-        failOnError: false
