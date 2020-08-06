@@ -45,6 +45,7 @@ View the full documentation at https://tailwindcss.com.
 
 module.exports = {
 
+  purge: false,
   important: true,
   // prefix: '',
   // separator: ':',

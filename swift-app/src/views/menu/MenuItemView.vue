@@ -280,6 +280,9 @@
 <script>
 import store from '@/store/store.js';
 import { mapActions, mapGetters, mapMutations } from "vuex";
+import $ from 'jquery';
+
+$('.commentInfo').text($('.commentInfo').text().substring(0,200))
 
 export default {
   data() {
@@ -445,9 +448,57 @@ export default {
         })
         .then(a => a.present())  
     },
-    goToCart(id) {
+    addToOrder() {
+      let data = {
+        "orderInfo": {
+          "restaurantId": 1,
+          "tableId": 1,
+          "employeeId": 7,
+          "orderItems": [
+            {
+              "menuItemId": this.newMenuItem.menuItemId,
+              "quantity": this.quantity,
+              "orderSelections": {
+                "selections": [
+                  {
+                    "name": "Preparation of Eggs",
+                    "values": ["poached"]
+                  },
+                  {
+                    "name": "Eggs Done",
+                    "values": ["Hard"]
+                  },
+                  {
+                    "name": "Toast",
+                    "values": ["White Toast"]
+                  },
+                  {
+                    "name": "Add-on",
+                    "values": ["Chicken Strips"]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "menuItemName": this.newMenuItem.menuItemName,
+        "total": this.itemTotal * this.quantity,
+      }
+      
+      this.addItemToOrder(data)
       this.$router.push("/cart");
     },
+    changeFavourite () {
+      let data = {
+        menuItemId: this.menuItemId
+      }
+      this.isFavourite ? this.removeFavourite(data) : this.addFavourite(data)
+    },
+    ...mapActions({
+      addFavourite: "CustomerStore/addFavourite",
+      removeFavourite: "CustomerStore/removeFavourite",
+      addItemToOrder: "OrderStore/addItemToOrder"
+    }),
   },
   computed: {
     menuItem() {
@@ -477,8 +528,13 @@ export default {
       }
     },
     ...mapGetters({
-      checkedIn: "RestaurantStore/getCheckInFlag"
-    })
+      checkedIn: "RestaurantsStore/getCheckInFlag",
+      menu: "MenuStore/getMenu",
+      customer: "CustomerStore/getCustomerProfile"
+    }),
   },
+  mounted: function() {
+    this.itemTotal = this.newMenuItem.price
+  }
 }
 </script>
