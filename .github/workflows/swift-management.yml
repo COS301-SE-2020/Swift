@@ -25,13 +25,13 @@ jobs:
     - run: npm --prefix ./swift-management-app run build
   deploy:
     runs-on: self-hosted
-      steps:
-      - name: Checkout the repository
-        uses: actions/checkout@master
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@master
         
-      - name: Deploy to Firebase
-        uses: w9jds/firebase-action@master
-        with:
-          args: deploy --only hosting:lumiqon-swift-management
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+    - name: Deploy to Firebase
+      uses: w9jds/firebase-action@master
+      with:
+        args: deploy --only hosting:lumiqon-swift-management
+      env:
+        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
