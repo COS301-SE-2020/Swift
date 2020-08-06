@@ -7,7 +7,7 @@ on:
 jobs:
   test:
     name: Test API
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout Repo
       uses: actions/checkout@v2
@@ -22,7 +22,7 @@ jobs:
   deploy:
     name: Deploy API
     needs: test
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout Repo
       uses: actions/checkout@v2
