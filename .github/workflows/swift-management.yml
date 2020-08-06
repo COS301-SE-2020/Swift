@@ -28,5 +28,5 @@ jobs:
       with:
         args: deploy --only hosting:lumiqon-swift-management
       env:
-        FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+        GCP_SA_KEY: ${{ secrets.GAE_CREDENTIALS }}
         PROJECT_PATH: ./swift-management-app
