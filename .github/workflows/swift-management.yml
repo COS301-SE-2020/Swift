@@ -20,7 +20,7 @@ jobs:
       with:
         node-version: 12.x  
     - name: Install Dependencies
-      run: npm --prefix ./swift-management-app ci
+      run: npm --prefix ./swift-management-app install
     - name: Build
       run: npm --prefix ./swift-management-app run build
     - name: Archive Production Artifact
