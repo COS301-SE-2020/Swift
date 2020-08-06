@@ -4,6 +4,7 @@ import axios from 'axios'
 const initialState = () => ({
   customer: {},
   isAuthenticated: false,
+  token: null,
 });
 
 const state = initialState();
@@ -12,6 +13,12 @@ const state = initialState();
 const getters = {
   getCustomerProfile( state ) {
     return state.customer;
+  },
+  getCustomerOrderHistory( state ) {
+    return state.customer.orderHistory;
+  },
+  getToken( state ) {
+    return state.token;
   },
   isAuthenticated(state) {
     return state.isAuthenticated;
@@ -30,12 +37,11 @@ const actions = {
         // "password": "john123"
       }
     ).then(result => {
+      commit('SAVE_TOKEN', result.data.token);
       commit('SAVE_CUSTOMER', result.data);
-      commit('SET_AUTHENTICATION', true);
+      this.dispatch('RestaurantsStore/allRestaurants');
+      this.dispatch('OrderStore/initOrderHistory');
     }).catch(({ response }) => {
-      if(response.status == 400 || response.status == 403 || response.status == 404){
-        commit('SET_AUTHENTICATION', false);
-      } 
     });
   },
 
@@ -61,13 +67,48 @@ const actions = {
   reset({ commit }) {
     commit('RESET');
   },
+
+  addFavourite({commit}, data) {
+    axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "addFavourite",
+      "token": this.getters['CustomerStore/getToken'],
+      "menuItemId": data.menuItemId
+    } 
+    ).then(result => {
+      commit('UPDATE_FAVOURITES', result.data.favourites);
+    }).catch(({ response }) => {
+    });
+  },
+
+  removeFavourite({commit}, data) {
+    axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "removeFavourite",
+      "token": this.getters['CustomerStore/getToken'],
+      "menuItemId": data.menuItemId
+    } 
+    ).then(result => {
+      commit('UPDATE_FAVOURITES', result.data.favourites);
+    }).catch(({ response }) => {
+    });
+  }
 }
 
 // Mutations
 const mutations = {
+  SAVE_TOKEN(state, token) {
+    state.token = token;
+  },
+
   SAVE_CUSTOMER(state, customer) {
     state.customer = customer;
   },
+
+  UPDATE_FAVOURITES(state, data) {
+    state.customer.favourites = data;
+  },
+
 
   SET_AUTHENTICATION(state, authentication_state) {
     state.isAuthenticated = authentication_state;

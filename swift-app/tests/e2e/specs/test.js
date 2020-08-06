@@ -1,21 +1,14 @@
-// For authoring Nightwatch tests, see
-// https://nightwatchjs.org/guide
-
 module.exports = {
-  'default e2e tests': browser => {
+  'testing login view': browser => {
     browser
-      .init()
-      .waitForElementVisible('#app')
-      .assert.elementPresent('.hello')
-      .assert.containsText('h1', 'Welcome to Your Vue.js App')
-      .assert.elementCount('img', 1)
+      .url('http://localhost:8080/#/login')
+      .waitForElementVisible('body')
+      .assert.titleContains('Ecosia')
+      .assert.visible('input[type=search]')
+      .setValue('input[type=search]', 'nightwatch')
+      .assert.visible('button[type=submit]')
+      .click('button[type=submit]')
+      .assert.containsText('.mainline-results', 'Nightwatch.js')
       .end()
   },
-
-  'example e2e test using a custom command': browser => {
-    browser
-      .openHomepage()
-      .assert.elementPresent('.hello')
-      .end()
-  }
 }

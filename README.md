@@ -6,6 +6,8 @@ Swift aims to create a convenient, flexible, and scalable interface suitable for
 
 ![Swift API CI](https://github.com/COS301-SE-2020/Swift/workflows/Swift%20API%20CI/badge.svg)
 ![Deploy to Google App Engine](https://github.com/COS301-SE-2020/Swift/workflows/Deploy%20to%20Google%20App%20Engine/badge.svg)
+![Swift App CI](https://github.com/COS301-SE-2020/Swift/workflows/Swift%20App%20CI/badge.svg)
+![Swift Management CI](https://github.com/COS301-SE-2020/Swift/workflows/Swift%20Management%20CI/badge.svg)
 
 ## Demo 1
 
@@ -14,8 +16,10 @@ Swift aims to create a convenient, flexible, and scalable interface suitable for
 
 ## Demo 2
 
-* :tv: [Demo Video]
+* :tv: [Demo Video](https://drive.google.com/file/d/16YMjF8z-J9YkiuJH0O94VUH7TRyhrEdc/view?usp=sharing)
 * :open_book: [Overleaf Document](https://www.overleaf.com/read/gdpwvqbghvkj)
+* :open_book: [User Manual](https://drive.google.com/file/d/126JpUB3yG6GSfKJJ3Hnvljq6qBqULci_/view?usp=sharing)
+* :computer: [Coding Standards](https://github.com/COS301-SE-2020/Swift/blob/master/CODING.md#coding-standards)
 
 ## Project Management Tools
 
