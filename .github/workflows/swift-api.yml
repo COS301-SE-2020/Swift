@@ -1,25 +1,51 @@
-# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
-
 name: Swift API CI
 
 on:
   push:
     branches: [ master, develop, api ]
-  pull_request:
-    branches: [ develop, master ]
 
 jobs:
-  build:
-    runs-on: self-hosted
-    strategy:
-      matrix:
-        node-version: [12.x]
-
+  test:
+    name: Test API
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+    - name: Setup Node.js 12.x
       uses: actions/setup-node@v1
       with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm --prefix ./api ci
-    - run: npm --prefix ./api test
+        node-version: 12.x  
+    - name: Install Dependencies
+      run: npm --prefix ./api ci
+    - name: Run Tests
+      run: npm --prefix ./api test
+  deploy:
+    name: Deploy API
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+
+    # Swap environment vars
+    - name: Get Environment Secrets
+      uses: ./.github/actions/yaml-env-secrets
+      env:
+        DB_HOST: ${{ secrets.DB_HOST }}
+        DB_NAME: ${{ secrets.DB_NAME }}
+        DB_PASS: ${{ secrets.DB_PASS }}
+        DB_PORT: ${{ secrets.DB_PORT }}
+        DB_USER: ${{ secrets.DB_USER }}
+
+    # Setup and configure gcloud CLI
+    - name: Setup gcloud CLI
+      uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      with:
+        version: '304.0.0'
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.GAE_CREDENTIALS }}
+
+    # Deploy App to App Engine
+    - name: Deploy To Google App Engine
+      run: |
+        gcloud app deploy ./api/swift-api.yaml --quiet --promote
