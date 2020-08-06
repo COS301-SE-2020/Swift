@@ -1,0 +1,37 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+
+name: Swift Management CI
+
+on:
+  push:
+    branches: [ master, develop, app ]
+  pull_request:
+    branches: [ develop, master ]
+
+jobs:
+  build:
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - run: npm --prefix ./swift-management-app ci
+    - run: npm --prefix ./swift-management-app run build
+  deploy:
+    runs-on: self-hosted
+      steps:
+      - name: Checkout the repository
+        uses: actions/checkout@master
+        
+      - name: Deploy to Firebase
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only hosting:lumiqon-swift-management
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
