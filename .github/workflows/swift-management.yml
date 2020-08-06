@@ -10,28 +10,40 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted
-    strategy:
-      matrix:
-        node-version: [12.x]
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
-      with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm --prefix ./swift-management-app ci
-    - run: npm --prefix ./swift-management-app run build
-  deploy:
+    name: Build
     runs-on: self-hosted
     steps:
-    - name: Checkout the repository
+    - name: Checkout Repo
       uses: actions/checkout@master
-        
+    - name: Install Dependencies
+      run: npm --prefix ./swift-management-app ci
+    - name: Build
+      run: npm --prefix ./swift-management-app run build
+    - name: Archive Production Artifact
+      uses: actions/upload-artifact@master
+      with:
+        name: dist
+        path: dist
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: self-hosted
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@master
+    - name: Download Production Artifact
+      uses: actions/download-artifact@master
+      with:
+        name: dist
+        path: dist
     - name: Deploy to Firebase
       uses: w9jds/firebase-action@master
       with:
         args: deploy --only hosting:lumiqon-swift-management
       env:
         FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+    - name: Cleanup Production Artifact
+      uses: geekyeggo/delete-artifact@v1
+      with:
+        name: dist
+        failOnError: false
