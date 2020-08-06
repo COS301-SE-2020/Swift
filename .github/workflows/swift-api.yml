@@ -3,8 +3,6 @@ name: Swift API CI
 on:
   push:
     branches: [ master, develop, api ]
-  pull_request:
-    branches: [ develop, master ]
 
 jobs:
   test:
