@@ -1,28 +1,36 @@
-<template>	
-
+<template>
   <div id="data-list-list-view" class="data-list-container">
-	<div class="router-header flex flex-wrap items-center mb-6">
-		<div class="content-area__heading pr-4">
-			<h2 class="mb-1">Menu Items</h2>
-		</div>
-	</div>
-    <data-view-sidebar :isSidebarActive="addNewDataSidebar" @closeSidebar="toggleDataSidebar" :data="sidebarData" />
+    <div class="router-header flex flex-wrap items-center mb-6">
+      <div class="content-area__heading pr-4">
+        <h2 class="mb-1">Menu Items</h2>
+      </div>
+    </div>
+    <data-view-sidebar
+      :isSidebarActive="addNewDataSidebar"
+      @closeSidebar="toggleDataSidebar"
+      :data="sidebarData"
+    />
 
-    <vs-table ref="table" multiple v-model="selected" pagination :max-items="itemsPerPage" search :data="products">
-
+    <vs-table
+      ref="table"
+      multiple
+      v-model="selected"
+      pagination
+      :max-items="itemsPerPage"
+      search
+      :data="products"
+    >
       <div slot="header" class="flex flex-wrap-reverse items-center flex-grow justify-between">
-
         <div class="flex flex-wrap-reverse items-center data-list-btn-container">
-
           <vs-dropdown vs-trigger-click class="dd-actions cursor-pointer mr-4 mb-4">
-
-            <div class="p-4 shadow-drop rounded-lg d-theme-dark-bg cursor-pointer flex items-center justify-center text-lg font-medium w-32 w-full">
+            <div
+              class="p-4 shadow-drop rounded-lg d-theme-dark-bg cursor-pointer flex items-center justify-center text-lg font-medium w-32 w-full"
+            >
               <span class="mr-2">Actions</span>
               <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
             </div>
 
             <vs-dropdown-menu>
-
               <vs-dropdown-item>
                 <span class="flex items-center">
                   <feather-icon icon="TrashIcon" svgClasses="h-4 w-4" class="mr-2" />
@@ -36,23 +44,28 @@
                   <span>Export</span>
                 </span>
               </vs-dropdown-item>
-
             </vs-dropdown-menu>
           </vs-dropdown>
 
-          <div class="btn-add-new p-3 mb-4 mr-4 rounded-lg cursor-pointer flex items-center justify-center text-lg font-medium text-base text-primary border border-solid border-primary" @click="addNewData">
-              <feather-icon icon="PlusIcon" svgClasses="h-4 w-4" />
-              <span class="ml-2 text-base text-primary">Add New</span>
+          <div
+            class="btn-add-new p-3 mb-4 mr-4 rounded-lg cursor-pointer flex items-center justify-center text-lg font-medium text-base text-primary border border-solid border-primary"
+            @click="addNewData"
+          >
+            <feather-icon icon="PlusIcon" svgClasses="h-4 w-4" />
+            <span class="ml-2 text-base text-primary">Add New</span>
           </div>
         </div>
 
         <vs-dropdown vs-trigger-click class="cursor-pointer mb-4 mr-4 items-per-page-handler">
-          <div class="p-4 border border-solid d-theme-border-grey-light rounded-full d-theme-dark-bg cursor-pointer flex items-center justify-between font-medium">
-            <span class="mr-2">{{ currentPage * itemsPerPage - (itemsPerPage - 1) }} - {{ products.length - currentPage * itemsPerPage > 0 ? currentPage * itemsPerPage : products.length }} of {{ queriedItems }}</span>
+          <div
+            class="p-4 border border-solid d-theme-border-grey-light rounded-full d-theme-dark-bg cursor-pointer flex items-center justify-between font-medium"
+          >
+            <span
+              class="mr-2"
+            >{{ currentPage * itemsPerPage - (itemsPerPage - 1) }} - {{ products.length - currentPage * itemsPerPage > 0 ? currentPage * itemsPerPage : products.length }} of {{ queriedItems }}</span>
             <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
           </div>
           <vs-dropdown-menu>
-
             <vs-dropdown-item @click="itemsPerPage=4">
               <span>4</span>
             </vs-dropdown-item>
@@ -78,49 +91,63 @@
         <vs-th>Action</vs-th>
       </template>
 
-        <template slot-scope="{data}">
-          <tbody>
-            <vs-tr :data="tr" :key="indextr" v-for="(tr, indextr) in data">
+      <template slot-scope="{data}">
+        <tbody>
+          <vs-tr :data="tr" :key="indextr" v-for="(tr, indextr) in data">
+            <vs-td>
+              <p class="product-name font-medium truncate">{{ tr.name }}</p>
+            </vs-td>
 
-              <vs-td>
-                <p class="product-name font-medium truncate">{{ tr.name }}</p>
-              </vs-td>
+            <vs-td>
+              <p class="product-category">{{ tr.category}}</p>
+            </vs-td>
 
-              <vs-td>
-                <p class="product-category">{{ tr.category}}</p>
-              </vs-td>
+            <vs-td>
+              <vs-progress
+                :percent="Number(tr.popularity)"
+                :color="getPopularityColor(Number(tr.popularity))"
+                class="shadow-md"
+              />
+            </vs-td>
 
-              <vs-td>
-                <vs-progress :percent="Number(tr.popularity)" :color="getPopularityColor(Number(tr.popularity))" class="shadow-md" />
-              </vs-td>
+            <vs-td>
+              <vs-chip
+                :color="getEstimatedTimeColor(tr.estimatedWaitingTime)"
+                class="product-order-status"
+              >{{ tr.estimatedWaitingTime}} min</vs-chip>
+            </vs-td>
 
-              <vs-td>
-                <vs-chip :color="getEstimatedTimeColor(tr.estimatedWaitingTime)" class="product-order-status">{{ tr.estimatedWaitingTime}} min</vs-chip>
-              </vs-td>
+            <vs-td>
+              <p class="product-price">R{{ tr.price }}</p>
+            </vs-td>
 
-              <vs-td>
-                <p class="product-price">R{{ tr.price }}</p>
-              </vs-td>
-
-              <vs-td class="whitespace-no-wrap">
-                <feather-icon icon="EditIcon" svgClasses="w-5 h-5 hover:text-primary stroke-current" @click.stop="editData(tr)" />
-                <feather-icon icon="TrashIcon" svgClasses="w-5 h-5 hover:text-danger stroke-current" class="ml-2" @click.stop="deleteData(tr.id)" />
-              </vs-td>
-
-            </vs-tr>
-          </tbody>
-        </template>
+            <vs-td class="whitespace-no-wrap">
+              <feather-icon
+                icon="EditIcon"
+                svgClasses="w-5 h-5 hover:text-primary stroke-current"
+                @click.stop="editData(tr)"
+              />
+              <feather-icon
+                icon="TrashIcon"
+                svgClasses="w-5 h-5 hover:text-danger stroke-current"
+                class="ml-2"
+                @click.stop="deleteData(tr.id)"
+              />
+            </vs-td>
+          </vs-tr>
+        </tbody>
+      </template>
     </vs-table>
   </div>
 </template>
 
 <script>
-import DataViewSidebar from './MenuItemsSidebar.vue'
-import moduleDataList from "@/store/menu/menuDataList.js"
+import DataViewSidebar from "./MenuItemsSidebar.vue";
+import modulemenuList from "@/store/menu/menuDataList.js";
 
 export default {
   components: {
-    DataViewSidebar
+    DataViewSidebar,
   },
   data() {
     return {
@@ -132,78 +159,80 @@ export default {
       // Data Sidebar
       addNewDataSidebar: false,
       sidebarData: {},
-    }
+    };
   },
   computed: {
     currentPage() {
-      if(this.isMounted) {
-        return this.$refs.table.currentx
+      if (this.isMounted) {
+        return this.$refs.table.currentx;
       }
-      return 0
+      return 0;
     },
     products() {
-      return this.$store.state.dataList.products;
+      return this.$store.state.menuList.products;
     },
     productsCount() {
-      		if(this.$store.state.dataList)
-      return this.$store.state.dataList.products.length;
-		else
-			return null
+      if (this.$store.state.menuList)
+        return this.$store.state.menuList.products.length;
+      else return null;
     },
     queriedItems() {
-      return this.$refs.table ? this.$refs.table.queriedResults.length : this.products.length
-    }
+      return this.$refs.table
+        ? this.$refs.table.queriedResults.length
+        : this.products.length;
+    },
   },
   methods: {
     addNewData() {
-      this.sidebarData = {}
-      this.toggleDataSidebar(true)
+      this.sidebarData = {};
+      this.toggleDataSidebar(true);
     },
     deleteData(id) {
-      this.$store.dispatch("dataList/removeItem", id).catch(err => { console.error(err) })
+      this.$store.dispatch("menuList/removeItem", id).catch((err) => {
+        console.error(err);
+      });
     },
     editData(data) {
-      this.sidebarData = data
-      this.toggleDataSidebar(true)
+      this.sidebarData = data;
+      this.toggleDataSidebar(true);
     },
     getEstimatedTimeColor(time) {
-		if(time <= 15) return "success"
-		if(time <= 25) return "warning"
-		if(time <= 40) return "danger"
-		return "primary"
+      if (time <= 15) return "success";
+      if (time <= 25) return "warning";
+      if (time <= 40) return "danger";
+      return "primary";
     },
     getPopularityColor(num) {
-      if(num > 90) return "success"
-      if(num >70) return "primary"
-      if(num >= 50) return "warning"
-      if(num < 50) return "danger"
-      return "primary"
+      if (num > 90) return "success";
+      if (num > 70) return "primary";
+      if (num >= 50) return "warning";
+      if (num < 50) return "danger";
+      return "primary";
     },
-    toggleDataSidebar(val=false) {
-      this.addNewDataSidebar = val
-	},
-	listMenuItems() {
-		this.$store.dispatch("dataList/listMenuItems")
-	}
+    toggleDataSidebar(val = false) {
+      this.addNewDataSidebar = val;
+    },
+    listMenuItems() {
+      this.$store.dispatch("menuList/listMenuItems");
+    },
   },
   created() {
-    if(!moduleDataList.isRegistered) {
-      this.$store.registerModule('dataList', moduleDataList)
-      moduleDataList.isRegistered = true
-  }
-  if(!this.productsCount > 0)
-    //this.$vs.loading();
+    if (!modulemenuList.isRegistered) {
+      this.$store.registerModule("menuList", modulemenuList);
+      modulemenuList.isRegistered = true;
+    }
+    if (!this.productsCount > 0) this.$vs.loading();
 
-	this.listMenuItems();
+    this.listMenuItems();
   },
   mounted() {
     this.isMounted = true;
   },
-  watch:{
-    productCount(newCount, oldCount) {
-     // this.$vs.loading.close();
-   }
-  }
+  watch: {
+    productsCount(newCount, oldCount) {
+      this.$vs.loading.close();
+    },
+  },
 };
 </script>
 
@@ -254,18 +283,18 @@ export default {
         flex-grow: 1;
       }
 
-      .vs-table--search{
+      .vs-table--search {
         padding-top: 0;
 
         .vs-table--search-input {
           padding: 0.9rem 2.5rem;
           font-size: 1rem;
 
-          &+i {
+          & + i {
             left: 1rem;
           }
 
-          &:focus+i {
+          &:focus + i {
             left: 1rem;
           }
         }
@@ -277,43 +306,43 @@ export default {
       border-spacing: 0 1.3rem;
       padding: 0 1rem;
 
-      tr{
-          box-shadow: 0 4px 20px 0 rgba(0,0,0,.05);
-          td{
-            padding: 20px;
-            &:first-child{
-              border-top-left-radius: .5rem;
-              border-bottom-left-radius: .5rem;
-            }
-            &:last-child{
-              border-top-right-radius: .5rem;
-              border-bottom-right-radius: .5rem;
-            }
+      tr {
+        box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.05);
+        td {
+          padding: 20px;
+          &:first-child {
+            border-top-left-radius: 0.5rem;
+            border-bottom-left-radius: 0.5rem;
           }
-          td.td-check{
-            padding: 20px !important;
+          &:last-child {
+            border-top-right-radius: 0.5rem;
+            border-bottom-right-radius: 0.5rem;
           }
+        }
+        td.td-check {
+          padding: 20px !important;
+        }
       }
     }
 
-	.vs-chip--text {
-		text-align: center;
-	}
+    .vs-chip--text {
+      text-align: center;
+    }
 
-    .vs-table--thead{
+    .vs-table--thead {
       th {
         padding-top: 0;
         padding-bottom: 0;
 
-        .vs-table-text{
+        .vs-table-text {
           text-transform: uppercase;
           font-weight: 600;
         }
       }
-      th.td-check{
+      th.td-check {
         padding: 0 15px !important;
       }
-      tr{
+      tr {
         background: none;
         box-shadow: none;
       }
