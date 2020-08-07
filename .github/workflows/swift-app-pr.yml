@@ -1,0 +1,21 @@
+name: Swift App PR CI
+
+on:
+  pull_request:
+    branches: [ develop, master ]
+
+jobs:
+  build:
+    name: User App Tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+    - name: Setup Node.js 12.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12.x  
+    - name: Install Dependencies
+      run: npm --prefix ./swift-app ci
+    - name: Build
+      run: npm --prefix ./swift-app run build
