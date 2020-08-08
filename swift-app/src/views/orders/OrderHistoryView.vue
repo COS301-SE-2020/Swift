@@ -153,21 +153,20 @@ export default {
       })
     },
     getOrderStatusItem() {
-      // console.log(this.orderHistory)
       return (this.orderHistory.find(orderItem => {
-        // console.log(parseInt(orderItem.orderStatus) < 100)
         return parseInt(orderItem.orderStatus) < 100 || orderItem.orderStatus == "in-progress"
       }))
     },
     updateOrderStatus() {
-      var self = this;
+      let self = this;
       setInterval(() => { 
-        // if (self.getOrderStatusItem() != null) {
-          var data = {
-            "orderId": self.getOrderStatusItem().orderId
+        let order = self.getOrderStatusItem();
+        if (order != undefined) {
+          let data = {
+            "orderId": order.orderId
           }
           self.orderStatus(data)
-        // }
+        }
       }, 3000);  
     },
     ...mapActions({

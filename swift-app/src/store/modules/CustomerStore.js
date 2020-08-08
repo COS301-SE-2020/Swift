@@ -28,7 +28,7 @@ const getters = {
 // Actions 
 const actions = {
   login({commit}, data) {
-    axios.post('https://api.swiftapp.ml', 
+    return axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "login",
         "email": data.email,
@@ -41,7 +41,9 @@ const actions = {
       commit('SAVE_CUSTOMER', result.data);
       this.dispatch('RestaurantsStore/allRestaurants');
       this.dispatch('OrderStore/initOrderHistory');
+      return "Success";
     }).catch(({ response }) => {
+      return "Fail";
     });
   },
 
@@ -49,8 +51,8 @@ const actions = {
     axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "register",
-        "name": "john",
-        "surname": "doe",
+        "name": data.name,
+        "surname": data.surname,
         "username": data.username,
         // "username": "john123",
         "email": data.email,

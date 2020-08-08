@@ -14,10 +14,13 @@
           <p class="body-2 float-right" color="secondary"><u>Forgot Password?</u></p>
         </v-btn>
       </v-col>
+      <!-- <v-col cols="10" class="py-0 mb-0 d-flex flex-column align-center">
+        <p class="body-2 py-0 mb-0" style="color: red">Username or password incorrect</p>
+      </v-col> -->
     </div>
     <div class="row d-flex flex-column align-center mx-8">
       <v-btn @click="loginCustomer" v-show=!isLoading block rounded class="py-5" color="primary">Sign in</v-btn>
-      <v-progress-circular v-show=isLoading indeterminate color="primary"></v-progress-circular>
+      <v-progress-circular v-show="isLoading" indeterminate color="primary"></v-progress-circular>
     </div>
     <div class="row d-flex flex-col align-center justify-center">
       <v-col cols="2">
@@ -71,20 +74,26 @@ export default {
     forgotPass () {
       this.$router.push('/forgotPassword')
     },
-    loginCustomer ()  {
-      this.isLoading = true
+    async loginCustomer ()  {
+      this.isLoading = !this.isLoading;
       if (this.emailErrors.length > 0 && this.passwordErrors > 0 || this.email.length == 0 || this.password.length == 0) {
         this.$v.$touch()
-        this.isLoading = false
+        this.isLoading = !this.isLoading;
       } else {
-        this.isLoading = false
+        // this.isLoading = !this.isLoading;
         let data = {
           email: this.email,
           password: this.password,
         }
         
-        this.login(data)
-        this.$router.push('/')
+        let user = await this.login(data);
+        // user.then((mssg) => {
+          // console.log(user);
+        this.isLoading = !this.isLoading;
+        if (user == "Success") 
+          this.$router.push('/');
+          
+        // });
       }
     },
     ...mapGetters({
