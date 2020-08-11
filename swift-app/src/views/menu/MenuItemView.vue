@@ -53,131 +53,81 @@
         <v-card flat>
           <v-card-title class="pb-0 pt-4">Customise Order</v-card-title>
           <v-container>
-            <div>
-              <v-list class="py-0">
-                <v-list-group  v-for="(attribute, i) in newMenuItem.attributes.attributes" :key="i" no-action>
-                  <template expand v-slot:activator>
-                    <v-list-item-content>
-                      <v-list-item-title  v-text="attribute.name"></v-list-item-title>
-                    </v-list-item-content>
-                  </template>
-
-                  <v-list-item @click="value.selected = !value.selected" ripple v-for="(value, j) in attribute.values" :key="j" height="20px" class="pl-5 py-0 my-0">
-                    <v-list-item-content>
-                      <v-list-item-title v-text="value.name"></v-list-item-title>
-                    </v-list-item-content>
-                    <v-list-item-icon class="my-1 ml-5 mr-0 pr-2">
-                      <span v-if="Object.keys(value).includes('fee')" class="d-flex align-center">+ R{{value.fee}}0</span>
-                      <v-btn @click="Object.keys(value).includes('fee') ? (value.selected ? itemTotal = itemTotal -= parseInt(value.fee) : itemTotal = itemTotal += parseInt(value.fee)) : itemTotal" icon>
-                        <v-icon class="ml-2" color="secondary" v-text="value.selected ? optionIcon(attribute.field.type).selected : optionIcon(attribute.field.type).unselected"></v-icon>
-                      </v-btn>
-                    </v-list-item-icon>
-                  </v-list-item>
-                </v-list-group>
-              </v-list>
-            </div>
-            <!-- <v-row> -->
-              <!-- <v-col cols="12" class="d-flex align-center justify-center"> -->
-                <!-- <v-slide-x-transition> -->
-                  <v-row v-if="expandOrderBtn" class="d-flex justify-space-between">
-                    <!-- <v-btn @click="changeOrderBtn" rounded class="py-6 mt-5" color="grey">Remove</v-btn> -->
-                    <v-col cols="4" class="mt-2 px-0 d-flex justify-center">
-                      <v-btn @click="quantity--" fab elevation="2" width="22px" height="22px" class="mr-2">
-                          <v-icon size="15px">mdi-minus</v-icon>
-                      </v-btn>
-                      <div class="body-2 secondary--text" style="display: inline;">{{quantity}}</div>
-                      <v-btn @click="quantity++" fab elevation="2" width="22px" height="22px" class="ml-2">
-                          <v-icon size="15px">mdi-plus</v-icon>
-                      </v-btn>
-                    </v-col>
-                    <v-col cols="8" class="d-flex justify-center px-0">
-                      <v-btn @click="addToOrder" rounded class="" color="accent">R {{calculatePrice(itemTotal)}} | Add to order</v-btn>
-                    </v-col>
-                  </v-row>
-                <!-- </v-slide-x-transition> -->
-              <!-- </v-col> -->
-            <!-- </v-row> -->
-          </v-container>
-          
-          <!-- <v-container>
-            <v-card-text class="py-0 pr-0">
-              <v-row>
-                <v-col class="pl-0" cols="3">
-                  <span class="subtitle-1" >Size:</span>
-                </v-col>
-                <v-col cols="9" class="py-0 d-flex  justify-end">
-                  <v-chip-group v-model="selection" active-class="primary" mandatory>
-                    <v-chip>Small</v-chip>
-                    <v-chip>Medium</v-chip>
-                    <v-chip>Large</v-chip>
-                  </v-chip-group>
-                </v-col>
-              </v-row>
-            </v-card-text>
-            <v-divider></v-divider>
-            <v-card-text @click="muesliSelected = !muesliSelected" v-ripple class="py-0 pr-0">
-              <v-row>
-                <v-col class="pl-0 pb-2" cols="3">
-                  <span class="subtitle-1" >Muesli:</span>
-                </v-col>
-                <v-col cols="9" class="pb-0 pt-1 d-flex justify-end">
-                  <v-btn icon>
-                    <v-icon color="secondary" v-text="muesliSelected ? 'mdi-radiobox-marked' : 'mdi-radiobox-blank'"></v-icon>
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-card-text>
-            <v-divider></v-divider>
-            <v-card-text  @click="honeySelected = !honeySelected"  v-ripple class="py-0 pr-0">
-              <v-row>
-                <v-col class="pl-0 pb-2" cols="3">
-                  <span class="subtitle-1" >Honey:</span>
-                </v-col>
-                <v-col cols="9" class="pb-0 pt-1 d-flex justify-end">
-                  <v-btn icon>
-                    <v-icon color="secondary" v-text="honeySelected ? 'mdi-radiobox-marked' : 'mdi-radiobox-blank'"></v-icon>
-                  </v-btn>
-                </v-col>
-              </v-row>
-            </v-card-text>
-            <v-divider></v-divider>
-
-            <v-list class="py-0">
-              <v-list-group  v-for="item in menuItemSelections" :key="item.title" v-model="item.active"  no-action>
+            <v-form ref="form" v-model="valid">
+              <v-list-group  v-for="(attribute, i) in newMenuItem.attributes.attributes" :key="i" no-action>
                 <template expand v-slot:activator>
                   <v-list-item-content>
-                    <v-list-item-title  v-text="item.title"></v-list-item-title>
+                    <v-list-item-title class="label" v-text="attribute.name"></v-list-item-title>
                   </v-list-item-content>
                 </template>
+                <div v-if="attribute.field.type == 'radio'">
+                  <v-radio-group v-if="attribute.field.type == 'radio'" v-model="radio[i]" class="mt-0 radioCustomise">
+                    <v-card flat v-for="(value, j) in attribute.values" :key="j" height="50px">
+                      <v-row class="d-flex justify-space-between customisation" style="max-height: 50px">
+                        <v-col cols="7" class="pl-5" style="max-height: 50px">
+                          <span>{{value.name}}</span>
+                        </v-col>
+                        <v-col cols="5" class="pr-5" style="max-height: 50px">
+                          <v-row class="d-flex justify-space-between py-0" style="max-height: 50px">
+                            <v-col cols="8" class="ph-0 py-0">
+                              <span v-if="'fee' in value">+ R{{(value.fee).toFixed(2)}}</span>
+                            </v-col>
+                            <v-col cols="4" class="ph-0 py-0 d-flex justify-start icons" >                            
+                              <v-radio :value="value.name"></v-radio>
+                            </v-col>
+                          </v-row>
+                        </v-col>
+                      </v-row>
+                    </v-card>
+                  </v-radio-group>
+                </div>
 
-                <v-list-item @click="subItem.selected = !subItem.selected" ripple v-for="subItem in item.items" :key="subItem.title" height="20px" class="pl-5 py-0 my-0">
-                  <v-list-item-content>
-                    <v-list-item-title v-text="subItem.title"></v-list-item-title>
-                  </v-list-item-content>
-                  <v-list-item-icon class="my-1 ml-5 mr-0 pr-2">
-                    <span class="d-flex align-center">{{subItem.extra}}</span>
-                    <v-btn icon>
-                      <v-icon class="ml-2" color="secondary" v-text="subItem.selected ? 'mdi-check-box-outline' : 'mdi-checkbox-blank-outline'"></v-icon>
-                    </v-btn>
-                  </v-list-item-icon>
-                </v-list-item>
+
+                <div v-else class="mt-0">
+                  <v-card flat v-for="(value, j) in attribute.values" :key="j" height="50px">
+                    <v-row class="d-flex justify-space-between customisation" style="max-height: 50px">
+                      <v-col cols="7" class="pl-5" style="max-height: 50px">
+                        <span>{{value.name}}</span>
+                      </v-col>
+                      <v-col cols="5" class="pr-5" style="max-height: 50px">
+                        <v-row class="d-flex justify-space-between py-0" style="max-height: 50px">
+                          <v-col cols="8" class="ph-0 py-0">
+                            <span v-if="'fee' in value">+ R{{(value.fee).toFixed(2)}}</span>
+                          </v-col>
+                          <v-col cols="4" class="ph-0 py-0 d-flex justify-start icons" >
+                            <v-checkbox :value="value.name"></v-checkbox>
+                          </v-col>
+                        </v-row>
+                      </v-col>
+                    </v-row>
+                  </v-card>
+                </div>
               </v-list-group>
-              
-            </v-list>
-            <v-row>
-              <v-col cols="12" class="d-flex align-center justify-center">
-                <v-slide-x-transition>
-                  <div v-if="expandOrderBtn" id="orderButton">
-                    <v-btn @click="changeOrderBtn" rounded class="py-6 mt-5" color="primary" width="150px">Add To Order</v-btn>
-                  </div>
-                  <div v-if="!expandOrderBtn">
-                    <v-btn @click="changeOrderBtn" rounded class="py-6 mt-5" color="grey">Remove</v-btn>
-                    <v-btn @click="goToCart" rounded class="py-6 mt-5 ml-5" color="accent">R85 | Place Order</v-btn>
-                  </div>
-                </v-slide-x-transition>
+            </v-form>
+
+            <v-row v-if="expandOrderBtn" class="d-flex justify-space-around px-2 mt-4">
+              <v-col cols="4" class="d-flex justify-center px-0">
+                <div class="px-1 d-flex align-center quantityButton" height="45px">
+                  <v-btn @click="(quantity > 1) ? quantity-- : quantity" icon class="mr-2"><v-icon size="22">mdi-minus</v-icon></v-btn>
+                  {{quantity}}
+                  <v-btn @click="quantity++" icon class="ml-2"><v-icon size="22">mdi-plus</v-icon></v-btn>
+                </div>
+
+                <!-- <v-btn @click="quantity--" fab elevation="2" width="22px" height="22px" class="mr-2">
+                    <v-icon size="15px">mdi-minus</v-icon>
+                </v-btn>
+                <div class="body-2 secondary--text" style="display: inline;">{{quantity}}</div>
+                <v-btn @click="quantity++" fab elevation="2" width="22px" height="22px" class="ml-2">
+                    <v-icon size="15px">mdi-plus</v-icon>
+                </v-btn> -->
+              </v-col>
+              <v-col cols="7" class="d-flex justify-center px-0">
+                <v-btn @click="addToOrder" style="border-radius: 13px; color: white" height="45px" color="accent">R {{calculatePrice(itemTotal)}} | Add to order</v-btn>
               </v-col>
             </v-row>
-          </v-container> -->
+
+          </v-container>
+          
         </v-card>
       </v-tab-item>
       <v-tab-item class="overflow-x-hidden">
@@ -275,6 +225,20 @@
     padding-right: 5px;
   }
 
+  .icons .v-input--selection-controls {
+    padding-top: 0px;
+    margin-top: 0px;
+  }
+
+  .quantityButton {
+    border-radius: 13px; 
+    background-color: white; box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
+  }
+
+  .radioCustomise .v-messages {
+    display: none;
+  }
+
 </style>
 
 <script>
@@ -287,7 +251,11 @@ $('.commentInfo').text($('.commentInfo').text().substring(0,200))
 export default {
   data() {
     return {
+      radio: [],
+      checkboxVal: [[]],
+      valid: true,
       quantity: 1,
+      radioGroup: 1,
       itemTotal: 0,
       activeComments: [],
       menuItemId: this.$route.params.itemid,
@@ -302,26 +270,26 @@ export default {
       favourited: false,
       muesliSelected: true,
       honeySelected: false,
-      menuItemSelections: [
-        {
-          title: 'Choose fruit:',
-          active: false,
-          items: [
-            { title: '- Strawberry', icon: 'mdi-check-box-outline', toggleIcon: '', extra: '', selected: true },
-            { title: '- Mango', icon: 'mdi-check-box-outline', extra: '+ R2.00', selected: true },
-            { title: '- Berry', icon: 'mdi-checkbox-blank-outline', extra: '', selected: false },
-          ],
-        },
-        {
-          title: 'Choose Yogurt type:',
-          active: false,
-          items: [
-            { title: '- Greek', icon: 'mdi-radiobox-marked', extra: '', selected: true },
-            { title: '- Low Fat', icon: 'mdi-radiobox-blank', extra: '', selected: false },
-            { title: '- Strawberry', icon: 'mdi-radiobox-blank', extra: '+ R4.50', selected: false },
-          ],
-        },
-      ],
+      // menuItemSelections: [
+      //   {
+      //     title: 'Choose fruit:',
+      //     active: false,
+      //     items: [
+      //       { title: '- Strawberry', icon: 'mdi-check-box-outline', toggleIcon: '', extra: '', selected: true },
+      //       { title: '- Mango', icon: 'mdi-check-box-outline', extra: '+ R2.00', selected: true },
+      //       { title: '- Berry', icon: 'mdi-checkbox-blank-outline', extra: '', selected: false },
+      //     ],
+      //   },
+      //   {
+      //     title: 'Choose Yogurt type:',
+      //     active: false,
+      //     items: [
+      //       { title: '- Greek', icon: 'mdi-radiobox-marked', extra: '', selected: true },
+      //       { title: '- Low Fat', icon: 'mdi-radiobox-blank', extra: '', selected: false },
+      //       { title: '- Strawberry', icon: 'mdi-radiobox-blank', extra: '+ R4.50', selected: false },
+      //     ],
+      //   },
+      // ],
       selected: ['John'],
       text: 'small',
       selection: 0,
@@ -390,7 +358,7 @@ export default {
   },
   methods: {
     backNavigation () {
-      this.$router.push('/menu')
+      this.$router.go(-1)
     },
     
     changeFavouriteComment: function (comment) {
@@ -449,44 +417,47 @@ export default {
         .then(a => a.present())  
     },
     addToOrder() {
-      let data = {
-        "orderInfo": {
-          "restaurantId": 1,
-          "tableId": 1,
-          "employeeId": 7,
-          "orderItems": [
-            {
-              "menuItemId": this.newMenuItem.menuItemId,
-              "quantity": this.quantity,
-              "orderSelections": {
-                "selections": [
-                  {
-                    "name": "Preparation of Eggs",
-                    "values": ["poached"]
-                  },
-                  {
-                    "name": "Eggs Done",
-                    "values": ["Hard"]
-                  },
-                  {
-                    "name": "Toast",
-                    "values": ["White Toast"]
-                  },
-                  {
-                    "name": "Add-on",
-                    "values": ["Chicken Strips"]
-                  }
-                ]
-              }
-            }
-          ]
-        },
-        "menuItemName": this.newMenuItem.menuItemName,
-        "total": this.itemTotal * this.quantity,
-      }
+      console.log($('.label').eq(0).text());
+      console.log(this.radio[0]);
+      console.log(this.checkboxVal);
+      // let data = {
+      //   "orderInfo": {
+      //     "restaurantId": 1,
+      //     "tableId": 1,
+      //     "employeeId": 7,
+      //     "orderItems": [
+      //       {
+      //         "menuItemId": this.newMenuItem.menuItemId,
+      //         "quantity": this.quantity,
+      //         "orderSelections": {
+      //           "selections": [
+      //             {
+      //               "name": "Preparation of Eggs",
+      //               "values": ["poached"]
+      //             },
+      //             {
+      //               "name": "Eggs Done",
+      //               "values": ["Hard"]
+      //             },
+      //             {
+      //               "name": "Toast",
+      //               "values": ["White Toast"]
+      //             },
+      //             {
+      //               "name": "Add-on",
+      //               "values": ["Chicken Strips"]
+      //             }
+      //           ]
+      //         }
+      //       }
+      //     ]
+      //   },
+      //   "menuItemName": this.newMenuItem.menuItemName,
+      //   "total": this.itemTotal * this.quantity,
+      // }
       
-      this.addItemToOrder(data)
-      this.$router.push("/cart");
+      // this.addItemToOrder(data)
+      // this.$router.push("/cart");
     },
     changeFavourite () {
       let data = {

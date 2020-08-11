@@ -1,95 +1,142 @@
 <template>
-  <div class="homemenu">
-    <div class="toolbar">
-      <v-card color="grey lighten-4" flat tile>
-        <v-container>
-          <v-row>
-            <v-col cols="12">
-              <div class="title pl-1">Welcome, {{customerInfo.name}} {{customerInfo.surname}}</div>
-            </v-col>
-          </v-row>
-          <v-row no-gutters d-flex flex-row >
-            <v-col cols="12">
-              <v-text-field class="searchBarBg pb-2" v-model="search" rounded clearable solo-inverted hide-details label="Search..." background-color="white"></v-text-field>
-            </v-col>
-          </v-row>
-        </v-container>
+  <v-container>
+
+    <v-card flat tile>
+      <v-row class="d-flex justify-space-between">
+        <v-col cols="8">
+          <div class="pl-1 welcome font-weight-light">Welcome, </div>
+          <div class="pl-1 pt-0 customerName">{{customerInfo.name}} {{customerInfo.surname}}</div>
+        </v-col>
+        <v-col cols="4" class="d-flex justify-end align-center">
+          <v-btn class="mr-4" elevation="2" width="35px" height="35px" @click="callWaiter" :key="activeCall.icon" :color="activeCall.color" small fab>
+            <v-icon size="23px" :style="called ? { 'transform': 'rotate(45deg)' } : { 'transform': 'rotate(0deg)' }">{{ activeCall.icon }}</v-icon>
+          </v-btn>
+          <v-btn elevation="2" width="35px" height="35px" small fab>
+            <v-icon size="23px">mdi-cart-outline</v-icon>
+          </v-btn>
+        </v-col>
+      </v-row>
+
+      <v-card v-show="checkedIn" color="accent" height="80px" flat tile style="border-radius: 13px !important" class="mt-2 mb-5">
+        <v-row class="d-flex justify-space-between specialsInfo">
+          <v-col cols="10" class="d-flex justify-center px-0">
+            <div style="text-align: center" class="checkedInBannerText">
+              <div class="specialsText font-weight-light">You are checked-in to</div>
+              <div class="specialsText checkedRestaurant font-weight-light">{{restaurant}}</div>
+            </div>
+          </v-col>
+          <v-col cols="2" class="d-flex align-center px-0">
+            <v-btn small icon color="white">
+              <v-icon size="32px">mdi-chevron-right</v-icon>
+            </v-btn>
+          </v-col>
+        </v-row>
       </v-card>
-    </div>
+
+      <v-row no-gutters d-flex flex-row >
+        <v-col cols="12">
+          <v-text-field class="searchBarBg" v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search..."></v-text-field>
+        </v-col>
+      </v-row>
+    </v-card>
+
+    <v-card color="secondary" height="180px" flat tile style="border-radius: 13px !important" class="mt-5">
+      <v-row class="d-flex justify-space-between specialsInfo">
+        <v-col cols="6" class="pr-0">
+          <v-layout column justify-space-around align-center fill-height>
+            <div class="px-3">
+              <span class="specialsText font-weight-light">30%</span> <span class="specialsText discount font-weight-light">discount</span> <span class="specialsText font-weight-light">on all pizza slices</span>
+              <div class="mt-1 specialsDate">Monday-Friday 12:00-18:00</div>
+            </div>
+            <div class="browseButton">
+              <v-btn color="accent" height="35px" class="browseMenu">Browse Menu</v-btn>
+            </div>
+          </v-layout>
+        </v-col>
+        <v-col cols="6" class="py-0">
+          <v-layout column fill-height>
+            <v-img src="../../assets/exploreImages/colcacchio.jpg" class="specialsImage">Col'Cacchio</v-img>
+          </v-layout>
+        </v-col>
+      </v-row>
+    </v-card>
+      
     <v-container py-0 transition="slide-x-transition">
       <v-row style="max-width: 400px" class="overflow-y-auto">
         <v-col cols="12">
-          <div class="title">Categories</div>
+          <div class="categoryTitle">Categories</div>
         </v-col>
       </v-row>
       <v-sheet class="mx-auto" max-width="700">
         <v-slide-group multiple>
           <v-slide-item v-for="(category, index) in categories" :key="index">
-            <div class="ml-0" align="center">
-              <v-btn width="50px" height="50px" min-width="50px" class="mx-2" >
-                <!-- <v-avatar size="40px"> -->
-                  <v-icon size="33px">{{ category.icon }}</v-icon>
-                <!-- </v-avatar> -->
+            <div class="mr-3" align="center">
+              <v-btn width="50px" height="50px" min-width="50px">
+                <v-img height="50px" width="50px" :src="require('../../assets/exploreImages/' + category.imageURL)"></v-img>
               </v-btn>
               <div class="mt-1 caption">{{category.name}}</div>
             </div>
           </v-slide-item>
         </v-slide-group>
       </v-sheet>
-      <v-divider class="mt-2"></v-divider>
-      
+
 
       <v-row style="max-width: 400px" class="overflow-y-auto">
         <v-col cols="12">
-          <div class="title restaurants">Restaurants Near You</div>
+          <div class="categoryTitle">Nearby</div>
         </v-col>
       </v-row>
-
-      <v-row dense>
-        <v-col v-for="restaurant in allRestaurants" :key="restaurant.name" cols="6">
-          <v-card ripple>
-            <v-img @click="goToRestaurant(restaurant.restaurantId)" :src="restaurant.image" class="white--text align-center" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="120px">
-              <!-- <v-card-title class="body-1 pa-2 pl-4" v-text="restaurant.name"></v-card-title>
-              <v-card-text><v-rating :value="restaurant.rating" readonly size="18" dense color="yellow darken-3" background-color="secondary" ></v-rating></v-card-text> -->
-            </v-img>
-            <v-row class="pl-2">
-              <v-card-title class="body-1 pb-0 pt-2" v-text="restaurant.name"></v-card-title>
-              <v-card-text><v-rating :value="restaurant.rating" readonly size="15" dense color="yellow darken-3" background-color="secondary" ></v-rating></v-card-text>
-            </v-row>
-          </v-card>
-        </v-col>
-      </v-row>
-
-      <v-row  style="max-width: 400px" class="overflow-y-auto pl-1">
-        <v-col cols="12">
-          <div class="title">Popular Restaurants</div>
-        </v-col>
-      </v-row>
-
-      <v-sheet class="mx-auto pl-0 pb-4" max-width="700">
+      <v-sheet class="mx-auto" max-width="700">
         <v-slide-group multiple>
-          <v-slide-item v-for="card in filteredList" :key="card.title">
-            <v-card ripple width="170px" class="mr-2">
-              <v-img :src="card.src" @click="goToMenuItem(1)" class="white--text align-center" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" width="170px" height="100px" >
-                <!-- <v-card-title class="pl-2 pt-1 body-1" v-text="card.title"></v-card-title>
-                <v-rating :value="card.rating" size="14" class="pl-2" dense color="yellow darken-3" background-color="secondary"></v-rating> -->
+          <v-slide-item v-for="(card, index) in filteredList" :key="index">
+            <v-card ripple flat width="140px" class="mr-4">
+              <v-img :src="card.src" @click="goToMenuItem(1)" class="white--text align-center restaurantImage" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="90px" >
+                <v-rating background-color="white" readonly size="10" dense color="yellow darken-3" :value="parseInt(card.rating)" style="bottom: 3px; right: 3px; position: absolute"></v-rating>
               </v-img>
-              <v-row>
-                <v-card-title class="body-1 pb-0 pt-2" v-text="card.title"></v-card-title>
-                <v-card-text class="pb-2"><v-rating :value="card.rating" readonly size="15" dense color="yellow darken-3" background-color="secondary" ></v-rating></v-card-text>
+              <div class="pl-1 pt-1 resaturantTitle font-weight-light">{{card.title}}</div>
+              <v-row class="ml-0">
+                <v-icon size="13px">mdi-map-marker</v-icon>
+                <div class="pl-0 pt-0 restaurantLocation font-weight-light">{{card.location}}</div>
+              </v-row>
+              <div class="ml-1 pt-0 restaurantCategory">{{(card.category).join(', ')}}</div>
+              <v-row class="pl-3 mt-1">
+                <v-col v-for="(tag, i) in card.descriptors" :key="i" class="pl-0 pr-3 pt-0">
+                  <div class="restaurantDescriptor">{{tag}}</div>
+                </v-col>
               </v-row>
             </v-card>
           </v-slide-item>
         </v-slide-group>
       </v-sheet>
 
-      <v-btn class="checkInBtn" @click=goToCheckin app color="accent" style="bottom: 20px; right: 20px;" absolute  fab  >
+
+      <v-card color="primary" height="140px" flat tile style="border-radius: 13px !important" class="mt-5">
+        <v-row class="px-0 py-0 specialsInfo">
+          <v-col cols="6" class="pl-7 py-3 pr-0">
+            <v-layout column justify-space-between fill-height>
+              <div class="headingText">Big Discount</div>
+              <div>
+                <div class="promotionalText">Only</div>
+                <div class="priceText">R60.00</div>
+                <div class="promotionalText">2 Pizzas [Wed-Fri]</div>
+              </div>
+            </v-layout>
+          </v-col>
+          <v-col cols="6" class="py-0">
+            <v-layout column fill-height>
+              <v-img src="../../assets/exploreImages/colcacchio.jpg" class="specialsImage bannerImage pl-2">Pizza Hut</v-img>
+            </v-layout>
+          </v-col>
+      </v-row>
+    </v-card>
+
+      <v-btn class="checkInBtn" @click=goToCheckin app color="primary" style="bottom: 20px; right: 20px;" absolute fab>
         <v-icon>mdi-table-furniture</v-icon>
       </v-btn>
     </v-container>
       
     <NavBar></NavBar>
-  </div>
+  </v-container>
 </template>
 
 <script>
@@ -106,48 +153,55 @@ export default {
   data: () => ({
     search: '',
     categories: [
-      { icon: 'mdi-glass-cocktail', name: 'Drinks' },
-      { icon: 'mdi-pizza', name: 'Pizza' },
-      { icon: 'mdi-hamburger', name: 'Burgers' },
-      { icon: 'mdi-fish', name: 'Seafood' },
-      { icon: 'mdi-noodles', name: 'Asian' },
-      { icon: 'mdi-apple', name: 'Healthy' },
-      { icon: 'mdi-food', name: 'Fast Food' },
-      { icon: 'mdi-cupcake', name: 'Desserts' },
-      { icon: 'mdi-food-croissant', name: 'Bakery' },
-      { icon: 'mdi-coffee', name: 'Cafe' },
+      { imageURL: 'drinks.jpg', name: 'Drinks' },
+      { imageURL: 'pizza.jpg', name: 'Pizza' },
+      { imageURL: 'burger.jpg', name: 'Burgers' },
+      { imageURL: 'fastFood.jpg', name: 'Fast Food' },
+      { imageURL: 'dessert.jpg', name: 'Desserts' },
+      { imageURL: 'seafood.jpg', name: 'Seafood' },
+      { imageURL: 'asian.jpg', name: 'Asian' },
+      { imageURL: 'healthy.jpg', name: 'Healthy' },
+      { imageURL: 'breakfast.jpg', name: 'Breakfast' },
+      { imageURL: 'cafe.jpg', name: 'Cafe' },
     ],
     popularFood: [
       {
-        title: "Crawdaddy's",
+        title: "Mugg & Bean",
         rating: 4,
-        src: "https://source.unsplash.com/800x800/?steakhouse"
+        src: "https://source.unsplash.com/800x800/?coffee",
+        location: "Brooklyn",
+        category: ["Western Cuisine", "Fast Food", "Breakfast"],
+        descriptors: ["Fast Service", "Presentation"]
       },
       {
-        title: "Pizza e Vino",
+        title: "Col'Cacchio",
         rating: 5,
-        src: "https://source.unsplash.com/800x800/?pizza"
+        src: "https://source.unsplash.com/800x800/?pizzaria",
+        location: "Brooklyn",
+        category: ["Pizza", "Drinks", "Breakfast"],
+        descriptors: ["Fast Service", "Presentation"]
       },
       {
         title: "Cappuccinos",
         rating: 4,
-        src: "https://source.unsplash.com/800x800/?pasta"
+        src: "https://source.unsplash.com/800x800/?pasta",
+        location: "Brooklyn",
+        category: ["Pizza", "Cafe", "Breakfast"],
+        descriptors: ["Fast Service", "Presentation"]
       },
       {
         title: "Ocean Basket",
         rating: 3,
-        src: "https://source.unsplash.com/800x800/?seafood"
+        src: "https://source.unsplash.com/800x800/?seafood",
+        location: "Brooklyn",
+        category: ["Seafood", "Drinks", "Desserts"],
+        descriptors: ["Fast Service", "Presentation"]
       }
     ],
-    /* restaurants: [
-      { title: 'Mugg & Bean', src: 'https://source.unsplash.com/800x800/?mcdonalds', flex: 4 },
-      { title: 'RocoMamas', src: 'https://source.unsplash.com/800x800/?spaghetti', flex: 4 },
-      { title: 'Burger King', src: 'https://source.unsplash.com/800x800/?burgerking', flex: 4 },
-      { title: 'Varsity Bakery', src: 'https://source.unsplash.com/800x800/?bakery', flex: 4 },
-      { title: 'Ocean Basket', src: 'https://source.unsplash.com/800x800/?burger', flex: 4 },
-      { title: "Crawdaddy's", src: 'https://source.unsplash.com/800x800/?seafood', flex: 4 },
-    ], */
     favourited: false,
+    called: false,
+    checkedIn: false,
+    restaurant: "Mugg & Bean"
   }),
   methods: {
     goToRestaurant (id) {
@@ -160,6 +214,9 @@ export default {
     changeFavouriteFab () {
       this.favourited = !this.favourited
     },
+    callWaiter() {
+      this.called = !this.called;
+    }
   },
   computed: {
     ...mapGetters({
@@ -169,6 +226,13 @@ export default {
     ...mapActions({
       // retrieveRestaurantMenu: ('RestaurantsStore/retrieveRestaurantMenu'),
     }),
+    activeCall() {
+      if (!this.called) {
+        return { color: "secondary", icon: "mdi-bell-outline" };
+      } else {
+        return { color: "primary", icon: "mdi-bell-outline" };
+      }
+    },
     filteredList() {
       return this.popularFood.filter(restaurant => {
         return restaurant.title.toLowerCase().includes(this.search.toLowerCase())
@@ -184,3 +248,114 @@ export default {
   },
 }
 </script>
+
+<style>
+  .welcome {
+    font-size: 25px;
+  }
+
+  .customerName {
+    font-size: 23px;
+  }
+
+  .specialsText {
+    font-size: 18px;
+    color: white;
+  }
+
+  .checkedRestaurant {
+    font-size: 20px;
+  }
+
+  .specialsDate {
+    font-size: 12px;
+    color: white;
+  }
+
+  .browseMenu {
+    font-family: 'Helvetica';
+    font-size: 14px;
+    border-radius: 7px;
+  }
+
+  .discount {
+    color: #f75564;
+  }
+
+  .specialsImage {
+    /* background: url("../../assets/exploreImages/colcacchio.jpg") no-repeat;
+    background-size: cover; */
+    /* height: 100%; */
+    /* width: 103.5%; */
+    border-top-right-radius: 7px;
+    border-bottom-right-radius: 7px;
+    color: white !important;
+    font-size: 24px;
+    text-align: center;
+    font-family: 'Helvetica';
+    line-height: 180px;
+  }
+
+  .bannerImage {
+    line-height: 140px;
+    font-size: 22px;
+    border-bottom-left-radius: 130px;
+  }
+
+  .specialsInfo {
+    height: 100%;
+  }
+
+  .categoryTitle {
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .restaurantImage {
+    border-radius: 7px !important;
+  }
+
+  .resaturantTitle {
+    font-size: 17px;
+  }
+
+  .restaurantLocation {
+    font-size: 11px;
+  }
+
+  .restaurantCategory {
+    font-size: 12px;
+    height: 36px;
+  }
+
+  .restaurantDescriptor {
+    border-radius: 12px;
+    background-color: lightgray;
+    opacity: 0.6;
+    font-weight: 500;
+    font-size: 10px;
+    text-align: center;
+  }
+
+  .headingText{
+    color: white;
+    font-family: 'Helvetica';
+    font-size: 19px;
+  }
+
+  .promotionalText{
+    color: white;
+    font-family: 'Helvetica';
+    font-size: 13px;
+  }
+
+  .priceText {
+    color: #f9a825;
+    font-family: 'Helvetica';
+    font-size: 21px;
+  }
+
+  .checkedInBannerText {
+    padding-left: 17%;
+  }
+</style>
