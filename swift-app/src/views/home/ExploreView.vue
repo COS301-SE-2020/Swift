@@ -34,32 +34,44 @@
       </v-card>
 
       <v-row no-gutters d-flex flex-row >
-        <v-col cols="12">
-          <v-text-field class="searchBarBg" v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search..."></v-text-field>
+        <v-col cols="11">
+          <v-text-field class="searchBarBg" background-color="red" v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search by name or category"></v-text-field>
+        </v-col>
+        <v-col cols="1" class="d-flex align-center px-0">
+          <v-btn small icon color="primary">
+            <v-icon size="25px">mdi-filter-variant</v-icon>
+            <!-- <v-img height="18px" width="18x" style="transform: rotate(90deg)" contain src="../../assets/filterIcon.png"></v-img> -->
+              
+          </v-btn>
         </v-col>
       </v-row>
     </v-card>
 
-    <v-card color="secondary" height="180px" flat tile style="border-radius: 13px !important" class="mt-5">
-      <v-row class="d-flex justify-space-between specialsInfo">
-        <v-col cols="6" class="pr-0">
-          <v-layout column justify-space-around align-center fill-height>
-            <div class="px-3">
-              <span class="specialsText font-weight-light">30%</span> <span class="specialsText discount font-weight-light">discount</span> <span class="specialsText font-weight-light">on all pizza slices</span>
-              <div class="mt-1 specialsDate">Monday-Friday 12:00-18:00</div>
-            </div>
-            <div class="browseButton">
-              <v-btn color="accent" height="35px" class="browseMenu">Browse Menu</v-btn>
-            </div>
-          </v-layout>
-        </v-col>
-        <v-col cols="6" class="py-0">
-          <v-layout column fill-height>
-            <v-img src="../../assets/exploreImages/colcacchio.jpg" class="specialsImage">Col'Cacchio</v-img>
-          </v-layout>
-        </v-col>
-      </v-row>
-    </v-card>
+
+    <v-carousel v-model="carouselIndex" class="promotionalMaterial" :continuous="false" :cycle="cycle" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="210px">
+      <v-carousel-item v-for="(promotion, i) in promotions" :key="i">
+        <v-sheet color="secondary" height="190px" flat tile style="border-radius: 13px !important" class="mt-5">
+          <v-row class="d-flex justify-space-between specialsInfo">
+            <v-col cols="6" class="pr-0 py-1 mb-5">
+              <v-layout column justify-space-around align-center fill-height>
+                <div class="px-3">
+                  <span class="specialsText font-weight-light">30%</span> <span class="specialsText discount font-weight-light">discount</span> <span class="specialsText font-weight-light">on all pizza slices</span>
+                  <div class="mt-1 specialsDate">Monday-Friday 12:00-18:00</div>
+                </div>
+                <div class="browseButton">
+                  <v-btn @click="goToRestaurant(1)" color="accent" height="35px" class="browseMenu">Browse Menu</v-btn>
+                </div>
+              </v-layout>
+            </v-col>
+            <v-col cols="6" class="py-0">
+              <v-layout column fill-height>
+                <v-img src="../../assets/exploreImages/colcacchio.jpg" class="specialsImage">Col'Cacchio</v-img>
+              </v-layout>
+            </v-col>
+          </v-row>
+        </v-sheet>
+      </v-carousel-item>
+    </v-carousel>
       
     <v-container py-0 transition="slide-x-transition">
       <v-row style="max-width: 400px" class="overflow-y-auto">
@@ -90,17 +102,17 @@
         <v-slide-group multiple>
           <v-slide-item v-for="(card, index) in filteredList" :key="index">
             <v-card ripple flat width="140px" class="mr-4">
-              <v-img :src="card.src" @click="goToMenuItem(1)" class="white--text align-center restaurantImage" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="90px" >
+              <v-img :src="card.image" @click="goToRestaurant(card.restaurantId)" class="white--text align-center restaurantImage" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="90px" >
                 <v-rating background-color="white" readonly size="10" dense color="yellow darken-3" :value="parseInt(card.rating)" style="bottom: 3px; right: 3px; position: absolute"></v-rating>
               </v-img>
-              <div class="pl-1 pt-1 resaturantTitle font-weight-light">{{card.title}}</div>
+              <div class="pl-1 pt-1 resaturantTitle font-weight-light">{{card.name}}</div>
               <v-row class="ml-0">
                 <v-icon size="13px">mdi-map-marker</v-icon>
                 <div class="pl-0 pt-0 restaurantLocation font-weight-light">{{card.location}}</div>
               </v-row>
-              <div class="ml-1 pt-0 restaurantCategory">{{(card.category).join(', ')}}</div>
+              <div class="ml-1 pt-0 restaurantCategory">{{(category).join(', ')}}</div>
               <v-row class="pl-3 mt-1">
-                <v-col v-for="(tag, i) in card.descriptors" :key="i" class="pl-0 pr-3 pt-0">
+                <v-col v-for="(tag, i) in descriptors" :key="i" class="pl-0 pr-3 pt-0">
                   <div class="restaurantDescriptor">{{tag}}</div>
                 </v-col>
               </v-row>
@@ -110,11 +122,11 @@
       </v-sheet>
 
 
-      <v-card color="primary" height="140px" flat tile style="border-radius: 13px !important" class="mt-5">
+      <v-card @click="goToRestaurant(1)" color="primary" height="140px" flat tile style="border-radius: 13px !important" class="mt-5">
         <v-row class="px-0 py-0 specialsInfo">
           <v-col cols="6" class="pl-7 py-3 pr-0">
             <v-layout column justify-space-between fill-height>
-              <div class="headingText">Big Discount</div>
+              <div class="headingText">Big Promotion</div>
               <div>
                 <div class="promotionalText">Only</div>
                 <div class="priceText">R60.00</div>
@@ -127,11 +139,11 @@
               <v-img src="../../assets/exploreImages/colcacchio.jpg" class="specialsImage bannerImage pl-2">Pizza Hut</v-img>
             </v-layout>
           </v-col>
-      </v-row>
-    </v-card>
+        </v-row>
+      </v-card>
 
-      <v-btn class="checkInBtn" @click=goToCheckin app color="primary" style="bottom: 20px; right: 20px;" absolute fab>
-        <v-icon>mdi-table-furniture</v-icon>
+      <v-btn height="50px" width="50px" class="checkInBtn" @click=goToCheckin app color="accent" fab style="position: fixed; bottom: 65px; right: 20px">
+        <v-icon size="30">mdi-table-furniture</v-icon>
       </v-btn>
     </v-container>
       
@@ -152,6 +164,11 @@ export default {
   },
   data: () => ({
     search: '',
+    promotions: [
+      {restaurant: "Col'Cacchio", promotionalMessage: "30% discount on all pizza slices", period: "Monday-Friday 12:00-18:00", promotionalImage: ""},
+      {restaurant: "Col'Cacchio", promotionalMessage: "30% discount on all pizza slices", period: "Monday-Friday 12:00-18:00", promotionalImage: ""},
+      {restaurant: "Col'Cacchio", promotionalMessage: "30% discount on all pizza slices", period: "Monday-Friday 12:00-18:00", promotionalImage: ""}
+    ],
     categories: [
       { imageURL: 'drinks.jpg', name: 'Drinks' },
       { imageURL: 'pizza.jpg', name: 'Pizza' },
@@ -164,44 +181,48 @@ export default {
       { imageURL: 'breakfast.jpg', name: 'Breakfast' },
       { imageURL: 'cafe.jpg', name: 'Cafe' },
     ],
-    popularFood: [
-      {
-        title: "Mugg & Bean",
-        rating: 4,
-        src: "https://source.unsplash.com/800x800/?coffee",
-        location: "Brooklyn",
-        category: ["Western Cuisine", "Fast Food", "Breakfast"],
-        descriptors: ["Fast Service", "Presentation"]
-      },
-      {
-        title: "Col'Cacchio",
-        rating: 5,
-        src: "https://source.unsplash.com/800x800/?pizzaria",
-        location: "Brooklyn",
-        category: ["Pizza", "Drinks", "Breakfast"],
-        descriptors: ["Fast Service", "Presentation"]
-      },
-      {
-        title: "Cappuccinos",
-        rating: 4,
-        src: "https://source.unsplash.com/800x800/?pasta",
-        location: "Brooklyn",
-        category: ["Pizza", "Cafe", "Breakfast"],
-        descriptors: ["Fast Service", "Presentation"]
-      },
-      {
-        title: "Ocean Basket",
-        rating: 3,
-        src: "https://source.unsplash.com/800x800/?seafood",
-        location: "Brooklyn",
-        category: ["Seafood", "Drinks", "Desserts"],
-        descriptors: ["Fast Service", "Presentation"]
-      }
-    ],
+    category: ["Western Cuisine", "Fast Food", "Breakfast"],
+    descriptors: ["Fast Service", "Presentation"],
+    // popularFood: [
+    //   {
+    //     title: "Mugg & Bean",
+    //     rating: 4,
+    //     src: "https://source.unsplash.com/800x800/?coffee",
+    //     location: "Brooklyn",
+    //     category: ["Western Cuisine", "Fast Food", "Breakfast"],
+    //     descriptors: ["Fast Service", "Presentation"]
+    //   },
+    //   {
+    //     title: "Col'Cacchio",
+    //     rating: 5,
+    //     src: "https://source.unsplash.com/800x800/?pizzaria",
+    //     location: "Brooklyn",
+    //     category: ["Pizza", "Drinks", "Breakfast"],
+    //     descriptors: ["Fast Service", "Presentation"]
+    //   },
+    //   {
+    //     title: "Cappuccinos",
+    //     rating: 4,
+    //     src: "https://source.unsplash.com/800x800/?pasta",
+    //     location: "Brooklyn",
+    //     category: ["Pizza", "Cafe", "Breakfast"],
+    //     descriptors: ["Fast Service", "Presentation"]
+    //   },
+    //   {
+    //     title: "Ocean Basket",
+    //     rating: 3,
+    //     src: "https://source.unsplash.com/800x800/?seafood",
+    //     location: "Brooklyn",
+    //     category: ["Seafood", "Drinks", "Desserts"],
+    //     descriptors: ["Fast Service", "Presentation"]
+    //   }
+    // ],
     favourited: false,
     called: false,
     checkedIn: false,
-    restaurant: "Mugg & Bean"
+    restaurant: "Mugg & Bean",
+    cycle: false,
+    carouselIndex: 0
   }),
   methods: {
     goToRestaurant (id) {
@@ -219,13 +240,10 @@ export default {
     }
   },
   computed: {
-    ...mapGetters({
-      allRestaurants: 'RestaurantsStore/getAllRestaurants',
-      customerInfo: 'CustomerStore/getCustomerProfile',
-    }),
-    ...mapActions({
-      // retrieveRestaurantMenu: ('RestaurantsStore/retrieveRestaurantMenu'),
-    }),
+    
+    // ...mapActions({
+    //   // retrieveRestaurantMenu: ('RestaurantsStore/retrieveRestaurantMenu'),
+    // }),
     activeCall() {
       if (!this.called) {
         return { color: "secondary", icon: "mdi-bell-outline" };
@@ -234,22 +252,62 @@ export default {
       }
     },
     filteredList() {
-      return this.popularFood.filter(restaurant => {
-        return restaurant.title.toLowerCase().includes(this.search.toLowerCase())
-      })
+      if (this.allRestaurants.length != undefined)
+        return this.allRestaurants.filter(restaurant => {
+          return restaurant.name.toLowerCase().includes(this.search.toLowerCase())
+        })
     },
-    activateFavourite () {
-      if (!this.favourited) {
-        return { color: 'primary', icon: 'mdi-heart-outline' }
-      } else {
-        return { color: 'primary', icon: 'mdi-heart' }
-      }
+    carouselTab () {
+      // if (!this.carouselIndex == ind) {
+        // return'mdi-ellipse';
+      // } else {
+        return 'mdi-checkbox-blank-circle';
+      // }
     },
+    ...mapGetters({
+      allRestaurants: 'RestaurantsStore/getAllRestaurants',
+      customerInfo: 'CustomerStore/getCustomerProfile',
+    }),
   },
 }
 </script>
 
 <style>
+
+ body {
+   font-family: 'Helvetica';
+ }
+
+ .searchBarBg label {
+   font-size: 15px;
+ }
+
+  .searchBarBg.v-text-field.v-text-field--solo .v-input__control {
+    min-height: 42px !important;
+    max-width: 97%  !important;
+  }
+
+  .promotionalMaterial .v-carousel__controls__item {
+    margin: 0px !important;
+    padding-top: 5px;
+  }
+
+  .promotionalMaterial .v-btn .v-btn__content .v-icon {
+    font-size: 9px !important;
+    margin: 0px !important;
+    color: white;
+    opacity: 1;
+  }
+
+  .promotionalMaterial .v-btn--icon.v-size--small {
+    height: 14px;
+    width: 18px;
+  }
+
+  .promotionalMaterial .v-item--active .v-btn__content .v-icon {
+    color: #f75564 !important;
+  }
+
   .welcome {
     font-size: 25px;
   }
@@ -273,7 +331,6 @@ export default {
   }
 
   .browseMenu {
-    font-family: 'Helvetica';
     font-size: 14px;
     border-radius: 7px;
   }
@@ -292,7 +349,6 @@ export default {
     color: white !important;
     font-size: 24px;
     text-align: center;
-    font-family: 'Helvetica';
     line-height: 180px;
   }
 
@@ -339,23 +395,24 @@ export default {
 
   .headingText{
     color: white;
-    font-family: 'Helvetica';
     font-size: 19px;
   }
 
   .promotionalText{
     color: white;
-    font-family: 'Helvetica';
     font-size: 13px;
   }
 
   .priceText {
     color: #f9a825;
-    font-family: 'Helvetica';
     font-size: 21px;
   }
 
   .checkedInBannerText {
     padding-left: 17%;
+  }
+
+  .promotionalMaterial .v-image .v-responsive .v-carousel__item {
+    height: 0px
   }
 </style>

@@ -60,7 +60,7 @@
 
     </v-container>
        <!--snackbar shows table number on successful checkin -->
-      <v-snackbar id="notification" :timeout="2000" transition centered color="primary" elevation="24" v-model="snackbar">{{ tableNumber }}</v-snackbar>
+      <v-snackbar id="notification" :timeout="2000" centered color="primary" elevation="24" v-model="snackbar">{{ tableNumber }}</v-snackbar>
     <NavBar></NavBar>
   </div>
 </template>
