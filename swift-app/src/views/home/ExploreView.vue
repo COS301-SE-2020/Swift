@@ -1,78 +1,79 @@
 <template>
-  <v-container>
+  <v-container class="px-0">
 
-    <v-card flat tile>
-      <v-row class="d-flex justify-space-between">
-        <v-col cols="8">
-          <div class="pl-1 welcome font-weight-light">Welcome, </div>
-          <div class="pl-1 pt-0 customerName">{{customerInfo.name}} {{customerInfo.surname}}</div>
-        </v-col>
-        <v-col cols="4" class="d-flex justify-end align-center">
-          <v-btn class="mr-4" elevation="2" width="35px" height="35px" @click="callWaiter" :key="activeCall.icon" :color="activeCall.color" small fab>
-            <v-icon size="23px" :style="called ? { 'transform': 'rotate(45deg)' } : { 'transform': 'rotate(0deg)' }">{{ activeCall.icon }}</v-icon>
-          </v-btn>
-          <v-btn elevation="2" width="35px" height="35px" small fab>
-            <v-icon size="23px">mdi-cart-outline</v-icon>
-          </v-btn>
-        </v-col>
-      </v-row>
-
-      <v-card v-show="checkedIn" color="accent" height="80px" flat tile style="border-radius: 13px !important" class="mt-2 mb-5">
-        <v-row class="d-flex justify-space-between specialsInfo">
-          <v-col cols="10" class="d-flex justify-center px-0">
-            <div style="text-align: center" class="checkedInBannerText">
-              <div class="specialsText font-weight-light">You are checked-in to</div>
-              <div class="specialsText checkedRestaurant font-weight-light">{{restaurant}}</div>
-            </div>
+    <v-container py-0>
+      <v-card flat tile>
+        <v-row class="d-flex justify-space-between">
+          <v-col cols="8">
+            <div class="pl-1 welcome font-weight-light">Welcome, </div>
+            <div class="pl-1 pt-0 customerName">{{customerInfo.name}} {{customerInfo.surname}}</div>
           </v-col>
-          <v-col cols="2" class="d-flex align-center px-0">
-            <v-btn small icon color="white">
-              <v-icon size="32px">mdi-chevron-right</v-icon>
+          <v-col cols="4" class="d-flex justify-end align-center">
+            <v-btn class="mr-4" elevation="2" width="35px" height="35px" @click="callWaiter" :key="activeCall.icon" :color="activeCall.color" small fab>
+              <v-icon size="23px" :style="called ? { 'transform': 'rotate(45deg)' } : { 'transform': 'rotate(0deg)' }">{{ activeCall.icon }}</v-icon>
+            </v-btn>
+            <v-btn elevation="2" width="35px" height="35px" small fab>
+              <v-icon size="23px">mdi-cart-outline</v-icon>
+            </v-btn>
+          </v-col>
+        </v-row>
+
+        <v-card v-show="checkedIn" color="accent" height="80px" flat tile style="border-radius: 13px !important" class="mt-2 mb-5">
+          <v-row class="d-flex justify-space-between specialsInfo">
+            <v-col cols="10" class="d-flex justify-center px-0">
+              <div style="text-align: center" class="checkedInBannerText">
+                <div class="specialsText font-weight-light">You are checked-in to</div>
+                <div class="specialsText checkedRestaurant font-weight-light">{{restaurant}}</div>
+              </div>
+            </v-col>
+            <v-col cols="2" class="d-flex align-center px-0">
+              <v-btn small icon color="white">
+                <v-icon size="32px">mdi-chevron-right</v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-card>
+
+        <v-row no-gutters d-flex flex-row >
+          <v-col cols="11">
+            <v-text-field class="searchBarBg" background-color="red" v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search by name or category"></v-text-field>
+          </v-col>
+          <v-col cols="1" class="d-flex align-center px-0">
+            <v-btn small icon color="primary">
+              <v-icon size="24px">mdi-filter-variant</v-icon> 
             </v-btn>
           </v-col>
         </v-row>
       </v-card>
+    </v-container>
 
-      <v-row no-gutters d-flex flex-row >
-        <v-col cols="11">
-          <v-text-field class="searchBarBg" background-color="red" v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search by name or category"></v-text-field>
-        </v-col>
-        <v-col cols="1" class="d-flex align-center px-0">
-          <v-btn small icon color="primary">
-            <v-icon size="25px">mdi-filter-variant</v-icon>
-            <!-- <v-img height="18px" width="18x" style="transform: rotate(90deg)" contain src="../../assets/filterIcon.png"></v-img> -->
-              
-          </v-btn>
-        </v-col>
-      </v-row>
-    </v-card>
+    <v-container py-0>
+      <v-carousel v-model="carouselIndex" class="promotionalMaterial" :continuous="false" :cycle="cycle" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="210px">
+        <v-carousel-item v-for="(promotion, i) in promotions" :key="i">
+          <v-sheet color="secondary" height="190px" flat tile style="border-radius: 13px !important" class="mt-5">
+            <v-row class="d-flex justify-space-between specialsInfo">
+              <v-col cols="6" class="pr-0 py-1 mb-5">
+                <v-layout column justify-space-around align-center fill-height>
+                  <div class="px-3">
+                    <span class="specialsText font-weight-light">30%</span> <span class="specialsText discount font-weight-light">discount</span> <span class="specialsText font-weight-light">on all pizza slices</span>
+                    <div class="mt-1 specialsDate">Monday-Friday 12:00-18:00</div>
+                  </div>
+                  <div class="browseButton">
+                    <v-btn @click="goToRestaurant(1)" color="accent" height="35px" class="browseMenu">Browse Menu</v-btn>
+                  </div>
+                </v-layout>
+              </v-col>
+              <v-col cols="6" class="py-0">
+                <v-layout column fill-height>
+                  <v-img src="../../assets/exploreImages/colcacchio.jpg" class="specialsImage">Col'Cacchio</v-img>
+                </v-layout>
+              </v-col>
+            </v-row>
+          </v-sheet>
+        </v-carousel-item>
+      </v-carousel>
+    </v-container>
 
-
-    <v-carousel v-model="carouselIndex" class="promotionalMaterial" :continuous="false" :cycle="cycle" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="210px">
-      <v-carousel-item v-for="(promotion, i) in promotions" :key="i">
-        <v-sheet color="secondary" height="190px" flat tile style="border-radius: 13px !important" class="mt-5">
-          <v-row class="d-flex justify-space-between specialsInfo">
-            <v-col cols="6" class="pr-0 py-1 mb-5">
-              <v-layout column justify-space-around align-center fill-height>
-                <div class="px-3">
-                  <span class="specialsText font-weight-light">30%</span> <span class="specialsText discount font-weight-light">discount</span> <span class="specialsText font-weight-light">on all pizza slices</span>
-                  <div class="mt-1 specialsDate">Monday-Friday 12:00-18:00</div>
-                </div>
-                <div class="browseButton">
-                  <v-btn @click="goToRestaurant(1)" color="accent" height="35px" class="browseMenu">Browse Menu</v-btn>
-                </div>
-              </v-layout>
-            </v-col>
-            <v-col cols="6" class="py-0">
-              <v-layout column fill-height>
-                <v-img src="../../assets/exploreImages/colcacchio.jpg" class="specialsImage">Col'Cacchio</v-img>
-              </v-layout>
-            </v-col>
-          </v-row>
-        </v-sheet>
-      </v-carousel-item>
-    </v-carousel>
-      
     <v-container py-0 transition="slide-x-transition">
       <v-row style="max-width: 400px" class="overflow-y-auto">
         <v-col cols="12">
@@ -120,8 +121,9 @@
           </v-slide-item>
         </v-slide-group>
       </v-sheet>
+    </v-container>
 
-
+    <v-container pt-0>
       <v-card @click="goToRestaurant(1)" color="primary" height="140px" flat tile style="border-radius: 13px !important" class="mt-5">
         <v-row class="px-0 py-0 specialsInfo">
           <v-col cols="6" class="pl-7 py-3 pr-0">
@@ -142,7 +144,7 @@
         </v-row>
       </v-card>
 
-      <v-btn height="50px" width="50px" class="checkInBtn" @click=goToCheckin app color="accent" fab style="position: fixed; bottom: 65px; right: 20px">
+      <v-btn height="50px" width="50px" class="checkInBtn" @click=goToCheckin app color="accent" fab style="position: fixed; bottom: 65px; right: 13px">
         <v-icon size="30">mdi-table-furniture</v-icon>
       </v-btn>
     </v-container>
