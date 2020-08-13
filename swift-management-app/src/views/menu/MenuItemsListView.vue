@@ -4,13 +4,30 @@
       <div class="content-area__heading pr-4">
         <h2 class="mb-1">Menu Items</h2>
       </div>
-    </div>
-    <data-view-sidebar
-      :isSidebarActive="addNewDataSidebar"
-      @closeSidebar="toggleDataSidebar"
-      :data="sidebarData"
-    />
+      <vs-divider>
+        <h3 class="menuTitle mb-1">Breakfast Menu</h3>
+      </vs-divider>
+      <vs-dropdown class="mb-4 mr-4">
+        <vs-button type="border">
+          <span class="flex items-center">
+            <span>Switch Menu</span>
+            <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
+          </span>
+        </vs-button>
+        <vs-dropdown-menu>
+          <vs-dropdown-item>Breakfast</vs-dropdown-item>
+          <vs-dropdown-item>Soups and Bowls</vs-dropdown-item>
+          <vs-dropdown-item>Mix, Match and Share</vs-dropdown-item>
+        </vs-dropdown-menu>
+      </vs-dropdown>
 
+      <vs-button @click="addMenuItem()" type="filled" class="mb-4 mr-4">
+        <span class="flex items-center">
+          <feather-icon icon="PlusIcon" svgClasses="h-4 w-4 mr-1" />
+          <span>Add menu Item</span>
+        </span>
+      </vs-button>
+    </div>
     <vs-table
       ref="table"
       multiple
@@ -26,7 +43,7 @@
             <div
               class="p-4 shadow-drop rounded-lg d-theme-dark-bg cursor-pointer flex items-center justify-center text-lg font-medium w-32 w-full"
             >
-              <span class="mr-2">Actions</span>
+              <span class="mr-2">Bulk Actions</span>
               <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
             </div>
 
@@ -46,14 +63,6 @@
               </vs-dropdown-item>
             </vs-dropdown-menu>
           </vs-dropdown>
-
-          <div
-            class="btn-add-new p-3 mb-4 mr-4 rounded-lg cursor-pointer flex items-center justify-center text-lg font-medium text-base text-primary border border-solid border-primary"
-            @click="addNewData"
-          >
-            <feather-icon icon="PlusIcon" svgClasses="h-4 w-4" />
-            <span class="ml-2 text-base text-primary">Add New</span>
-          </div>
         </div>
 
         <vs-dropdown vs-trigger-click class="cursor-pointer mb-4 mr-4 items-per-page-handler">
@@ -84,7 +93,7 @@
 
       <template slot="thead">
         <vs-th sort-key="name">Name</vs-th>
-        <vs-th sort-key="category">Category</vs-th>
+        <vs-th sort-key="category">Sub-Category</vs-th>
         <vs-th sort-key="popularity">Popularity</vs-th>
         <vs-th sort-key="estimatedWaitingTime">Prep Time</vs-th>
         <vs-th sort-key="price">Price</vs-th>
@@ -142,23 +151,16 @@
 </template>
 
 <script>
-import DataViewSidebar from "./MenuItemsSidebar.vue";
 import modulemenuList from "@/store/menu/menuDataList.js";
 
 export default {
-  components: {
-    DataViewSidebar,
-  },
+  components: {},
   data() {
     return {
       selected: [],
       // products: [],
       itemsPerPage: 10,
       isMounted: false,
-
-      // Data Sidebar
-      addNewDataSidebar: false,
-      sidebarData: {},
     };
   },
   computed: {
@@ -183,18 +185,19 @@ export default {
     },
   },
   methods: {
-    addNewData() {
-      this.sidebarData = {};
-      this.toggleDataSidebar(true);
+    addMenuItem() {
+      this.$router.push("/add-menu-item");
+    },
+    addNewMenuItem() {
+      alert("yo");
+    },
+    editData(tr) {
+      console.log(tr);
     },
     deleteData(id) {
       this.$store.dispatch("menuList/removeItem", id).catch((err) => {
         console.error(err);
       });
-    },
-    editData(data) {
-      this.sidebarData = data;
-      this.toggleDataSidebar(true);
     },
     getEstimatedTimeColor(time) {
       if (time <= 15) return "success";
@@ -208,9 +211,6 @@ export default {
       if (num >= 50) return "warning";
       if (num < 50) return "danger";
       return "primary";
-    },
-    toggleDataSidebar(val = false) {
-      this.addNewDataSidebar = val;
     },
     listMenuItems() {
       this.$store.dispatch("menuList/listMenuItems");
@@ -237,6 +237,9 @@ export default {
 </script>
 
 <style lang="scss">
+.menuTitle {
+  color: #636363;
+}
 #data-list-list-view {
   .vs-con-table {
     @media (max-width: 689px) {
