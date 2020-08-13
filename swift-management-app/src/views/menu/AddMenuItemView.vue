@@ -21,6 +21,40 @@
           collapse-action
           subtitle="Provide the base description of the item"
         >
+          <vs-dropdown vs-trigger-click class="dd-actions cursor-pointer mr-4 mb-4">
+            <div
+              class="p-4 shadow-drop rounded-lg d-theme-dark-bg cursor-pointer flex items-center justify-center text-lg font-medium w-32 w-full"
+            >
+              <span class="mr-2">{{ itemCategoryTitle }}</span>
+              <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
+            </div>
+            <vs-dropdown-menu style="z-index:99999">
+              <vs-dropdown-item v-for="category in restaurantObject.categories" :key="category.categoryName">
+                <vs-button type="flat"  @click="itemCategory = category.categoryName" v-if="category.type == 'primary'">{{ category.categoryName }}</vs-button>
+              </vs-dropdown-item>
+            </vs-dropdown-menu>
+          </vs-dropdown>
+          <vs-dropdown v-if="itemCategory" vs-trigger-click class="dd-actions cursor-pointer mr-4 mb-4">
+            <div
+              class="p-4 shadow-drop rounded-lg d-theme-dark-bg cursor-pointer flex items-center justify-center text-lg font-medium w-32 w-full"
+            >
+              <span class="mr-2">Sub-Category</span>
+              <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
+            </div>
+            <vs-dropdown-menu>
+              <vs-dropdown-item>
+                <span>Menu 1</span>
+              </vs-dropdown-item>
+            </vs-dropdown-menu>
+          </vs-dropdown>
+
+          <vs-button @click="addMenuItem()" type="border" class="mb-4 mr-4">
+            <span class="flex items-center">
+              <feather-icon icon="PlusIcon" svgClasses="h-4 w-4 mr-1" />
+              <span>Add category</span>
+            </span>
+          </vs-button>
+
           <vs-row class="vx-row mb-4">
             <vs-col vs-type="flex" vs-justify="center" vs-align="center" vs-w="4">
               <vs-input label="Item Name" v-model="itemName" />
@@ -59,9 +93,7 @@
       title-color="primary"
       collapse-action
       subtitle="Specify the item-specific attributes"
-    >
-      Add-ons
-    </vx-card>
+    >Add-ons</vx-card>
     <vx-card
       title="Images"
       class="mb-4"
@@ -98,6 +130,8 @@
 </template>
 
 <script>
+import modulemenuList from "@/store/menu/menuDataList.js";
+
 export default {
   data() {
     return {
@@ -106,9 +140,20 @@ export default {
         "Roasted butternut, spiced chickpeas, candied walnuts, cherry tomatoes, feta & spring onions tossed with mixed lettuce.",
       itemPrice: 20.5,
       itemPrepTime: 10,
+      itemCategory: ''
     };
   },
-  computed: {},
+  computed: {
+    restaurantObject() {
+      return this.$store.state.menuList.restaurantObject;
+    },
+    itemCategoryTitle() {
+      if(this.itemCategory)
+        return this.itemCategory;
+      else
+        return "Item Category";
+    }
+  },
   methods: {
     successUpload() {
       this.$vs.notify({
@@ -117,6 +162,16 @@ export default {
         text: "Lorem ipsum dolor sit amet, consectetur",
       });
     },
+  },
+  created() {
+    if (!modulemenuList.isRegistered) {
+      this.$store.registerModule("menuList", modulemenuList);
+      modulemenuList.isRegistered = true;
+    }
+    //if menu has not been loaded yet, load it first
+    if(Object.keys(this.restaurantObject).length === 0){
+     this.$store.dispatch("menuList/listMenuItems");
+    }
   },
 };
 </script>

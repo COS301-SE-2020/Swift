@@ -35,7 +35,7 @@
       pagination
       :max-items="itemsPerPage"
       search
-      :data="products"
+      :data="menuItems"
     >
       <div slot="header" class="flex flex-wrap-reverse items-center flex-grow justify-between">
         <div class="flex flex-wrap-reverse items-center data-list-btn-container">
@@ -71,7 +71,7 @@
           >
             <span
               class="mr-2"
-            >{{ currentPage * itemsPerPage - (itemsPerPage - 1) }} - {{ products.length - currentPage * itemsPerPage > 0 ? currentPage * itemsPerPage : products.length }} of {{ queriedItems }}</span>
+            >{{ currentPage * itemsPerPage - (itemsPerPage - 1) }} - {{ menuItems.length - currentPage * itemsPerPage > 0 ? currentPage * itemsPerPage : menuItems.length }} of {{ queriedItems }}</span>
             <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
           </div>
           <vs-dropdown-menu>
@@ -158,7 +158,7 @@ export default {
   data() {
     return {
       selected: [],
-      // products: [],
+      // menuItems: [],
       itemsPerPage: 10,
       isMounted: false,
     };
@@ -170,18 +170,18 @@ export default {
       }
       return 0;
     },
-    products() {
-      return this.$store.state.menuList.products;
+    menuItems() {
+      return this.$store.state.menuList.menuItems;
     },
-    productsCount() {
+    menuItemsCount() {
       if (this.$store.state.menuList)
-        return this.$store.state.menuList.products.length;
+        return this.$store.state.menuList.menuItems.length;
       else return null;
     },
     queriedItems() {
       return this.$refs.table
         ? this.$refs.table.queriedResults.length
-        : this.products.length;
+        : this.menuItems.length;
     },
   },
   methods: {
@@ -221,7 +221,7 @@ export default {
       this.$store.registerModule("menuList", modulemenuList);
       modulemenuList.isRegistered = true;
     }
-    if (!this.productsCount > 0) this.$vs.loading();
+    if (!this.menuItemsCount > 0) this.$vs.loading();
 
     this.listMenuItems();
   },
@@ -229,7 +229,7 @@ export default {
     this.isMounted = true;
   },
   watch: {
-    productsCount(newCount, oldCount) {
+    menuItemsCount(newCount, oldCount) {
       this.$vs.loading.close();
     },
   },

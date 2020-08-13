@@ -77,6 +77,9 @@ export default {
         }
       ).then(result => {
         console.log(result);
+      
+      commit('SET_RESTAURANT_OBJECT', result.data);
+      
       result.data.categories.forEach(function(category) {
           category.menuItems.forEach(function(menuItem) {
             var item = {  name : menuItem.menuItemName,
