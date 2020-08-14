@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const validator = require('email-validator');
 const db = require('../db');
 const accCreator = require('../helper/accountCreator');
+const SendEmail = require('../helper/Notifications/SendEmail');
 const { generateToken, validateToken, tokenState } = require('../helper/tokenHandler');
 const { getFavourites, getOrderHistory } = require('../helper/objectBuilder');
 
@@ -278,9 +279,11 @@ module.exports = {
         }
 
         // Create new account
-        // TODO: Generate and send user account activation email
+        // TODO: Generate and send user account activation email-DONE
         return accCreator.createCustomer(newUserData)
-          .then(() => response.status(201).send({ status: 201, reason: 'Customer Account Created' }))
+          .then(() => response.status(201).send({ status: 201, reason: 'Customer Account Created' }),
+           SendEmail.RegistrationEmail(newUserData) //sends account activation email
+          )
           .catch((err) => {
             console.error('Query Error [Register Customer - Create Customer Account]', err.stack);
             return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
