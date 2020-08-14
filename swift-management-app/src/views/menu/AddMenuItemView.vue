@@ -92,6 +92,22 @@
         <vx-card title="Item Preview" class="mb-4" title-color="primary" collapse-action>
           <h2>{{ itemName }}</h2>
           <p>{{ itemDescription }}</p>
+          <vs-divider>Add-ons</vs-divider>
+
+          <vs-list v-for="addOn in itemAddons"
+              :key="addOn.id">
+            <vs-list-header
+              :title="addOn.attributeName"
+            ></vs-list-header>
+
+            <vs-list-item
+              v-for="attributeValue in addOn.values"
+              :key="attributeValue.id"
+              :title="attributeValue.name"
+              :subtitle="'R'+attributeValue.price"
+            ></vs-list-item>
+          </vs-list>
+
           <vs-divider></vs-divider>
           <vs-chip class="mb-2" color="primary">Price: R{{ itemPrice }}</vs-chip>
           <vs-chip class="mb-2" color="success">Preperation: {{ itemPrepTime }}min</vs-chip>
@@ -134,11 +150,15 @@
           </vs-col>
         </vs-row>
         <vs-divider>Attribute Values</vs-divider>
-        <div class="attributesList" v-for="attriuteValue in addOn.values" :key="attriuteValue.id">
+        <div
+          class="attributesValuesList"
+          v-for="attributeValue in addOn.values"
+          :key="attributeValue.id"
+        >
           <vs-row class="mb-8">
             <vs-col vs-type="flex" vs-justify="left" vs-align="left" vs-w="3"></vs-col>
             <vs-col vs-type="flex" vs-justify="left" vs-align="left" vs-w="2">
-              <vs-input label="Value name" v-model="attriuteValue.name" />
+              <vs-input label="Value name" v-model="attributeValue.name" />
             </vs-col>
             <vs-col vs-type="flex" vs-justify="left" vs-align="left" vs-w="2">
               <vs-input
@@ -146,11 +166,11 @@
                 label="Additional Price (ZAR)"
                 min="0"
                 step="0.5"
-                v-model="attriuteValue.price"
+                v-model="attributeValue.price"
               />
             </vs-col>
             <vs-col vs-type="flex" vs-justify="left" vs-align="left" vs-w="2">
-              <vs-checkbox v-model="attriuteValue.selectedByDefault">selected by default</vs-checkbox>
+              <vs-checkbox v-model="attributeValue.selectedByDefault">selected by default</vs-checkbox>
             </vs-col>
           </vs-row>
         </div>
@@ -241,7 +261,7 @@ export default {
       itemName: "Moroccan Butternut",
       itemDescription:
         "Roasted butternut, spiced chickpeas, candied walnuts, cherry tomatoes, feta & spring onions tossed with mixed lettuce.",
-      itemPrice: 20.5,
+      itemPrice: 20.50,
       itemPrepTime: 10,
       itemCategory: "",
       itemSubCategory: "",
