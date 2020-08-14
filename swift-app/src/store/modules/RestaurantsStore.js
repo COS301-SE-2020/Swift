@@ -1,5 +1,8 @@
+import axios from 'axios'
+
 // State object
 const initialState = () => ({
+  allRestaurants: {},
   tableNumber: "Checked in manually",
   checkedIn: false,
   displayNotification: false,
@@ -7,10 +10,11 @@ const initialState = () => ({
 
 const state = initialState();
 
-// Setter functions
-
 // Getter functions
 const getters = {
+  getAllRestaurants(state) {
+    return state.allRestaurants;
+  },
   getTableNumber(state) {
     return state.tableNumber;
   },
@@ -24,18 +28,26 @@ const getters = {
 
 // Actions 
 const actions = {
+  allRestaurants({commit}, data) {
+    var token = this.getters['CustomerStore/getToken']
+    axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "allRestaurants",
+      "token": token,
+    }
+    ).then(result => {
+      commit('SAVE_ALL_RESTAURANTS', result.data.restaurants);
+    }).catch(({ response }) => {
+    });
+  },
+
+  retrieveRestaurantMenu({commit, dispatch}, restaurantId) {
+    this.dispatch('MenuStore/retrieveMenu', restaurantId);
+  },
+
   // Used to reset the store
   reset({ commit }) {
     commit('RESET');
-  },
-
-  fetchVariable1({ commit }) {
-    return new Promise( (resolve, reject) => {
-      // Make network request and fetch data
-      // and commit the data
-      commit('SET_VARIABLE_1', data); 
-      resolve();
-    })
   },
 
   updateCheckInFlag({commit}, data) {
@@ -49,6 +61,10 @@ const actions = {
 
 // Mutations
 const mutations = {
+  SAVE_ALL_RESTAURANTS(state, restaurants) {
+    state.allRestaurants = restaurants;
+  },
+
   // Used to reset the store
   RESET(state) {
     const newState = initialState();

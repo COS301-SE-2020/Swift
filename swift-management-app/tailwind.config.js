@@ -45,6 +45,10 @@ View the full documentation at https://tailwindcss.com.
 
 module.exports = {
 
+<<<<<<< HEAD
+=======
+  purge: false,
+>>>>>>> feature-notification
   important: true,
   // prefix: '',
   // separator: ':',

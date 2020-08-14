@@ -60,7 +60,11 @@
                 </v-row>
                 <v-row justify="center">
                   <v-col cols="11" class="pt-0 pb-0">
+<<<<<<< HEAD
                     <v-textarea class="commentSection" label="Tell us what you liked..." solo single-line auto-grow  rows="5" row-height="20"></v-textarea>
+=======
+                    <v-textarea class="commentSection" label="Tell us what you liked..." outlined single-line auto-grow rows="5" row-height="20"></v-textarea>
+>>>>>>> feature-notification
                   </v-col>
                 </v-row>
                 <v-row class="mt-1" justify="center" v-if="currentIndex != (rating.length - 1)">
@@ -71,6 +75,22 @@
                     <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">Share with public</span>
                   </v-col>
                 </v-row>
+<<<<<<< HEAD
+=======
+                <v-row class="mt-6 mb-4" justify="center">
+                  <v-col cols="11" class="pt-0" width="100%">
+                    <v-row class="d-flex justify-space-around">
+                      <v-col cols="5" class="pa-0" align="center">
+                        <v-btn v-show="currentIndex != 0" rounded color="#F5F5F5" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showPrevious">Previous</v-btn>
+                      </v-col>
+                      <v-col cols="5" class="pa-0" align="center">
+                        <v-btn v-show="currentIndex != (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showNext">Next</v-btn>
+                        <v-btn v-show="currentIndex == (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="submitRating">Submit</v-btn>
+                      </v-col>
+                    </v-row>
+                  </v-col>
+                </v-row>
+>>>>>>> feature-notification
               </v-card>
             </v-card>
           </v-tab-item>
@@ -116,7 +136,11 @@
             </v-row>
             <v-row justify="center">
               <v-col cols="11" class="pt-0 pb-0">
+<<<<<<< HEAD
                 <v-textarea class="commentSection" label="Tell us what you liked..." solo single-line auto-grow  rows="5" row-height="20"></v-textarea>
+=======
+                <v-textarea class="commentSection" label="Tell us what you liked..." outlined single-line auto-grow  rows="5" row-height="20"></v-textarea>
+>>>>>>> feature-notification
               </v-col>
             </v-row>
             <v-row class="mt-1" justify="center" v-if="currentIndex != (rating.length - 1)">
@@ -127,6 +151,7 @@
                 <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">Share with public</span>
               </v-col>
             </v-row>
+<<<<<<< HEAD
           </v-card>
         </v-card>
         <v-row class="mt-6 mb-4" justify="center">
@@ -142,12 +167,33 @@
             </v-row>
           </v-col>
         </v-row>
+=======
+            <v-row class="mt-6 mb-4" justify="center">
+              <v-col cols="11" class="pt-0" width="100%">
+                <v-row class="d-flex justify-space-around">
+                  <v-col cols="5" class="pa-0" align="center">
+                    <v-btn v-show="currentIndex != 0" rounded color="#F5F5F5" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showPrevious">Previous</v-btn>
+                  </v-col>
+                  <v-col cols="5" class="pa-0" align="center">
+                    <v-btn v-show="currentIndex != (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showNext">Next</v-btn>
+                    <v-btn v-show="currentIndex == (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="submitRating">Submit</v-btn>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
+          </v-card>
+        </v-card>
+>>>>>>> feature-notification
 
         <v-overlay relative opacity="0.25" :value="submitted" z-index="10">
           <v-avatar elevation="3" color="accent" class="pl-0 pr-0" absolute style="position: absolute; z-index: 12">
             <v-icon size="33px" color="white" v-text="'mdi-check'"></v-icon>
           </v-avatar>
+<<<<<<< HEAD
           <v-alert :value="alert" color="white" transition="scale-transition" class="alert" align="center" style="margin-top: 20px">
+=======
+          <v-alert color="white" transition="scale-transition" class="alert" align="center" style="margin-top: 20px">
+>>>>>>> feature-notification
             <div style="font-size: 22px !important; color: #343434" class="pl-8 pr-8 mt-8">Review successful</div>
             <div class="font-weight-light mt-2" style="font-size: 16px !important; color: #343434">Thank you for your feedback!</div>
             <v-btn text @click="hideAlert" class="mt-6 mb-1">
@@ -166,6 +212,10 @@ import { mapActions, mapGetters, mapMutations } from "vuex";
 export default {
     data() {
     return {
+<<<<<<< HEAD
+=======
+      tab: null,
+>>>>>>> feature-notification
       selectedRestaurant: false,
       selectedItemPublic: [],
       submitted: false,
@@ -185,6 +235,7 @@ export default {
         },
         {
           type: 'Items',
+<<<<<<< HEAD
           info: [
             {
               name: 'Avo & Egg on Toast',
@@ -199,6 +250,12 @@ export default {
               img: ''
             }
           ],
+=======
+          info: [{
+            name: 'Classic Eggs Benedict',
+            img: '',
+          },],
+>>>>>>> feature-notification
           ratingPhrases: [
             'Taste', 'Presentation', 'Value'
           ],
@@ -239,7 +296,17 @@ export default {
     },
     hideAlert () {
       this.$router.push('/')
+<<<<<<< HEAD
     }
+=======
+    },
+    backNavigation () {
+      this.$router.go(-1)
+    },
+    ...mapGetters({
+      orderHistory: 'OrderStore/getOrderHistory',
+    }),
+>>>>>>> feature-notification
   },
   computed: {
     selectTab () {
@@ -249,7 +316,21 @@ export default {
         return 'mdi-heart'
       }
     },
+<<<<<<< HEAD
   },
+=======
+    filteredList: function (id) {
+      return this.orderHistory().find(orderItem => {
+        return orderItem.orderId == id
+      })
+    },
+    
+  },
+  mounted: function () {
+    this.rating[0].info.name = this.filteredList(16).restaurantName
+    this.rating[2].info.name = this.filteredList(16).orderEmployeeName + ' ' + this.filteredList(16).orderEmployeeSurname
+  }
+>>>>>>> feature-notification
 };
 </script>
 
@@ -262,10 +343,21 @@ export default {
     border-radius:12px !important;
 }
 
+<<<<<<< HEAD
 .v-text-field__details {
     display: none !important;
 }
 
+=======
+.commentSection .v-text-field__details {
+    display: none !important;
+}
+
+.commentSection .v-application .primary--text {
+  color: black !important;
+}
+
+>>>>>>> feature-notification
 .ratingItems {
   min-width: 0px;
   width: 20px;

@@ -9,9 +9,15 @@
                 <v-icon>mdi-chevron-left</v-icon>
               </v-btn> -->
               <v-carousel height="200px" :show-arrows="false" hide-delimiter cycle hide-delimiters continuous>
+<<<<<<< HEAD
                 <v-carousel-item gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.4)" v-for="(item,i) in restaurantImages" :key="i" :src="item.img">
                     <v-row  align="center" justify="center" class="mt-6">
                       <div class="white--text display-1">Welcome to<br/> Mugg & Bean</div>
+=======
+                <v-carousel-item gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.4)" :src="menu.image">
+                    <v-row  align="center" justify="center" class="mt-6">
+                      <div class="white--text display-1">Welcome to<br/> {{menu.name}}</div>
+>>>>>>> feature-notification
                     </v-row>
                     <v-row no-gutters d-flex flex-row align="center" justify="center" class="fill-height">
                       <v-col cols="10" style="z-index: 11">
@@ -41,13 +47,21 @@
                             </v-list-item-action>
                           </template>
                         </v-autocomplete>
+<<<<<<< HEAD
                       </v-col>
                     </v-row>
+=======
+                        
+                      </v-col>
+                    </v-row>
+                    
+>>>>>>> feature-notification
                 </v-carousel-item>
               </v-carousel>
               <v-btn width="30px" height="30px" @click="callWaiter" :key="activeCall.icon" :color="activeCall.color" absolute small fab style="top: 20px; right: 10px;">
                 <v-icon :style="called ? { 'transform': 'rotate(45deg)' } : { 'transform': 'rotate(0deg)' }">{{ activeCall.icon }}</v-icon>
               </v-btn>
+<<<<<<< HEAD
             </v-col>
           </v-row>
         </div>
@@ -145,15 +159,18 @@
             </v-col>
             <v-col class="d-flex" cols="6" sm="6">
               <v-select prepend-icon="mdi-sort-variant" color="grey darken-4" :items="sorting" label="Sort" solo dense></v-select>
+=======
+>>>>>>> feature-notification
             </v-col>
           </v-row>
-        </v-expand-transition>
+        </div>
       </v-container>
     </v-card> 
-  </div> -->
+  </div>
 </template>
 
 <script>
+<<<<<<< HEAD
   import $ from 'jquery';
 
   $(window).scroll(function(){
@@ -194,29 +211,72 @@
       },
       callWaiter() {
         this.called = !this.called;
+=======
+import $ from 'jquery';
+import { mapActions, mapGetters } from "vuex";
+
+$(window).scroll(function(){
+  $(".backgroundImage").css("opacity", 1 - $(window).scrollTop() / 250);
+});
+
+export default {
+  data: () => ({
+    restaurantImages: [
+      { img: 'https://source.unsplash.com/GXXYkSwndP4/800x800/' },
+    ],
+  }),
+  methods: {
+    showFilters () {
+      this.toolbarExpanded = !this.toolbarExpanded   
+      this.expand = !this.expand
+      
+      if (!this.toolbarExpanded) {
+        this.toolbarHeight = '140px';
+      } else {
+        this.toolbarHeight = '200px';
+>>>>>>> feature-notification
       }
     },
-    watch: {
-      model (val) {
-        if (val != null) this.tab = 0
-        else this.tab = null
-      },
-      search (val) {
-        if (this.items.length > 0) return
-
-        this.isLoading = true
-
-        fetch('https://api.coingecko.com/api/v3/coins/list')
-          .then(res => res.clone().json())
-          .then(res => {
-            this.items = res
-          })
-          .catch(err => {
-            console.log(err)
-          })
-          .finally(() => (this.isLoading = false))
-      },
+    backNavigation () {
+      this.$router.push("/");
     },
+    callWaiter() {
+      this.called = !this.called;
+    }
+  },
+  watch: {
+    model (val) {
+      if (val != null) this.tab = 0
+      else this.tab = null
+    },
+    search (val) {
+      if (this.items.length > 0) return
+
+      this.isLoading = true
+
+      fetch('https://api.coingecko.com/api/v3/coins/list')
+        .then(res => res.clone().json())
+        .then(res => {
+          this.items = res
+        })
+        .catch(err => {
+          console.log(err)
+        })
+        .finally(() => (this.isLoading = false))
+    },
+  },
+  computed: {
+    ...mapGetters({
+      menu: "MenuStore/getMenu"
+    }),
+    activeCall() {
+      if (!this.called) {
+        return { color: "white", icon: "mdi-bell-outline" };
+      } else {
+        return { color: "primary", icon: "mdi-bell-outline" };
+      }
+    },
+<<<<<<< HEAD
     computed: {
       activeCall() {
         if (!this.called) {
@@ -227,6 +287,10 @@
       },
     }
   } 
+=======
+  }
+} 
+>>>>>>> feature-notification
 </script>
 
 <style>
@@ -242,4 +306,12 @@ label {
 .v-text-field--rounded > .v-input__control > .v-input__slot {
   padding-left: 18px;
 }
+<<<<<<< HEAD
+=======
+.searchBarBg .v-input__slot {
+  background: rgba(0, 0, 0, 0.06) !important;
+  caret-color: #343434 !important;
+  color: #343434 !important;
+}
+>>>>>>> feature-notification
 </style>

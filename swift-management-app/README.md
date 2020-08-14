@@ -1,4 +1,8 @@
 # swift-management
+<<<<<<< HEAD
+=======
+=======
+>>>>>>> feature-notification
 
 ## Project setup
 ```
@@ -23,4 +27,7 @@ npm run test:unit
 ### Run your end-to-end tests
 ```
 npm run test:e2e
+<<<<<<< HEAD
 ```
+=======
+>>>>>>> feature-notification

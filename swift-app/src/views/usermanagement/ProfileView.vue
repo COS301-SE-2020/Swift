@@ -82,16 +82,10 @@ export default {
     ],
     tab: null,
   }),
-  created() {
-    this.customerInfo
-  },
   components: {
     'NavBar': NavBar
   },
   methods: {
-    populateCustomer () {
-      this.customerInfo
-    },
     signOut (title) {
       if (title == 'Logout') {
         this.reset

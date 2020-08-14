@@ -34,6 +34,10 @@
           <v-col cols="11" class="pt-0 mb-10" width="100%" style="position: absolute; bottom: 0;">
            <div class="row d-flex flex-column align-center mx-8">
               <v-btn @click="resetPass" block rounded class="py-5 body-2 font-weight-light" color="primary" style="font-size: 17px !important">Reset Password</v-btn>
+<<<<<<< HEAD
+=======
+              <v-progress-circular v-show=isLoading indeterminate color="primary"></v-progress-circular>
+>>>>>>> feature-notification
            </div>
           </v-col>
         </v-row>
@@ -60,7 +64,11 @@
               <span  style="font-size: 25px">Verify your email</span>
             </v-row>
             <v-row justify="center" class="mt-4 mb-6">
+<<<<<<< HEAD
               <span style="font-size: 16px; text-align: center; opacity: 0.9" class="font-weight-light">Please enter the 4 digit code sent to {{email}}</span>
+=======
+              <span style="font-size: 16px; text-align: center; opacity: 0.9" class="font-weight-light">Please enter the 4 digit code sent to {{enteredEmail}}</span>
+>>>>>>> feature-notification
             </v-row>
             <v-row justify="center" class="mt-4 mb-6" style="text-align:center">
               <v-col cols="2" class="pl-1 pr-1" style="text-align: center">
@@ -75,6 +83,14 @@
               <v-col cols="2" class="pl-1 pr-1">
                 <v-textarea maxlength="1" class="centered-input text--darken-3 mt-3 digits" height="4" solo single-line outlined></v-textarea>
               </v-col>
+<<<<<<< HEAD
+=======
+
+              <!-- <input maxlength="1" class="centered-input text--darken-3 mt-3 digits" height="4" solo single-line outlined v-on:keyup="$event.target.nextElementSibling.focus()" type="text">
+              <input v-on:keyup="$event.target.nextElementSibling.focus()" type="text">
+              <input v-on:keyup="$event.target.nextElementSibling.focus()" type="text">
+              <input v-on:keyup="$event.target.nextElementSibling.focus()" type="text"> -->
+>>>>>>> feature-notification
             </v-row>
           </v-card>
           <v-btn text @click="resendEmail" class="mt-0 mb-1">
@@ -85,6 +101,10 @@
           <v-col cols="11" class="pt-0 mb-10" width="100%" style="position: absolute; bottom: 0;">
            <div class="row d-flex flex-column align-center mx-8">
               <v-btn @click="confirmEmail" block rounded class="py-5 body-2 font-weight-light" color="primary" style="font-size: 17px !important">Confirm</v-btn>
+<<<<<<< HEAD
+=======
+              <v-progress-circular v-show=isLoading indeterminate color="primary"></v-progress-circular>
+>>>>>>> feature-notification
            </div>
           </v-col>
         </v-row>
@@ -136,12 +156,34 @@
 
 <script>
 import { mapActions, mapGetters, mapMutations } from "vuex";
+<<<<<<< HEAD
 
 export default {
     data() {
     return {
      email: 'peterjames@gmail.com',
      step: 1
+=======
+import { validationMixin } from 'vuelidate'
+import { required, maxLength, email } from 'vuelidate/lib/validators'
+import $ from 'jquery';
+
+export default {
+  mixins: [validationMixin],
+  validations: {
+    email: { required, email },
+    password: { required },
+  },
+  data() {
+    return {
+     email: '',
+     enteredEmail: 'peterjames@gmail.com',
+     showPassword: false,
+     step: 1,
+     errorMsg: '',
+     password: '',
+     isLoading: false,
+>>>>>>> feature-notification
     }
   },
   methods: {
@@ -152,17 +194,70 @@ export default {
         this.step = this.step - 1;
     },
     resetPass () {
+<<<<<<< HEAD
       this.step = this.step + 1;
+=======
+      this.isLoading = true
+      if (this.emailErrors.length > 0  || this.email.length == 0) {
+        this.$v.$touch()
+        this.isLoading = false
+      } else {
+        this.isLoading = false
+        // let data = {
+        //   email: this.email,
+        //   password: this.password,
+        // }
+        
+        this.step = this.step + 1;
+      }
+
+      
+>>>>>>> feature-notification
     },
     confirmEmail () {
       this.step = this.step + 1;
     },
     submitPass () {
+<<<<<<< HEAD
       this.$router.push('login')
     }
   },
   computed: {
   
+=======
+      this.isLoading = true
+      if (this.passwordErrors.length > 0  || this.password.length == 0) {
+        this.$v.$touch()
+        this.isLoading = false
+      } else {
+        this.isLoading = false
+        this.$router.push('login')
+      }
+    },
+    resendEmail () {
+      
+    },
+    ...mapGetters({
+      isAuthenticated: 'isAuthenticated',
+      errors: 'getErrors',
+    }),
+
+  },
+  computed: {
+    emailErrors () {
+      const errors = []
+      if (!this.$v.email.$dirty) return errors
+      !this.$v.email.email && errors.push('Must be a valid email')
+      !this.$v.email.required && errors.push('Email is required.')
+      return errors
+    },
+    passwordErrors () {
+      const errors = []
+      if (!this.$v.password.$dirty) return errors
+      !this.$v.password.required && errors.push('Password is required.')
+      return errors
+    },
+>>>>>>> feature-notification
   },
 };
 </script>
@@ -177,7 +272,11 @@ export default {
   font-size: 30px;
 }
 
+<<<<<<< HEAD
 .v-application--is-ltr .v-textarea.v-text-field--enclosed .v-text-field__slot textarea {
+=======
+.digits .v-application--is-ltr .v-textarea.v-text-field--enclosed .v-text-field__slot textarea {
+>>>>>>> feature-notification
   text-align: center;
   line-height: 40px;
 }
