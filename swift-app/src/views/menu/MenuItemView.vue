@@ -17,22 +17,22 @@
 
     <v-card-text class="pb-0 pt-3">
       <v-row class="mx-0">
-        <v-col cols="9" class="pl-0 pb-0">
+        <v-col cols="8" class="pl-0 pb-0">
           <span class="title black--text">{{newMenuItem.menuItemName}}</span>
         </v-col>
-        <v-col cols="3" class="pl-0 pb-0">
+        <v-col cols="4" class="pl-0 pb-0">
           <span class="title black--text">R85.00</span>
         </v-col>
       </v-row>
     </v-card-text>
 
     <v-card-text class="pt-0" >
-      <v-row align="center" class="mx-0" >
+      <v-row align="center" class="mx-0 my-4" >
         <v-col cols="8" class="px-0 py-0">
           <v-rating readonly size="18" dense color="yellow darken-3" background-color="secondary" :value="newMenuItem.rating"></v-rating>
         </v-col>
         <v-col cols="4" class="py-0">
-          <div color="secondary" class="ml-4 my-4"><v-icon color="secondary">mdi-clock</v-icon> 15 min</div>
+          <div color="secondary"><v-icon color="secondary">mdi-clock</v-icon> 15 min</div>
         </v-col>
       </v-row>
       <div class="justify">{{newMenuItem.menuItemDescription}}</div>
@@ -61,7 +61,7 @@
                   </v-list-item-content>
                 </template>
                 <div v-if="attribute.field.type == 'radio'">
-                  <v-radio-group v-if="attribute.field.type == 'radio'" v-model="radio[i]" class="mt-0 radioCustomise">
+                  <v-radio-group v-if="attribute.field.type == 'radio'" v-model="values[i]" class="mt-0 radioCustomise">
                     <v-card flat v-for="(value, j) in attribute.values" :key="j" height="50px">
                       <v-row class="d-flex justify-space-between customisation" style="max-height: 50px">
                         <v-col cols="7" class="pl-5" style="max-height: 50px">
@@ -95,7 +95,7 @@
                             <span v-if="'fee' in value">+ R{{(value.fee).toFixed(2)}}</span>
                           </v-col>
                           <v-col cols="4" class="ph-0 py-0 d-flex justify-start icons" >
-                            <v-checkbox :value="value.name"></v-checkbox>
+                            <v-checkbox :value="value.name" v-model="values[i]"></v-checkbox>
                           </v-col>
                         </v-row>
                       </v-col>
@@ -251,8 +251,8 @@ $('.commentInfo').text($('.commentInfo').text().substring(0,200))
 export default {
   data() {
     return {
-      radio: [],
-      checkboxVal: [[]],
+      // radio: [],
+      values: [[]],
       valid: true,
       quantity: 1,
       radioGroup: 1,
@@ -417,9 +417,12 @@ export default {
         .then(a => a.present())  
     },
     addToOrder() {
-      console.log($('.label').eq(0).text());
-      console.log(this.radio[0]);
-      console.log(this.checkboxVal);
+      // console.log($('.label').eq(0).text());
+      console.log(this.values[0]);
+      console.log(this.values[1]);
+      console.log(this.values[2]);
+      console.log(this.values[3]);
+      // console.log(this.checkboxVal);
       // let data = {
       //   "orderInfo": {
       //     "restaurantId": 1,

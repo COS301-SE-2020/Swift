@@ -51,7 +51,7 @@
                     <v-row class="mx-0 pb-1">
                       <v-col cols="5" class="pb-2 orderButtons">
                         <v-icon color="primary" size="20px">mdi-history</v-icon> 
-                        <span class="pl-1 orderOptions">Repeat Order</span>
+                        <span class="pl-1 orderOptions repeat">Repeat Order</span>
                       </v-col>
                       <v-col cols="4" class="pb-2 orderButtons">
                         <v-icon size="17px">mdi-comment-edit</v-icon> 
@@ -256,5 +256,9 @@ export default {
 .orderSearchBar {
   background-color: rgba(0, 0, 0, 0.04);
   height: 90px;
+}
+
+.repeat {
+  color: #f75564;
 }
 </style>
