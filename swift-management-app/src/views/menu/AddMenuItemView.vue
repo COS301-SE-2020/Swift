@@ -29,21 +29,34 @@
               <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
             </div>
             <vs-dropdown-menu style="z-index:99999">
-              <vs-dropdown-item v-for="category in restaurantObject.categories" :key="category.categoryName">
-                <vs-button type="flat"  @click="itemCategory = category.categoryName" v-if="category.type == 'primary'">{{ category.categoryName }}</vs-button>
+              <vs-dropdown-item v-for="category in primaryCategories" :key="category.categoryName">
+                <vs-button
+                  type="flat"
+                  @click="itemCategory = category.categoryName"
+                >{{ category.categoryName }}</vs-button>
               </vs-dropdown-item>
             </vs-dropdown-menu>
           </vs-dropdown>
-          <vs-dropdown v-if="itemCategory" vs-trigger-click class="dd-actions cursor-pointer mr-4 mb-4">
+          <vs-dropdown
+            v-if="itemCategory"
+            vs-trigger-click
+            class="dd-actions cursor-pointer mr-4 mb-4"
+          >
             <div
               class="p-4 shadow-drop rounded-lg d-theme-dark-bg cursor-pointer flex items-center justify-center text-lg font-medium w-32 w-full"
             >
-              <span class="mr-2">Sub-Category</span>
+              <span class="mr-2">{{ itemSubCategoryTitle }}</span>
               <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
             </div>
             <vs-dropdown-menu>
-              <vs-dropdown-item>
-                <span>Menu 1</span>
+              <vs-dropdown-item
+                v-for="category in secondaryCategories"
+                :key="category.categoryName"
+              >
+                <vs-button
+                  type="flat"
+                  @click="itemSubCategory = category.categoryName"
+                >{{ category.categoryName }}</vs-button>
               </vs-dropdown-item>
             </vs-dropdown-menu>
           </vs-dropdown>
@@ -93,7 +106,97 @@
       title-color="primary"
       collapse-action
       subtitle="Specify the item-specific attributes"
-    >Add-ons</vx-card>
+    >
+      <div class="addOnsList" v-for="addOn in itemAddons" :key="addOn.id">
+        <vs-divider color="primary">{{ addOn.attributeName }}</vs-divider>
+        <vs-row class="mb-4">
+          <vs-col vs-type="flex" vs-justify="center" vs-align="center" vs-w="4">
+            <vs-input label="Attribute Name" v-model="addOn.attributeName" />
+          </vs-col>
+          <vs-col vs-type="flex" vs-justify="center" vs-align="center" vs-w="4">
+            <p>How many can they select:</p>
+            <vs-input-number
+              label="min"
+              style="max-width: 200px; margin: 0 auto"
+              v-model="addOn.min"
+              icon-inc="expand_less"
+              icon-dec="expand_more"
+            />
+          </vs-col>
+          <vs-col vs-type="flex" vs-justify="center" vs-align="center" vs-w="4">
+            <vs-input-number
+              label="max"
+              style="max-width: 200px; margin: 0 auto"
+              v-model="addOn.max"
+              icon-inc="expand_less"
+              icon-dec="expand_more"
+            />
+          </vs-col>
+        </vs-row>
+        <vs-divider>Attribute Values</vs-divider>
+        <div class="attributesList" v-for="attriuteValue in addOn.values" :key="attriuteValue.id">
+          <vs-row class="mb-8">
+            <vs-col vs-type="flex" vs-justify="left" vs-align="left" vs-w="3"></vs-col>
+            <vs-col vs-type="flex" vs-justify="left" vs-align="left" vs-w="2">
+              <vs-input label="Value name" v-model="attriuteValue.name" />
+            </vs-col>
+            <vs-col vs-type="flex" vs-justify="left" vs-align="left" vs-w="2">
+              <vs-input
+                type="number"
+                label="Additional Price (ZAR)"
+                min="0"
+                step="0.5"
+                v-model="attriuteValue.price"
+              />
+            </vs-col>
+            <vs-col vs-type="flex" vs-justify="left" vs-align="left" vs-w="2">
+              <vs-checkbox v-model="attriuteValue.selectedByDefault">selected by default</vs-checkbox>
+            </vs-col>
+          </vs-row>
+        </div>
+        <vs-row>
+          <vs-col
+            class="mt-3"
+            vs-offset="4"
+            vs-type="flex"
+            vs-justify="center"
+            vs-align="center"
+            vs-w="4"
+          >
+            <vs-button
+              color="dark"
+              @click="addAddOnValue(addOn.id)"
+              size="small"
+              type="border"
+              class="mb-4 mr-4"
+            >
+              <span class="flex items-center">
+                <feather-icon icon="PlusIcon" svgClasses="h-4 w-4 mr-1" />
+                <span>New Value</span>
+              </span>
+            </vs-button>
+          </vs-col>
+        </vs-row>
+      </div>
+      <vs-divider></vs-divider>
+      <vs-row>
+        <vs-col
+          class="mt-3"
+          vs-offset="4"
+          vs-type="flex"
+          vs-justify="center"
+          vs-align="center"
+          vs-w="4"
+        >
+          <vs-button @click="addAddOn()" type="border" class="mb-4 mr-4">
+            <span class="flex items-center">
+              <feather-icon icon="PlusIcon" svgClasses="h-4 w-4 mr-1" />
+              <span>New Item Add-On</span>
+            </span>
+          </vs-button>
+        </vs-col>
+      </vs-row>
+    </vx-card>
     <vx-card
       title="Images"
       class="mb-4"
@@ -140,7 +243,37 @@ export default {
         "Roasted butternut, spiced chickpeas, candied walnuts, cherry tomatoes, feta & spring onions tossed with mixed lettuce.",
       itemPrice: 20.5,
       itemPrepTime: 10,
-      itemCategory: ''
+      itemCategory: "",
+      itemSubCategory: "",
+      itemAddons: [
+        {
+          //TODO: Update itemAddon ids
+          id: Math.random(),
+          attributeName: "Preperation of Eggs",
+          min: 0,
+          max: 10,
+          values: [
+            {
+              id: Math.random(),
+              name: "fried",
+              price: 10,
+              selectedByDefault: true,
+            },
+            {
+              id: Math.random(),
+              name: "scrambled",
+              price: 20,
+              selectedByDefault: false,
+            },
+            {
+              id: Math.random(),
+              name: "poached",
+              price: 30,
+              selectedByDefault: false,
+            },
+          ],
+        },
+      ],
     };
   },
   computed: {
@@ -148,11 +281,27 @@ export default {
       return this.$store.state.menuList.restaurantObject;
     },
     itemCategoryTitle() {
-      if(this.itemCategory)
-        return this.itemCategory;
-      else
-        return "Item Category";
-    }
+      if (this.itemCategory) return this.itemCategory;
+      else return "Item Category";
+    },
+    itemSubCategoryTitle() {
+      if (this.itemSubCategory) return this.itemSubCategory;
+      else return "Sub-Category";
+    },
+    primaryCategories() {
+      if (this.restaurantLoaded())
+        return this.restaurantObject.categories.filter(
+          (i) => i.type === "primary"
+        );
+      else return null;
+    },
+    secondaryCategories() {
+      if (this.restaurantLoaded())
+        return this.restaurantObject.categories.filter(
+          (i) => i.type === "secondary"
+        );
+      else return null;
+    },
   },
   methods: {
     successUpload() {
@@ -162,6 +311,49 @@ export default {
         text: "Lorem ipsum dolor sit amet, consectetur",
       });
     },
+    restaurantLoaded() {
+      if (Object.keys(this.restaurantObject).length === 0) return false;
+      else return true;
+    },
+    addAddOn() {
+      var newAddOn = {
+        //TODO: Update itemAddon ids
+        id: Math.random(),
+        attributeName: "Preperation of Eggs",
+        min: 0,
+        max: 10,
+        values: [
+          {
+            id: Math.random(),
+            name: "fried",
+            price: 10,
+            selectedByDefault: true,
+          },
+          {
+            id: Math.random(),
+            name: "scrambled",
+            price: 20,
+            selectedByDefault: false,
+          },
+          {
+            id: Math.random(),
+            name: "poached",
+            price: 30,
+            selectedByDefault: false,
+          },
+        ],
+      };
+      this.itemAddons.push(newAddOn);
+    },
+    addAddOnValue(id) {
+      var newAddOnValue = {
+        id: Math.random(),
+        name: "fried",
+        price: 10,
+        selectedByDefault: true,
+      };
+      this.itemAddons.find((i) => i.id === id).values.push(newAddOnValue);
+    },
   },
   created() {
     if (!modulemenuList.isRegistered) {
@@ -169,8 +361,8 @@ export default {
       modulemenuList.isRegistered = true;
     }
     //if menu has not been loaded yet, load it first
-    if(Object.keys(this.restaurantObject).length === 0){
-     this.$store.dispatch("menuList/listMenuItems");
+    if (!this.restaurantLoaded()) {
+      this.$store.dispatch("menuList/listMenuItems");
     }
   },
 };
