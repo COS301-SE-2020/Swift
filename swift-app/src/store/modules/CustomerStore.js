@@ -1,4 +1,5 @@
 import axios from 'axios'
+const {OAuth2Client} = require('google-auth-library');
 
 // State object
 const initialState = () => ({
@@ -47,6 +48,21 @@ const actions = {
     });
   },
 
+  async googleLogin({commit}, data) {
+    const client = new OAuth2Client('415163052147-np5h380l61kp40l50eqk5qqgh3t3ku2r.apps.googleusercontent.com');
+    const ticket = await client.verifyIdToken({
+      idToken: data.google.id_token,
+      audience: '415163052147-np5h380l61kp40l50eqk5qqgh3t3ku2r.apps.googleusercontent.com'
+    });
+    const payload = ticket.getPayload();
+    console.log('Google payload is '+JSON.stringify(payload));
+    const userid = payload['sub'];
+    let email = payload['email'];
+    let emailVerified = payload['email_verified'];
+    let name = payload["name"];
+    let pictureUrl = payload["picture"];
+  },
+
   register({commit}, data) {
     axios.post('https://api.swiftapp.ml', 
       {
@@ -64,6 +80,21 @@ const actions = {
       commit('SAVE_CUSTOMER', result.data);
     }).catch(({ response }) => {
     });
+  },
+
+  async googleRegister({commit}, data) {
+    const client = new OAuth2Client('415163052147-np5h380l61kp40l50eqk5qqgh3t3ku2r.apps.googleusercontent.com');
+    const ticket = await client.verifyIdToken({
+      idToken: data.google.id_token,
+      audience: '415163052147-np5h380l61kp40l50eqk5qqgh3t3ku2r.apps.googleusercontent.com'
+    });
+    const payload = ticket.getPayload();
+    console.log('Google payload is '+JSON.stringify(payload));
+    const userid = payload['sub'];
+    let email = payload['email'];
+    let emailVerified = payload['email_verified'];
+    let name = payload["name"];
+    let pictureUrl = payload["picture"];
   },
 
   reset({ commit }) {
