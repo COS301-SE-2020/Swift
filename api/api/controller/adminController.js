@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const validator = require('email-validator');
 const db = require('../db');
 const accCreator = require('../helper/accountCreator');
+const sendEmail = "value";
 const { generateToken } = require('../helper/tokenHandler');
 
 const BC_SALT_ROUNDS = 10;
