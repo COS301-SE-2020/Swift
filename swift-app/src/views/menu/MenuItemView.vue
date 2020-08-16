@@ -416,14 +416,15 @@ export default {
       this.activeComments.includes(index) ? this.activeComments.splice(this.activeComments.indexOf(index), 1) : this.activeComments.push(index);
     },
     openARScanner() {
-      return this.$ionic.alertController
+      /* return this.$ionic.alertController
         .create({
           header: 'Augmented Reality',
           subHeader: 'Coming Soon',
           message: 'This feature will be added in a future build.',
           buttons: ['OK']
         })
-        .then(a => a.present())  
+        .then(a => a.present())   */
+        window.location.href = 'https://studio.onirix.com/modelviewer/012b5b7f41d14cbba1d8728d960d9011?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUyMDIsImFzc2V0SWQiOjEzOTU4NCwicm9sZSI6OCwiaWF0IjoxNTkxMDMwNDg0fQ.LgMQAzyY6tmJyGY2-_RcT38SEibg-eWoHRmtQoUMkK8'
     },
     addToOrder() {;
       let selectionValues = [];
