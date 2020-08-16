@@ -31,6 +31,8 @@ jobs:
     - name: Get Environment Secrets
       uses: ./.github/actions/yaml-env-secrets
       env:
+        AUTH_GOOGLE_CLIENT_ID: ${{ secrets.AUTH_GOOGLE_CLIENT_ID }}
+        AUTH_GOOGLE_CLIENT_SECRET: ${{ secrets.AUTH_GOOGLE_CLIENT_SECRET }}
         DB_HOST: ${{ secrets.DB_HOST }}
         DB_NAME: ${{ secrets.DB_NAME }}
         DB_PASS: ${{ secrets.DB_PASS }}
