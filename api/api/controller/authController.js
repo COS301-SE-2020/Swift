@@ -98,17 +98,15 @@ module.exports = {
 
     return response.status(302).send(oauthLoginResponse);
   },
-  handleGoogleCallback: (urlParams, response) => Oauth2Client.getToken(urlParams.code)
-    .then(({ tokens }) => {
+  handleGoogleCallback: async (urlParams, response) => {
+    try {
+      const { tokens } = await Oauth2Client.getToken(urlParams.code);
       Oauth2Client.setCredentials(tokens);
-    })
-    .then(() => oauth2.userinfo.get({ auth: Oauth2Client })
-      .then((res) => {
-        // Login user from authenticated Google account
-        loginUser(res.data.email, response);
-      }))
-    .catch((err) => {
+      const userInfo = await oauth2.userinfo.get({ auth: Oauth2Client });
+      return loginUser(userInfo.data.email, response);
+    } catch (err) {
       console.error('Google OAUTH2 Callback Error', err.stack);
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
-    })
+    }
+  }
 };
