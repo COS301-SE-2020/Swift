@@ -9,8 +9,8 @@ const BC_SALT_ROUNDS = 10;
 const oauth2 = google.oauth2('v2');
 
 const Oauth2Client = new google.auth.OAuth2(
-  process.env.GOOGLE_CLIENT_ID || config.clientId,
-  process.env.GOOGLE_CLIENT_SECRET || config.clientSecret,
+  process.env.AUTH_GOOGLE_CLIENT_ID || config.clientId,
+  process.env.AUTH_GOOGLE_CLIENT_SECRET || config.clientSecret,
   (typeof process.env.NODE_ENV !== 'undefined' && process.env.NODE_ENV.trim() === 'production')
     ? config.productionCallback : config.devCallback
 );
