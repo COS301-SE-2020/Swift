@@ -1,0 +1,17 @@
+{
+  "hosting": {
+    "public": "public",
+    "site": "lumiqon-swift-privacy",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}
