@@ -1,5 +1,6 @@
 const express = require('express');
 const adminController = require('./controller/adminController');
+const authController = require('./controller/authController');
 const restaurantController = require('./controller/restaurantController');
 const userController = require('./controller/userController');
 const healthCheck = require('./helper/healthCheck');
@@ -25,6 +26,9 @@ router.get('/', (req, res) => {
 // Health Check
 router.get('/status', (req, res) => healthCheck.getServiceStatus(res));
 
+// Google OAUTH2
+router.get('/auth/google', (req, res) => authController.handleGoogleCallback(req.query, res));
+
 // Handle POST request
 router.post('/', (req, res) => {
   try {
@@ -44,6 +48,10 @@ router.post('/', (req, res) => {
       }
       case 'loginAdmin': {
         adminController.loginAdmin(req.body, res);
+        break;
+      }
+      case 'loginGoogle': {
+        authController.getLoginURL(req.body, res);
         break;
       }
       case 'refresh': {

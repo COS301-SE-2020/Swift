@@ -54,6 +54,9 @@ app.put('/', require('./api/api'));
 // health check endpoint
 app.get('/status', require('./api/api'));
 
+// Google OAUTH2
+app.get('/auth/google', require('./api/api'));
+
 // Handle favicon requests
 app.get('/favicon.ico', (req, res) => { res.status(204).end(); });
 

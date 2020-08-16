@@ -6,3 +6,6 @@ node_modules/
 
 # DB Credentials
 api/config.json
+
+# Google auth credentials
+api/config-google-oauth.json
