@@ -15,34 +15,35 @@
       </v-container>
     </v-toolbar>
     <v-container style="height:100%">
-          <template>
-            <div>
-              <v-list v-for="orderMenuItem in orderInfo().orderInfo.orderItems" :key="orderMenuItem" class="py-2">
-                <v-card>
-                  <v-list-item ripple class="pt-1 pr-0">
-                    <v-list-item-content>
-                      <v-list-item-title class="mb-2" v-text="orderInfo().menuItemName"></v-list-item-title>
-                      <div v-for="(orderItem, index) in orderMenuItem.orderSelections.selections" :key="index">
-                        <v-list-item-subtitle v-for="(value, index) in orderItem.values" :key="index">- {{orderItem.name}}: {{value}}</v-list-item-subtitle>
-                      </div>
-                    </v-list-item-content>
-                    <v-list-item-action class="mr-3">
-                      <v-list-item-action-text>R{{calculatePrice(orderInfo().total, orderMenuItem.quantity)}}</v-list-item-action-text>
-                      <v-list-item-action-text>
-                        <v-btn @click="orderMenuItem.quantity--" fab elevation="2" width="22px" height="22px" class="mr-2">
-                          <v-icon size="15px">mdi-minus</v-icon>
-                        </v-btn>
-                        <div class="body-2 secondary--text" style="display: inline;">{{orderMenuItem.quantity}}</div>
-                        <v-btn @click="orderMenuItem.quantity++" fab elevation="2" width="22px" height="22px" class="ml-2">
-                            <v-icon size="15px">mdi-plus</v-icon>
-                        </v-btn>
-                      </v-list-item-action-text>
-                    </v-list-item-action>
-                  </v-list-item>
-                </v-card>
-              </v-list>
-            </div>
-          </template>
+      <template>
+        <div>
+          <v-list v-for="orderMenuItem in orderInfo().orderInfo.orderItems" :key="orderMenuItem" class="py-2">
+            <v-card>
+              <v-list-item ripple class="pt-1 pr-0">
+                <v-list-item-content>
+                  <v-list-item-title class="mb-2" v-text="orderInfo().menuItemName"></v-list-item-title>
+                  <div v-for="(orderItem, index) in orderMenuItem.orderSelections.selections" :key="index">
+                    <v-list-item-subtitle v-if="!Array.isArray(orderItem.values)">- {{orderItem.name}}: {{orderItem.values}}</v-list-item-subtitle>
+                    <v-list-item-subtitle v-else>- {{orderItem.name}}: {{(orderItem.values).join(', ')}}</v-list-item-subtitle>
+                  </div>
+                </v-list-item-content>
+                <v-list-item-action class="mr-3">
+                  <v-list-item-action-text>R{{orderInfo().total}}</v-list-item-action-text>
+                  <v-list-item-action-text>
+                    <v-btn @click="orderMenuItem.quantity--" fab elevation="2" width="22px" height="22px" class="mr-2">
+                      <v-icon size="15px">mdi-minus</v-icon>
+                    </v-btn>
+                    <div class="body-2 secondary--text" style="display: inline;">{{orderMenuItem.quantity}}</div>
+                    <v-btn @click="orderMenuItem.quantity++" fab elevation="2" width="22px" height="22px" class="ml-2">
+                        <v-icon size="15px">mdi-plus</v-icon>
+                    </v-btn>
+                  </v-list-item-action-text>
+                </v-list-item-action>
+              </v-list-item>
+            </v-card>
+          </v-list>
+        </div>
+      </template>
       <v-row class="mt-5">
         <v-col class="d-flex justify-center pb-1">
           <v-card width="95%" class="pa-1 pr-2">
@@ -52,7 +53,7 @@
                   <div class="body-1 secondary--text">Subtotal</div>
                 </v-col>
                 <v-col cols="3" class="pb-0 px-0"> 
-                  <div class="body-1 secondary--text d-flex justify-end">R {{subtotal.toFixed(2)}}</div>
+                  <div class="body-1 secondary--text d-flex justify-end">R {{subtotal}}</div>
                 </v-col>
               </v-row>
               <v-row>
@@ -60,7 +61,7 @@
                   <div class="body-1 secondary--text">Tax(14% VAT included)</div>
                 </v-col>
                 <v-col cols="3" class="pb-0 px-0">
-                  <div class="body-1 secondary--text d-flex justify-end">R {{(subtotal * 0.14).toFixed(2)}}</div>
+                  <div class="body-1 secondary--text d-flex justify-end">R {{(subtotal  * 0.14).toFixed(2)}}</div>
                 </v-col>
               </v-row>
               <v-row>
@@ -128,7 +129,6 @@ export default {
   data () {
     return {
       subtotal: 0,
-      orderTotal: 0,
       tab: null,
       paymentMade: false,
       items: [
@@ -162,13 +162,14 @@ export default {
     ...mapGetters({
       orderInfo: "OrderStore/getOrderInfo",
     }),
-    calculatePrice (price, quantity) {
-      this.subtotal = price * quantity;
-      return (price * quantity).toFixed(2)
-    },
     calculateTotal() {
-      return (this.subtotal + (this.subtotal * 0.14) + (this.subtotal * 0.1)).toFixed(2);
+      let tax = (this.subtotal * 0.14).toFixed(2);
+      let tip = (this.subtotal * 0.1).toFixed(2);
+      return (parseFloat(this.subtotal) + parseFloat(tax) + parseFloat(tip)).toFixed(2);
     }
   },
+  mounted: function() {
+    this.subtotal = this.orderInfo().total;
+  }
 }
 </script>

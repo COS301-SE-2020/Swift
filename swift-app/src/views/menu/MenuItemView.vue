@@ -20,8 +20,8 @@
         <v-col cols="8" class="pl-0 pb-0">
           <span class="title black--text">{{newMenuItem.menuItemName}}</span>
         </v-col>
-        <v-col cols="4" class="pl-0 pb-0">
-          <span class="title black--text">R85.00</span>
+        <v-col cols="4" class="pl-0 pb-0 d-flex justify-end">
+          <span class="title black--text">R{{(newMenuItem.price).toFixed(2)}}</span>
         </v-col>
       </v-row>
     </v-card-text>
@@ -31,7 +31,7 @@
         <v-col cols="8" class="px-0 py-0">
           <v-rating readonly size="18" dense color="yellow darken-3" background-color="secondary" :value="newMenuItem.rating"></v-rating>
         </v-col>
-        <v-col cols="4" class="py-0">
+        <v-col cols="4" class="py-0 d-flex justify-end">
           <div color="secondary"><v-icon color="secondary">mdi-clock</v-icon> 15 min</div>
         </v-col>
       </v-row>
@@ -47,70 +47,51 @@
         Reviews ({{ comments.length }})
       </v-tab>
     </v-tabs>
+    
 
     <v-tabs-items v-model="tab">
       <v-tab-item v-if="newMenuItem.attributes != null">
         <v-card flat>
           <v-card-title class="pb-0 pt-4">Customise Order</v-card-title>
-          <v-container>
-            <v-form ref="form" v-model="valid">
-              <v-list-group  v-for="(attribute, i) in newMenuItem.attributes.attributes" :key="i" no-action>
-                <template expand v-slot:activator>
+          <v-container class="pl-0">
+            <v-list shaped>
+              <v-list-group class="attributeElements" v-for="(attribute, i) in newMenuItem.attributes.attributes" :key="i" no-action value="true">
+                <template v-slot:activator>
                   <v-list-item-content>
-                    <v-list-item-title class="label" v-text="attribute.name"></v-list-item-title>
+                    <v-list-item-title class="label pl-3" v-text="attribute.name"></v-list-item-title>
                   </v-list-item-content>
                 </template>
-                <div v-if="attribute.field.type == 'radio'">
-                  <v-radio-group v-if="attribute.field.type == 'radio'" v-model="values[i]" class="mt-0 radioCustomise">
-                    <v-card flat v-for="(value, j) in attribute.values" :key="j" height="50px">
-                      <v-row class="d-flex justify-space-between customisation" style="max-height: 50px">
-                        <v-col cols="7" class="pl-5" style="max-height: 50px">
-                          <span>{{value.name}}</span>
-                        </v-col>
-                        <v-col cols="5" class="pr-5" style="max-height: 50px">
-                          <v-row class="d-flex justify-space-between py-0" style="max-height: 50px">
-                            <v-col cols="8" class="ph-0 py-0">
-                              <span v-if="'fee' in value">+ R{{(value.fee).toFixed(2)}}</span>
+                <v-list-item-group class="pl-4" :multiple="(attribute.field.type == 'radio') ? false : true" :mandatory="(attribute.field.type == 'radio') ? true : false" v-model="model[i]">
+                  <template v-for="(value, j) in attribute.values">
+                      <v-list-item @click="checkInput(i, j, value)" class="px-2 attributeValues" :key="`item-${j}`" :value="value.name">
+                        <template v-slot:default="{ active }">
+                          <v-row>
+                            <v-col cols="8">
+                              <v-list-item-title v-text="value.name"></v-list-item-title>
                             </v-col>
-                            <v-col cols="4" class="ph-0 py-0 d-flex justify-start icons" >                            
-                              <v-radio :value="value.name"></v-radio>
+                            <v-col>
+                              <v-list-item-title v-if="'fee' in value" v-text="`+ R${(value.fee).toFixed(2)}`"></v-list-item-title>
                             </v-col>
                           </v-row>
-                        </v-col>
-                      </v-row>
-                    </v-card>
-                  </v-radio-group>
-                </div>
-
-
-                <div v-else class="mt-0">
-                  <v-card flat v-for="(value, j) in attribute.values" :key="j" height="50px">
-                    <v-row class="d-flex justify-space-between customisation" style="max-height: 50px">
-                      <v-col cols="7" class="pl-5" style="max-height: 50px">
-                        <span>{{value.name}}</span>
-                      </v-col>
-                      <v-col cols="5" class="pr-5" style="max-height: 50px">
-                        <v-row class="d-flex justify-space-between py-0" style="max-height: 50px">
-                          <v-col cols="8" class="ph-0 py-0">
-                            <span v-if="'fee' in value">+ R{{(value.fee).toFixed(2)}}</span>
-                          </v-col>
-                          <v-col cols="4" class="ph-0 py-0 d-flex justify-start icons" >
-                            <v-checkbox :value="value.name" v-model="values[i]"></v-checkbox>
-                          </v-col>
-                        </v-row>
-                      </v-col>
-                    </v-row>
-                  </v-card>
-                </div>
+                          <v-list-item-action>
+                            <v-radio :id="`${i}${j}${(value.name).replace(/\s+/g, '')}`" checked v-if="attribute.field.type == 'radio'" :input-value="active" ></v-radio>
+                            <v-checkbox v-else :input-value="active"></v-checkbox>
+                          </v-list-item-action>
+                        </template>
+                      </v-list-item>
+                    </template>
+                </v-list-item-group>
               </v-list-group>
-            </v-form>
+            </v-list>
+
+            
 
             <v-row v-if="expandOrderBtn" class="d-flex justify-space-around px-2 mt-4">
               <v-col cols="4" class="d-flex justify-center px-0">
                 <div class="px-1 d-flex align-center quantityButton" height="45px">
-                  <v-btn @click="(quantity > 1) ? quantity-- : quantity" icon class="mr-2"><v-icon size="22">mdi-minus</v-icon></v-btn>
+                  <v-btn @click="detractPrice" icon class="mr-2"><v-icon size="22">mdi-minus</v-icon></v-btn>
                   {{quantity}}
-                  <v-btn @click="quantity++" icon class="ml-2"><v-icon size="22">mdi-plus</v-icon></v-btn>
+                  <v-btn @click="addPrice" icon class="ml-2"><v-icon size="22">mdi-plus</v-icon></v-btn>
                 </div>
 
                 <!-- <v-btn @click="quantity--" fab elevation="2" width="22px" height="22px" class="mr-2">
@@ -122,7 +103,7 @@
                 </v-btn> -->
               </v-col>
               <v-col cols="7" class="d-flex justify-center px-0">
-                <v-btn @click="addToOrder" style="border-radius: 13px; color: white" height="45px" color="accent">R {{calculatePrice(itemTotal)}} | Add to order</v-btn>
+                <v-btn @click="addToOrder" style="border-radius: 13px; color: white" height="45px" color="accent">R {{total.toFixed(2)}} | Add to order</v-btn>
               </v-col>
             </v-row>
 
@@ -239,6 +220,10 @@
     display: none;
   }
 
+  .attributeElements > .v-list-item--active.v-list-item--link {
+    background-color: rgba(247, 85, 100, 0.1) !important;
+  }
+
 </style>
 
 <script>
@@ -251,12 +236,13 @@ $('.commentInfo').text($('.commentInfo').text().substring(0,200))
 export default {
   data() {
     return {
-      // radio: [],
-      values: [[]],
+      model: [],
+      total: 0,
+      addOns: 0,
       valid: true,
       quantity: 1,
       radioGroup: 1,
-      itemTotal: 0,
+      // itemTotal: 0,
       activeComments: [],
       menuItemId: this.$route.params.itemid,
       expandOrderBtn: true,
@@ -360,6 +346,15 @@ export default {
     backNavigation () {
       this.$router.go(-1)
     },
+    detractPrice() {
+      if (this.quantity > 1) 
+        this.quantity--;
+      this.changeTotal();
+    },
+    addPrice() {
+      this.quantity++;
+      this.changeTotal();
+    },
     
     changeFavouriteComment: function (comment) {
       comment.liked = !comment.liked
@@ -376,6 +371,20 @@ export default {
         return { color: 'primary', icon: 'mdi-heart' }
       }
     },
+    checkInput(i, j, value) {
+      // console.log($(".attributeElements").eq(i).find(".v-radio i").html());
+      $(".attributeElements").eq(i).find(".v-radio i").removeClass("mdi-radiobox-marked");
+      $("#" + i + j + (value.name).replace(/\s+/g, '')).parent().children("i").addClass("mdi-radiobox-marked");
+
+      let checked = $(".attributeElements").eq(i).find(".attributeValues").eq(j).hasClass("v-item--active v-list-item--active");
+
+      if ('fee' in value && checked) {
+        this.addOns -= value.fee
+      } else if ('fee' in value && !checked) {
+        this.addOns += value.fee
+      }
+      this.changeTotal();
+    },
     optionIcon: function (type) {
       if (type == "checkbox") {
         return { selected: 'mdi-check-box-outline', unselected: 'mdi-checkbox-blank-outline' }
@@ -389,9 +398,9 @@ export default {
       else 
         return false
     },
-    calculatePrice (price) {
-      return (price * this.quantity).toFixed(2)
-    },
+    // calculatePrice (price) {
+    //   return (price * this.quantity).toFixed(2)
+    // },
     limitComment: function (userInput, index) {
       if (userInput.comment.length > 150 && !this.activeComments.includes(index)) {
         var truncated = userInput.comment.substr(0,150) + '...';
@@ -416,51 +425,39 @@ export default {
         })
         .then(a => a.present())  
     },
-    addToOrder() {
-      // console.log($('.label').eq(0).text());
-      console.log(this.values[0]);
-      console.log(this.values[1]);
-      console.log(this.values[2]);
-      console.log(this.values[3]);
-      // console.log(this.checkboxVal);
-      // let data = {
-      //   "orderInfo": {
-      //     "restaurantId": 1,
-      //     "tableId": 1,
-      //     "employeeId": 7,
-      //     "orderItems": [
-      //       {
-      //         "menuItemId": this.newMenuItem.menuItemId,
-      //         "quantity": this.quantity,
-      //         "orderSelections": {
-      //           "selections": [
-      //             {
-      //               "name": "Preparation of Eggs",
-      //               "values": ["poached"]
-      //             },
-      //             {
-      //               "name": "Eggs Done",
-      //               "values": ["Hard"]
-      //             },
-      //             {
-      //               "name": "Toast",
-      //               "values": ["White Toast"]
-      //             },
-      //             {
-      //               "name": "Add-on",
-      //               "values": ["Chicken Strips"]
-      //             }
-      //           ]
-      //         }
-      //       }
-      //     ]
-      //   },
-      //   "menuItemName": this.newMenuItem.menuItemName,
-      //   "total": this.itemTotal * this.quantity,
-      // }
+    addToOrder() {;
+      let selectionValues = [];
+      for (let i = 0; i < this.newMenuItem.attributes.attributes.length; i++) {
+        let data = {
+          "name": $('.label').eq(i).text(),
+          "values": this.model[i]
+        };
+        selectionValues[i] = data;
+      }
+
+      let data = {
+        "orderInfo": {
+          "restaurantId": 1,
+          "tableId": 1,
+          "employeeId": 7,
+          "orderItems": [
+            {
+              "menuItemId": this.newMenuItem.menuItemId,
+              "quantity": this.quantity,
+              "orderSelections": {
+                "selections": selectionValues
+              }
+            }
+          ]
+        },
+        "menuItemName": this.newMenuItem.menuItemName,
+        "total": this.total.toFixed(2),
+      }
+
+      console.log(data);
       
-      // this.addItemToOrder(data)
-      // this.$router.push("/cart");
+      this.addItemToOrder(data)
+      this.$router.push("/cart");
     },
     changeFavourite () {
       let data = {
@@ -480,6 +477,9 @@ export default {
         menuItem => menuItem.id === this.menuItemId
       )      
     },
+    changeTotal() {
+      this.total = this.newMenuItem.price * this.quantity + this.addOns * this.quantity;
+    },
     findCategory() {
       return this.menu.categories.find(
         category => category.menuItems.find(menuItem => menuItem.menuItemId === parseInt(this.menuItemId) )
@@ -491,6 +491,9 @@ export default {
         return this.customer.favourites.some(favourite => favourite.menuItemId === parseInt(this.menuItemId))
       return false
     },
+    // removeActive() {
+    //   $(".attributeValues").removeClass("v-item--active v-list-item--active");
+    // },
     newMenuItem() {
       return this.findCategory.menuItems.find(menuItem => menuItem.menuItemId === parseInt(this.menuItemId) )
     },
@@ -508,7 +511,10 @@ export default {
     }),
   },
   mounted: function() {
-    this.itemTotal = this.newMenuItem.price
+    // console.log($(".attributeElements").find(".attributeValues").html())
+    // $(".attributeElements").find(".attributeValues").removeClass("v-item--active v-list-item--active");
+    this.total = this.newMenuItem.price
+    // this.itemTotal = this.newMenuItem.price
   }
 }
 </script>

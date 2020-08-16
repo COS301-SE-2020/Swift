@@ -143,7 +143,7 @@
           </v-row>
         </v-card>
 
-        <v-btn height="50px" width="50px" class="checkInBtn" @click=goToCheckin app color="accent" fab style="position: fixed; bottom: 65px; right: 13px">
+        <v-btn height="50px" width="50px" class="checkInBtn" @click=goToCheckin app color="primary" fab style="position: fixed; bottom: 65px; right: 13px">
           <v-icon size="30">mdi-table-furniture</v-icon>
         </v-btn>
       </v-container>
@@ -151,7 +151,7 @@
       
     <v-container v-else class="mt-3">
       <div v-if="filteredList.length != 0">
-        <v-card elevation="2" v-for="(card, index) in filteredList" :key="index">
+        <v-card @click="goToRestaurant(card.restaurantId)" elevation="2" v-for="(card, index) in filteredList" :key="index">
           <v-row class="mx-0">
             <v-col cols="3" class="py-2 px-1 pl-2">
               <v-img width="75px" height="70px" style="background-size: contain" :src="card.image" class="align-center mt-3"></v-img>

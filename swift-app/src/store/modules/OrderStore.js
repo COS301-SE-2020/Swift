@@ -16,6 +16,7 @@ const state = initialState();
 // Getter functions
 const getters = {
   getOrderInfo(state) {
+    console.log(state.orderInfo);
     return state.orderInfo;
   },
 
