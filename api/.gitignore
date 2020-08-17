@@ -7,6 +7,9 @@ node_modules/
 # DB Credentials
 api/config.json
 
+#Email Credentials
+api/helper/Notifications/config/config.json
+
 # OAUTH2 credentials
 api/config-facebook-oauth.json
 api/config-google-oauth.json
