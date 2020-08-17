@@ -1,6 +1,9 @@
+const axios = require('axios');
 const bcrypt = require('bcrypt');
 const { google } = require('googleapis');
-const config = require('../config-google-oauth.json');
+const path = require('path');
+const configFacebook = require('../config-facebook-oauth.json');
+const configGoogle = require('../config-google-oauth.json');
 const db = require('../db');
 const { generateToken } = require('../helper/tokenHandler');
 const { getFavourites, getOrderHistory } = require('../helper/objectBuilder');
@@ -9,14 +12,14 @@ const BC_SALT_ROUNDS = 10;
 const oauth2 = google.oauth2('v2');
 
 const Oauth2Client = new google.auth.OAuth2(
-  process.env.AUTH_GOOGLE_CLIENT_ID || config.clientId,
-  process.env.AUTH_GOOGLE_CLIENT_SECRET || config.clientSecret,
+  process.env.AUTH_GOOGLE_CLIENT_ID || configGoogle.clientId,
+  process.env.AUTH_GOOGLE_CLIENT_SECRET || configGoogle.clientSecret,
   (typeof process.env.NODE_ENV !== 'undefined' && process.env.NODE_ENV.trim() === 'production')
-    ? config.productionCallback : config.devCallback
+    ? configGoogle.productionCallback : configGoogle.devCallback
 );
 
 // TODO: Check if account is active
-const loginUser = (userEmail, response) => db.query(
+const loginUser = (userEmail, userName, response) => db.query(
   'SELECT person.userid, person.name, person.surname, person.email,'
     + ' customer.theme FROM public.person'
     + ' INNER JOIN public.customer ON customer.userid = person.userid'
@@ -82,7 +85,23 @@ const loginUser = (userEmail, response) => db.query(
   });
 
 module.exports = {
-  getLoginURL: (reqBody, response) => {
+  getFacebookLoginURL: (reqBody, response) => {
+    // Generate Facebook authentication URL
+    let fbLoginURL = `https://www.facebook.com/${configFacebook.apiVersion}/dialog/oauth`;
+    fbLoginURL += '?response_type=token';
+    fbLoginURL += '&display=popup';
+    fbLoginURL += `&client_id=${process.env.AUTH_FACEBOOK_CLIENT_ID || configFacebook.clientId}`;
+    fbLoginURL += '&redirect_uri=';
+    fbLoginURL += (typeof process.env.NODE_ENV !== 'undefined' && process.env.NODE_ENV.trim() === 'production')
+      ? configFacebook.productionCallback : configFacebook.devCallback;
+    fbLoginURL += '&scope=email';
+
+    const oauthLoginResponse = {};
+    oauthLoginResponse.url = fbLoginURL;
+
+    return response.status(302).send(oauthLoginResponse);
+  },
+  getGoogleLoginURL: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
     if (Object.keys(reqBody).length !== 1) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
@@ -93,17 +112,35 @@ module.exports = {
     oauthLoginResponse.url = Oauth2Client.generateAuthUrl({
       access_type: 'offline',
       prompt: 'consent',
-      scope: 'email'
+      scope: ['email', 'profile']
     });
 
     return response.status(302).send(oauthLoginResponse);
+  },
+  handleFacebookCallback: async (urlParams, response) => response.sendFile(path.resolve('api/public/fb-login.html')),
+  handleFacebookCallbackPost: async (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+    || Object.keys(reqBody).length !== 1) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Generate Facebook Graph API URL
+    let fbGraphApiURL = `https://graph.facebook.com/${configFacebook.apiVersion}/me`;
+    fbGraphApiURL += '?fields=id,name,email';
+    fbGraphApiURL += `&access_token=${reqBody.token}`;
+    return axios.get(fbGraphApiURL)
+      .then((res) => loginUser(res.data.email, res.data.name, response))
+      .catch((err) => {
+        console.error('Facebook OAUTH2 Callback Error', err.stack);
+        return response.status(400).send({ status: 400, reason: 'Bad Request' });
+      });
   },
   handleGoogleCallback: async (urlParams, response) => {
     try {
       const { tokens } = await Oauth2Client.getToken(urlParams.code);
       Oauth2Client.setCredentials(tokens);
       const userInfo = await oauth2.userinfo.get({ auth: Oauth2Client });
-      return loginUser(userInfo.data.email, response);
+      return loginUser(userInfo.data.email, userInfo.data.name, response);
     } catch (err) {
       console.error('Google OAUTH2 Callback Error', err.stack);
       return response.status(400).send({ status: 400, reason: 'Bad Request' });

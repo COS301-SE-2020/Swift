@@ -7,5 +7,6 @@ node_modules/
 # DB Credentials
 api/config.json
 
-# Google auth credentials
+# OAUTH2 credentials
+api/config-facebook-oauth.json
 api/config-google-oauth.json
