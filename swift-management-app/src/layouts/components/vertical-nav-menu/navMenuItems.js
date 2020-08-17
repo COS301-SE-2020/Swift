@@ -24,8 +24,8 @@ export default [
     icon: "ActivityIcon",
   },
   {
-    url: "/menu-items",
-    name: "Menu Items",
+    url: "/menu",
+    name: "Restaurant Menu",
     slug: "menu-items",
     icon: "EditIcon",
   },

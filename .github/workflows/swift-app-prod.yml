@@ -2,7 +2,7 @@ name: Swift App CI
 
 on:
   push:
-    branches: [ master, develop, app ]
+    branches: [ master ]
 
 jobs:
   build:
@@ -19,7 +19,7 @@ jobs:
       run: npm --prefix ./swift-app ci
     - name: Build
       run: npm --prefix ./swift-app run build
-    - name: Deploy to Firebase
+    - name: Deploy (production)
       uses: w9jds/firebase-action@master
       with:
         args: deploy --only hosting:lumiqon-swift-app

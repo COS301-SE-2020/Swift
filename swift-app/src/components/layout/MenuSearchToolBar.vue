@@ -15,7 +15,7 @@
                     </v-row>
                     <v-row no-gutters d-flex flex-row align="center" justify="center" class="fill-height">
                       <v-col cols="10" style="z-index: 11">
-                        <v-autocomplete style="bottom: 50px;" rounded background-color="white" color="secondary" v-model="model" :items="items" :loading="isLoading" :search-input.sync="search" chips clearable hide-details hide-selected item-text="name" item-value="symbol" label="What would you like to order?" prepend-inner-icon="mdi-magnify" solo>
+                        <v-autocomplete style="bottom: 50px;" rounded background-color="white" color="secondary" :items="items" :search-input.sync="search" chips clearable hide-details hide-selected item-text="name" item-value="symbol" label="What would you like to order?" prepend-inner-icon="mdi-magnify" solo>
                           <template v-slot:no-data>
                             <v-list-item>
                               <v-list-item-title>
@@ -24,7 +24,7 @@
                               </v-list-item-title>
                             </v-list-item>
                           </template>
-                          <template v-slot:selection="{ attr, on, item }">
+                          <template v-slot:selection="{ item }">
                               <v-icon left>mdi-coin</v-icon>
                               <span class="black--text" v-text="item.name"></span>
                           </template>
@@ -71,6 +71,10 @@ export default {
     restaurantImages: [
       { img: 'https://source.unsplash.com/GXXYkSwndP4/800x800/' },
     ],
+    items: [],
+    isLoading: false,
+    search: '',
+    called: false
   }),
   methods: {
     showFilters () {

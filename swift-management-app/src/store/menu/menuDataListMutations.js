@@ -1,26 +1,29 @@
 export default {
   ADD_ITEM(state, item) {
     let exists = false;
-    state.products.forEach(function (menuItem) {
+    state.menuItems.forEach(function (menuItem) {
       if (item.name === menuItem.name)
         exists = true;
     });
 
     if (!exists)
-      state.products.unshift(item)
+      state.menuItems.unshift(item)
   },
-  SET_PRODUCTS(state, products) {
-    state.products = products
+  SET_RESTAURANT_OBJECT(state, restaurantObject) {
+    state.restaurantObject = restaurantObject;
+  },
+  SET_menuItems(state, menuItems) {
+    state.menuItems = menuItems
   },
   // SET_LABELS(state, labels) {
   //   state.eventLabels = labels
   // },
   UPDATE_PRODUCT(state, product) {
-      const productIndex = state.products.findIndex((p) => p.id == product.id)
-      Object.assign(state.products[productIndex], product)
+      const productIndex = state.menuItems.findIndex((p) => p.id == product.id)
+      Object.assign(state.menuItems[productIndex], product)
   },
   REMOVE_ITEM(state, itemId) {
-      const ItemIndex = state.products.findIndex((p) => p.id == itemId)
-      state.products.splice(ItemIndex, 1)
+      const ItemIndex = state.menuItems.findIndex((p) => p.id == itemId)
+      state.menuItems.splice(ItemIndex, 1)
   },
 }
