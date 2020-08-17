@@ -25,6 +25,16 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+    - name: Setup Node.js 12.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12.x  
+    - name: Install Dependencies
+      run: npm --prefix ./swift-docs ci
+    - name: Build
+      run: npm --prefix ./swift-docs run build
     - name: Deploy to Firebase
       uses: w9jds/firebase-action@master
       with:
