@@ -282,8 +282,7 @@ module.exports = {
         // TODO: Generate and send user account activation email-DONE
         return accCreator.createCustomer(newUserData)
           .then(() => response.status(201).send({ status: 201, reason: 'Customer Account Created' }),
-          SendEmail.RegistrationEmail(newUserData) //sends account activation email
-          )
+            SendEmail.RegistrationEmail(newUserData)) // sends account activation email
           .catch((err) => {
             console.error('Query Error [Register Customer - Create Customer Account]', err.stack);
             return response.status(500).send({ status: 500, reason: 'Internal Server Error' });

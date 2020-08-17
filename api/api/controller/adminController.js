@@ -119,7 +119,7 @@ module.exports = {
         // TODO: Generate and send user account activation email-Done
         return accCreator.createAdmin(newUserData)
           .then(() => response.status(201).send({ status: 201, reason: 'Admin Account Created' }),
-          SendEmail.RegistrationEmail(newUserData) )//sends account activation email
+            SendEmail.RegistrationEmail(newUserData))// sends account activation email
           .catch((err) => {
             console.error('Query Error [Register Admin - Create Admin Account]', err.stack);
             return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
