@@ -141,7 +141,7 @@ export default {
     checkedIn() {
       var checkedIn = localStorage.getItem('checked-in');
 
-      if (checkedIn) 
+      if (checkedIn == 'true') 
         return true;
       else 
         return false;

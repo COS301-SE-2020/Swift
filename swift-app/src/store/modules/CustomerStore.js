@@ -29,8 +29,6 @@ const getters = {
 // Actions 
 const actions = {
   checkInCustomer({commit}, data) {
-    console.log(data.qrcode)
-    console.log("token: " + this.getters['CustomerStore/getToken'])
     return axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "checkin",
@@ -38,7 +36,6 @@ const actions = {
         "token": this.getters['CustomerStore/getToken'],
       }
     ).then(result => {
-      console.log("table: " + result.data)
       return result.data;
     }).catch(({ response }) => {
     });

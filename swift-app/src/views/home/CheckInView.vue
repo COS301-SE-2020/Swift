@@ -6,7 +6,7 @@
       <div class="subtitle-2">Scanning will start automatically</div>
     </div>
     <div class="row d-flex flex-column align-center w-50">
-      <qrcode-stream class="w-50" @decode="onQRDecode" @init="onQRInit"></qrcode-stream>
+      <qrcode-stream class="w-50" @decode="onQRDecode"></qrcode-stream>
     </div>
     <div class="row d-flex flex-column align-center">
       <v-row class="justify-space-around">
@@ -28,20 +28,19 @@ import { mapActions, mapGetters, mapMutations } from "vuex";
 export default {
   methods: {
     goToRestaurant(restaurantId) {
-      this.updateDisplayNotification(true);
       this.updateCheckInFlag(true);
+      this.$store.dispatch('RestaurantsStore/retrieveRestaurantMenu', restaurantId);
       this.$router.push("/menu/" + restaurantId)
     },
     goToHome() {
       this.$router.push("/")
     },
     async onQRDecode(result) {
-      console.log(result)
       var data = {
         "qrcode": result
       }
       var tableData = await this.checkInCustomer(data);
-      localStorage.setItem('checked-in', true);
+      localStorage.setItem('checked-in', 'true');
       
       this.goToRestaurant(tableData.restaurantId);
     },
@@ -51,7 +50,6 @@ export default {
     ...mapActions({
       checkInCustomer: 'CustomerStore/checkInCustomer',
       updateCheckInFlag: 'CustomerStore/UPDATE_CHECKED_IN',
-      updateDisplayNotification: 'RestaurantStore/updateDisplayNotification',
     }),
   },
 };
