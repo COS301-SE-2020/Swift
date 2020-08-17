@@ -29,7 +29,11 @@ const loginUser = (userEmail, userName, response) => db.query(
 // eslint-disable-next-line consistent-return
   .then((res) => {
     if (res.rows.length === 0) {
-      // user does not exist
+      // user does not exist - create account
+      // const randomPassword = Math.random().toString(36).substring(2);
+
+      // attempt to login again
+      // return loginUser(userEmail, userName, response);
       return response.status(404).send({ status: 404, reason: 'Not Found' });
     }
 
@@ -129,7 +133,13 @@ module.exports = {
     fbGraphApiURL += '?fields=id,name,email';
     fbGraphApiURL += `&access_token=${reqBody.token}`;
     return axios.get(fbGraphApiURL)
-      .then((res) => loginUser(res.data.email, res.data.name, response))
+      .then((res) => {
+        if (typeof res.data.email !== 'undefined' && typeof res.data.name !== 'undefined') {
+          return loginUser(res.data.email, res.data.name, response);
+        }
+
+        return response.status(401).send({ status: 401, reason: 'Facebook Email Permission Required' });
+      })
       .catch((err) => {
         console.error('Facebook OAUTH2 Callback Error', err.stack);
         return response.status(400).send({ status: 400, reason: 'Bad Request' });
