@@ -143,7 +143,7 @@
           </v-row>
         </v-card>
 
-        <v-btn height="50px" width="50px" class="checkInBtn" @click=goToCheckin app color="primary" fab style="position: fixed; bottom: 65px; right: 13px">
+        <v-btn height="50px" width="50px" class="checkInBtn" @click=goToCheckin app color="accent" fab style="position: fixed; bottom: 65px; right: 13px">
           <v-icon size="30">mdi-table-furniture</v-icon>
         </v-btn>
       </v-container>
