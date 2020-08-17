@@ -1,6 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const db = require('../db');
-const PaymentEmail = require('../helper/Notifications/SendEmail');
+const paymentEmail = require('../helper/notifications/sendEmail');
 const { validateToken, tokenState } = require('../helper/tokenHandler');
 const {
   getReviews,
@@ -795,7 +795,7 @@ module.exports = {
           newUserData.name = reqBody.name;
           newUserData.email = reqBody.email;
           // newUserData.details = reqBody.details;
-          newUserData.amountPaid = reqBody.amountPaid; // under of items ordered
+          newUserData.amountPaid = reqBody.amountPaid; // under items ordered
           newUserData.orderName = reqBody.orderName;
           newUserData.paymentMethod = reqBody.paymentMethod;
           newUserData.waiterTip = reqBody.waiterTip;
@@ -814,7 +814,7 @@ module.exports = {
               [newOrderStatus, reqBody.orderId]
             )
               .then(() => response.status(200).send(),
-                PaymentEmail.PaymentEmail(newUserData)) // Payment email
+                paymentEmail.paymentEmail(newUserData)) // Payment email
               // add email here
               .catch((err) => {
                 console.error('Query Error [Order Payment - Update Order Status]', err.stack);

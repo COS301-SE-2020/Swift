@@ -1,25 +1,30 @@
 const ejs = require('ejs');
 const nodemailer = require('nodemailer');
-const creds = require('../../config/config-email.json');
+const mg = require('nodemailer-mailgun-transport');
+const config = require('../../config/config-email.json');
+
+// mailgun authentication details
+const mgAuth = {
+  auth: {
+    api_key: process.env.MG_API_KEY || config.apiKey,
+    domain: process.env.MG_DOMAIN_FROM || config.domainFrom
+  }
+};
+
+// connect to mailgun API
+const apiTransporter = nodemailer.createTransport(mg(mgAuth));
 
 /** *****Registration Email ******** */
 // eslint-disable-next-line no-unused-vars
-module.exports.RegistrationEmail = (req, res) => {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER || creds.usernname,
-      pass: process.env.EMAIL_PASS || creds.password,
-    }
-  });
+module.exports.registrationEmail = (req, res) => {
   ejs.renderFile(`${__dirname}/RegistrationTemp.ejs`, { name: req.name }, (err, data) => {
     const mailOptions = {
-      from: 'lumiqon.info@gmail.com',
+      from: process.env.MG_EMAIL_FROM || config.emailFrom,
       to: req.email,
       subject: 'Swift-app Account Activated',
       html: data
     };
-    transporter.sendMail(mailOptions, (error, info) => {
+    apiTransporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error(`error occurs : ${error}`);
       } else {
@@ -32,15 +37,7 @@ module.exports.RegistrationEmail = (req, res) => {
 
 /** *****Payment Email ******** */
 // eslint-disable-next-line no-unused-vars
-module.exports.PaymentEmail = (req, res) => {
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.EMAIL_USER || creds.usernname,
-      pass: process.env.EMAIL_PASS || creds.password,
-    }
-  });
-
+module.exports.paymentEmail = (req, res) => {
   const { orderId } = req;
   // const order= req.details;
   const tip = req.waiterTip;
@@ -54,14 +51,14 @@ module.exports.PaymentEmail = (req, res) => {
     orderId, name, tip, tax, total, amount, paymentMethod
   }, (err, data) => {
     const mailOptions = {
-      from: 'lumiqon.info@gmail.com',
+      from: process.env.MG_EMAIL_FROM || config.emailFrom,
       to: req.email,
       subject: 'Swift-app Payment Reciept',
       // text: 'Congratulations you have successfully registered ',
       html: data
     };
 
-    transporter.sendMail(mailOptions, (error, info) => {
+    apiTransporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error(`error occurs : ${error}`);
       } else {

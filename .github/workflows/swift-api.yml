@@ -41,6 +41,9 @@ jobs:
         DB_USER: ${{ secrets.DB_USER }}
         EMAIL_USER: ${{ secrets.EMAIL_USERNAME }}
         EMAIL_PASS: ${{ secrets.EMAIL_PASSWORD }}
+        MG_API_KEY: ${{ secrets.MAILGUN_API_KEY }}
+        MG_DOMAIN_FROM: ${{ secrets.MAILGUN_DOMAIN_FROM }}
+        MG_EMAIL_FROM: ${{ secrets.MAILGUN_EMAIL_FROM }}
 
     # Setup and configure gcloud CLI
     - name: Setup gcloud CLI
