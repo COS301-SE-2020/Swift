@@ -83,6 +83,7 @@ export default {
       result.data.categories.forEach(function(category) {
           category.menuItems.forEach(function(menuItem) {
             var item = {  name : menuItem.menuItemName,
+                          //TODO: Implement sub-categories on API end
                           category : category.categoryName,
                           price: menuItem.price.toFixed(2),
                           id: menuItem.menuItemId,

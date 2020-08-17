@@ -5,7 +5,7 @@
         <h2 class="mb-1">Menu Items</h2>
       </div>
       <vs-divider>
-        <h3 class="menuTitle mb-1">Breakfast Menu</h3>
+        <h3 class="menuTitle mb-1">{{ currentMenu }} Menu</h3>
       </vs-divider>
       <vs-dropdown class="mb-4 mr-4">
         <vs-button type="border">
@@ -15,9 +15,11 @@
           </span>
         </vs-button>
         <vs-dropdown-menu>
-          <vs-dropdown-item>Breakfast</vs-dropdown-item>
-          <vs-dropdown-item>Soups and Bowls</vs-dropdown-item>
-          <vs-dropdown-item>Mix, Match and Share</vs-dropdown-item>
+          <vs-dropdown-item
+            @click="changeMenu(category.categoryName)"
+            v-for="category in primaryCategories"
+            :key="category.categoryName"
+          >{{ category.categoryName }}</vs-dropdown-item>
         </vs-dropdown-menu>
       </vs-dropdown>
 
@@ -93,7 +95,7 @@
 
       <template slot="thead">
         <vs-th sort-key="name">Name</vs-th>
-        <vs-th sort-key="category">Sub-Category</vs-th>
+        <vs-th sort-key="subCategory">Sub-Category</vs-th>
         <vs-th sort-key="popularity">Popularity</vs-th>
         <vs-th sort-key="estimatedWaitingTime">Prep Time</vs-th>
         <vs-th sort-key="price">Price</vs-th>
@@ -161,9 +163,13 @@ export default {
       // menuItems: [],
       itemsPerPage: 10,
       isMounted: false,
+      currentMenu: "",
     };
   },
   computed: {
+    restaurantObject() {
+      return this.$store.state.menuList.restaurantObject;
+    },
     currentPage() {
       if (this.isMounted) {
         return this.$refs.table.currentx;
@@ -171,7 +177,10 @@ export default {
       return 0;
     },
     menuItems() {
-      return this.$store.state.menuList.menuItems;
+      return this.$store.state.menuList.menuItems.filter(
+        (i) => i.category === this.currentMenu
+      );
+
     },
     menuItemsCount() {
       if (this.$store.state.menuList)
@@ -182,6 +191,13 @@ export default {
       return this.$refs.table
         ? this.$refs.table.queriedResults.length
         : this.menuItems.length;
+    },
+    primaryCategories() {
+      if (this.restaurantLoaded())
+        return this.restaurantObject.categories.filter(
+          (i) => i.type === "primary"
+        );
+      else return null;
     },
   },
   methods: {
@@ -215,13 +231,34 @@ export default {
     listMenuItems() {
       this.$store.dispatch("menuList/listMenuItems");
     },
+    restaurantLoaded() {
+      if (Object.keys(this.restaurantObject).length === 0) return false;
+      else return true;
+    },
+    changeMenu(categoryName){
+      this.currentMenu = categoryName;
+    },
+    loadInitialMenu(){
+      //TODO: Store current menu in cross page persistent store
+      if(this.currentMenu != "" || !this.restaurantLoaded())
+        return;
+        
+      if(this.primaryCategories.length <= 0)
+        //TODO: Handle newly created restaurant with no menu items or categories yet
+        this.$router.push("/add-menu-item")
+      else
+        this.changeMenu(this.primaryCategories[0].categoryName);
+    }
   },
   created() {
     if (!modulemenuList.isRegistered) {
       this.$store.registerModule("menuList", modulemenuList);
       modulemenuList.isRegistered = true;
     }
-    if (!this.menuItemsCount > 0) this.$vs.loading();
+    if (!this.restaurantLoaded() ) 
+      this.$vs.loading();
+    else
+      this.loadInitialMenu();
 
     this.listMenuItems();
   },
@@ -231,6 +268,7 @@ export default {
   watch: {
     menuItemsCount(newCount, oldCount) {
       this.$vs.loading.close();
+      this.loadInitialMenu();
     },
   },
 };
