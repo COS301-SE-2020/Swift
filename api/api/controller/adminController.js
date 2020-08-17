@@ -2,7 +2,10 @@ const bcrypt = require('bcrypt');
 const validator = require('email-validator');
 const db = require('../db');
 const accCreator = require('../helper/accountCreator');
+<<<<<<< HEAD
 const SendEmail = require('../helper/Notifications/SendEmail');
+=======
+>>>>>>> parent of 8fe67d2... api test
 const { generateToken } = require('../helper/tokenHandler');
 
 const BC_SALT_ROUNDS = 10;
