@@ -1,4 +1,4 @@
-name: Swift Management (production) CI
+name: Swift Management CI
 
 on:
   push:

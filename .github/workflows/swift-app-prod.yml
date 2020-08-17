@@ -1,4 +1,4 @@
-name: Swift App (production) CI
+name: Swift App CI
 
 on:
   push:
