@@ -3,7 +3,8 @@ const cors = require('cors');
 const express = require('express');
 
 const app = express();
-const SERVER_PORT = process.env.PORT || 3264;
+const DEFAULT_PORT = 3264;
+const SERVER_PORT = process.env.PORT || DEFAULT_PORT;
 
 // Parse JSON bodies
 app.use(bodyParser.json());
@@ -51,8 +52,16 @@ app.get('/', require('./api/api'));
 app.post('/', require('./api/api'));
 app.put('/', require('./api/api'));
 
+// Assets
+app.use('/public', express.static(`${__dirname}/api/public`));
+
 // health check endpoint
 app.get('/status', require('./api/api'));
+
+// Facebook OAUTH2
+app.get('/auth/facebook', require('./api/api'));
+// Parse URL-encoded bodies (as sent by HTML forms)
+app.post('/auth/facebook', bodyParser.urlencoded({ extended: true }), require('./api/api'));
 
 // Google OAUTH2
 app.get('/auth/google', require('./api/api'));

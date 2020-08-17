@@ -5,10 +5,11 @@ node_modules/
 .vscode/
 
 # DB Credentials
-api/config.json
+api/config/config-db.json
 
 #Email Credentials
-api/helper/Notifications/config/config.json
+api/config/config-email.json
 
-# Google auth credentials
-api/config-google-oauth.json
+# OAUTH2 credentials
+api/config/config-facebook-oauth.json
+api/config/config-google-oauth.json

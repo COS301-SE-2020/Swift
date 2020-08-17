@@ -31,6 +31,7 @@ jobs:
     - name: Get Environment Secrets
       uses: ./.github/actions/yaml-env-secrets
       env:
+        AUTH_FACEBOOK_CLIENT_ID: ${{ secrets.AUTH_FACEBOOK_CLIENT_ID }}
         AUTH_GOOGLE_CLIENT_ID: ${{ secrets.AUTH_GOOGLE_CLIENT_ID }}
         AUTH_GOOGLE_CLIENT_SECRET: ${{ secrets.AUTH_GOOGLE_CLIENT_SECRET }}
         DB_HOST: ${{ secrets.DB_HOST }}
@@ -38,6 +39,8 @@ jobs:
         DB_PASS: ${{ secrets.DB_PASS }}
         DB_PORT: ${{ secrets.DB_PORT }}
         DB_USER: ${{ secrets.DB_USER }}
+        EMAIL_USER: ${{ secrets.EMAIL_USERNAME }}
+        EMAIL_PASS: ${{ secrets.EMAIL_PASSWORD }}
 
     # Setup and configure gcloud CLI
     - name: Setup gcloud CLI
