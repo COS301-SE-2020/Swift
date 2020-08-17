@@ -41,8 +41,8 @@ export default {
         "qrcode": result
       }
       var tableData = await this.checkInCustomer(data);
+      localStorage.setItem('checked-in', true);
       
-      this.setTable(result);
       this.goToRestaurant(tableData.restaurantId);
     },
     ...mapMutations({
@@ -50,7 +50,7 @@ export default {
     }),
     ...mapActions({
       checkInCustomer: 'CustomerStore/checkInCustomer',
-      updateCheckInFlag: 'RestaurantStore/updateCheckInFlag',
+      updateCheckInFlag: 'CustomerStore/UPDATE_CHECKED_IN',
       updateDisplayNotification: 'RestaurantStore/updateDisplayNotification',
     }),
   },

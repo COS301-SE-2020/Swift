@@ -152,6 +152,10 @@ const mutations = {
     state.customer.favourites = data;
   },
 
+  UPDATE_CHECKED_IN(state, data) {
+    state.checkedIn = data;
+  },
+
 
   SET_AUTHENTICATION(state, authentication_state) {
     state.isAuthenticated = authentication_state;
