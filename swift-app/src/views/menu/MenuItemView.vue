@@ -220,9 +220,9 @@
     display: none;
   }
 
-  .attributeElements > .v-list-item--active.v-list-item--link {
+  /* .attributeElements > .v-list-item--active.v-list-item--link {
     background-color: rgba(247, 85, 100, 0.1) !important;
-  }
+  } */
 
 </style>
 
