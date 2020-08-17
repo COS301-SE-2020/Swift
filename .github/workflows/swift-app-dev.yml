@@ -22,7 +22,7 @@ jobs:
     - name: Deploy (dev)
       uses: w9jds/firebase-action@master
       with:
-        args: --config=./firebase-dev.json deploy --only hosting:lumiqon-swift-app-dev
+        args: --config firebase-dev.json deploy --only hosting:lumiqon-swift-app-dev
       env:
         GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
         PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
