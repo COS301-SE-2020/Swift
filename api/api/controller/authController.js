@@ -7,6 +7,7 @@ const configGoogle = require('../config-google-oauth.json');
 const db = require('../db');
 const { generateToken } = require('../helper/tokenHandler');
 const { getFavourites, getOrderHistory } = require('../helper/objectBuilder');
+const { registerUser } = require('./userController');
 
 const BC_SALT_ROUNDS = 10;
 const oauth2 = google.oauth2('v2');
@@ -27,14 +28,31 @@ const loginUser = (userEmail, userName, response) => db.query(
   [userEmail]
 )
 // eslint-disable-next-line consistent-return
-  .then((res) => {
+  .then(async (res) => {
     if (res.rows.length === 0) {
       // user does not exist - create account
-      // const randomPassword = Math.random().toString(36).substring(2);
+      const newUserAccount = {};
+      const userFName = userName.split(' ');
+      newUserAccount.requestType = 'register';
+      // eslint-disable-next-line prefer-destructuring
+      newUserAccount.name = userFName[0];
+      newUserAccount.surname = (userFName.length > 1) ? userFName[1] : '';
+      newUserAccount.email = userEmail;
+      newUserAccount.password = Math.random().toString(36).substring(2); // random password
+      await registerUser(newUserAccount, {}, true)
+        .then((regRes) => {
+          if (regRes.status === 201) {
+            // attempt to login with new account
+            return loginUser(userEmail, userName, response);
+          }
 
-      // attempt to login again
-      // return loginUser(userEmail, userName, response);
-      return response.status(404).send({ status: 404, reason: 'Not Found' });
+          // User registration failed
+          return response.status(regRes.status).send(regRes);
+        })
+        .catch((err) => {
+          console.error('Query Error [Register Customer - Check Account Availability]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
     }
 
     const loginResponse = {};
@@ -93,7 +111,8 @@ module.exports = {
     // Generate Facebook authentication URL
     let fbLoginURL = `https://www.facebook.com/${configFacebook.apiVersion}/dialog/oauth`;
     fbLoginURL += '?response_type=token';
-    fbLoginURL += '&display=popup';
+    fbLoginURL += '&display=popup'; // mobile displays
+    fbLoginURL += '&auth_type=rerequest';
     fbLoginURL += `&client_id=${process.env.AUTH_FACEBOOK_CLIENT_ID || configFacebook.clientId}`;
     fbLoginURL += '&redirect_uri=';
     fbLoginURL += (typeof process.env.NODE_ENV !== 'undefined' && process.env.NODE_ENV.trim() === 'production')
@@ -130,7 +149,7 @@ module.exports = {
 
     // Generate Facebook Graph API URL
     let fbGraphApiURL = `https://graph.facebook.com/${configFacebook.apiVersion}/me`;
-    fbGraphApiURL += '?fields=id,name,email';
+    fbGraphApiURL += '?fields=id,name,email'; // required permissions
     fbGraphApiURL += `&access_token=${reqBody.token}`;
     return axios.get(fbGraphApiURL)
       .then((res) => {
