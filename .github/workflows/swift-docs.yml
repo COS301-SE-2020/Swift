@@ -1,0 +1,45 @@
+name: Swift Docs CI
+
+on:
+  push:
+    branches: [ master, documentation ]
+
+jobs:
+  build:
+    name: Build Docs
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+    - name: Setup Node.js 12.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12.x  
+    - name: Install Dependencies
+      run: npm --prefix ./swift-docs ci
+    - name: Build
+      run: npm --prefix ./swift-docs run build
+
+  deploy:
+    name: Deploy Docs
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+    - name: Setup Node.js 12.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12.x  
+    - name: Install Dependencies
+      run: npm --prefix ./swift-docs ci
+    - name: Build
+      run: npm --prefix ./swift-docs run build
+    - name: Deploy to Firebase
+      uses: w9jds/firebase-action@master
+      with:
+        args: deploy --only hosting:lumiqon-swift-docs
+      env:
+        GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+        PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+        PROJECT_PATH: ./swift-docs
