@@ -8,7 +8,7 @@ module.exports.RegistrationEmail = (req, res) => {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.EMAIL_USER || creds.usernname,
+      user: process.env.EMAIL_USER || creds.username,
       pass: process.env.EMAIL_PASS || creds.password,
     }
   });
