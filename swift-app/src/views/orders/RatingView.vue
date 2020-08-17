@@ -16,7 +16,7 @@
         </v-card>
         <v-tabs v-if="Array.isArray(ratingType.info)" height="20px" width="auto" v-model="tab" hide-slider centered>
           <v-tab active-class="no-active" v-for="(item, ind) in ratingType.info" :key="ind" :href="`#tab-${ind}`" class="ratingItems">
-            <v-icon size="10px" v-if="icons">mdi-circle-outline</v-icon>
+            <v-icon v-if="ratingType.info.length > 1" size="10px">mdi-circle-outline</v-icon>
           </v-tab>
           <v-tab-item v-for="(item, ind) in ratingType.info" :key="ind" :value="'tab-' + ind">
             <v-card flat tile>
@@ -31,10 +31,10 @@
                   <span  style="font-size: 25px">{{item.name}}</span>
                 </v-row>
                 <v-row justify="center" class="mt-3">
-                  <v-rating size="30" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
+                  <v-rating size="30" @input="changeFeedback(ind)" dense color="yellow darken-3" v-model="itemRating[ind]" background-color="secondary" :value=0></v-rating>
                 </v-row>
                 <v-row justify="center" class="mt-3 mb-6">
-                  <span style="font-size: 17px; opacity: 0.7" class="font-weight-light">Good</span>
+                  <span  style="font-size: 17px; opacity: 0.7" class="font-weight-light">{{ratingFeedback}}</span>
                 </v-row>
                 <v-divider></v-divider>
               </v-card>
@@ -47,7 +47,7 @@
                           <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">{{rating}}</span>
                         </v-col>
                         <v-col cols="5" class="pr-6">
-                          <v-rating size="18" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
+                          <v-rating size="18" v-model="itemPhraseRatings[i]" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
                         </v-col>
                       </v-row>
                     </v-card>
@@ -60,15 +60,13 @@
                 </v-row>
                 <v-row justify="center">
                   <v-col cols="11" class="pt-0 pb-0">
-                    <v-textarea class="commentSection" label="Tell us what you liked..." outlined single-line auto-grow rows="5" row-height="20"></v-textarea>
+                    <v-textarea v-model="comment" class="commentSection" label="Tell us what you liked..." outlined single-line auto-grow rows="5" row-height="20"></v-textarea>
                   </v-col>
                 </v-row>
                 <v-row class="mt-1" justify="center" v-if="currentIndex != (rating.length - 1)">
                   <v-col cols="11" class="pt-0" width="100%">
-                    <v-btn icon @click="togglePublic(ind)">
-                      <v-icon color="secondary" v-text="(selectedItemPublic.includes(ind) ? 'mdi-check-box-outline' : 'mdi-checkbox-blank-outline')"></v-icon>
-                    </v-btn>
-                    <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">Share with public</span>
+                    <v-checkbox class="pt-0" v-model="share[ind]" label="Share with public"></v-checkbox>
+                    <!-- <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">Share with public</span> -->
                   </v-col>
                 </v-row>
                 <v-row class="mt-6 mb-4" justify="center">
@@ -103,7 +101,7 @@
               <v-rating size="30" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
             </v-row>
             <v-row justify="center" class="mt-3 mb-6">
-              <span style="font-size: 17px; opacity: 0.7" class="font-weight-light">Good</span>
+              <span  style="font-size: 17px; opacity: 0.7" class="font-weight-light">{{ratingFeedback}}</span>
             </v-row>
             <v-divider></v-divider>
           </v-card>
@@ -134,10 +132,11 @@
             </v-row>
             <v-row class="mt-1" justify="center" v-if="currentIndex != (rating.length - 1)">
               <v-col cols="11" class="pt-0" width="100%">
-                <v-btn icon @click="togglePublicRestaurant">
+                <v-checkbox class="pt-0" v-model="share[ind]" label="Share with public"></v-checkbox>
+                <!-- <v-btn icon @click="togglePublicRestaurant">
                   <v-icon color="secondary" v-text="(selectedRestaurant ? 'mdi-check-box-outline' : 'mdi-checkbox-blank-outline')"></v-icon>
                 </v-btn>
-                <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">Share with public</span>
+                <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">Share with public</span> -->
               </v-col>
             </v-row>
             <v-row class="mt-6 mb-4" justify="center">
@@ -180,6 +179,11 @@ export default {
     data() {
     return {
       tab: null,
+      comment: "",
+      ratingFeedback: "",
+      share: [],
+      itemPhraseRatings: [],
+      itemRating: [],
       selectedRestaurant: false,
       selectedItemPublic: [],
       submitted: false,
@@ -200,7 +204,7 @@ export default {
         {
           type: 'Items',
           info: [{
-            name: 'Classic Eggs Benedict',
+            name: 'Avo on Toast',
             img: '',
           },],
           ratingPhrases: [
@@ -239,6 +243,10 @@ export default {
       currentTab = index;
     },
     submitRating () {
+      // console.log(this.comment);
+      // console.log(this.share);
+      // console.log(this.itemPhraseRatings[1]);
+      // console.log(this.itemRating);
       this.submitted = !this.submitted;
     },
     hideAlert () {
@@ -246,6 +254,15 @@ export default {
     },
     backNavigation () {
       this.$router.go(-1)
+    },
+    changeFeedback(i) {
+      // console.log("entered")
+      if (this.itemRating[i] <= 3)
+        this.ratingFeedback = "Poor"
+      else if (this.itemRating[i] == 4)
+        this.ratingFeedback = "Good"
+      else
+        this.ratingFeedback = "Excellent"
     },
     ...mapGetters({
       orderHistory: 'OrderStore/getOrderHistory',

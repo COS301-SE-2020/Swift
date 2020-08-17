@@ -30,11 +30,11 @@
                 <v-list v-for="(item, index) in itemsForStatus(status)" :key="index" class="py-2">
                   <v-card ripple class="pt-1 pr-0 orderCard" elevation="2">
                     <v-row class="mx-0 d-flex justify-space-around">
-                      <v-col cols="8" class="pb-0 pt-2">
+                      <v-col cols="7" class="pb-0 pt-2">
                         <v-list-item-title class="restaurantName" v-text="item.restaurantName"></v-list-item-title>
                         <v-rating background-color="secondary" readonly size="13" dense color="yellow darken-3" :value="4"></v-rating>
                       </v-col>
-                      <v-col cols="4" class="pb-0 pt-2">
+                      <v-col cols="5" class="pb-0 pt-2 d-flex justify-end">
                         <v-list-item-action-text class="orderDateTime" v-text="getDate(item.orderDateTime)"></v-list-item-action-text>
                       </v-col>
                     </v-row>

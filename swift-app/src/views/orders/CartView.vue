@@ -1,5 +1,5 @@
 <template>
-<v-container class="pl-0 pt-0 pr-0 pb-0 overflow-y-auto" fluid>
+<v-container fill-height class="pl-0 pt-0 pr-0 pb-0 overflow-y-auto cartOrders overflow-x-hidden" fluid>
     <v-toolbar elevation='2'>
       <v-container>
         <v-row>
@@ -14,46 +14,61 @@
         </v-row>
       </v-container>
     </v-toolbar>
-    <v-container style="height:100%">
+    <v-container v-if="orderInfo().length == 0" py-0>
+      <div class="row d-flex flex-column align-stretch align-self-stretch">
+        <v-container fluid fill-height class="pa-0">
+          <div class="row d-flex flex-column align-self-center align-center">
+            <v-avatar class="mb-8" height="140px" width="140px" fab color="primary">
+              <v-icon size="65px" class="font-weight-light" color="white">mdi-cart-outline</v-icon>
+            </v-avatar>
+            <div class="headline mb-3 mt-12 secondary--text">Order Empty</div>
+            <div class="subtitle-1 secondary--text">Order some food or drinks here:</div>
+          </div>
+        </v-container>
+      </div>
+    </v-container>
+    <v-container fill-height v-else class="orderDetailsCart">
       <template>
         <div>
-          <v-list v-for="orderMenuItem in orderInfo().orderInfo.orderItems" :key="orderMenuItem" class="py-2">
-            <v-card>
-              <v-list-item ripple class="pt-1 pr-0">
-                <v-list-item-content>
-                  <v-list-item-title class="mb-2" v-text="orderInfo().menuItemName"></v-list-item-title>
-                  <div v-for="(orderItem, index) in orderMenuItem.orderSelections.selections" :key="index">
-                    <v-list-item-subtitle v-if="!Array.isArray(orderItem.values)">- {{orderItem.name}}: {{orderItem.values}}</v-list-item-subtitle>
-                    <v-list-item-subtitle v-else>- {{orderItem.name}}: {{(orderItem.values).join(', ')}}</v-list-item-subtitle>
-                  </div>
-                </v-list-item-content>
-                <v-list-item-action class="mr-3">
-                  <v-list-item-action-text>R{{orderInfo().total}}</v-list-item-action-text>
-                  <v-list-item-action-text>
-                    <v-btn @click="orderMenuItem.quantity--" fab elevation="2" width="22px" height="22px" class="mr-2">
-                      <v-icon size="15px">mdi-minus</v-icon>
-                    </v-btn>
-                    <div class="body-2 secondary--text" style="display: inline;">{{orderMenuItem.quantity}}</div>
-                    <v-btn @click="orderMenuItem.quantity++" fab elevation="2" width="22px" height="22px" class="ml-2">
+          <v-card v-for="(item,i) in orderInfo()" :key="i" flat>
+            <v-list v-for="(orderMenuItem,j) in item.orderInfo.orderItems" :key="j" class="py-2">
+              <v-card>
+                <v-list-item ripple class="pt-1 pr-0">
+                  <v-list-item-content>
+                    <v-list-item-title class="mb-2" v-text="item.menuItemName"></v-list-item-title>
+                    <div v-for="(orderItem, index) in orderMenuItem.orderSelections.selections" :key="index">
+                      <v-list-item-subtitle v-if="!Array.isArray(orderItem.values)">- {{orderItem.name}}: {{orderItem.values}}</v-list-item-subtitle>
+                      <v-list-item-subtitle v-else>- {{orderItem.name}}: {{(orderItem.values).join(', ')}}</v-list-item-subtitle>
+                    </div>
+                  </v-list-item-content>
+                  <v-list-item-action class="mr-3">
+                    <v-list-item-action-text>R{{item.total}}</v-list-item-action-text>
+                    <v-list-item-action-text>
+                      <v-btn @click="orderMenuItem.quantity--" fab elevation="2" width="22px" height="22px" class="mr-2">
+                        <v-icon size="15px">mdi-minus</v-icon>
+                      </v-btn>
+                      <div class="body-2 secondary--text" style="display: inline;">{{orderMenuItem.quantity}}</div>
+                      <v-btn @click="orderMenuItem.quantity++" fab elevation="2" width="22px" height="22px" class="ml-2" color="primary">
                         <v-icon size="15px">mdi-plus</v-icon>
-                    </v-btn>
-                  </v-list-item-action-text>
-                </v-list-item-action>
-              </v-list-item>
-            </v-card>
-          </v-list>
+                      </v-btn>
+                    </v-list-item-action-text>
+                  </v-list-item-action>
+                </v-list-item>
+              </v-card>
+            </v-list>
+          </v-card>
         </div>
       </template>
       <v-row class="mt-5">
         <v-col class="d-flex justify-center pb-1">
-          <v-card width="95%" class="pa-1 pr-2">
+          <v-card width="100%" class="pa-1 pr-2">
             <v-container py-0>
               <v-row>
                 <v-col cols="9" class="pb-0">
                   <div class="body-1 secondary--text">Subtotal</div>
                 </v-col>
                 <v-col cols="3" class="pb-0 px-0"> 
-                  <div class="body-1 secondary--text d-flex justify-end">R {{subtotal}}</div>
+                  <div class="body-1 secondary--text d-flex justify-end">R {{subtotal.toFixed(2)}}</div>
                 </v-col>
               </v-row>
               <v-row>
@@ -87,38 +102,37 @@
           </v-card>
         </v-col>
       </v-row>
-      <v-row class="d-flex justify-space-around" style="position: absolute; width:100%; bottom: 0; margin-bottom: 33px">
-          <v-col cols="5" class="pa-0">
-              <v-btn rounded color="primary" elevation="2" class="mr-2 body-2" width="100%" @click="goToOrder">Order Now, Pay Later</v-btn>
-          </v-col>
-          <v-col cols="5" class="pa-0">
-              <v-btn rounded color="accent" elevation="2" class="mr-2 body-2" width="100%" @click="toggleAlert">Pay Now</v-btn>
-          </v-col>
+      <v-row class="d-flex justify-space-around" style="position: relative; width:100%; bottom: 0%; margin-top: 25px; margin-bottom: 10px">
+        <v-col cols="5" class="pa-0">
+            <v-btn rounded color="primary" elevation="2" class="mr-2 body-2" width="100%" @click="goToOrder">Order Now, Pay Later</v-btn>
+        </v-col>
+        <v-col cols="5" class="pa-0">
+            <v-btn rounded color="accent" elevation="2" class="mr-2 body-2" width="100%" @click="toggleAlert">Pay Now</v-btn>
+        </v-col>
       </v-row>
     </v-container>
-
-        <v-overlay relative opacity="0.25" :value="paymentMade" z-index="10">
-          <v-avatar elevation="3" color="accent" class="pl-0 pr-0" absolute style="position: absolute; z-index: 12">
-              <v-icon size="33px" color="white" v-text="'mdi-check'"></v-icon>
-          </v-avatar>
-          <v-alert color="white" transition="scale-transition" class="alert" align="center" style="margin-top: 20px;">
-            <div style="font-size: 22px !important; color: #343434;" class="pl-8 pr-8 mt-8">Proceed with payment?</div>
-            <div class="mt-2" style="font-size: 16px !important; color: #343434">Please note that once you make payment, <br/>you will be checked out of the system.</div>
-            <v-row justify="center">
-              <v-col cols="12" class="d-flex justify-space-around" flat>
-                <v-btn text @click="toggleAlert" class="mt-6 mb-1">
-                  <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline; text-align: center">Cancel</div>
-                </v-btn>
-                <v-btn text @click="goToPayment" class="mt-6 mb-1">
-                  <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline; text-align: center">Continue</div>
-                </v-btn>
-              </v-col>
-            </v-row>
-          </v-alert>
-        </v-overlay>
+    <v-overlay relative opacity="0.25" :value="paymentMade" z-index="10">
+      <v-avatar elevation="3" color="accent" class="pl-0 pr-0" absolute style="position: absolute; z-index: 12">
+          <v-icon size="33px" color="white" v-text="'mdi-check'"></v-icon>
+      </v-avatar>
+      <v-alert color="white" transition="scale-transition" class="alert" align="center" style="margin-top: 20px;">
+        <div style="font-size: 22px !important; color: #343434;" class="pl-8 pr-8 mt-8">Proceed with payment?</div>
+        <div class="mt-2" style="font-size: 16px !important; color: #343434">Please note that once you make payment, <br/>you will be checked out of the system.</div>
+        <v-row justify="center">
+          <v-col cols="12" class="d-flex justify-space-around" flat>
+            <v-btn text @click="toggleAlert" class="mt-6 mb-1">
+              <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline; text-align: center">Cancel</div>
+            </v-btn>
+            <v-btn text @click="goToPayment" class="mt-6 mb-1">
+              <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline; text-align: center">Continue</div>
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-alert>
+    </v-overlay>
 
     <NavBar></NavBar>
-</v-container>
+  </v-container>
 </template>
 
 <script>
@@ -147,7 +161,7 @@ export default {
     goToOrder () {
       this.updateOrderFlag(true);
       this.submitOrder();
-      this.$router.push('/orders')
+      // this.$router.push('/orders')
     },
     toggleAlert() {
         this.paymentMade = !this.paymentMade
@@ -169,7 +183,20 @@ export default {
     }
   },
   mounted: function() {
-    this.subtotal = this.orderInfo().total;
+    console.log(this.orderInfo());
+    for (let i = 0; i < this.orderInfo().length; i++) {
+      this.subtotal += parseFloat(this.orderInfo()[i].total);
+    }
   }
 }
 </script>
+
+<style scoped>
+  .cartOrders.container.fill-height {
+    align-items: inherit !important;
+  }
+
+  .orderDetailsCart {
+    display: block;
+  }
+</style>
