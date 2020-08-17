@@ -27,7 +27,7 @@ const actions = {
         "token": token,
       }
     ).then(result => {
-      console.log("MENU: ", result.data)
+      // console.log("MENU: ", result.data)
       commit('SAVE_MENU', result.data);
     }).catch(({ response }) => {
     });
