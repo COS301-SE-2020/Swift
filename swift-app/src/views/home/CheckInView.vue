@@ -30,25 +30,26 @@ export default {
     goToRestaurant(restaurantId) {
       this.updateDisplayNotification(true);
       this.updateCheckInFlag(true);
-      this.$router.push("/")
-      // this.$router.push("/menu/" + restaurantId)
+      this.$router.push("/menu/" + restaurantId)
     },
     goToHome() {
       this.$router.push("/")
     },
     async onQRDecode(result) {
+      console.log(result)
       var data = {
         "qrcode": result
       }
       var tableData = await this.checkInCustomer(data);
-      // this.setTable(result);
+      
+      this.setTable(result);
       this.goToRestaurant(tableData.restaurantId);
     },
     ...mapMutations({
       setTable : 'RestaurantStore/setTableNumber',
     }),
     ...mapActions({
-      checkInCustomer: 'RestaurantStore/checkInCustomer',
+      checkInCustomer: 'CustomerStore/checkInCustomer',
       updateCheckInFlag: 'RestaurantStore/updateCheckInFlag',
       updateDisplayNotification: 'RestaurantStore/updateDisplayNotification',
     }),
