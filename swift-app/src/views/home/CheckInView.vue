@@ -27,22 +27,27 @@ import { mapActions, mapGetters, mapMutations } from "vuex";
 
 export default {
   methods: {
-    goToRestaurant() {
+    goToRestaurant(restaurantId) {
       this.updateDisplayNotification(true);
       this.updateCheckInFlag(true);
-      this.$router.push("/menu")
+      this.$router.push("/menu/" + restaurantId)
     },
     goToHome() {
       this.$router.push("/")
     },
-    onQRDecode(result) {
-      this.setTable(result);
-      this.goToRestaurant();
+    async onQRDecode(result) {
+      var data = {
+        "qrcode": result
+      }
+      var tableData = await this.checkInCustomer(data);
+      // this.setTable(result);
+      this.goToRestaurant(tableData.restaurantId);
     },
     ...mapMutations({
       setTable : 'RestaurantStore/setTableNumber',
     }),
     ...mapActions({
+      checkInCustomer: 'RestaurantStore/checkInCustomer',
       updateCheckInFlag: 'RestaurantStore/updateCheckInFlag',
       updateDisplayNotification: 'RestaurantStore/updateDisplayNotification',
     }),

@@ -28,6 +28,19 @@ const getters = {
 
 // Actions 
 const actions = {
+  checkInCustomer({commit}, data) {
+    return axios.post('https://api.swiftapp.ml', 
+      {
+        "requestType": "checkin",
+        "qrcode": data.qrcode,
+        "token": this.getters['CustomerStore/getToken'],
+      }
+    ).then(result => {
+      return result.data;
+    }).catch(({ response }) => {
+    });
+  },
+
   login({commit}, data) {
     return axios.post('https://api.swiftapp.ml', 
       {
