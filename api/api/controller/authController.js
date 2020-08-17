@@ -2,8 +2,8 @@ const axios = require('axios');
 const bcrypt = require('bcrypt');
 const { google } = require('googleapis');
 const path = require('path');
-const configFacebook = require('../config-facebook-oauth.json');
-const configGoogle = require('../config-google-oauth.json');
+const configFacebook = require('../config/config-facebook-oauth.json');
+const configGoogle = require('../config/config-google-oauth.json');
 const db = require('../db');
 const { generateToken } = require('../helper/tokenHandler');
 const { getFavourites, getOrderHistory } = require('../helper/objectBuilder');
@@ -28,7 +28,7 @@ const loginUser = (userEmail, userName, response) => db.query(
   [userEmail]
 )
 // eslint-disable-next-line consistent-return
-  .then(async (res) => {
+  .then((res) => {
     if (res.rows.length === 0) {
       // user does not exist - create account
       const newUserAccount = {};
@@ -39,7 +39,7 @@ const loginUser = (userEmail, userName, response) => db.query(
       newUserAccount.surname = (userFName.length > 1) ? userFName[1] : '';
       newUserAccount.email = userEmail;
       newUserAccount.password = Math.random().toString(36).substring(2); // random password
-      await registerUser(newUserAccount, {}, true)
+      return Promise.resolve(registerUser(newUserAccount, {}, true))
         .then((regRes) => {
           if (regRes.status === 201) {
             // attempt to login with new account

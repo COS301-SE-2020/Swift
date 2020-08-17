@@ -10,6 +10,8 @@ env_variables:
   DB_PASS: $DB_PASS
   DB_PORT: $DB_PORT
   DB_USER: $DB_USER
+  EMAIL_USER: $EMAIL_USER
+  EMAIL_PASS: $EMAIL_PASS
 
 handlers:
   - url: /.*

@@ -1,6 +1,6 @@
 const ejs = require('ejs');
 const nodemailer = require('nodemailer');
-const creds = require('../../config.json');
+const creds = require('../../config/config-email.json');
 
 /** *****Registration Email ******** */
 // eslint-disable-next-line no-unused-vars
@@ -8,8 +8,8 @@ module.exports.RegistrationEmail = (req, res) => {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: creds.USER,
-      pass: creds.PASS,
+      user: process.env.EMAIL_USER || creds.usernname,
+      pass: process.env.EMAIL_PASS || creds.password,
     }
   });
   ejs.renderFile(`${__dirname}/RegistrationTemp.ejs`, { name: req.name }, (err, data) => {
@@ -36,8 +36,8 @@ module.exports.PaymentEmail = (req, res) => {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: creds.USER,
-      pass: creds.PASS,
+      user: process.env.EMAIL_USER || creds.usernname,
+      pass: process.env.EMAIL_PASS || creds.password,
     }
   });
 
