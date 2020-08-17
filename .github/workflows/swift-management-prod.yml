@@ -1,0 +1,29 @@
+name: Swift Management (production) CI
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+    - name: Setup Node.js 12.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12.x  
+    - name: Install Dependencies
+      run: npm --prefix ./swift-management-app ci
+    - name: Build
+      run: npm --prefix ./swift-management-app run build
+    - name: Deploy (production)
+      uses: w9jds/firebase-action@master
+      with:
+        args: --config=./firebase-prod.json deploy --only hosting:lumiqon-swift-management
+      env:
+        GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+        PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+        PROJECT_PATH: ./swift-management-app
