@@ -33,6 +33,8 @@ Swift aims to create a convenient, flexible, and scalable interface suitable for
 
 * :open_book: [Clickup](https://app.clickup.com/2546114/v/l/s/2693763)
 
+---
+
 ## Lumiqon Team Members
 
 | **Cadon Gernandt (Team Leader)** | **Giovanni Joubert** | **Onkarabile Kau** |
