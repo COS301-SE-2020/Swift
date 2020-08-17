@@ -10,7 +10,6 @@ const initialState = () => ({
 
 const state = initialState();
 
-
 // Setter functions
 
 // Getter functions
