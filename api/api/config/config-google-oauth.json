@@ -1,0 +1,6 @@
+{
+  "clientId": "app-client-id",
+  "clientSecret": "app-client-secret",
+  "devCallback": "http://localhost:3264/auth/google",
+  "productionCallback": "https://api.swiftapp.ml/auth/google"
+}

@@ -1,15 +1,15 @@
 const { Pool } = require('pg');
-const config = require('./config.json');
+const configDB = require('./config/config-db.json');
 
 // cache db pool
 let pool;
 if (pool == null) {
   pool = new Pool({
-    user: process.env.DB_USER || config.user,
-    host: process.env.DB_HOST || config.host,
-    database: process.env.DB_NAME || config.database,
-    password: process.env.DB_PASS || config.password,
-    port: process.env.DB_PORT || config.port
+    user: process.env.DB_USER || configDB.user,
+    host: process.env.DB_HOST || configDB.host,
+    database: process.env.DB_NAME || configDB.database,
+    password: process.env.DB_PASS || configDB.password,
+    port: process.env.DB_PORT || configDB.port
   });
 }
 
