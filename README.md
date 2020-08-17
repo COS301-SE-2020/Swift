@@ -15,6 +15,8 @@ Swift aims to create a convenient, flexible, and scalable interface suitable for
 * :computer: [Management Web App](https://manage.swiftapp.ml)
 * :books: [Swift Documentation](https://docs.swiftapp.ml)
 
+---
+
 ## Demo 1
 
 * :tv: [Demo Video](https://drive.google.com/open?id=1g0fqyLqzCHTh3am9SoxcRQSSlTxp0vDy)
