@@ -41,6 +41,8 @@ export default {
       }
       var tableData = await this.checkInCustomer(data);
       localStorage.setItem('checked-in', 'true');
+      localStorage.setItem('checkedInRestaurantId', 'true');
+      localStorage.setItem('checkedInTableId', tableData.tableId);
       
       this.goToRestaurant(tableData.restaurantId);
     },

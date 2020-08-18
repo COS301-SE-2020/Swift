@@ -46,9 +46,7 @@ const actions = {
       {
         "requestType": "login",
         "email": data.email,
-        // "email": "johnmay@gmail.com",
         "password": data.password
-        // "password": "john123"
       }
     ).then(result => {
       commit('SAVE_TOKEN', result.data.token);
@@ -80,11 +78,8 @@ const actions = {
         "name": data.name,
         "surname": data.surname,
         "username": data.username,
-        // "username": "john123",
         "email": data.email,
-        // "email": "johnmay@gmail.com",
         "password": data.password
-        // "password": "john123"
       }
     ).then(result => {
       commit('SAVE_CUSTOMER', result.data);
@@ -102,10 +97,6 @@ const actions = {
     }).catch(({ response }) => {
       return response.data.url
     });
-  },
-
-  reset({ commit }) {
-    commit('RESET');
   },
 
   addFavourite({commit}, data) {
@@ -132,7 +123,20 @@ const actions = {
       commit('UPDATE_FAVOURITES', result.data.favourites);
     }).catch(({ response }) => {
     });
-  }
+  },
+
+  callWaiter({commit}, data) {
+    axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "callWaiter",
+      "tableId": data.tableId,
+      "token": this.getters['CustomerStore/getToken']
+    })
+  },
+  
+  reset({ commit }) {
+    commit('RESET');
+  },
 }
 
 // Mutations

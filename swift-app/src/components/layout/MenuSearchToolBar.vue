@@ -47,7 +47,7 @@
                     
                 </v-carousel-item>
               </v-carousel>
-              <v-btn width="30px" height="30px" @click="callWaiter" :key="activeCall.icon" :color="activeCall.color" absolute small fab style="top: 20px; right: 10px;">
+              <v-btn width="30px" height="30px" @click="callWaiterPressed" :key="activeCall.icon" :color="activeCall.color" absolute small fab style="top: 20px; right: 10px;">
                 <v-icon :style="called ? { 'transform': 'rotate(45deg)' } : { 'transform': 'rotate(0deg)' }">{{ activeCall.icon }}</v-icon>
               </v-btn>
             </v-col>
@@ -90,8 +90,14 @@ export default {
     backNavigation () {
       this.$router.push("/");
     },
-    callWaiter() {
-      this.called = !this.called;
+    callWaiterPressed() {
+      var tableId = localStorage.getItem('checkedInTableId');
+      this.callWaiter(tableId)
+      this.called = !this.called; 
+      
+      setTimeout(function() { 
+        this.called = !this.called;
+      }, 5000);
     }
   },
   watch: {
@@ -116,6 +122,9 @@ export default {
     },
   },
   computed: {
+    ...mapActions({
+      callWaiter: 'CustomerStore/callWaiter',
+    }),
     ...mapGetters({
       menu: "MenuStore/getMenu"
     }),

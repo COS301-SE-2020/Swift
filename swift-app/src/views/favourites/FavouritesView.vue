@@ -11,7 +11,7 @@
     <template>
       <v-subheader v-once style="height: 20px" class="mt-3 mb-1 pl-1" v-text="customerInfo.favourites[0].restaurantName"></v-subheader>
       <v-list v-for="item in filteredList" :key="item.menuItemName" class="py-0">
-        <v-list-item  ripple class="py-1 pr-0">
+        <v-list-item @click="goToMenuItem(item.menuItemId)"  ripple class="py-1 pr-0">
           <v-list-item-avatar tile  style="border-radius: 4px" size="45" >
             <v-img src="https://source.unsplash.com/hrlvr2ZlUNk/800x800/"></v-img>
           </v-list-item-avatar>
@@ -51,8 +51,10 @@ export default {
     }
   },
   methods: {
+    goToMenuItem(menuItemId) {
+      this.$router.push("/menuItem/" + menuItemId);
+    },
     removeFav(menuItemId) {
-      // console.log(menuItemId)
       let data = {
         menuItemId: menuItemId
       }

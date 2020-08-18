@@ -54,17 +54,18 @@
                 <v-col cols="6" class="pr-0 py-1 mb-5">
                   <v-layout column justify-space-around align-center fill-height>
                     <div class="px-3">
-                      <span class="specialsText font-weight-light">30%</span> <span class="specialsText discount font-weight-light">discount</span> <span class="specialsText font-weight-light">on all pizza slices</span>
-                      <div class="mt-1 specialsDate">Monday-Friday 12:00-18:00</div>
+                      <!-- <span class="specialsText font-weight-light">30%</span> <span class="specialsText discount font-weight-light">discount</span> <span class="specialsText font-weight-light">on all pizza slices</span> -->
+                      <span class="specialsText font-weight-light">{{ promotion.promotionalMessage }}</span>
+                      <div class="mt-1 specialsDate">{{ promotion.period }}</div>
                     </div>
                     <div class="browseButton">
-                      <v-btn @click="goToRestaurant(1)" color="accent" height="35px" class="browseMenu">Browse Menu</v-btn>
+                      <v-btn @click="goToRestaurant(promotion.restaurantId)" color="accent" height="35px" class="browseMenu">Browse Menu</v-btn>
                     </div>
                   </v-layout>
                 </v-col>
                 <v-col cols="6" class="py-0">
                   <v-layout column fill-height>
-                    <v-img src="../../assets/exploreImages/colcacchio.jpg" class="specialsImage">Col'Cacchio</v-img>
+                    <v-img :src="promotion.promotionalImage" class="specialsImage">{{ promotion.restaurant }}</v-img>
                   </v-layout>
                 </v-col>
               </v-row>
@@ -131,7 +132,7 @@
                 <div>
                   <div class="promotionalText">Only</div>
                   <div class="priceText">R60.00</div>
-                  <div class="promotionalText">2 Pizzas [Wed-Fri]</div>
+                  <div class="promotionalText">2 Pizzas (Wed-Fri)</div>
                 </div>
               </v-layout>
             </v-col>
@@ -199,9 +200,9 @@ export default {
   data: () => ({
     search: '',
     promotions: [
-      {restaurant: "Col'Cacchio", promotionalMessage: "30% discount on all pizza slices", period: "Monday-Friday 12:00-18:00", promotionalImage: ""},
-      {restaurant: "Col'Cacchio", promotionalMessage: "30% discount on all pizza slices", period: "Monday-Friday 12:00-18:00", promotionalImage: ""},
-      {restaurant: "Col'Cacchio", promotionalMessage: "30% discount on all pizza slices", period: "Monday-Friday 12:00-18:00", promotionalImage: ""}
+      {restaurantId: 1, restaurant: "Col'Cacchio", promotionalMessage: "30% discount on all pizza's ordered", period: "Monday 18:00-22:00", promotionalImage: "https://source.unsplash.com/MQUqbmszGGM/800x800"},
+      {restaurantId: 2, restaurant: "Aroma", promotionalMessage: "Free ice cream for each cappuccino bought", period: "Thursday 12:00-18:00", promotionalImage: "https://source.unsplash.com/VZ9zJ9wk2AE/800x800"},
+      {restaurantId: 3, restaurant: "Burger Bistro", promotionalMessage: "Burger competition", period: "31 July - 08 August", promotionalImage: "https://source.unsplash.com/sc5sTPMrVfk/800x800"}
     ],
     categories: [
       { imageURL: 'drinks.jpg', name: 'Drinks' },
