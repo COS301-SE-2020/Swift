@@ -871,11 +871,10 @@ module.exports = {
       || !Object.prototype.hasOwnProperty.call(reqBody, 'amountPaid')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'name')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'email')
-      // || !Object.prototype.hasOwnProperty.call(reqBody, 'orderDetails')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'waiterTip')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'orderTotal')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'orderTax')
-      // || Object.keys(reqBody).length !== 5
+      || Object.keys(reqBody).length !== 10
       || reqBody.amountPaid < 0.0) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
@@ -896,8 +895,9 @@ module.exports = {
             return response.status(404).send({ status: 404, reason: 'Not Found' });
           }
 
-          if (resOrderStatus.rows[0].orderstatus.toLowerCase() === 'paid') {
-            // order has already been paid for
+          if (resOrderStatus.rows[0].orderstatus.toLowerCase() === 'paid'
+          || resOrderStatus.rows[0].orderstatus.toLowerCase() === 'rated') {
+            // order has already been paid for (and rated)
             return response.status(205).send();
           }
 
@@ -906,7 +906,6 @@ module.exports = {
           newUserData.orderId = reqBody.orderId;
           newUserData.name = reqBody.name;
           newUserData.email = reqBody.email;
-          // newUserData.details = reqBody.details;
           newUserData.amountPaid = reqBody.amountPaid; // under items ordered
           newUserData.orderName = reqBody.orderName;
           newUserData.paymentMethod = reqBody.paymentMethod;
@@ -925,9 +924,10 @@ module.exports = {
               'UPDATE public.customerorder SET orderstatus = $1::text WHERE orderid = $2::integer',
               [newOrderStatus, reqBody.orderId]
             )
-              .then(() => response.status(200).send(),
-                paymentEmail.paymentEmail(newUserData)) // Payment email
-              // add email here
+              .then(() => {
+                paymentEmail.paymentEmail(newUserData); // send payment email
+                return response.status(200).send();
+              })
               .catch((err) => {
                 console.error('Query Error [Order Payment - Update Order Status]', err.stack);
                 return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
@@ -1007,7 +1007,7 @@ module.exports = {
               if (orderStatus === 'rated') {
                 return response.status(409).send({ status: 409, reason: 'Order Already Rated' });
               // eslint-disable-next-line no-else-return
-              } else if (orderStatus === 'paid') {
+              } else if (orderStatus === 'received') {
                 return response.status(402).send({ status: 402, reason: 'Payment Required' });
               }
 
