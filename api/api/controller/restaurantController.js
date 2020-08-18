@@ -766,7 +766,7 @@ module.exports = {
             return response.status(404).send({ status: 404, reason: 'Not Found' });
           }
 
-          return response.status(200).send({ qroce: res.rows[0].qrcode });
+          return response.status(200).send({ qrcode: res.rows[0].qrcode });
         })
         .catch((err) => {
           console.error('Query Error [Restaurant - Get Table QR code]', err.stack);
