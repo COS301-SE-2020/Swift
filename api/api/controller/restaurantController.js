@@ -608,7 +608,7 @@ module.exports = {
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
       return db.query(
-        'SELECT orderstatus FROM public.customerorder WHERE orderid = $1::integer;',
+        'SELECT orderstatus, progress FROM public.customerorder WHERE orderid = $1::integer;',
         [reqBody.orderId]
       )
         .then((res) => {
@@ -617,11 +617,11 @@ module.exports = {
             return response.status(404).send({ status: 404, reason: 'Not Found' });
           }
 
-          if (Number.isNaN(parseInt(res.rows[0].orderstatus, 10))) {
-            return response.status(200).send({ orderStatus: res.rows[0].orderstatus });
-          }
-
-          return response.status(200).send({ orderStatus: parseInt(res.rows[0].orderstatus, 10) });
+          // return order status
+          return response.status(200).send({
+            orderStatus: res.rows[0].orderstatus,
+            orderProgress: res.rows[0].progress
+          });
         })
         .catch((err) => {
           console.error('Query Error [Update Order Status - Check Order Existence]', err.stack);
