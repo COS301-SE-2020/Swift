@@ -26,7 +26,7 @@
                 class="restaurantDescription mb-4"
               >O’Galito is an upmarket restaurant specialising in preparing exceptionally fine Portuguese dishes, complimented with world class service.</div>
 
-              <vs-button type="border">
+              <vs-button @click="editRestaurant()" type="border">
                 <span class="flex items-center">
                   <feather-icon icon="EditIcon" svgClasses="h-4 w-4 mr-1" />
                   <span>Edit</span>
@@ -38,50 +38,121 @@
       </vs-col>
     </vs-row>
     <div class="text-center mt-4">
-      <vs-button type="border" class="mb-4 mr-4">
+      <vs-button @click="addRestaurant()" type="border" class="mb-4 mr-4">
         <span class="flex items-center">
           <feather-icon icon="PlusIcon" svgClasses="h-4 w-4 mr-1" />
           <span>Add Restaurant</span>
         </span>
       </vs-button>
     </div>
-
     <vs-popup
-      class="addRestaurantPopup text-center"
-      title="Add new Restaurant"
-      :active.sync="addTablePopupActive"
+      class="text-center"
+      :title="restaurantPopupTitle"
+      :active.sync="restaurantPopupActive"
     >
-      <AddRestaurantPopup></AddRestaurantPopup>
+      <vs-row>
+        <vs-col
+          class="mb-4"
+          vs-type="flex"
+          vs-justify="center"
+          vs-align="center"
+          vs-lg="6"
+          vs-sm="12"
+        >
+          <vs-input label="Restaurant Name" placeholder="Mug & Bean" v-model="restaurantName" />
+        </vs-col>
+        <vs-col
+          class="mb-4"
+          vs-type="flex"
+          vs-justify="center"
+          vs-align="center"
+          vs-lg="6"
+          vs-sm="12"
+        >
+          <vs-input label="Branch" placeholder="Centurion Mall" v-model="restaurantBranch" />
+        </vs-col>
+      </vs-row>
+      <vs-row>
+        <vs-col
+          vs-offset="1"
+          class="mb-4"
+          vs-type="flex"
+          vs-justify="center"
+          vs-align="center"
+          vs-lg="10"
+          vs-sm="12"
+        >
+          <vs-textarea label="Description" v-model="restaurantDesc" />
+        </vs-col>
+      </vs-row>
+      <vx-card>
+        <vs-button type="border" size="small" @click="chooseFiles()">Choose header image</vs-button>
+        <input hidden id="uploadImageInput" type="file" @change="updateImage" accept="image/*" />
+        <div
+          id="restaurantCoverUploadPreview"
+          hidden
+          class="mt-4 rounded-lg"
+          :style="'background-image:url('+restaurantImage+')'"
+        ></div>
+      </vx-card>
       <vs-button
-        @click="addTable()"
+        @click="addRestaurantSubmit()"
         style="margin-top:15px"
         color="primary"
         type="filled"
-      >Create Restaurant</vs-button>
+      >{{ restaurantPopupButton }}</vs-button>
     </vs-popup>
   </div>
 </template>
 <script>
-import AddRestaurantPopup from "../../components/AddRestaurantPopup";
 
 export default {
-  components: {
-    AddRestaurantPopup,
-  },
   data() {
     return {
-      addTablePopupActive: true,
+      restaurantPopupAction: "",
+      restaurantPopupTitle: "",
+      restaurantPopupButton: "",
+      restaurantPopupActive: false,
+      restaurantName: "",
+      restaurantBranch: "",
+      restaurantDesc: "",
+      restaurantImage: "",
     };
   },
-
-  /*
-	"requestType": "createRestaurant",
-  "name": "O'Galito",
-  "description": "O’Galito is an upmarket restaurant specialising in preparing exceptionally fine Portuguese dishes, complimented with world class service.",
-  "location": "Centurion Mall",
-  "coverImageURL": "data:image/jpeg;base64...",
-  "token": "eyJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiYWxnIjoiRUN"
-  */
+  methods: {
+    chooseFiles() {
+      document.getElementById("uploadImageInput").click();
+    },
+    updateImage() {
+      var reader = new FileReader();
+      reader.readAsDataURL(
+        document.getElementById("uploadImageInput").files[0]
+      );
+      reader.onload = () => {
+        this.setRestaurantImage(reader.result);
+      };
+      reader.onerror = function (error) {
+        console.log("Error: ", error);
+      };
+    },
+    setRestaurantImage(image) {
+      this.restaurantImage = image;
+      document.getElementById("restaurantCoverUploadPreview").style.display =
+        "block";
+    },
+    editRestaurant(){
+      this.restaurantPopupAction = "edit";
+      this.restaurantPopupTitle = "Edit Restaurant";
+      this.restaurantPopupButton = "Save Restaurant";
+      this.restaurantPopupActive = true;
+    },
+    addRestaurant(){
+      this.restaurantPopupAction = "add";
+      this.restaurantPopupTitle = "Add New Restaurant";
+      this.restaurantPopupButton = "Create Restaurant";
+      this.restaurantPopupActive = true;
+    }
+  },
 };
 </script>
 
@@ -98,6 +169,14 @@ export default {
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
+}
+#restaurantCoverUploadPreview {
+  height: 200px;
+  width: 100%;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  display: none;
 }
 @media (max-width: 600px) {
   .restaurantCover {
