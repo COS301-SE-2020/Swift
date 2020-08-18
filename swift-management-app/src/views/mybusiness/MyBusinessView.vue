@@ -75,7 +75,7 @@
       <vs-row>
         <vs-col
           vs-offset="1"
-          class="mb-4"
+          class="mb-2"
           vs-type="flex"
           vs-justify="center"
           vs-align="center"
@@ -85,6 +85,22 @@
           <vs-textarea label="Description" v-model="restaurantDesc" />
         </vs-col>
       </vs-row>
+
+      <label class="vs-input--label">Select (up to 3) Restaurant Categories</label>
+      <div style="margin: auto" class="vx-row mt-4">
+        <vx-card
+          style="pointer-events: all;cursor: pointer;"
+          @click="selectCategory($event, category.categoryId)"
+          class="categoryOptionCards mr-2 ml-2 mb-6 md:w-1/6 lg:w-1/6 xl:w-1/6"
+          v-for="category in restaurantCategoryOptions"
+          :key="category.categoryId"
+          type="border"
+          :card-background="'linear-gradient(120deg ,rgba(0,0,0,.6), rgba(0,0,0,0.1)),url('+category.categoryImage+')'"
+        >
+          <p style="color:white;pointer-events: none;">{{ category.categoryName }}</p>
+        </vx-card>
+      </div>
+
       <vx-card>
         <vs-button type="border" size="small" @click="chooseFiles()">Choose header image</vs-button>
         <input hidden id="uploadImageInput" type="file" @change="updateImage" accept="image/*" />
@@ -96,7 +112,7 @@
         ></div>
       </vx-card>
       <vs-button
-        @click="addRestaurantSubmit()"
+        @click="restaurantPopupSubmit()"
         style="margin-top:15px"
         color="primary"
         type="filled"
@@ -105,6 +121,7 @@
   </div>
 </template>
 <script>
+import moduleDataList from "@/store/mybusiness/mybusinessDataList.js";
 
 export default {
   data() {
@@ -117,9 +134,27 @@ export default {
       restaurantBranch: "",
       restaurantDesc: "",
       restaurantImage: "",
+      restaurantCategories: [],
     };
   },
+  computed: {
+    restaurantCategoryOptions() {
+      return this.$store.state.mybusinessData.restaurantCategoryOptions;
+    },
+  },
   methods: {
+    selectCategory(event, id) {
+      var cardElement = event.target;
+      var index = this.restaurantCategories.indexOf(id);
+
+      if (index > -1) {
+        cardElement.style.opacity = "0.5";
+        this.restaurantCategories.splice(index, 1);
+      } else if (this.restaurantCategories.length < 3) {
+        this.restaurantCategories.push(id);
+        cardElement.style.opacity = "1";
+      }
+    },
     chooseFiles() {
       document.getElementById("uploadImageInput").click();
     },
@@ -140,18 +175,46 @@ export default {
       document.getElementById("restaurantCoverUploadPreview").style.display =
         "block";
     },
-    editRestaurant(){
+    editRestaurant() {
       this.restaurantPopupAction = "edit";
       this.restaurantPopupTitle = "Edit Restaurant";
       this.restaurantPopupButton = "Save Restaurant";
       this.restaurantPopupActive = true;
     },
-    addRestaurant(){
+    addRestaurant() {
       this.restaurantPopupAction = "add";
       this.restaurantPopupTitle = "Add New Restaurant";
       this.restaurantPopupButton = "Create Restaurant";
       this.restaurantPopupActive = true;
+    },
+    restaurantPopupSubmit() {
+      if (this.restaurantPopupAction == "add") {
+        this.$store.dispatch("mybusinessData/addNewRestaurant", {
+          restaurantName: this.restaurantName,
+          restaurantDesc: this.restaurantDesc,
+          restaurantBranch: this.restaurantBranch,
+          restaurantImage: this.restaurantImage,
+        });
+      } else if (this.restaurantPopupAction == "add") {
+        return;
+      }
+    },
+    listBusinesses() {
+      this.$store.dispatch("mybusinessData/retrieveRestaurantCategories");
+
+      return;
+    },
+  },
+  created() {
+    if (!moduleDataList.isRegistered) {
+      this.$store.registerModule("mybusinessData", moduleDataList);
+      moduleDataList.isRegistered = true;
     }
+
+    this.listBusinesses();
+  },
+  mounted() {
+    this.isMounted = true;
   },
 };
 </script>
@@ -177,6 +240,24 @@ export default {
   background-repeat: no-repeat;
   background-position: center;
   display: none;
+}
+.categoryOptionCards {
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  height: 60px;
+  opacity: 0.5;
+}
+.categoryOptionCards >>> .vx-card__body {
+  padding: 0px;
+  pointer-events: none;
+}
+.categoryOptionCards >>> .vx-card__collapsible-content {
+  margin: 0;
+  top: 50%;
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 @media (max-width: 600px) {
   .restaurantCover {
