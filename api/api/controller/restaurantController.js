@@ -113,6 +113,45 @@ module.exports = {
     // Invalid token
     return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
   },
+  getRatingPhrases: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || Object.keys(reqBody).length !== 2) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    const userToken = validateToken(reqBody.token);
+
+    if (userToken.state === tokenState.VALID) {
+      return db.query(
+        'SELECT phraseid, phrasedescription, type, positive FROM public.ratingphrase'
+      )
+        .then((res) => {
+          const phraseResponse = {};
+          phraseResponse.phrases = [];
+          for (let p = 0; p < res.rows.length; p++) {
+            phraseResponse.phrases[p] = {};
+            phraseResponse.phrases[p].phraseId = res.rows[p].phraseid;
+            phraseResponse.phrases[p].phraseDescription = res.rows[p].phrasedescription;
+            phraseResponse.phrases[p].phraseType = res.rows[p].type;
+            phraseResponse.phrases[p].phrasePositive = res.rows[p].positive;
+          }
+
+          // return phrases
+          return response.status(200).send(phraseResponse);
+        }).catch((err) => {
+          console.error('Query Error [Restaurant - Get Rating Phrases List]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
   checkIn: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'qrcode')
