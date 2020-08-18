@@ -96,7 +96,7 @@
         ></div>
       </vx-card>
       <vs-button
-        @click="addRestaurantSubmit()"
+        @click="restaurantPopupSubmit()"
         style="margin-top:15px"
         color="primary"
         type="filled"
@@ -105,6 +105,7 @@
   </div>
 </template>
 <script>
+import moduleDataList from "@/store/mybusiness/mybusinessDataList.js";
 
 export default {
   data() {
@@ -140,18 +141,44 @@ export default {
       document.getElementById("restaurantCoverUploadPreview").style.display =
         "block";
     },
-    editRestaurant(){
+    editRestaurant() {
       this.restaurantPopupAction = "edit";
       this.restaurantPopupTitle = "Edit Restaurant";
       this.restaurantPopupButton = "Save Restaurant";
       this.restaurantPopupActive = true;
     },
-    addRestaurant(){
+    addRestaurant() {
       this.restaurantPopupAction = "add";
       this.restaurantPopupTitle = "Add New Restaurant";
       this.restaurantPopupButton = "Create Restaurant";
       this.restaurantPopupActive = true;
+    },
+    restaurantPopupSubmit() {
+      if (this.restaurantPopupAction == "add") {
+        this.$store.dispatch("mybusinessData/addNewRestaurant", {
+          restaurantName: this.restaurantName,
+          restaurantDesc: this.restaurantDesc,
+          restaurantBranch: this.restaurantBranch,
+          restaurantImage: this.restaurantImage,
+        });
+      } else if (this.restaurantPopupAction == "add") {
+        return;
+      }
+    },
+    listBusinesses() {
+      return;
+    },
+  },
+  created() {
+    if (!moduleDataList.isRegistered) {
+      this.$store.registerModule("mybusinessData", moduleDataList);
+      moduleDataList.isRegistered = true;
     }
+
+    this.listBusinesses();
+  },
+  mounted() {
+    this.isMounted = true;
   },
 };
 </script>

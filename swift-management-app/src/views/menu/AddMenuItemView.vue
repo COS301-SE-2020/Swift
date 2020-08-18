@@ -30,10 +30,10 @@
             </div>
             <vs-dropdown-menu style="z-index:99999">
               <vs-dropdown-item v-for="category in primaryCategories" :key="category.categoryName">
-                <vs-button
-                  type="flat"
-                  @click="itemCategory = category.categoryName"
-                >{{ category.categoryName }}</vs-button>
+                <span @click="itemCategory = category.categoryName">{{ category.categoryName }}</span>
+              </vs-dropdown-item>
+              <vs-dropdown-item v-if="primaryCategories.length == 0">
+                <span @click="addCategoryPopupActive=true">No categories yet</span>
               </vs-dropdown-item>
             </vs-dropdown-menu>
           </vs-dropdown>
@@ -53,29 +53,47 @@
                 v-for="category in secondaryCategories"
                 :key="category.categoryName"
               >
-                <vs-button
-                  type="flat"
-                  @click="itemSubCategory = category.categoryName"
-                >{{ category.categoryName }}</vs-button>
+                <span @click="itemSubCategory = category.categoryName">{{ category.categoryName }}</span>
               </vs-dropdown-item>
             </vs-dropdown-menu>
           </vs-dropdown>
 
-          <vs-button @click="addMenuItem()" type="border" class="mb-4 mr-4">
+          <vs-button @click="addCategoryPopupActive=true" type="border" class="mb-4 mr-4">
             <span class="flex items-center">
               <feather-icon icon="PlusIcon" svgClasses="h-4 w-4 mr-1" />
-              <span>Add category</span>
+              <span>Add Category</span>
             </span>
           </vs-button>
 
           <vs-row class="vx-row mb-4">
-            <vs-col class="mb-4" vs-type="flex" vs-justify="center" vs-align="center" vs-lg="4" vs-sm="12">
+            <vs-col
+              class="mb-4"
+              vs-type="flex"
+              vs-justify="center"
+              vs-align="center"
+              vs-lg="4"
+              vs-sm="12"
+            >
               <vs-input label="Item Name" v-model="itemName" />
             </vs-col>
-            <vs-col  class="mb-4" vs-type="flex" vs-justify="center" vs-align="center" vs-lg="4" vs-sm="12">
+            <vs-col
+              class="mb-4"
+              vs-type="flex"
+              vs-justify="center"
+              vs-align="center"
+              vs-lg="4"
+              vs-sm="12"
+            >
               <vs-input type="number" label="Price (ZAR)" min="0" step="0.5" v-model="itemPrice" />
             </vs-col>
-            <vs-col  class="mb-4" vs-type="flex" vs-justify="center" vs-align="center" vs-lg="4" vs-sm="12">
+            <vs-col
+              class="mb-4"
+              vs-type="flex"
+              vs-justify="center"
+              vs-align="center"
+              vs-lg="4"
+              vs-sm="12"
+            >
               <vs-input
                 type="number"
                 label="Preperation Time (min)"
@@ -219,6 +237,48 @@
         </span>
       </vs-button>
     </div>
+    <vs-popup
+      class="addCategoryPopup text-center"
+      title="Add Category"
+      :active.sync="addCategoryPopupActive"
+    >
+      <label class="vs-input--label">Category type</label>
+      <br />
+      <vs-radio v-model="newCategoryType" vs-value="primary" class="mt-2 mr-4">Primary</vs-radio>
+      <vs-radio
+        v-if="primaryCategories.length != 0"
+        v-model="newCategoryType"
+        vs-value="secondary"
+      >Secondary</vs-radio>
+
+      <div v-if="newCategoryType == 'secondary'" class="mt-4">
+        <label class="vs-input--label">Parent category</label>
+        <br />
+        <vs-dropdown vs-trigger-click class="dd-actions cursor-pointer mt-2 mb-4">
+          <div
+            class="p-4 shadow-drop rounded-lg d-theme-dark-bg cursor-pointer flex items-center justify-center text-lg font-medium w-32 w-full"
+          >
+            <span>{{ newItemCategoryTitle }}</span>
+            <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
+          </div>
+          <vs-dropdown-menu style="z-index:99999">
+            <vs-dropdown-item v-for="category in primaryCategories" :key="category.categoryName">
+              <span @click="newCategoryParent = category.categoryName">{{ category.categoryName }}</span>
+            </vs-dropdown-item>
+          </vs-dropdown-menu>
+        </vs-dropdown>
+      </div>
+
+      <vs-input
+        style="margin: auto"
+        class="mb-4"
+        label="New Category Name"
+        placeholder="Drinks"
+        v-model="newCategoryName"
+      />
+
+      <vs-button>Add Category</vs-button>
+    </vs-popup>
   </div>
 </template>
 
@@ -228,6 +288,10 @@ import modulemenuList from "@/store/menu/menuDataList.js";
 export default {
   data() {
     return {
+      newCategoryType: "primary",
+      newCategoryName: "",
+      newCategoryParent: "",
+      addCategoryPopupActive: false,
       itemName: "Moroccan Butternut",
       itemDescription:
         "Roasted butternut, spiced chickpeas, candied walnuts, cherry tomatoes, feta & spring onions tossed with mixed lettuce.",
@@ -272,6 +336,10 @@ export default {
     },
     itemCategoryTitle() {
       if (this.itemCategory) return this.itemCategory;
+      else return "Item Category";
+    },
+    newItemCategoryTitle() {
+      if (this.newCategoryParent) return this.newCategoryParent;
       else return "Item Category";
     },
     itemSubCategoryTitle() {
@@ -357,4 +425,9 @@ export default {
   },
 };
 </script>
+<style scoped>
+.addCategoryPopup >>> .vs-popup {
+  max-width: 300px;
+}
+</style>
         

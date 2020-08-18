@@ -26,7 +26,7 @@
       <vs-button @click="addMenuItem()" type="filled" class="mb-4 mr-4">
         <span class="flex items-center">
           <feather-icon icon="PlusIcon" svgClasses="h-4 w-4 mr-1" />
-          <span>Add menu Item</span>
+          <span>Add Menu Item</span>
         </span>
       </vs-button>
     </div>
@@ -168,7 +168,9 @@ export default {
   },
   computed: {
     restaurantObject() {
-      return this.$store.state.menuList.restaurantObject;
+      if (this.$store.state.menuList)
+        return this.$store.state.menuList.restaurantObject;
+      else return null;
     },
     currentPage() {
       if (this.isMounted) {
@@ -180,12 +182,6 @@ export default {
       return this.$store.state.menuList.menuItems.filter(
         (i) => i.category === this.currentMenu
       );
-
-    },
-    menuItemsCount() {
-      if (this.$store.state.menuList)
-        return this.$store.state.menuList.menuItems.length;
-      else return null;
     },
     queriedItems() {
       return this.$refs.table
@@ -201,11 +197,18 @@ export default {
     },
   },
   methods: {
+    addFirstItemPrompt() {
+      this.$vs.dialog({
+        color: "primary",
+        title: "Let's create your first item!",
+        text:
+          "It looks like the current restaurant doesn't have any items yet. Let's create your first menu item.",
+        accept: this.addMenuItem,
+        acceptText: "Add Menu Item"
+      });
+    },
     addMenuItem() {
       this.$router.push("/add-menu-item");
-    },
-    addNewMenuItem() {
-      alert("yo");
     },
     editData(tr) {
       console.log(tr);
@@ -235,30 +238,25 @@ export default {
       if (Object.keys(this.restaurantObject).length === 0) return false;
       else return true;
     },
-    changeMenu(categoryName){
+    changeMenu(categoryName) {
       this.currentMenu = categoryName;
     },
-    loadInitialMenu(){
+    loadInitialMenu() {
       //TODO: Store current menu in cross page persistent store
-      if(this.currentMenu != "" || !this.restaurantLoaded())
-        return;
-        
-      if(this.primaryCategories.length <= 0)
-        //TODO: Handle newly created restaurant with no menu items or categories yet
-        this.$router.push("/add-menu-item")
-      else
-        this.changeMenu(this.primaryCategories[0].categoryName);
-    }
+      if (this.currentMenu != "" || !this.restaurantLoaded()) return;
+
+      if (this.primaryCategories.length <= 0) this.addFirstItemPrompt();
+      else this.currentMenu = this.primaryCategories[0].categoryName;
+      //set the current menu filter
+    },
   },
   created() {
     if (!modulemenuList.isRegistered) {
       this.$store.registerModule("menuList", modulemenuList);
       modulemenuList.isRegistered = true;
     }
-    if (!this.restaurantLoaded() ) 
-      this.$vs.loading();
-    else
-      this.loadInitialMenu();
+    if (!this.restaurantLoaded()) this.$vs.loading();
+    else this.loadInitialMenu();
 
     this.listMenuItems();
   },
@@ -266,7 +264,7 @@ export default {
     this.isMounted = true;
   },
   watch: {
-    menuItemsCount(newCount, oldCount) {
+    restaurantObject(newCount, oldCount) {
       this.$vs.loading.close();
       this.loadInitialMenu();
     },
