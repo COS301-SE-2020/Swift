@@ -157,7 +157,7 @@ module.exports = {
     'SELECT customerorder.orderid, restaurant.restaurantid, restaurant.restaurantname,'
     + ' restaurant.location, customerorder.orderdatetime, customerorder.ordercompletiontime,'
     + ' customerorder.orderstatus, customerorder.waitertip, customerorder.ordertotal,'
-    + ' employee.name AS "ename", employee.surname AS "esurname"'
+    + ' customerorder.ordernumber, employee.name AS "ename", employee.surname AS "esurname"'
     + ' FROM public.customerorder'
     + ' INNER JOIN public.restauranttable ON customerorder.tableid = restauranttable.tableid'
     + ' INNER JOIN public.restaurant ON restauranttable.restaurantid = restaurant.restaurantid'
@@ -172,6 +172,7 @@ module.exports = {
           .then((orderItems) => {
             const historyItem = {};
             historyItem.orderId = hist.orderid;
+            historyItem.orderNumber = hist.ordernumber;
             historyItem.restaurantId = hist.restaurantid;
             historyItem.restaurantName = hist.restaurantname;
             historyItem.restaurantLocation = hist.location;
