@@ -1,7 +1,6 @@
 const bcrypt = require('bcrypt');
 const validator = require('email-validator');
 const db = require('../db');
-const accCreator = require('../helper/accountCreator');
 const sendEmail = require('../helper/notifications/sendEmail');
 const { generateToken, validateToken, tokenState } = require('../helper/tokenHandler');
 const { getFavourites, getOrderHistory } = require('../helper/objectBuilder');
