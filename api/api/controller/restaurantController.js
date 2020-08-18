@@ -75,6 +75,44 @@ module.exports = {
     // Invalid token
     return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
   },
+  getRestaurantCategories: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || Object.keys(reqBody).length !== 2) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    const userToken = validateToken(reqBody.token);
+
+    if (userToken.state === tokenState.VALID) {
+      return db.query(
+        'SELECT categoryid, categoryname, categoryimage FROM public.classification'
+      )
+        .then((res) => {
+          const categoryResponse = {};
+          categoryResponse.categories = [];
+          for (let c = 0; c < res.rows.length; c++) {
+            categoryResponse.categories[c] = {};
+            categoryResponse.categories[c].categoryId = res.rows[c].categoryid;
+            categoryResponse.categories[c].categoryName = res.rows[c].categoryname;
+            categoryResponse.categories[c].categoryImage = res.rows[c].categoryimage;
+          }
+
+          // return categories
+          return response.status(200).send(categoryResponse);
+        }).catch((err) => {
+          console.error('Query Error [Restaurant - Get Restaurant Category List]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
   checkIn: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'qrcode')

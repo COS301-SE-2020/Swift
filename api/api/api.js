@@ -78,6 +78,10 @@ router.post('/', (req, res) => {
         restaurantController.getRestaurantList(req.body, res);
         break;
       }
+      case 'allRestaurantCategories': {
+        restaurantController.getRestaurantCategories(req.body, res);
+        break;
+      }
       case 'createRestaurant': {
         restaurantController.createRestaurant(req.body, res);
         break;
