@@ -375,9 +375,9 @@ module.exports = {
           // create order
           // TODO: Work of order completion time
           db.query(
-            'INSERT INTO public.customerorder (customerid, employeeid, tableid, orderdatetime,'
-            + ' ordercompletiontime, orderstatus, orderprogress, waitertip, ordertotal)'
-            + ' VALUES ($1::integer,$2::integer,$3::integer,NOW(),NOW(),$4::text,$5::integer,$6::real,$7::real)'
+            'INSERT INTO public.customerorder (customerid, employeeid, tableid, ordernumber, orderdatetime,'
+            + ' ordercompletiontime, orderstatus, progress, waitertip, ordertotal)'
+            + ' VALUES ($1::integer,$2::integer,$3::integer,\'0\',NOW(),NOW(),$4::text,$5::integer,$6::real,$7::real)'
             + ' RETURNING orderid',
             [
               customerId,
