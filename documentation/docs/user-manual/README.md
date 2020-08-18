@@ -13,3 +13,6 @@ sidebar: auto
 
 - Type: `string`
 - Default: `/`
+
+<!-- <ViewerJs-pdfViewer-pdf/> -->
+<pdfViewer/>
