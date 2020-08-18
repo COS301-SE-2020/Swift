@@ -23,7 +23,10 @@
               </v-col>
             </v-row>
           </div>
-          <v-container>
+          <div v-if="isLoading" style="display: flex; align-items: center; justify-content: center; margin-top: 10px">
+            <v-progress-circular indeterminate color="primary"></v-progress-circular>
+          </div>
+          <v-container v-if="!isLoading">
             <div v-for="status in statusList" :key="status">
               <div v-if="itemsForStatus(status).length != 0">
                 <v-subheader style="height: 20px" class="mt-3 mb-1 pl-1" v-text="status"></v-subheader>
@@ -137,6 +140,16 @@ export default {
       search: '',
       filter: {},
       ptr: this,
+      isLoading: false,
+    }
+  },
+  async mounted() {
+    var length = await this.orderHistory.length;
+    if (length == undefined) {
+      this.isLoading = !this.isLoading;
+      var response = await this.orderHistory;
+      if (response)
+        this.isLoading = !this.isLoading;
     }
   },
   methods: {

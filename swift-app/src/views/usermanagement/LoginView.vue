@@ -14,9 +14,6 @@
           <p class="body-2 float-right" color="secondary"><u>Forgot Password?</u></p>
         </v-btn>
       </v-col>
-      <!-- <v-col cols="10" class="py-0 mb-0 d-flex flex-column align-center">
-        <p class="body-2 py-0 mb-0" style="color: red">Username or password incorrect</p>
-      </v-col> -->
     </div>
     <div class="row d-flex flex-column align-center mx-8">
       <v-btn @click="loginCustomer" v-show=!isLoading block rounded class="py-5" color="primary">Sign in</v-btn>

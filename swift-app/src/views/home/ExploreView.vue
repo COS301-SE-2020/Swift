@@ -1,6 +1,9 @@
 <template>
   <v-container class="px-0">
-    <v-container py-0>
+    <div v-show="isLoading" style="display: flex; align-items: center; justify-content: center;">
+      <v-progress-circular style="height: 400px" indeterminate color="primary"></v-progress-circular>
+    </div>
+    <v-container v-show="!isLoading" py-0>
       <v-card flat tile>
         <v-row class="d-flex justify-space-between">
           <v-col cols="8">
@@ -45,7 +48,7 @@
         </v-row>
       </v-card>
     </v-container>
-    <v-container class="px-0 py-0" v-if="search == ''">
+    <v-container v-show="!isLoading" class="px-0 py-0" v-if="search == ''">
       <v-container py-0>
         <v-carousel v-model="carouselIndex" class="promotionalMaterial" :continuous="false" :cycle="cycle" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="210px">
           <v-carousel-item v-for="(promotion, i) in promotions" :key="i">
@@ -74,7 +77,7 @@
         </v-carousel>
       </v-container>
 
-      <v-container py-0 transition="slide-x-transition">
+      <v-container v-show="!isLoading" py-0 transition="slide-x-transition">
         <v-row style="max-width: 400px" class="overflow-y-auto">
           <v-col cols="12">
             <div class="categoryTitle">Categories</div>
@@ -123,7 +126,7 @@
         </v-sheet>
       </v-container>
 
-      <v-container pt-0>
+      <v-container v-show="!isLoading" pt-0>
         <v-card @click="goToRestaurant(1)" color="primary" height="140px" flat tile style="border-radius: 13px !important" class="mt-5">
           <v-row class="px-0 py-0 specialsInfo">
             <v-col cols="6" class="pl-7 py-3 pr-0">
@@ -150,7 +153,7 @@
       </v-container>
     </v-container>
       
-    <v-container v-else class="mt-3">
+    <v-container v-show="!isLoading" v-else class="mt-3">
       <div v-if="filteredList.length != 0">
         <v-card @click="goToRestaurant(card.restaurantId)" elevation="2" v-for="(card, index) in filteredList" :key="index">
           <v-row class="mx-0">
@@ -218,45 +221,12 @@ export default {
     ],
     category: ["Western Cuisine", "Fast Food", "Breakfast"],
     descriptors: ["Fast Service", "Presentation"],
-    // popularFood: [
-    //   {
-    //     title: "Mugg & Bean",
-    //     rating: 4,
-    //     src: "https://source.unsplash.com/800x800/?coffee",
-    //     location: "Brooklyn",
-    //     category: ["Western Cuisine", "Fast Food", "Breakfast"],
-    //     descriptors: ["Fast Service", "Presentation"]
-    //   },
-    //   {
-    //     title: "Col'Cacchio",
-    //     rating: 5,
-    //     src: "https://source.unsplash.com/800x800/?pizzaria",
-    //     location: "Brooklyn",
-    //     category: ["Pizza", "Drinks", "Breakfast"],
-    //     descriptors: ["Fast Service", "Presentation"]
-    //   },
-    //   {
-    //     title: "Cappuccinos",
-    //     rating: 4,
-    //     src: "https://source.unsplash.com/800x800/?pasta",
-    //     location: "Brooklyn",
-    //     category: ["Pizza", "Cafe", "Breakfast"],
-    //     descriptors: ["Fast Service", "Presentation"]
-    //   },
-    //   {
-    //     title: "Ocean Basket",
-    //     rating: 3,
-    //     src: "https://source.unsplash.com/800x800/?seafood",
-    //     location: "Brooklyn",
-    //     category: ["Seafood", "Drinks", "Desserts"],
-    //     descriptors: ["Fast Service", "Presentation"]
-    //   }
-    // ],
     favourited: false,
     called: false,
     // checkedIn: false,
     restaurant: "Mugg & Bean",
     cycle: false,
+    isLoading: false,
     carouselIndex: 0
   }),
   methods: {
@@ -278,7 +248,6 @@ export default {
     },
     checkedIn() {
       let checkedInVal = localStorage.getItem('checked-in');
-      console.log("explore", checkedInVal)
 
       if (checkedInVal == 'true') {
         return true;
@@ -287,11 +256,16 @@ export default {
       }
     }
   },
+  async mounted() {
+    var length = await this.allRestaurants.length;
+    if (length == undefined) {
+      this.isLoading = !this.isLoading;
+      var response = await this.fetchAllRestaurants;
+      if (response)
+        this.isLoading = !this.isLoading;
+    }
+  },
   computed: {
-    
-    // ...mapActions({
-    //   // retrieveRestaurantMenu: ('RestaurantsStore/retrieveRestaurantMenu'),
-    // }),
     activeCall() {
       if (!this.called) {
         return { color: "secondary", icon: "mdi-bell-outline" };
@@ -306,12 +280,11 @@ export default {
         })
     },
     carouselTab () {
-      // if (!this.carouselIndex == ind) {
-        // return'mdi-ellipse';
-      // } else {
-        return 'mdi-checkbox-blank-circle';
-      // }
+      return 'mdi-checkbox-blank-circle';
     },
+    ...mapActions({
+      fetchAllRestaurants: 'RestaurantsStore/allRestaurants',
+    }),
     ...mapGetters({
       allRestaurants: 'RestaurantsStore/getAllRestaurants',
       customerInfo: 'CustomerStore/getCustomerProfile',

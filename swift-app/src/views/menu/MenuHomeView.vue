@@ -1,6 +1,32 @@
 <template>
   <div class="homemenu">
-    <MenuSearchToolBar></MenuSearchToolBar>
+    <!-- <MenuSearchToolBar></MenuSearchToolBar> -->
+    <v-container class="pb-0">
+      <div class="backgroundImage" style="margin-top: 0px">
+        <v-row style="margin-top: -12px; margin-bottom: 10px"> 
+            <v-col cols="12" class="pt-0 px-0 pb-0">
+              <v-carousel height="200px" :show-arrows="false" hide-delimiter cycle hide-delimiters continuous>
+                <v-carousel-item gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.4)" :src="menu.image">
+                  <v-row  align="center" justify="center" class="mt-6">
+                    <div class="white--text display-1">Welcome to<br/> {{menu.name}}</div>
+                    <v-col cols="9" class="mt-3">
+                      <v-text-field background-color="white" class="menuItemSearchbar"  v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search by name or category"></v-text-field>
+                    </v-col>
+                    <v-col cols="1" class="d-flex align-center px-0 mt-3">
+                      <v-btn small icon color="white">
+                        <v-icon size="24px">mdi-filter-variant</v-icon> 
+                      </v-btn>
+                    </v-col>
+                  </v-row>
+                </v-carousel-item>
+              </v-carousel>
+              <v-btn width="30px" height="30px" @click="callWaiterPressed()" :key="activeCall.icon" :color="activeCall.color" absolute small fab style="top: 20px; right: 10px;">
+                <v-icon :style="called ? { 'transform': 'rotate(45deg)' } : { 'transform': 'rotate(0deg)' }">{{ activeCall.icon }}</v-icon>
+              </v-btn>
+            </v-col>
+          </v-row>
+        </div>
+    </v-container>
     <v-container class="px-0 overflow-x-hidden" transition="slide-x-transition">
       <v-row style="max-width: 400px" class="overflow-y-auto">
         <v-col cols="12" class="pt-0">
@@ -64,6 +90,11 @@
 import { mapActions, mapGetters } from "vuex";
 import NavBar from "@/components/layout/NavBar";
 import MenuSearchToolBar from "@/components/layout/MenuSearchToolBar";
+import $ from 'jquery';
+
+$(window).scroll(function(){
+  $(".backgroundImage").css("opacity", 1 - $(window).scrollTop() / 250);
+});
 
 export default {
   components: {
@@ -71,6 +102,10 @@ export default {
     MenuSearchToolBar: MenuSearchToolBar
   },
   data: () => ({
+    restaurantImages: [
+      { img: 'https://source.unsplash.com/GXXYkSwndP4/800x800/' },
+    ],
+    search: '',
     primaryCategoryTab: null,
     secondaryCategoryTab: null,
     items: [
@@ -127,7 +162,7 @@ export default {
         src: "https://source.unsplash.com/800x800/?juice"
       }
     ],
-    
+    called: false,
     favourited: false,
     snackbar: true
   }),
@@ -137,6 +172,18 @@ export default {
     },
     changeFavouriteFab() {
       this.favourited = !this.favourited;
+    },
+    backNavigation () {
+      this.$router.push("/");
+    },
+    async callWaiterPressed() {
+      var tableId = localStorage.getItem('checkedInTableId');
+      // await this.callWaiter(tableId)
+      this.called = true; 
+      
+      setTimeout(() => { 
+        this.called = false;
+      }, 5000);
     },
     checkedIn() {
       var checkedIn = localStorage.getItem('checked-in');
@@ -164,11 +211,19 @@ export default {
     ...mapActions({
       updateDisplayNotification: 'RestaurantsStore/updateDisplayNotification',
       retrieveMenu: 'MenuStore/retrieveMenu',
+      callWaiter: 'CustomerStore/callWaiter'
     }),
     ...mapGetters({
       displayNotification: "RestaurantsStore/getDisplayNotification",
-      menu: "MenuStore/getMenu"
-    })
+      menu: "MenuStore/getMenu",
+    }),
+    activeCall() {
+      if (!this.called) {
+        return { color: "white", icon: "mdi-bell-outline" };
+      } else {
+        return { color: "primary", icon: "mdi-bell-outline" };
+      }
+    },
   }
 };
 </script>
@@ -191,5 +246,22 @@ export default {
 
 .v-tabs:not(.v-tabs--vertical):not(.v-tabs--right) > .v-slide-group--is-overflowing.v-tabs-bar--is-mobile:not(.v-tabs-bar--show-arrows):not(.v-slide-group--has-affixes) .v-slide-group__prev {
   display: none
+}
+
+input, label, .mdi-magnify, .mdi-menu-down {
+  color: #343434 !important;
+}
+
+label {
+  opacity: 0.55;
+}
+
+.v-text-field--rounded > .v-input__control > .v-input__slot {
+  padding-left: 18px;
+}
+.menuItemSearchbar {
+  background: rgba(0, 0, 0, 0.06) !important;
+  caret-color: #343434 !important;
+  color: #343434 !important;
 }
 </style>

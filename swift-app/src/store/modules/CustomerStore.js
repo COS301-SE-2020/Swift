@@ -51,7 +51,7 @@ const actions = {
     ).then(result => {
       commit('SAVE_TOKEN', result.data.token);
       commit('SAVE_CUSTOMER', result.data);
-      this.dispatch('RestaurantsStore/allRestaurants');
+      // this.dispatch('RestaurantsStore/allRestaurants');
       this.dispatch('OrderStore/initOrderHistory');
       return "Success";
     }).catch(({ response }) => {
