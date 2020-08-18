@@ -242,7 +242,7 @@ module.exports = {
     }),
   getMenuCategories: (restaurantId = 0) => db.query(
     'SELECT categoryid, categoryname, categorydescription, parentcategoryid, categorytype'
-    + ' FROM public.category'
+    + ' FROM public.menucategory'
     + ' WHERE restaurantid = $1::integer;',
     [restaurantId]
   )
