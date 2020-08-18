@@ -5,6 +5,7 @@ const accCreator = require('../helper/accountCreator');
 const sendEmail = require('../helper/notifications/sendEmail');
 const { generateToken, validateToken, tokenState } = require('../helper/tokenHandler');
 const { getFavourites, getOrderHistory } = require('../helper/objectBuilder');
+const phImg = require('../helper/assets/placeholderImage.json');
 
 const BC_SALT_ROUNDS = 10;
 
@@ -259,6 +260,7 @@ module.exports = {
     newUserData.surname = reqBody.surname;
     newUserData.email = reqBody.email;
     newUserData.password = bcrypt.hashSync(reqBody.password, BC_SALT_ROUNDS); // Hash password
+    newUserData.profilePic = phImg.profileImage;
     newUserData.userTheme = 'light'; // Default light theme
     newUserData.refreshToken = 'inactive';
 
@@ -289,7 +291,19 @@ module.exports = {
 
         // Create new account
         // TODO: Generate and send user account activation email-DONE
-        return accCreator.createCustomer(newUserData)
+        return db.query(
+          'INSERT INTO public.person (name, surname, email, password, profileimageurl, refreshtoken, theme)'
+            + ' VALUES ($1::text, $2::text, $3::text, $4::text, $5::text, $6::text, $7::text);',
+          [
+            newUserData.name,
+            newUserData.surname,
+            newUserData.email,
+            newUserData.password,
+            newUserData.profilePic,
+            newUserData.refreshToken,
+            newUserData.userTheme
+          ]
+        )
           .then(() => {
             // sends account activation email
             sendEmail.registrationEmail(newUserData);
@@ -298,7 +312,7 @@ module.exports = {
               return { status: 201, reason: 'Customer Account Created' };
             }
 
-            return response.status(201).send({ status: 201, reason: 'Customer Account Created' });
+            return response.status(201).send({ status: 201, reason: 'Account Created Successfully' });
           })
           .catch((err) => {
             console.error('Query Error [Register Customer - Create Customer Account]', err.stack);
