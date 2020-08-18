@@ -25,6 +25,9 @@
         <v-divider class="mt-2"></v-divider>
       </div> -->
 
+
+      <!-- =========================================================================================================== -->
+
         <v-tabs  v-model="secondaryCategoryTab" background-color="secondary" color="primary" dark>
           <v-tab v-for="(category, index) in menu.categories" :key="index">
             {{ category.categoryName }}
@@ -36,7 +39,6 @@
             <v-list v-for="(menuItem, i) in category.menuItems" :key="i" class="py-0">
               <v-list-item @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1 ">
                 <v-list-item-avatar tile  style="border-radius: 4px" size="45" >
-                  <!-- <v-img src="https://source.unsplash.com/hrlvr2ZlUNk/800x800/"></v-img> -->
                   <img src="https://source.unsplash.com/collection/767186/800x800">
                 </v-list-item-avatar>
                 <v-list-item-content>
@@ -52,27 +54,13 @@
           </v-tab-item>
         </v-tabs-items>
 
-      <!-- <div v-for="(category, index) in menu.categories" :key="index">
-        <v-list v-for="(menuItem, i) in category.menuItems" :key="i" class="py-0">
-          <v-list-item @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1">
-            <v-list-item-avatar tile  style="border-radius: 4px" size="45" >
-              <v-img src="https://source.unsplash.com/hrlvr2ZlUNk/800x800/"></v-img>
-            </v-list-item-avatar>
-            <v-list-item-content>
-              <v-list-item-title v-html="menuItem.menuItemName"></v-list-item-title>
-            </v-list-item-content>
-          </v-list-item>
-          <v-divider divider class="ml-3" width="93%"></v-divider>
-        </v-list>
-      </div> -->
 
-
-
+      <!-- =============================================================================================================== -->
 
 
     </v-container>
        <!--snackbar shows table number on successful checkin -->
-      <v-snackbar id="notification" timeout=2000 transition centered color="primary" elevation="24" v-model="snackbar">{{ tableNumber }}</v-snackbar>
+      <v-snackbar id="notification" :timeout="2000" centered color="primary" elevation="24" v-model="snackbar">{{ tableNumber }}</v-snackbar>
     <NavBar></NavBar>
   </div>
 </template>
@@ -156,7 +144,6 @@ export default {
     changeFavouriteFab() {
       this.favourited = !this.favourited;
     },
-    
   },
   mounted: function() {
     if (this.displayNotification) {

@@ -11,7 +11,6 @@ export default {
       {title: 'Employees',   url: '/employees',      icon: 'UsersIcon', is_bookmarked: false},
       {title: 'Reviews',   url: '/reviews',      icon: 'ThumbsUpIcon', is_bookmarked: false},
       {title: 'My Business',   url: '/mybusiness',      icon: 'BriefcaseIcon', is_bookmarked: false},
-
     ]
   }
 }

@@ -1,6 +1,6 @@
 {
-  "appId": "com.example.swiftapp",
-  "appName": "swift-app",
+  "appId": "com.lumiqon.swiftapp",
+  "appName": "Swift",
   "bundledWebRuntime": false,
   "npmClient": "npm",
   "webDir": "dist",

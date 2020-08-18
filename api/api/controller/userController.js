@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const validator = require('email-validator');
 const db = require('../db');
 const accCreator = require('../helper/accountCreator');
+const sendEmail = require('../helper/notifications/sendEmail');
 const { generateToken, validateToken, tokenState } = require('../helper/tokenHandler');
 const { getFavourites, getOrderHistory } = require('../helper/objectBuilder');
 
@@ -242,7 +243,7 @@ module.exports = {
         return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
       });
   },
-  registerUser: (reqBody, response) => {
+  registerUser: (reqBody, response, socialRegistration = false) => {
     // Check all keys are in place - no need to check request type at this point
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'name')
     || !Object.prototype.hasOwnProperty.call(reqBody, 'surname')
@@ -263,6 +264,10 @@ module.exports = {
     // Check that email is valid
     if (!validator.validate(newUserData.email)) {
       // invalid email
+      if (socialRegistration) {
+        return { status: 400, reason: 'Invalid Email' };
+      }
+
       return response.status(400).send({ status: 400, reason: 'Invalid Email' });
     }
 
@@ -274,20 +279,41 @@ module.exports = {
       .then((res) => {
         if (res.rows.length > 0) {
           // user exists
+          if (socialRegistration) {
+            return { status: 409, reason: 'Account Already Exists' };
+          }
+
           return response.status(409).send({ status: 409, reason: 'Account Already Exists' });
         }
 
         // Create new account
-        // TODO: Generate and send user account activation email
+        // TODO: Generate and send user account activation email-DONE
         return accCreator.createCustomer(newUserData)
-          .then(() => response.status(201).send({ status: 201, reason: 'Customer Account Created' }))
+          .then(() => {
+            // sends account activation email
+            sendEmail.registrationEmail(newUserData);
+
+            if (socialRegistration) {
+              return { status: 201, reason: 'Customer Account Created' };
+            }
+
+            return response.status(201).send({ status: 201, reason: 'Customer Account Created' });
+          })
           .catch((err) => {
             console.error('Query Error [Register Customer - Create Customer Account]', err.stack);
+            if (socialRegistration) {
+              return { status: 500, reason: 'Internal Server Error' };
+            }
+
             return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
           });
       })
       .catch((err) => {
         console.error('Query Error [Register Customer - Check Account Availability]', err.stack);
+        if (socialRegistration) {
+          return { status: 500, reason: 'Internal Server Error' };
+        }
+
         return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
       });
   }

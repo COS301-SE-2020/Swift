@@ -36,9 +36,14 @@ const router = new Router({
           component: () => import('./views/stats/StatisticsView.vue')
         },
         {
-          path: '/menu-items',
+          path: '/menu',
           name: 'menu items',
           component: () => import('./views/menu/MenuItemsListView.vue')
+        },
+        {
+          path: '/add-menu-item',
+          name: 'add menu item',
+          component: () => import('./views/menu/AddMenuItemView.vue')
         },
         {
           path: '/employees',
