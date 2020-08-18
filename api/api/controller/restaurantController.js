@@ -1046,8 +1046,16 @@ module.exports = {
                     ));
                   });
 
-                  // Done
-                  return response.status(200).send({ status: 200, reason: 'Reivew Recorded' });
+                  // Update order status
+                  return db.query(
+                    'UPDATE public.customerorder SET orderstatus = $1::text WHERE orderid = $2::integer',
+                    ['Rated', reqBody.orderId]
+                  )
+                    .then(() => response.status(201).send({ status: 201, reason: 'Reivew Recorded' }))
+                    .catch((err) => {
+                      console.error('Query Error [Order Review - Update Order Status]', err.stack);
+                      return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+                    });
                 })
                 .catch((err) => {
                   console.error('Query Error [Order Review - Add User Review]', err.stack);
