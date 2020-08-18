@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // State object
 const initialState = () => ({
-  orderInfo: {},
+  orderInfo: [],
   orderHistory: {},
   orderTotal: 0,
   orderFlag: false
@@ -10,12 +10,13 @@ const initialState = () => ({
 
 const state = initialState();
 
-
 // Setter functions
 
 // Getter functions
 const getters = {
   getOrderInfo(state) {
+    console.log("in here");
+    console.log(state.orderInfo);
     return state.orderInfo;
   },
 
@@ -34,7 +35,8 @@ const getters = {
 
 // Actions 
 const actions = {
-  submitOrder({commit}, orderInfo) {
+  submitOrder({commit}) {
+    // console.log(this.orderInfo);
     axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "addOrder",
@@ -59,7 +61,7 @@ const actions = {
   retrieveOrderStatus({commit}, data) {
     var token = this.getters['CustomerStore/getToken'];
     var orderId = data.orderId;
-    console.log(orderId)
+    // console.log(orderId)
     axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "orderStatus",
@@ -97,7 +99,7 @@ const mutations = {
   },
 
   ADD_ITEM_TO_ORDER(state, orderItemInfo) {
-    state.orderInfo = orderItemInfo;
+    state.orderInfo.push(orderItemInfo);
   },
   
   UPDATE_ORDER_STATUS(state, data) {

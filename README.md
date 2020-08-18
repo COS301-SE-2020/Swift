@@ -6,7 +6,16 @@ Swift aims to create a convenient, flexible, and scalable interface suitable for
 
 ![Swift API CI](https://github.com/COS301-SE-2020/Swift/workflows/Swift%20API%20CI/badge.svg)
 ![Swift App CI](https://github.com/COS301-SE-2020/Swift/workflows/Swift%20App%20CI/badge.svg)
+![Swift Docs CI](https://github.com/COS301-SE-2020/Swift/workflows/Swift%20Docs%20CI/badge.svg)
 ![Swift Management CI](https://github.com/COS301-SE-2020/Swift/workflows/Swift%20Management%20CI/badge.svg)
+
+## Swift Links
+
+* :computer: [User Web App](https://app.swiftapp.ml)
+* :computer: [Management Web App](https://manage.swiftapp.ml)
+* :books: [Swift Documentation](https://docs.swiftapp.ml)
+
+---
 
 ## Demo 1
 
@@ -23,6 +32,8 @@ Swift aims to create a convenient, flexible, and scalable interface suitable for
 ## Project Management Tools
 
 * :open_book: [Clickup](https://app.clickup.com/2546114/v/l/s/2693763)
+
+---
 
 ## Lumiqon Team Members
 

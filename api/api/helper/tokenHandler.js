@@ -3,7 +3,7 @@ const b62 = require('base-x')(BASE62);
 // eslint-disable-next-line object-curly-newline
 const { JWE, JWK, JWT, errors } = require('jose');
 const { v4: uuidv4 } = require('uuid');
-const tokenKey = require('../tokenKey.json');
+const tokenKey = require('../config/tokenKey.json');
 
 // Generate an EC P-521 key pair in JWK format
 // const privateKey = JWK.generateSync('EC', 'P-521');

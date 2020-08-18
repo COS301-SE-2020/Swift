@@ -2,9 +2,10 @@
 
 ## Domain Model Diagram
 
-![architectural-design](../../assets/swift-domain-model.png)
+![Domain Model](~@assets/swift-domain-model.png)
 
-### Domain Model Explanation:
+### Domain Model Explanation
+
 * **Customer and Order:** A Customer will be able to place a number of Orders through the application.
 * **Customer and Menu:** A Customer will view the Menu on the application which will contain 3D AR representations of the
 items.
@@ -21,5 +22,3 @@ as well specific notes on how it must be prepared.
 * **Customer and Order:** An Order will be associated with a Table. Waiters will be able to view all the Orders made and the
 specific Table with which each one is associated.
 * **Waiter and Order:** The Waiter will manage the Orders and update their status.
-
-

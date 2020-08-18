@@ -100,9 +100,9 @@ module.exports = {
           collapsable: false,
           children: [
             '',
-            'customer-app-install',
-            'managemenet-app-install',
-            'api-install',
+            //'customer-app-install',
+            //'managemenet-app-install',
+            //'api-install',
           ]
         }
       ]
@@ -115,5 +115,16 @@ module.exports = {
   plugins: [
     '@vuepress/plugin-back-to-top',
     '@vuepress/plugin-medium-zoom',
-  ]
+  ],
+
+  /**
+   * Webpack config
+   */
+  configureWebpack: {
+    resolve: {
+      alias: {
+        '@assets': '../../assets/'
+      }
+    }
+  }
 }
