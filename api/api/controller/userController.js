@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const validator = require('email-validator');
 const db = require('../db');
 const accCreator = require('../helper/accountCreator');
-const SendEmail = require('../helper/Notifications/SendEmail');
+const sendEmail = require('../helper/notifications/sendEmail');
 const { generateToken, validateToken, tokenState } = require('../helper/tokenHandler');
 const { getFavourites, getOrderHistory } = require('../helper/objectBuilder');
 
@@ -291,7 +291,7 @@ module.exports = {
         return accCreator.createCustomer(newUserData)
           .then(() => {
             // sends account activation email
-            SendEmail.RegistrationEmail(newUserData);
+            sendEmail.registrationEmail(newUserData);
 
             if (socialRegistration) {
               return { status: 201, reason: 'Customer Account Created' };
