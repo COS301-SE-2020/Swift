@@ -369,29 +369,53 @@ module.exports = {
           }
 
           // time to place order
-          const orderStatus = 'in-progress';
+          const orderStatus = 'Received';
+          const initialProgress = 0;
 
           // create order
           // TODO: Work of order completion time
           db.query(
             'INSERT INTO public.customerorder (customerid, employeeid, tableid, orderdatetime,'
-            + ' ordercompletiontime, orderstatus)'
-            + ' VALUES ($1::integer, $2::integer, $3::integer, NOW(), NOW(), $4::text)'
+            + ' ordercompletiontime, orderstatus, orderprogress, waitertip, ordertotal)'
+            + ' VALUES ($1::integer,$2::integer,$3::integer,NOW(),NOW(),$4::text,$5::integer,$6::real,$7::real)'
             + ' RETURNING orderid',
-            [customerId, orderInfo.employeeId, orderInfo.tableId, orderStatus]
+            [
+              customerId,
+              orderInfo.employeeId,
+              orderInfo.tableId,
+              orderStatus,
+              initialProgress,
+              orderInfo.waiterTip,
+              orderInfo.orderTotal
+            ]
           )
             .then((resOrderId) => {
+              // Order number format: userId-restauramtId-orderid (without dashes)
+              const orderNum = `${userToken.data.userId}${orderInfo.restaurantId}${resOrderId.rows[0].orderid}`;
+
+              // Update order number
+              Promise.resolve(db.query(
+                'UPDATE public.customerorder SET ordernumber = $1::text WHERE orderid = $2::integer',
+                [orderNum, resOrderId.rows[0].orderid]
+              ))
+                .then(() => { })
+                .catch((err) => {
+                  console.error('Query Error [Add Order - Update Order Number]', err.stack);
+                  return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+                });
+
               orderInfo.orderItems.forEach((orderItem) => {
                 // add items to order
                 db.query(
-                  'INSERT INTO public.itemordered (orderid, menuitemid, quantity, orderselections)'
-                  + ' VALUES ($1::integer, $2::integer, $3::integer, $4::json)',
+                  'INSERT INTO public.itemordered (orderid, menuitemid, quantity, orderselections, progress)'
+                  + ' VALUES ($1::integer, $2::integer, $3::integer, $4::json,  $5::integer)',
                   [
                     resOrderId.rows[0].orderid,
                     orderItem.menuItemId,
                     orderItem.quantity,
                     // eslint-disable-next-line max-len
-                    Object.keys(orderItem.orderSelections).length === 0 ? null : orderItem.orderSelections
+                    Object.keys(orderItem.orderSelections).length === 0 ? null : orderItem.orderSelections,
+                    initialProgress
                   ]
                 )
                   .then(() => { })
