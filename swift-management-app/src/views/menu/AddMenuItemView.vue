@@ -94,11 +94,8 @@
           <p>{{ itemDescription }}</p>
           <vs-divider>Add-ons</vs-divider>
 
-          <vs-list v-for="addOn in itemAddons"
-              :key="addOn.id">
-            <vs-list-header
-              :title="addOn.attributeName"
-            ></vs-list-header>
+          <vs-list v-for="addOn in itemAddons" :key="addOn.id">
+            <vs-list-header :title="addOn.attributeName"></vs-list-header>
 
             <vs-list-item
               v-for="attributeValue in addOn.values"
@@ -174,48 +171,30 @@
             </vs-col>
           </vs-row>
         </div>
-        <vs-row>
-          <vs-col
-            class="mt-3"
-            vs-offset="4"
-            vs-type="flex"
-            vs-justify="center"
-            vs-align="center"
-            vs-w="4"
+        <div class="text-center">
+          <vs-button
+            color="dark"
+            @click="addAddOnValue(addOn.id)"
+            size="small"
+            type="border"
+            class="mb-4 mr-4"
           >
-            <vs-button
-              color="dark"
-              @click="addAddOnValue(addOn.id)"
-              size="small"
-              type="border"
-              class="mb-4 mr-4"
-            >
-              <span class="flex items-center">
-                <feather-icon icon="PlusIcon" svgClasses="h-4 w-4 mr-1" />
-                <span>New Value</span>
-              </span>
-            </vs-button>
-          </vs-col>
-        </vs-row>
-      </div>
-      <vs-divider></vs-divider>
-      <vs-row>
-        <vs-col
-          class="mt-3"
-          vs-offset="4"
-          vs-type="flex"
-          vs-justify="center"
-          vs-align="center"
-          vs-w="4"
-        >
-          <vs-button @click="addAddOn()" type="border" class="mb-4 mr-4">
             <span class="flex items-center">
               <feather-icon icon="PlusIcon" svgClasses="h-4 w-4 mr-1" />
-              <span>New Item Add-On</span>
+              <span>New Value</span>
             </span>
           </vs-button>
-        </vs-col>
-      </vs-row>
+        </div>
+      </div>
+      <vs-divider></vs-divider>
+      <div class="text-center">
+        <vs-button @click="addAddOn()" type="border" class="mb-4 mr-4">
+          <span class="flex items-center">
+            <feather-icon icon="PlusIcon" svgClasses="h-4 w-4 mr-1" />
+            <span>New Item Add-On</span>
+          </span>
+        </vs-button>
+      </div>
     </vx-card>
     <vx-card
       title="Images"
@@ -232,23 +211,14 @@
         @on-success="successUpload"
       />
     </vx-card>
-    <vs-row>
-      <vs-col
-        class="mt-3"
-        vs-offset="4"
-        vs-type="flex"
-        vs-justify="center"
-        vs-align="center"
-        vs-w="4"
-      >
-        <vs-button @click="addMenuItem()" type="filled" class="mb-4 mr-4">
-          <span class="flex items-center">
-            <feather-icon icon="SaveIcon" svgClasses="h-4 w-4 mr-1" />
-            <span>Save Item</span>
-          </span>
-        </vs-button>
-      </vs-col>
-    </vs-row>
+    <div class="text-center">
+      <vs-button @click="addMenuItem()" type="filled" class="mb-4 mr-4">
+        <span class="flex items-center">
+          <feather-icon icon="SaveIcon" svgClasses="h-4 w-4 mr-1" />
+          <span>Save Item</span>
+        </span>
+      </vs-button>
+    </div>
   </div>
 </template>
 
@@ -261,7 +231,7 @@ export default {
       itemName: "Moroccan Butternut",
       itemDescription:
         "Roasted butternut, spiced chickpeas, candied walnuts, cherry tomatoes, feta & spring onions tossed with mixed lettuce.",
-      itemPrice: 20.50,
+      itemPrice: 20.5,
       itemPrepTime: 10,
       itemCategory: "",
       itemSubCategory: "",
