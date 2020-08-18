@@ -126,6 +126,10 @@ router.post('/', (req, res) => {
         restaurantController.orderPayment(req.body, res);
         break;
       }
+      case 'addReview': {
+        restaurantController.addReview(req.body, res);
+        break;
+      }
       case 'ratingPhrases': {
         restaurantController.getRatingPhrases(req.body, res);
         break;

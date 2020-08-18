@@ -4,7 +4,7 @@ const paymentEmail = require('../helper/notifications/sendEmail');
 const { validateToken, tokenState } = require('../helper/tokenHandler');
 const {
   getReviews,
-  getRatingPhrases,
+  getRatingPhrasesObj,
   getMenuCategories,
   getOrderHistory,
   getOrderItems
@@ -283,7 +283,7 @@ module.exports = {
             }
           }));
 
-          menuPromises.push(getRatingPhrases(reqBody.restaurantId).then((rPhrase) => {
+          menuPromises.push(getRatingPhrasesObj(reqBody.restaurantId).then((rPhrase) => {
             if (disableFields && reqBody.disableFields.includes('ratingPhrases')) {
               menuResponse.ratingPhrases = 'disabled';
             } else {
@@ -915,6 +915,128 @@ module.exports = {
         })
         .catch((err) => {
           console.error('Query Error [Order Payment - Check Order Existence]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  addReview: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'type')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'itemId')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'orderId')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'ratingScore')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'comment')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'public')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'phrases')
+      || Object.keys(reqBody).length !== 9) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // check access token
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      // check if items exists
+      let query = '';
+      switch (reqBody.type.toLowerCase()) {
+        case 'menuitem':
+          query = 'SELECT menuitemid FROM public.menuitem WHERE menuitemid = $1::integer;';
+          break;
+        case 'restaurant':
+          query = 'SELECT restaurantid FROM public.restaurant WHERE restaurantid = $1::integer;';
+          break;
+        case 'waiter': // consider using 'employee'
+          query = 'SELECT userid FROM public.person WHERE userid = $1::integer;';
+          break;
+        default:
+          // request error
+          return response.status(400).send({ status: 400, reason: 'Bad Request' });
+      }
+
+      return db.query(query, [reqBody.itemId])
+        .then((res) => {
+          if (res.rows.length === 0) {
+            // menu item, restaurant or employee not found
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          // check if order exists
+          return db.query(
+            'SELECT orderid, customerid, orderstatus FROM public.customerorder'
+            + ' WHERE orderid = $1::integer AND customerid = $2::integer',
+            [reqBody.orderId, userToken.data.userId]
+          )
+            .then((oRes) => {
+              if (oRes.rows.length === 0) {
+                return response.status(404).send({ status: 404, reason: 'Not Found' });
+              }
+
+              const orderStatus = oRes.rows[0].orderstatus.toLowerCase();
+
+              if (orderStatus === 'rated') {
+                return response.status(409).send({ status: 409, reason: 'Order Already Rated' });
+              // eslint-disable-next-line no-else-return
+              } else if (orderStatus === 'paid') {
+                return response.status(402).send({ status: 402, reason: 'Payment Required' });
+              }
+
+              // rate order
+              let rQuery = 'INSERT INTO public.review';
+              rQuery += ' (orderid, reviewdatetime, ratingscore, comment, public, ';
+              switch (reqBody.type.toLowerCase()) {
+                case 'restaurant':
+                  rQuery += 'restaurantid';
+                  break;
+                case 'waiter': // consider using 'employee'
+                  rQuery += 'employeeid';
+                  break;
+                default:
+                  rQuery += 'menuitemid';
+                  break;
+              }
+
+              rQuery += ') VALUES ';
+              rQuery += '($1::integer, NOW(), $2::real, $3::text, $4::boolean, $5::integer)';
+              rQuery += ' RETURNING reviewid;';
+              return db.query(rQuery, [
+                reqBody.orderId,
+                reqBody.ratingScore,
+                reqBody.comment === '' ? null : reqBody.comment,
+                reqBody.public,
+                reqBody.itemId
+              ])
+                .then((rRes) => {
+                  // add phrases
+                  reqBody.phrases.forEach((rPhrase) => {
+                    Promise.resolve(db.query(
+                      'INSERT INTO public.customerphraserating (reviewid, phraseid, ratingscore)'
+                      + ' VALUES ($1::integer, $2::integer, $3::real);',
+                      [rRes.rows[0].reviewid, rPhrase.phraseId, rPhrase.phraseScore]
+                    ));
+                  });
+
+                  // Done
+                  return response.status(200).send({ status: 200, reason: 'Reivew Recorded' });
+                })
+                .catch((err) => {
+                  console.error('Query Error [Order Review - Add User Review]', err.stack);
+                  return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+                });
+            })
+            .catch((err) => {
+              console.error('Query Error [Order Review - Check Order Existence]', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
+        })
+        .catch((err) => {
+          console.error('Query Error [Order Review - Check Item Existence]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }

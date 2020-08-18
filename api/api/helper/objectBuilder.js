@@ -212,13 +212,13 @@ module.exports = {
       console.error('Query Error [Reviews - Get Restaurant Reviews]', err.stack);
       return [];
     }),
-  getRatingPhrases: (restaurantId = 0) => db.query(
+  getRatingPhrasesObj: (restaurantId = 0) => db.query(
     'SELECT ratingphrase.phrasedescription, AVG(customerphraserating.ratingscore) AS "rating"'
     + ' FROM public.customerphraserating'
     + ' INNER JOIN public.ratingphrase ON ratingphrase.phraseid = customerphraserating.phraseid'
     + ' INNER JOIN public.review ON customerphraserating.reviewid = review.reviewid'
     + " WHERE review.restaurantid = $1::integer AND (LOWER(ratingphrase.type) = 'restaurant'"
-    + " OR LOWER(ratingphrase.type) = 'waiter' OR LOWER(ratingphrase.type) = 'waitess')"
+    + " OR LOWER(ratingphrase.type) = 'waiter' OR LOWER(ratingphrase.type) = 'waitress')"
     + ' GROUP BY ratingphrase.phrasedescription;',
     [restaurantId]
   )
