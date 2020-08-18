@@ -85,13 +85,13 @@ export default {
         }
         
         this.register(data)
-        this.$router.push('/')
+        this.$router.push('/location')
       }
     },
     async registerWithGoogle () {
       let url = await this.googleRegister();
       window.location.href = url;
-      this.$router.push('/');
+      this.$router.push('/location');
     },
     ...mapActions({
       register: 'CustomerStore/register',
