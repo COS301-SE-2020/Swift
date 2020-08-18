@@ -29,7 +29,7 @@ module.exports = {
     // TODO: Check if account is active
     return db.query(
       'SELECT person.userid, person.name, person.surname, person.email, person.password,'
-      + ' customer.theme FROM public.person'
+      + ' customer.theme, customer.checkedin FROM public.person'
       + ' INNER JOIN public.customer ON customer.userid = person.userid'
       + ' WHERE person.email = $1::text',
       [email]
@@ -51,6 +51,7 @@ module.exports = {
           loginResponse.name = res.rows[0].name;
           loginResponse.surname = res.rows[0].surname;
           loginResponse.email = res.rows[0].email;
+          loginResponse.checkedIn = res.rows[0].checkedin;
           loginResponse.theme = res.rows[0].theme;
 
           // Update token in DB - async
