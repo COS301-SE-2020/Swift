@@ -164,7 +164,7 @@ module.exports = {
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
       return db.query(
-        'SELECT tableid, tablenumber, restaurantid, numseats, status FROM public.restauranttable'
+        'SELECT tableid, tablenumber, restaurantid, numseats FROM public.restauranttable'
         + ' WHERE qrcode = $1::text;',
         [reqBody.qrcode]
       )
@@ -176,7 +176,7 @@ module.exports = {
 
           // check if user already checked in
           return db.query(
-            'SELECT checkedin FROM public.customer'
+            'SELECT checkedin FROM public.person'
             + ' WHERE userid = $1::integer;',
             [userToken.data.userId]
           )
@@ -184,7 +184,7 @@ module.exports = {
               if (cRes.rows[0].checkedin == null) {
                 // check in user
                 return db.query(
-                  'UPDATE public.customer SET checkedin = $1::text WHERE userid = $2::integer;',
+                  'UPDATE public.person SET checkedin = $1::text WHERE userid = $2::integer;',
                   [reqBody.qrcode, userToken.data.userId]
                 )
                   .then(() => response.status(200).send({
@@ -200,7 +200,7 @@ module.exports = {
 
               // user already checked in
               return db.query(
-                'SELECT tableid, tablenumber, restaurantid, numseats, status FROM public.restauranttable'
+                'SELECT tableid, tablenumber, restaurantid, numseats FROM public.restauranttable'
                 + ' WHERE qrcode = $1::text;',
                 [cRes.rows[0].checkedin]
               )
