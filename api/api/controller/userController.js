@@ -28,10 +28,8 @@ module.exports = {
     // Check if user exists
     // TODO: Check if account is active
     return db.query(
-      'SELECT person.userid, person.name, person.surname, person.email, person.password,'
-      + ' customer.theme, customer.checkedin FROM public.person'
-      + ' INNER JOIN public.customer ON customer.userid = person.userid'
-      + ' WHERE person.email = $1::text',
+      'SELECT userid, name, surname, email, password, theme, checkedin'
+      + ' FROM public.person WHERE person.email = $1::text',
       [email]
     )
       // eslint-disable-next-line consistent-return

@@ -132,7 +132,7 @@ module.exports = {
     + ' restaurant.restaurantid, restaurant.restaurantname FROM public.menuitem'
     + ' INNER JOIN public.restaurant ON menuitem.restaurantid = restaurant.restaurantid'
     + ' INNER JOIN public.favourite ON menuitem.menuitemid = favourite.menuitemid'
-    + ' WHERE favourite.customerid = $1::integer;',
+    + ' WHERE favourite.userid = $1::integer;',
     [userId]
   )
     .then((res) => {
@@ -157,11 +157,11 @@ module.exports = {
     'SELECT customerorder.orderid, restaurant.restaurantid, restaurant.restaurantname,'
     + ' restaurant.location, customerorder.orderdatetime, customerorder.ordercompletiontime,'
     + ' customerorder.orderstatus, customerorder.waitertip, customerorder.ordertotal,'
-    + ' customerorder.ordernumber, employee.name AS "ename", employee.surname AS "esurname"'
+    + ' customerorder.ordernumber, person.name AS "ename", person.surname AS "esurname"'
     + ' FROM public.customerorder'
     + ' INNER JOIN public.restauranttable ON customerorder.tableid = restauranttable.tableid'
     + ' INNER JOIN public.restaurant ON restauranttable.restaurantid = restaurant.restaurantid'
-    + ' INNER JOIN public.employee ON customerorder.employeeid = employee.userid'
+    + ' INNER JOIN public.person ON customerorder.employeeid = person.userid'
     + ' WHERE customerorder.customerid = $1::integer;',
     [userId]
   )
