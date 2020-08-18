@@ -120,10 +120,10 @@ module.exports = {
 
           // add favourite if it has not already been added
           return db.query(
-            'INSERT INTO public.favourite (menuitemid, customerid)'
+            'INSERT INTO public.favourite (menuitemid, userid)'
             + ' SELECT $1::integer, $2::integer WHERE NOT EXISTS'
             + ' (SELECT 1 FROM public.favourite WHERE'
-            + ' menuitemid = $1::integer AND customerid = $2::integer);',
+            + ' menuitemid = $1::integer AND userid = $2::integer);',
             [reqBody.menuItemId, userToken.data.userId]
           )
             .then(() => getFavourites(userToken.data.userId)
@@ -161,7 +161,7 @@ module.exports = {
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
       return db.query(
-        'DELETE FROM public.favourite WHERE menuitemid = $1::integer AND customerid = $2::integer;',
+        'DELETE FROM public.favourite WHERE menuitemid = $1::integer AND userid = $2::integer;',
         [reqBody.menuItemId, userToken.data.userId]
       )
         .then(() => getFavourites(userToken.data.userId)
