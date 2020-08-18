@@ -87,7 +87,7 @@ module.exports = {
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
       return db.query(
-        'SELECT tableid, restaurantid, numseats, status FROM public.restauranttable'
+        'SELECT tableid, tablenumber, restaurantid, numseats, status FROM public.restauranttable'
         + ' WHERE qrcode = $1::text;',
         [reqBody.qrcode]
       )
@@ -97,37 +97,48 @@ module.exports = {
             return response.status(404).send({ status: 404, reason: 'Not Found' });
           }
 
-          let checkInUsers = [];
-          if (res.rows[0].status.toLowerCase() !== 'vacant') {
-            // get list of already checked in users
-            checkInUsers = res.rows[0].status.split(',');
-          }
-
-          if (checkInUsers.find((uid) => parseInt(uid, 10) === userToken.data.userId)) {
-            // user already checked in
-            return response.status(205).send({
-              restaurantId: res.rows[0].restaurantid,
-              tableId: res.rows[0].tableid
-            });
-          }
-
-          if (res.rows[0].numseats <= checkInUsers.length) {
-            // table is full
-            return response.status(409).send({ status: 409, reason: 'Table Full' });
-          }
-
-          // add user to checked in user list
-          checkInUsers.push(userToken.data.userId);
+          // check if user already checked in
           return db.query(
-            'UPDATE public.restauranttable SET status = $1::text WHERE tableid = $2::integer;',
-            [checkInUsers.join(','), res.rows[0].tableid]
+            'SELECT checkedin FROM public.customer'
+            + ' WHERE userid = $1::integer;',
+            [userToken.data.userId]
           )
-            .then(() => response.status(200).send({
-              restaurantId: res.rows[0].restaurantid,
-              tableId: res.rows[0].tableid
-            }))
+            .then((cRes) => {
+              if (cRes.rows[0].checkedin == null) {
+                // check in user
+                return db.query(
+                  'UPDATE public.customer SET checkedin = $1::text WHERE userid = $2::integer;',
+                  [reqBody.qrcode, userToken.data.userId]
+                )
+                  .then(() => response.status(200).send({
+                    restaurantId: res.rows[0].restaurantid,
+                    tableId: res.rows[0].tableid,
+                    tableNumber: res.rows[0].tablenumber
+                  }))
+                  .catch((err) => {
+                    console.error('Query Error [Restaurant - Update User CheckIn Status]', err.stack);
+                    return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+                  });
+              }
+
+              // user already checked in
+              return db.query(
+                'SELECT tableid, tablenumber, restaurantid, numseats, status FROM public.restauranttable'
+                + ' WHERE qrcode = $1::text;',
+                [cRes.rows[0].checkedin]
+              )
+                .then((checkedInRes) => response.status(205).send({
+                  restaurantId: checkedInRes.rows[0].restaurantid,
+                  tableId: checkedInRes.rows[0].tableid,
+                  tableNumber: checkedInRes.rows[0].tablenumber
+                }))
+                .catch((err) => {
+                  console.error('Query Error [Restaurant - Get Already CheckIn Details]', err.stack);
+                  return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+                });
+            })
             .catch((err) => {
-              console.error('Query Error [Restaurant - Update CheckIn Status]', err.stack);
+              console.error('Query Error [Restaurant - Check User CheckIn Status]', err.stack);
               return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
             });
         })
