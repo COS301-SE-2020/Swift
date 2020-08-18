@@ -105,54 +105,61 @@
             </v-row>
             <v-divider></v-divider>
           </v-card>
-          <v-card class="mx-auto mt-6" flat>
-            <v-row v-for="(rating, i) in ratingType.ratingPhrases" :key="i" justify="center">
-              <v-col cols="11" class="pt-1">
-                <v-card class="mx-auto mt-0 rounded-card" flat width="100%" height="50px" color="#F5F5F5">
-                  <v-row>
-                    <v-col cols="7" align="left" class="pl-8">
-                      <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">{{rating}}</span>
-                    </v-col>
-                    <v-col cols="5" class="pr-6">
-                      <v-rating size="18" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
+          <!-- <v-card class="mx-auto mt-6" flat> -->
+          <v-list-item-group no-action class="mt-6">
+            <template v-for="(rating, i) in ratingType.ratingPhrases">
+              <v-list-item class="px-2 attributeValues" :key="`item-${i}`" :value="rating">
+                <template v-slot:default="{ active }">
+                  <v-row justify="center">
+                          <!-- <v-col cols="8"> -->
+          <!-- <v-row v-for="(rating, i) in ratingType.ratingPhrases" :key="i" justify="center"> -->
+                    <v-col cols="11" class="pt-0 px-0">
+                      <v-card class="mx-auto rounded-card" flat width="100%" height="50px" color="#F5F5F5" style="border-radius: 30px">
+                        <v-row class="px-3">
+                          <v-col cols="7" align="left">
+                            <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">{{rating}}</span>
+                          </v-col>
+                          <v-col cols="5" class="px-6">
+                            <v-rating :input-value="active" size="18" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
+                          </v-col>
+                        </v-row>
+                      </v-card>
                     </v-col>
                   </v-row>
-                </v-card>
-              </v-col>
-            </v-row>
-            <v-row justify="center" class="mt-4">
-              <v-col cols="11" class="pt-1 pb-2" width="100%">
-                <span class="subtitle-1 " style="font-size: 17px !important;">Share your feedback</span>
-              </v-col>
-            </v-row>
-            <v-row justify="center">
-              <v-col cols="11" class="pt-0 pb-0">
-                <v-textarea class="commentSection" label="Tell us what you liked..." outlined single-line auto-grow  rows="5" row-height="20"></v-textarea>
-              </v-col>
-            </v-row>
-            <v-row class="mt-1" justify="center" v-if="currentIndex != (rating.length - 1)">
-              <v-col cols="11" class="pt-0" width="100%">
-                <v-checkbox class="pt-0" v-model="share[ind]" label="Share with public"></v-checkbox>
-                <!-- <v-btn icon @click="togglePublicRestaurant">
-                  <v-icon color="secondary" v-text="(selectedRestaurant ? 'mdi-check-box-outline' : 'mdi-checkbox-blank-outline')"></v-icon>
-                </v-btn>
-                <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">Share with public</span> -->
-              </v-col>
-            </v-row>
-            <v-row class="mt-6 mb-4" justify="center">
-              <v-col cols="11" class="pt-0" width="100%">
-                <v-row class="d-flex justify-space-around">
-                  <v-col cols="5" class="pa-0" align="center">
-                    <v-btn v-show="currentIndex != 0" rounded color="#F5F5F5" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showPrevious">Previous</v-btn>
-                  </v-col>
-                  <v-col cols="5" class="pa-0" align="center">
-                    <v-btn v-show="currentIndex != (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showNext">Next</v-btn>
-                    <v-btn v-show="currentIndex == (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="submitRating">Submit</v-btn>
-                  </v-col>
-                </v-row>
-              </v-col>
-            </v-row>
-          </v-card>
+                  </template>
+              </v-list-item>
+            </template>
+          </v-list-item-group>
+                  <v-row justify="center" class="mt-4">
+                    <v-col cols="11" class="pt-1 pb-2" width="100%">
+                      <span class="subtitle-1 " style="font-size: 17px !important;">Share your feedback</span>
+                    </v-col>
+                  </v-row>
+                  <v-row justify="center">
+                    <v-col cols="11" class="pt-0 pb-0">
+                      <v-textarea :input-value="active" class="commentSection" label="Tell us what you liked..." outlined single-line auto-grow  rows="5" row-height="20"></v-textarea>
+                    </v-col>
+                  </v-row>
+                  <v-row class="mt-1" justify="center" v-if="currentIndex != (rating.length - 1)">
+                    <v-col cols="11" class="pt-0" width="100%">
+                      <v-checkbox :input-value="active" class="pt-0" v-model="share[index]" label="Share with public"></v-checkbox>
+                    </v-col>
+                  </v-row>
+                  <v-row class="mt-6 mb-4" justify="center">
+                    <v-col cols="11" class="pt-0" width="100%">
+                      <v-row class="d-flex justify-space-around">
+                        <v-col cols="5" class="pa-0" align="center">
+                          <v-btn v-show="currentIndex != 0" rounded color="#F5F5F5" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showPrevious">Previous</v-btn>
+                        </v-col>
+                        <v-col cols="5" class="pa-0" align="center">
+                          <v-btn v-show="currentIndex != (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showNext">Next</v-btn>
+                          <v-btn v-show="currentIndex == (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="submitRating">Submit</v-btn>
+                        </v-col>
+                      </v-row>
+                    </v-col>
+                  </v-row>
+                
+          <!-- </v-card> -->
         </v-card>
 
         <v-overlay relative opacity="0.25" :value="submitted" z-index="10">
@@ -206,7 +213,11 @@ export default {
           info: [{
             name: 'Avo on Toast',
             img: '',
-          },],
+          },
+          {
+            name: 'Classic Breakfast',
+            img: '',
+          }],
           ratingPhrases: [
             'Taste', 'Presentation', 'Value'
           ],

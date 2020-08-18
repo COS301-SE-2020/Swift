@@ -57,8 +57,8 @@ export default {
     return {
       showPassword: false,
       showPlaceholder: false,
-      password: 'lee123',
-      email: 'jLee@gmail.com',
+      password: 'john123',
+      email: 'john@doe.com',
       isLoading: false,
       errorMsg: '',
     }
