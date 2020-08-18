@@ -54,13 +54,8 @@
           </v-tab-item>
         </v-tabs-items>
 
-
-      <!-- =============================================================================================================== -->
-
-
     </v-container>
-       <!--snackbar shows table number on successful checkin -->
-      <v-snackbar id="notification" :timeout="2000" centered color="primary" elevation="24" v-model="snackbar">{{ tableNumber }}</v-snackbar>
+    <v-snackbar :v-if=checkedIn id="notification" :timeout="2000" centered color="primary" elevation="24" v-model="snackbar">You have been checked-in to {{menu.name}}</v-snackbar>
     <NavBar></NavBar>
   </div>
 </template>
@@ -138,12 +133,19 @@ export default {
   }),
   methods: {
     goToMenuItem(id) {
-      // insert call to fetch menu item
       this.$router.push("/menuItem/" + id);
     },
     changeFavouriteFab() {
       this.favourited = !this.favourited;
     },
+    checkedIn() {
+      var checkedIn = localStorage.getItem('checked-in');
+
+      if (checkedIn == 'true') 
+        return true;
+      else 
+        return false;
+    }
   },
   mounted: function() {
     if (this.displayNotification) {
@@ -164,7 +166,6 @@ export default {
       retrieveMenu: 'MenuStore/retrieveMenu',
     }),
     ...mapGetters({
-      tableNumber: "RestaurantsStore/getTableNumber",
       displayNotification: "RestaurantsStore/getDisplayNotification",
       menu: "MenuStore/getMenu"
     })

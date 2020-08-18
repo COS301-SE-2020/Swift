@@ -6,7 +6,7 @@
       <div class="subtitle-2">Scanning will start automatically</div>
     </div>
     <div class="row d-flex flex-column align-center w-50">
-      <qrcode-stream class="w-50" @decode="onQRDecode" @init="onQRInit"></qrcode-stream>
+      <qrcode-stream class="w-50" @decode="onQRDecode"></qrcode-stream>
     </div>
     <div class="row d-flex flex-column align-center">
       <v-row class="justify-space-around">
@@ -27,24 +27,29 @@ import { mapActions, mapGetters, mapMutations } from "vuex";
 
 export default {
   methods: {
-    goToRestaurant() {
-      this.updateDisplayNotification(true);
+    goToRestaurant(restaurantId) {
       this.updateCheckInFlag(true);
-      this.$router.push("/menu")
+      this.$store.dispatch('RestaurantsStore/retrieveRestaurantMenu', restaurantId);
+      this.$router.push("/menu/" + restaurantId)
     },
     goToHome() {
       this.$router.push("/")
     },
-    onQRDecode(result) {
-      this.setTable(result);
-      this.goToRestaurant();
+    async onQRDecode(result) {
+      var data = {
+        "qrcode": result
+      }
+      var tableData = await this.checkInCustomer(data);
+      localStorage.setItem('checked-in', 'true');
+      
+      this.goToRestaurant(tableData.restaurantId);
     },
     ...mapMutations({
       setTable : 'RestaurantStore/setTableNumber',
     }),
     ...mapActions({
-      updateCheckInFlag: 'RestaurantStore/updateCheckInFlag',
-      updateDisplayNotification: 'RestaurantStore/updateDisplayNotification',
+      checkInCustomer: 'CustomerStore/checkInCustomer',
+      updateCheckInFlag: 'CustomerStore/UPDATE_CHECKED_IN',
     }),
   },
 };

@@ -28,6 +28,19 @@ const getters = {
 
 // Actions 
 const actions = {
+  checkInCustomer({commit}, data) {
+    return axios.post('https://api.swiftapp.ml', 
+      {
+        "requestType": "checkin",
+        "qrcode": data.qrcode,
+        "token": this.getters['CustomerStore/getToken'],
+      }
+    ).then(result => {
+      return result.data;
+    }).catch(({ response }) => {
+    });
+  },
+
   login({commit}, data) {
     return axios.post('https://api.swiftapp.ml', 
       {
@@ -48,19 +61,16 @@ const actions = {
     });
   },
 
-  async googleLogin({commit}, data) {
-    const client = new OAuth2Client('415163052147-np5h380l61kp40l50eqk5qqgh3t3ku2r.apps.googleusercontent.com');
-    const ticket = await client.verifyIdToken({
-      idToken: data.google.id_token,
-      audience: '415163052147-np5h380l61kp40l50eqk5qqgh3t3ku2r.apps.googleusercontent.com'
+  googleLogin({commit}) {
+    return axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "loginGoogle"
+    } 
+    ).then(result => {
+      return response.data.url
+    }).catch(({ response }) => {
+      return response.data.url
     });
-    const payload = ticket.getPayload();
-    console.log('Google payload is '+JSON.stringify(payload));
-    const userid = payload['sub'];
-    let email = payload['email'];
-    let emailVerified = payload['email_verified'];
-    let name = payload["name"];
-    let pictureUrl = payload["picture"];
   },
 
   register({commit}, data) {
@@ -82,19 +92,16 @@ const actions = {
     });
   },
 
-  async googleRegister({commit}, data) {
-    const client = new OAuth2Client('415163052147-np5h380l61kp40l50eqk5qqgh3t3ku2r.apps.googleusercontent.com');
-    const ticket = await client.verifyIdToken({
-      idToken: data.google.id_token,
-      audience: '415163052147-np5h380l61kp40l50eqk5qqgh3t3ku2r.apps.googleusercontent.com'
+  googleRegister({commit}) {
+    return axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "loginGoogle"
+    } 
+    ).then(result => {
+      return response.data.url
+    }).catch(({ response }) => {
+      return response.data.url
     });
-    const payload = ticket.getPayload();
-    console.log('Google payload is '+JSON.stringify(payload));
-    const userid = payload['sub'];
-    let email = payload['email'];
-    let emailVerified = payload['email_verified'];
-    let name = payload["name"];
-    let pictureUrl = payload["picture"];
   },
 
   reset({ commit }) {
@@ -140,6 +147,10 @@ const mutations = {
 
   UPDATE_FAVOURITES(state, data) {
     state.customer.favourites = data;
+  },
+
+  UPDATE_CHECKED_IN(state, data) {
+    state.checkedIn = data;
   },
 
 

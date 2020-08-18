@@ -3,7 +3,7 @@ import axios from 'axios'
 // State object
 const initialState = () => ({
   allRestaurants: {},
-  tableNumber: "Checked in manually",
+  tableNumber: "",
   checkedIn: false,
   displayNotification: false,
 });

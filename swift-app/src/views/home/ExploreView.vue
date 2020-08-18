@@ -17,7 +17,7 @@
           </v-col>
         </v-row>
 
-        <v-card v-show="checkedIn" color="accent" height="80px" flat tile style="border-radius: 13px !important" class="mt-2 mb-5">
+        <v-card v-show="checkedIn()" color="accent" height="80px" flat tile style="border-radius: 13px !important" class="mt-2 mb-5">
           <v-row class="d-flex justify-space-between specialsInfo">
             <v-col cols="10" class="d-flex justify-center px-0">
               <div style="text-align: center" class="checkedInBannerText">
@@ -143,7 +143,7 @@
           </v-row>
         </v-card>
 
-        <v-btn height="50px" width="50px" class="checkInBtn" @click=goToCheckin app color="primary" fab style="position: fixed; bottom: 65px; right: 13px">
+        <v-btn v-if="!checkedIn()" height="50px" width="50px" class="checkInBtn" @click=goToCheckin app color="primary" fab style="position: fixed; bottom: 65px; right: 13px">
           <v-icon size="30">mdi-table-furniture</v-icon>
         </v-btn>
       </v-container>
@@ -253,7 +253,7 @@ export default {
     // ],
     favourited: false,
     called: false,
-    checkedIn: false,
+    // checkedIn: false,
     restaurant: "Mugg & Bean",
     cycle: false,
     carouselIndex: 0
@@ -274,6 +274,16 @@ export default {
     },
     goToCart() {
       this.$router.push('/cart')
+    },
+    checkedIn() {
+      let checkedInVal = localStorage.getItem('checked-in');
+      console.log("explore", checkedInVal)
+
+      if (checkedInVal == 'true') {
+        return true;
+      } else {
+        return false;
+      }
     }
   },
   computed: {

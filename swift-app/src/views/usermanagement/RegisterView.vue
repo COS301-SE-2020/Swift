@@ -88,26 +88,10 @@ export default {
         this.$router.push('/')
       }
     },
-    registerWithGoogle () {
-      this.$gAuth
-      .signIn()
-      .then(GoogleUser => {
-        // on success do something
-        console.log('GoogleUser', GoogleUser)
-        console.log('getId', GoogleUser.getId())
-        console.log('getBasicProfile', GoogleUser.getBasicProfile())
-        console.log('getAuthResponse', GoogleUser.getAuthResponse())
-        var userInfo = {
-          loginType: 'google',
-          google: GoogleUser.getAuthResponse(),
-        }
-        // this.$store.commit('setLoginUser', userInfo)
-        this.googleRegister(userInfo);
-        this.$router.push('/');
-      })
-      .catch(error => {
-        console.log('error', error)
-      })
+    async registerWithGoogle () {
+      let url = await this.googleRegister();
+      window.location.href = url;
+      this.$router.push('/');
     },
     ...mapActions({
       register: 'CustomerStore/register',

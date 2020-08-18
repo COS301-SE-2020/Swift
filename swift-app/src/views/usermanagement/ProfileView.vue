@@ -44,6 +44,24 @@
             </v-list-item-action>
           </v-list-item>
         </v-list>
+        <!-- Test check out -->
+        <v-list subheader>
+          <v-list-item @click=checkOut()  v-ripple>
+            <v-list-item-avatar>
+              <v-icon>mdi-logout</v-icon>
+            </v-list-item-avatar>
+            <v-list-item-content>
+              <v-list-item-title >Check out</v-list-item-title>
+            </v-list-item-content>
+
+            <v-list-item-action>
+              <v-btn icon>
+                <v-icon color="secondary">mdi-chevron-right</v-icon>
+              </v-btn>
+            </v-list-item-action>
+          </v-list-item>
+        </v-list>
+
       </v-tab-item>
       <v-tab-item>
         <v-card flat>
@@ -97,6 +115,10 @@ export default {
     },
     editProfile () {
     },
+    checkOut() {
+      localStorage.setItem('checked-in', 'false');
+      console.log(localStorage.getItem('checked-in'));
+    }
   },
   computed: {
     ...mapGetters({

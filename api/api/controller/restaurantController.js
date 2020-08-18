@@ -1,5 +1,6 @@
 const { v4: uuidv4 } = require('uuid');
 const db = require('../db');
+const paymentEmail = require('../helper/notifications/sendEmail');
 const { validateToken, tokenState } = require('../helper/tokenHandler');
 const {
   getReviews,
@@ -756,7 +757,13 @@ module.exports = {
       || !Object.prototype.hasOwnProperty.call(reqBody, 'orderId')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'paymentMethod')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'amountPaid')
-      || Object.keys(reqBody).length !== 5
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'name')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'email')
+      // || !Object.prototype.hasOwnProperty.call(reqBody, 'orderDetails')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'waiterTip')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'orderTotal')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'orderTax')
+      // || Object.keys(reqBody).length !== 5
       || reqBody.amountPaid < 0.0) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
@@ -782,6 +789,18 @@ module.exports = {
             return response.status(205).send();
           }
 
+          // for payment email data
+          const newUserData = {};
+          newUserData.orderId = reqBody.orderId;
+          newUserData.name = reqBody.name;
+          newUserData.email = reqBody.email;
+          // newUserData.details = reqBody.details;
+          newUserData.amountPaid = reqBody.amountPaid; // under items ordered
+          newUserData.orderName = reqBody.orderName;
+          newUserData.paymentMethod = reqBody.paymentMethod;
+          newUserData.waiterTip = reqBody.waiterTip;
+          newUserData.orderTax = reqBody.orderTax;
+          newUserData.orderTotal = reqBody.orderTotal;
           // pay for order
           const newOrderStatus = 'Paid';
 
@@ -794,7 +813,9 @@ module.exports = {
               'UPDATE public.customerorder SET orderstatus = $1::text WHERE orderid = $2::integer',
               [newOrderStatus, reqBody.orderId]
             )
-              .then(() => response.status(200).send())
+              .then(() => response.status(200).send(),
+                paymentEmail.paymentEmail(newUserData)) // Payment email
+              // add email here
               .catch((err) => {
                 console.error('Query Error [Order Payment - Update Order Status]', err.stack);
                 return response.status(500).send({ status: 500, reason: 'Internal Server Error' });

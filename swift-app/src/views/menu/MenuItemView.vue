@@ -2,6 +2,9 @@
   <v-card class="mx-auto" flat>
     <v-carousel height="200px" :show-arrows="false" hide-delimiter-background continuous>
       <v-carousel-item v-for="(item,i) in items" :key="i" :src="item.img"></v-carousel-item>
+      <!-- <v-carousel-item>
+        <iframe src="https://studio.onirix.com/modelviewer/012b5b7f41d14cbba1d8728d960d9011?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUyMDIsImFzc2V0SWQiOjEzOTU4NCwicm9sZSI6OCwiaWF0IjoxNTkxMDMwNDg0fQ.LgMQAzyY6tmJyGY2-_RcT38SEibg-eWoHRmtQoUMkK8"  frameborder="0"></iframe>
+      </v-carousel-item> -->
     </v-carousel>
     <v-btn width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 10px; left: 10px;">
       <v-icon>mdi-chevron-left</v-icon>
