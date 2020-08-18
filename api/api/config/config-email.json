@@ -1,4 +1,5 @@
 {
-  "username": "email_user",
-  "password": "email_password"
+  "apiKey": "mailgun-api-key",
+  "domainFrom": "swiftapp.ml",
+  "emailFrom": "Swift App <noreply@swiftapp.ml>"
 }
