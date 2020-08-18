@@ -45,11 +45,35 @@
         </span>
       </vs-button>
     </div>
+
+    <vs-popup
+      class="addRestaurantPopup text-center"
+      title="Add new Restaurant"
+      :active.sync="addTablePopupActive"
+    >
+      <AddRestaurantPopup></AddRestaurantPopup>
+      <vs-button
+        @click="addTable()"
+        style="margin-top:15px"
+        color="primary"
+        type="filled"
+      >Create Restaurant</vs-button>
+    </vs-popup>
   </div>
 </template>
-
 <script>
+import AddRestaurantPopup from "../../components/AddRestaurantPopup";
+
 export default {
+  components: {
+    AddRestaurantPopup,
+  },
+  data() {
+    return {
+      addTablePopupActive: true,
+    };
+  },
+
   /*
 	"requestType": "createRestaurant",
   "name": "O'Galito",
@@ -60,7 +84,6 @@ export default {
   */
 };
 </script>
-
 
 <style scoped>
 .restaurantDescription {

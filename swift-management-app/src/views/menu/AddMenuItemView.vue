@@ -69,13 +69,13 @@
           </vs-button>
 
           <vs-row class="vx-row mb-4">
-            <vs-col vs-type="flex" vs-justify="center" vs-align="center" vs-w="4">
+            <vs-col class="mb-4" vs-type="flex" vs-justify="center" vs-align="center" vs-lg="4" vs-sm="12">
               <vs-input label="Item Name" v-model="itemName" />
             </vs-col>
-            <vs-col vs-type="flex" vs-justify="center" vs-align="center" vs-w="4">
+            <vs-col  class="mb-4" vs-type="flex" vs-justify="center" vs-align="center" vs-lg="4" vs-sm="12">
               <vs-input type="number" label="Price (ZAR)" min="0" step="0.5" v-model="itemPrice" />
             </vs-col>
-            <vs-col vs-type="flex" vs-justify="center" vs-align="center" vs-w="4">
+            <vs-col  class="mb-4" vs-type="flex" vs-justify="center" vs-align="center" vs-lg="4" vs-sm="12">
               <vs-input
                 type="number"
                 label="Preperation Time (min)"
