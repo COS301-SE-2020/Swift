@@ -492,17 +492,18 @@ module.exports = {
 
           let oQuery = 'SELECT customerorder.orderid, customerorder.orderstatus,'
             + ' restauranttable.tableid, restauranttable.tablenumber,'
-            + ' employee.userid AS "employeeid", employee.employeenumber,'
-            + ' employee.name AS "ename", employee.surname AS "esurname",'
+            + ' person.userid AS "employeeid", restaurantemployee.employeenumber,'
+            + ' person.name AS "ename", person.surname AS "esurname",'
             + ' customerorder.orderdatetime, customerorder.ordercompletiontime'
             + ' FROM public.customerorder'
             + ' INNER JOIN public.restauranttable ON customerorder.tableid = restauranttable.tableid'
-            + ' INNER JOIN public.employee ON customerorder.employeeid = employee.userid'
+            + ' INNER JOIN public.person ON customerorder.employeeid = person.userid'
+            + ' INNER JOIN public.restaurantemployee ON restaurantemployee.userid = person.userid'
             + ' WHERE restauranttable.restaurantid = $1::integer';
 
           // check if past orders should be included
           if (reqBody.getAllOrders === false) {
-            oQuery += " AND NOT (LOWER(orderstatus) = 'paid' OR LOWER(orderstatus) = 'complete')";
+            oQuery += " AND NOT (LOWER(orderstatus) = 'paid' OR LOWER(orderstatus) = 'rated')";
           }
 
           return db.query(oQuery, [reqBody.restaurantId])
