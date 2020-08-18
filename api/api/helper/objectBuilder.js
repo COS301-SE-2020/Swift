@@ -156,7 +156,8 @@ module.exports = {
   getOrderHistory: (userId = 0) => db.query(
     'SELECT customerorder.orderid, restaurant.restaurantid, restaurant.restaurantname,'
     + ' restaurant.location, customerorder.orderdatetime, customerorder.ordercompletiontime,'
-    + ' customerorder.orderstatus, employee.name AS "ename", employee.surname AS "esurname"'
+    + ' customerorder.orderstatus, customerorder.waitertip, customerorder.ordertotal,'
+    + ' employee.name AS "ename", employee.surname AS "esurname"'
     + ' FROM public.customerorder'
     + ' INNER JOIN public.restauranttable ON customerorder.tableid = restauranttable.tableid'
     + ' INNER JOIN public.restaurant ON restauranttable.restaurantid = restaurant.restaurantid'
@@ -177,7 +178,9 @@ module.exports = {
             historyItem.orderDateTime = hist.orderdatetime;
             historyItem.orderCompletionTime = hist.ordercompletiontime;
             historyItem.orderStatus = hist.orderstatus;
-            historyItem.total = orderItems.orderTotal;
+            // historyItem.total = orderItems.orderTotal;
+            historyItem.waiterTip = hist.waitertip;
+            historyItem.total = hist.ordertotal;
             historyItem.orderEmployeeName = hist.ename;
             historyItem.orderEmployeeSurname = hist.esurname;
             historyItem.items = orderItems.items;
