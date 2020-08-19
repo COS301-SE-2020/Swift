@@ -268,14 +268,19 @@ module.exports = {
     // Check token
     const userToken = validateToken(reqBody.token);
     if (userToken.state === tokenState.VALID) {
-      // check if restaurant exists
-      return db.query(
-        'SELECT restaurantname, location, coverimageurl FROM public.restaurant'
-        + ' WHERE restaurantid = $1::integer',
-        [reqBody.restaurantId]
-      )
-        // eslint-disable-next-line consistent-return
-        .then((res) => {
+      return (async () => {
+        const client = await db.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+
+          // check if restaurant exists
+          const res = await client.query(
+            'SELECT restaurantname, location, coverimageurl FROM public.restaurant'
+            + ' WHERE restaurantid = $1::integer',
+            [reqBody.restaurantId]
+          );
+
           if (res.rows.length === 0) {
             // restaurant does not exist
             return response.status(404).send({ status: 404, reason: 'Not Found' });
@@ -283,7 +288,6 @@ module.exports = {
 
           // get menu
           const menuResponse = {};
-          const menuPromises = [];
           menuResponse.name = res.rows[0].restaurantname;
           menuResponse.location = res.rows[0].location;
 
@@ -299,44 +303,39 @@ module.exports = {
             menuResponse.image = res.rows[0].coverimageurl;
           }
 
-          menuPromises.push(getReviews(reqBody.restaurantId).then((reviews) => {
-            if (disableFields && reqBody.disableFields.includes('reviews')) {
-              menuResponse.reviews = 'disabled';
-            } else {
-              menuResponse.reviews = reviews;
-            }
-          }));
+          // get reviews
+          if (disableFields && reqBody.disableFields.includes('reviews')) {
+            menuResponse.reviews = 'disabled';
+          } else {
+            menuResponse.reviews = await getReviews(reqBody.restaurantId);
+          }
 
-          menuPromises.push(getRatingPhrasesObj(reqBody.restaurantId).then((rPhrase) => {
-            if (disableFields && reqBody.disableFields.includes('ratingPhrases')) {
-              menuResponse.ratingPhrases = 'disabled';
-            } else {
-              menuResponse.ratingPhrases = rPhrase;
-            }
-          }));
+          // get rating phrases
+          if (disableFields && reqBody.disableFields.includes('ratingPhrases')) {
+            menuResponse.ratingPhrases = 'disabled';
+          } else {
+            menuResponse.ratingPhrases = await getRatingPhrasesObj(reqBody.restaurantId);
+          }
 
-          menuPromises.push(new Promise((resolve, reject) => {
-            menuPromises.push(getMenuCategories(reqBody.restaurantId).then((categoryPromise) => {
-              menuResponse.categories = [];
-              Promise.all(categoryPromise)
-                .then((categoryItem) => {
-                  categoryItem.forEach((catItem) => {
-                    menuResponse.categories.push(catItem);
-                  });
-                  resolve();
-                })
-                .catch((err) => {
-                  reject(err);
-                });
-            }));
-          }));
+          // get menu categories
+          menuResponse.categories = await getMenuCategories(reqBody.restaurantId);
 
-          Promise.all(menuPromises).then(() => response.status(200).send(menuResponse))
-            .catch((err) => {
-              console.error('Get Menu Promise Error', err.stack);
-              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
-            });
-        })
+          // commit changes
+          client.query('COMMIT');
+
+          // send response
+          return response.status(200).send(menuResponse);
+        } catch (err) {
+          // rollback changes
+          await client.query('ROLLBACK');
+
+          // throw error for async catch
+          throw err;
+        } finally {
+          // close connection
+          client.release();
+        }
+      })()
         .catch((err) => {
           console.error('Query Error [Restaurant - Get Menu Details]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
