@@ -104,7 +104,7 @@ router.post('/', (req, res) => {
         break;
       }
       case 'getTableStatus': {
-        restaurantController.getTableStatus(req.body, res);
+        restaurantAdminController.getTableStatus(req.body, res);
         break;
       }
       case 'addOrder': {
