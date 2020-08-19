@@ -5,6 +5,9 @@ import 'material-icons/iconfont/material-icons.css'
 import 'vuesax/dist/vuesax.css';
 Vue.use(Vuesax)
 
+import Vuelidate from 'vuelidate'
+Vue.use(Vuelidate)
+
 import axios from "./axios.js"
 Vue.prototype.$http = axios
 
