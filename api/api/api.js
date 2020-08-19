@@ -2,6 +2,7 @@ const express = require('express');
 const adminController = require('./controller/adminController');
 const authController = require('./controller/authController');
 const restaurantController = require('./controller/restaurantController');
+const restaurantAdminController = require('./controller/restaurantAdminController');
 const userController = require('./controller/userController');
 const healthCheck = require('./helper/healthCheck');
 
@@ -79,7 +80,7 @@ router.post('/', (req, res) => {
         break;
       }
       case 'createRestaurant': {
-        restaurantController.createRestaurant(req.body, res);
+        restaurantAdminController.createRestaurant(req.body, res);
         break;
       }
       case 'checkin': {
@@ -95,7 +96,7 @@ router.post('/', (req, res) => {
         break;
       }
       case 'createTable': {
-        restaurantController.createTable(req.body, res);
+        restaurantAdminController.createTable(req.body, res);
         break;
       }
       case 'getTableQR': {

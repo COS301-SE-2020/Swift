@@ -1,4 +1,3 @@
-const { v4: uuidv4 } = require('uuid');
 const db = require('../db');
 const paymentEmail = require('../helper/notifications/sendEmail');
 const { validateToken, tokenState } = require('../helper/tokenHandler');
@@ -9,8 +8,6 @@ const {
   getOrderHistory,
   getOrderItems
 } = require('../helper/objectBuilder');
-
-// TODO: Check that the restaurant id is not a placeholder (id == 0)
 
 module.exports = {
   getRestaurantList: (reqBody, response) => {
@@ -24,8 +21,7 @@ module.exports = {
 
     if (userToken.state === tokenState.VALID) {
       return db.query(
-        'SELECT restaurantid, restaurantname, location, coverimageurl FROM public.restaurant'
-        + ' WHERE restaurantid != 0;'
+        'SELECT restaurantid, restaurantname, location, coverimageurl FROM public.restaurant;'
       )
         .then((res) => {
           const restaurantResponse = {};
@@ -653,117 +649,6 @@ module.exports = {
         })
         .catch((err) => {
           console.error('Query Error [Update Order Status - Check Order Existence]', err.stack);
-          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
-        });
-    }
-
-    if (userToken.state === tokenState.REFRESH) {
-      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
-    }
-
-    // Invalid token
-    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
-  },
-  createRestaurant: (reqBody, response) => {
-    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
-      || !Object.prototype.hasOwnProperty.call(reqBody, 'name')
-      || !Object.prototype.hasOwnProperty.call(reqBody, 'description')
-      || !Object.prototype.hasOwnProperty.call(reqBody, 'location')
-      || !Object.prototype.hasOwnProperty.call(reqBody, 'coverImageURL')
-      || Object.keys(reqBody).length !== 6) {
-      return response.status(400).send({ status: 400, reason: 'Bad Request' });
-    }
-
-    // Check token
-    const userToken = validateToken(reqBody.token, true);
-    if (userToken.state === tokenState.VALID) {
-      // check admin status
-      // TODO: check more admin information [security]
-      // TODO: allow user to be an admin for more than one restaurant
-      if (userToken.data.isAdmin) {
-        return db.query(
-          'INSERT INTO public.restaurant (restaurantName, restaurantDescription, location, coverimageurl)'
-          + ' VALUES ($1::text, $2::text, $3::text, $4::text)'
-          + ' RETURNING restaurantid',
-          [
-            reqBody.name,
-            reqBody.description,
-            reqBody.location,
-            reqBody.coverImageURL
-          ]
-        )
-          .then((res) => db.query(
-            'UPDATE public.adminuser SET restaurantid = $1::integer'
-            + ' WHERE userid = $2::integer;',
-            [res.rows[0].restaurantid, userToken.data.userId]
-          )
-            .then(() => response.status(201).send({ restaurantId: res.rows[0].restaurantid }))
-            .catch((err) => {
-              console.error('Query Error [Restaurant - Update Restaurant Admin]', err.stack);
-              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
-            }))
-          .catch((err) => {
-            console.error('Query Error [Restaurant - Create Restaurant]', err.stack);
-            return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
-          });
-      }
-    }
-
-    if (userToken.state === tokenState.REFRESH) {
-      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
-    }
-
-    // Invalid token
-    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
-  },
-  createTable: (reqBody, response) => {
-    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
-      || !Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')
-      || !Object.prototype.hasOwnProperty.call(reqBody, 'tableNumber')
-      || !Object.prototype.hasOwnProperty.call(reqBody, 'seatCount')
-      || Object.keys(reqBody).length !== 5
-      || Number.isNaN(reqBody.seatCount)
-      || reqBody.seatCount < 1) {
-      return response.status(400).send({ status: 400, reason: 'Bad Request' });
-    }
-
-    // Check token
-    const userToken = validateToken(reqBody.token, true);
-    if (userToken.state === tokenState.VALID) {
-      return db.query(
-        'SELECT restaurantname FROM public.restaurant WHERE restaurant.restaurantid = $1::integer',
-        [reqBody.restaurantId]
-      )
-        .then((resCheck) => {
-          if (resCheck.rows.length === 0) {
-            // restaurant does not exist
-            return response.status(404).send({ status: 404, reason: 'Not Found' });
-          }
-
-          const newTableStatus = 'Vacant';
-          // UUID version 4 with dashes removes
-          const qrcode = uuidv4().replace(/-/g, '');
-          return db.query(
-            'INSERT INTO public.restauranttable'
-            + ' (restaurantid, numseats, tablenumber, status, qrcode)'
-            + ' VALUES ($1::integer, $2::integer, $3::text, $4::text, $5::text)'
-            + ' RETURNING tableid;',
-            [
-              reqBody.restaurantId,
-              parseInt(reqBody.seatCount, 10),
-              reqBody.tableNumber,
-              newTableStatus,
-              qrcode
-            ]
-          )
-            .then((res) => response.status(201).send({ tableId: res.rows[0].tableid, qrcode }))
-            .catch((err) => {
-              console.error('Query Error [Restaurant - Create Restaurant Table]', err.stack);
-              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
-            });
-        })
-        .catch((err) => {
-          console.error('Query Error [Create Table - Check Restaurant Existence]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }
