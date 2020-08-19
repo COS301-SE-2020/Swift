@@ -20,7 +20,7 @@
           </v-col>
         </v-row>
 
-        <v-card v-show="checkedIn()" color="accent" height="80px" flat tile style="border-radius: 13px !important" class="mt-2 mb-5">
+        <v-card v-show="checkedIn()" @click="goToRestaurant(checkedInRestaurantId)" color="accent" height="80px" flat tile style="border-radius: 13px !important" class="mt-2 mb-5">
           <v-row class="d-flex justify-space-between specialsInfo">
             <v-col cols="10" class="d-flex justify-center px-0">
               <div style="text-align: center" class="checkedInBannerText">
@@ -247,9 +247,9 @@ export default {
       this.$router.push('/cart')
     },
     checkedIn() {
-      let checkedInVal = localStorage.getItem('checked-in');
+      let checkedInVal = this.checkedInQRCode;
 
-      if (checkedInVal == 'true') {
+      if (checkedInVal != null) {
         return true;
       } else {
         return false;
@@ -257,6 +257,11 @@ export default {
     }
   },
   async mounted() {
+    // Check-in customer again if system crashes 
+    if (checkedInVal != null && this.checkedInRestaurantId == null) {
+      this.checkInCustomer(checkedInVal)
+    }
+
     var length = await this.allRestaurants.length;
     if (length == undefined) {
       this.isLoading = !this.isLoading;
@@ -284,10 +289,13 @@ export default {
     },
     ...mapActions({
       fetchAllRestaurants: 'RestaurantsStore/allRestaurants',
+      checkInCustomer: 'CustomerStore/checkInCustomer',
     }),
     ...mapGetters({
       allRestaurants: 'RestaurantsStore/getAllRestaurants',
       customerInfo: 'CustomerStore/getCustomerProfile',
+      checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
+      checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
     }),
   },
 }

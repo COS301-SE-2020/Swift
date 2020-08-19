@@ -18,6 +18,7 @@
     <div class="row d-flex flex-column align-center mx-8">
       <v-btn @click="loginCustomer" v-show=!isLoading block rounded class="py-5" color="primary">Sign in</v-btn>
       <v-progress-circular v-show="isLoading" indeterminate color="primary"></v-progress-circular>
+      <v-input class="mt-2" v-show=loginFailed :error-messages=errorMsg error disabled></v-input>
     </div>
     <div class="row d-flex flex-col align-center justify-center">
       <v-col cols="2">
@@ -57,7 +58,8 @@ export default {
       password: 'john123',
       email: 'john@doe.com',
       isLoading: false,
-      errorMsg: '',
+      errorMsg: '*Login Failed',
+      loginFailed: false,
     }
   },
   methods: {
@@ -80,8 +82,12 @@ export default {
         
         let user = await this.login(data);
         this.isLoading = !this.isLoading;
+        this.loginFailed = false
         if (user == "Success") 
           this.$router.push('/');
+        else 
+          this.loginFailed = true
+
       }
     },
     async loginWithGoogle () {
@@ -110,6 +116,12 @@ export default {
       const errors = []
       if (!this.$v.password.$dirty) return errors
       !this.$v.password.required && errors.push('Password is required.')
+      return errors
+    },
+    loginFailed () {
+      const errors = []
+      if (!this.$v.loginFailed.$dirty) return errors
+      !this.$v.loginFailed.required && errors.push('Login Failed.')
       return errors
     },
   },

@@ -6,6 +6,9 @@ const initialState = () => ({
   customer: {},
   isAuthenticated: false,
   token: null,
+  checkedInQRCode: null,
+  checkedInRestaurantId: null,
+  checkedInTableId: null
 });
 
 const state = initialState();
@@ -23,6 +26,15 @@ const getters = {
   getToken( state ) {
     return state.token;
   },
+  getCheckedInQRCode( state ) {
+    return state.checkedInQRCode;
+  },
+  getCheckedInRestaurantId( state ) {
+    return state.checkedInRestaurantId;
+  },
+  getCheckedInTableId( state ) {
+    return state.checkedInTableId;
+  },
   isAuthenticated(state) {
     return state.isAuthenticated;
   }
@@ -38,6 +50,9 @@ const actions = {
         "token": this.getters['CustomerStore/getToken'],
       }
     ).then(result => {
+      commit('SET_CHECKED_IN_CODE', data.qrcode);
+      commit('SET_CHECKED_IN_RESTAURANT_ID', result.data.restaurantId);
+      commit('SET_CHECKED_IN_TABLE_ID', result.data.tableId);
       return result.data;
     }).catch(({ response }) => {
     });
@@ -52,8 +67,9 @@ const actions = {
       }
     ).then(result => {
       commit('SAVE_TOKEN', result.data.token);
+      // sessionStorage.setItem('authToken', result.data.token);
+      commit('SET_CHECKED_IN_CODE', result.data.checkedIn);
       commit('SAVE_CUSTOMER', result.data);
-      // this.dispatch('RestaurantsStore/allRestaurants');
       this.dispatch('OrderStore/initOrderHistory');
       return "Success";
     }).catch(({ response }) => {
@@ -155,10 +171,21 @@ const mutations = {
     state.customer.favourites = data;
   },
 
-  UPDATE_CHECKED_IN(state, data) {
+  UPDATE_CHECKED_IN(state, status) {
     state.checkedIn = data;
   },
 
+  SET_CHECKED_IN_CODE(state, qrcode) {
+    state.checkedInQRCode = qrcode;
+  },
+
+  SET_CHECKED_IN_RESTAURANT_ID(state, id) {
+    state.checkedInRestaurantId = id;
+  },
+
+  SET_CHECKED_IN_TABLE_ID(state, id) {
+    state.checkedInTableId = id;
+  },
 
   SET_AUTHENTICATION(state, authentication_state) {
     state.isAuthenticated = authentication_state;
