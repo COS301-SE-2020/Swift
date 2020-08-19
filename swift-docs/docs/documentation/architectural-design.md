@@ -4,7 +4,7 @@
 
 ### Architectural Design Diagram
 
-![architectural-design](../../assets/swift-architectural-design.png)
+![architectural-design](../../assets/swift-architectural-design.svg)
 
 ### Discussion
 
