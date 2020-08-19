@@ -35,7 +35,7 @@
                     <v-row class="mx-0 d-flex justify-space-around" @click="viewOrder(item)">
                       <v-col cols="7" class="pb-0 pt-2">
                         <v-list-item-title class="restaurantName pb-1" v-text="item.restaurantName"></v-list-item-title>
-                        <v-rating background-color="secondary" readonly size="13" dense color="yellow darken-3" :value="4"></v-rating>
+                        <!-- <v-rating background-color="secondary" readonly size="13" dense color="yellow darken-3" :value="4"></v-rating> -->
                       </v-col>
                       <v-col cols="5" class="pb-0 pt-2 d-flex justify-end">
                         <v-list-item-action-text class="orderDateTime" v-text="getDate(item.orderDateTime)"></v-list-item-action-text>
@@ -48,7 +48,7 @@
                       </v-col>
                       <v-col class="pb-0 pt-2 pl-0" cols="4">
                         <span class="orderDetails">{{orderItem.quantity}}x </span>
-                        <v-rating background-color="secondary" readonly size="11" class="pl-2" dense color="yellow darken-3" :value="5" style="display: inline"></v-rating>
+                        <!-- <v-rating background-color="secondary" readonly size="11" class="pl-2" dense color="yellow darken-3" :value="5" style="display: inline"></v-rating> -->
                       </v-col>
                     </v-row>
                     <v-row class="mx-0 pb-1 pr-1">
@@ -213,6 +213,7 @@ export default {
       for (let i = 0; i < item.items.length; i++) {
         let data = {
           "menuItemId": item.items[i].menuItemId,
+          "itemTotal": item.items[i].itemTotal,
           "quantity": item.items[i].quantity,
           "orderSelections": item.items[i].orderSelections
         };

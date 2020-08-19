@@ -450,13 +450,13 @@ export default {
       let data = {
         "orderInfo": {
           "restaurantId": 1,
-          "tableId": 1,
-          "employeeId": 2,
-          "orderTotal": this.total.toFixed(2),
+          "tableId": this.checkedInTableId,
+          "employeeId": 6,
           "waiterTip": 0,
           "orderItems": [
             {
               "menuItemId": this.newMenuItem.menuItemId,
+              "itemTotal": this.total,
               "quantity": this.quantity,
               "orderSelections": {
                 "selections": selectionValues
@@ -528,6 +528,9 @@ export default {
     ...mapGetters({
       menu: "MenuStore/getMenu",
       customer: "CustomerStore/getCustomerProfile",
+      itemToEdit: "OrderStore/getItemToEdit",
+      checkedInTableId: "CustomerStore/getCheckedInTableId",
+      
       // checkedInStatus: 'CustomerStore/getCheckedInStatus',
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',

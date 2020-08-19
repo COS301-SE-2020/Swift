@@ -32,7 +32,7 @@
         <div>
           <!-- <v-card v-for="(item,i) in orderInfo()" :key="i" flat> -->
             <v-list v-for="(orderMenuItem,j) in orderInfo().orderItems" :key="j" class="py-2">
-              <v-card :disabled="!checkedIn()">
+              <v-card :disabled="!checkedIn()" @click="editItem(orderMenuItem)">
                 <v-list-item class="pt-1">
                   <v-list-item-content>
                     <v-row>
@@ -41,7 +41,7 @@
                       </v-col>
                       <v-col cols="3 d-flex justify-end">
                         <div>
-                          <v-list-item-title>R{{(orderMenuItem.itemTotal != null) ? orderMenuItem.itemTotal : (0).toFixed(2)}}</v-list-item-title>
+                          <v-list-item-title><span style="color: #f75564; font-size: 14px" class="pr-1">{{orderMenuItem.quantity}}x</span> R{{((orderMenuItem.itemTotal != null) ? orderMenuItem.itemTotal : (0)).toFixed(2)}}</v-list-item-title>
                         </div>
                       </v-col>
                     </v-row>
@@ -54,20 +54,17 @@
                           </div>
                         </div>
                       </v-col>
-                      <v-col cols="4" class="py-0 d-flex justify-end">
+                      <!-- <v-col cols="4" class="py-0 d-flex justify-end">
                         <div v-if="checkedIn()">
-                    <!-- <v-list-item-action-text>R{{(orderInfo().orderTotal != null) ? orderInfo().orderTotal : (0).toFixed(2)}}</v-list-item-action-text> -->
-                          <!-- <v-list-item-action-text> -->
-                            <v-btn @click="decreaseQuantity(orderMenuItem)" fab elevation="2" width="22px" height="22px" class="mr-2">
-                              <v-icon size="15px">mdi-minus</v-icon>
-                            </v-btn>
-                            <div class="body-2 secondary--text" style="display: inline;">{{orderMenuItem.quantity}}</div>
-                            <v-btn @click="increaseQuantity(orderMenuItem)" fab elevation="2" width="22px" height="22px" class="ml-2" color="primary">
-                              <v-icon size="15px">mdi-plus</v-icon>
-                            </v-btn>
-                          <!-- </v-list-item-action-text> -->
+                          <v-btn @click="decreaseQuantity(orderMenuItem)" fab elevation="2" width="22px" height="22px" class="mr-2">
+                            <v-icon size="15px">mdi-minus</v-icon>
+                          </v-btn>
+                          <div class="body-2 secondary--text" style="display: inline;">{{orderMenuItem.quantity}}</div>
+                          <v-btn @click="increaseQuantity(orderMenuItem)" fab elevation="2" width="22px" height="22px" class="ml-2" color="primary">
+                            <v-icon size="15px">mdi-plus</v-icon>
+                          </v-btn>
                         </div>
-                      </v-col>
+                      </v-col> -->
                     </v-row>
                   </v-list-item-content>
                   
@@ -178,12 +175,12 @@ export default {
   },
   methods: {
     goBack () {
-      this.$router.back()
+      this.$router.go(-2)
     },
     goToOrder () {
       this.updateOrderFlag(true);
       this.submitOrder();
-      // this.$router.push('/orders')
+      this.$router.push('/orders')
     },
     toggleAlert() {
         this.paymentMade = !this.paymentMade
@@ -196,13 +193,19 @@ export default {
       if (item.quantity > 1) {
         let singlePrice = this.subtotal/item.quantity
         item.quantity--;
+        item.itemTotal -= parseFloat(singlePrice)
         this.subtotal -= parseFloat(singlePrice)
       }
     },
+    editItem(item) {
+      console.log(item)
+      this.addItemToEdit(item)
+      this.$router.push("/menuItem/" + item.menuItemId);
+    },
     checkedIn() {
-      let checkedInVal = this.checkedInQRCode;
+      let checkedInVal = this.checkedInQRCode();
 
-      if (checkedInVal != null && this.orderInfo.restaurantId == this.checkedInRestaurantId) {
+      if (checkedInVal != null && this.orderInfo().restaurantId == this.checkedInRestaurantId()) {
         return true;
       } else {
         return false;
@@ -211,10 +214,12 @@ export default {
     increaseQuantity(item) {
       let singlePrice = this.subtotal/item.quantity
       item.quantity++
+      item.itemTotal += parseFloat(singlePrice)
       this.subtotal += parseFloat(singlePrice)
     },
     ...mapActions({
       updateOrderFlag: 'OrderStore/updateOrderFlag',
+      addItemToEdit: 'OrderStore/addItemToEdit',
       submitOrder: 'OrderStore/submitOrder',
     }),
     ...mapGetters({
@@ -243,10 +248,10 @@ export default {
   mounted: function() {
     console.log("order");
     console.log(this.orderInfo());
-    this.subtotal = (this.orderInfo().orderTotal != null) ? parseFloat(this.orderInfo().orderTotal): 0;
+    
     for (let i = 0; i < this.orderInfo().orderItems.length; i++) {
+      this.subtotal += (this.orderInfo().orderItems[i].itemTotal != null) ? parseFloat(this.orderInfo().orderItems[i].itemTotal): 0;
       this.quantity[i] = parseFloat(this.orderInfo().orderItems[i].quantity)
-      console.log(this.quantity)
     }
   }
 }

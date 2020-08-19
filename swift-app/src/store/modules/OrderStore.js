@@ -3,6 +3,7 @@ import axios from 'axios'
 // State object
 const initialState = () => ({
   orderInfo: {},
+  itemToEdit: {},
   paymentInfo: {},
   orderHistory: {},
   orderTotal: 0,
@@ -35,17 +36,29 @@ const getters = {
 
   getPaymentInfo(state) {
     return state.paymentInfo;
+  },
+
+  getItemToEdit(state) {
+    return state.itemToEdit;
   }
 }
 
 // Actions 
 const actions = {
   submitOrder({commit}) {
+    console.log("ORDER DETAILS")
+    console.log(this.getters['OrderStore/getOrderInfo'])
+    let data = {
+      "requestType": "addOrder",
+      "token": sessionStorage.getItem('authToken'),
+      "orderInfo": this.getters['OrderStore/getOrderInfo']
+    }
+    console.log(data)
     axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "addOrder",
         "token": sessionStorage.getItem('authToken'),
-        "orderInfo": this.getters['OrderStore/getOrderInfo'].orderInfo
+        "orderInfo": this.getters['OrderStore/getOrderInfo']
       }
     ).then(result => {
       commit('UPDATE_ORDER_HISTORY', result.data.orderHistory);
@@ -98,6 +111,10 @@ const actions = {
     commit('ADD_ITEM_TO_ORDER', orderItemInfo);
   },
 
+  addItemToEdit({commit,}, itemInfo) {
+    commit('ADD_ITEM_TO_EDIT', itemInfo);
+  },
+
   clearOrder({commit,}) {
     commit('CLEAR_ORDER');
   },
@@ -132,6 +149,10 @@ const actions = {
 
   updateOrderFlag({commit}, orderFlag) {
     commit('UPDATE_ORDER_FLAG', orderFlag);
+  },
+
+  updateOrder({commit}) {
+    commit('UPDATE_ORDER');
   }
 }
 
@@ -148,6 +169,10 @@ const mutations = {
   CLEAR_ORDER(state) {
     state.orderInfo = {}
     // console.log("now empty")
+  },
+
+  UPDATE_ORDER(state) {
+    
   },
 
   ADD_ITEM_TO_ORDER(state, orderItemInfo) {
@@ -169,6 +194,12 @@ const mutations = {
     state.paymentInfo = orderPaymentinfo;
     console.log("payment added")
     console.log(state.paymentInfo)
+  },
+
+  ADD_ITEM_TO_EDIT(state, itemInfo) {
+    state.itemToEdit = itemInfo;
+    console.log("item to edit added")
+    console.log(state.itemToEdit)
   },
   
   UPDATE_ORDER_STATUS(state, data) {
