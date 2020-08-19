@@ -14,7 +14,7 @@
             <v-btn class="mr-4" elevation="2" width="35px" height="35px" @click="callWaiter" :key="activeCall.icon" :color="activeCall.color" small fab>
               <v-icon size="23px" :style="called ? { 'transform': 'rotate(45deg)' } : { 'transform': 'rotate(0deg)' }">{{ activeCall.icon }}</v-icon>
             </v-btn>
-            <v-btn @click="goToCart" elevation="2" width="35px" height="35px" small fab>
+            <v-btn v-if="checkedIn()" @click="goToCart" elevation="2" width="35px" height="35px" small fab>
               <v-icon size="23px">mdi-cart-outline</v-icon>
             </v-btn>
           </v-col>
@@ -247,13 +247,21 @@ export default {
       this.$router.push('/cart')
     },
     checkedIn() {
-      let checkedInVal = this.checkedInQRCode;
+      let checkedInStatus = this.checkedInStatus
+
+      if (checkedInStatus == true && checkedInStatus != null) {
+        return true;
+      } else {
+        return false;
+      } 
+
+      /* let checkedInVal = this.checkedInQRCode;
 
       if (checkedInVal != null) {
         return true;
       } else {
         return false;
-      }
+      } */
     }
   },
   async mounted() {
@@ -295,6 +303,7 @@ export default {
     ...mapGetters({
       allRestaurants: 'RestaurantsStore/getAllRestaurants',
       customerInfo: 'CustomerStore/getCustomerProfile',
+      checkedInStatus: 'CustomerStore/getCheckedInStatus',
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
     }),

@@ -15,7 +15,7 @@
         </v-col>
         <v-col cols="6">
           <!-- TODO: Manual Table input popup -->
-          <v-btn large rounded @click="goToRestaurant" color="primary">Enter Manually</v-btn>
+          <v-btn large rounded @click="goToRestaurant" color="primary">Check-in</v-btn>
         </v-col>
       </v-row>
     </div>
@@ -28,9 +28,8 @@ import { mapActions, mapGetters, mapMutations } from "vuex";
 export default {
   methods: {
     goToRestaurant(restaurantId) {
-      this.updateCheckInFlag(true);
-      this.$store.dispatch('RestaurantsStore/retrieveRestaurantMenu', restaurantId);
-      this.$router.push("/menu/" + restaurantId)
+      this.$router.push("/")
+      this.setCheckedInStatus(true)
     },
     goToHome() {
       this.$router.push("/")
@@ -45,11 +44,12 @@ export default {
     },
     ...mapMutations({
       setTable : 'RestaurantStore/setTableNumber',
+      setCheckedInStatus : 'CustomerStore/SET_CHECKED_IN_STATUS',
       setCheckedInQRCode : 'CustomerStore/SET_CHECKED_IN_CODE',
+      updateCheckInFlag : 'CustomerStore/UPDATE_CHECKED_IN',
     }),
     ...mapActions({
       checkInCustomer: 'CustomerStore/checkInCustomer',
-      updateCheckInFlag: 'CustomerStore/UPDATE_CHECKED_IN',
     }),
   },
 };

@@ -43,7 +43,7 @@
 
     
     <v-tabs v-model="tab" background-color="white" grow>
-      <v-tab v-if="newMenuItem.attributes != null">
+      <v-tab v-if="newMenuItem.attributes != null && checkedIn()">
         Details
       </v-tab>
       <v-tab>
@@ -53,7 +53,7 @@
     
 
     <v-tabs-items v-model="tab">
-      <v-tab-item v-if="newMenuItem.attributes != null">
+      <v-tab-item v-if="newMenuItem.attributes != null && checkedIn()">
         <v-card flat>
           <v-card-title class="pb-0 pt-4">Customise Order</v-card-title>
           <v-container class="pl-0">
@@ -474,6 +474,15 @@ export default {
       removeFavourite: "CustomerStore/removeFavourite",
       addItemToOrder: "OrderStore/addItemToOrder"
     }),
+    checkedIn() {
+      let checkedInStatus = this.checkedInStatus
+
+      if (checkedInStatus == true && checkedInStatus != null) {
+        return true;
+      } else {
+        return false;
+      } 
+    }
   },
   computed: {
     menuItem() {
@@ -509,9 +518,9 @@ export default {
       }
     },
     ...mapGetters({
-      checkedIn: "RestaurantsStore/getCheckInFlag",
       menu: "MenuStore/getMenu",
-      customer: "CustomerStore/getCustomerProfile"
+      customer: "CustomerStore/getCustomerProfile",
+      checkedInStatus: 'CustomerStore/getCheckedInStatus',
     }),
   },
   mounted: function() {

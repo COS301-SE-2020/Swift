@@ -8,7 +8,8 @@
               <v-carousel height="200px" :show-arrows="false" hide-delimiter cycle hide-delimiters continuous>
                 <v-carousel-item gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.4)" :src="menu.image">
                   <v-row  align="center" justify="center" class="mt-6">
-                    <div class="white--text display-1">Welcome to<br/> {{menu.name}}</div>
+                    <div v-if="checkedIn()" class="white--text display-1">Welcome to<br/> {{menu.name}}</div>
+                    <div v-if="!checkedIn()" class="white--text display-1">{{menu.name}}</div>
                     <v-col cols="9" class="mt-3">
                       <v-text-field background-color="white" class="menuItemSearchbar"  v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search by name or category"></v-text-field>
                     </v-col>
@@ -20,7 +21,7 @@
                   </v-row>
                 </v-carousel-item>
               </v-carousel>
-              <v-btn width="30px" height="30px" @click="callWaiterPressed()" :key="activeCall.icon" :color="activeCall.color" absolute small fab style="top: 20px; right: 10px;">
+              <v-btn v-if="checkedIn()" width="30px" height="30px" @click="callWaiterPressed()" :key="activeCall.icon" :color="activeCall.color" absolute small fab style="top: 20px; right: 10px;">
                 <v-icon :style="called ? { 'transform': 'rotate(45deg)' } : { 'transform': 'rotate(0deg)' }">{{ activeCall.icon }}</v-icon>
               </v-btn>
             </v-col>
@@ -81,7 +82,7 @@
         </v-tabs-items>
 
     </v-container>
-    <v-snackbar :v-if=checkedIn id="notification" :timeout="2000" centered color="primary" elevation="24" v-model="snackbar">You have been checked-in to {{menu.name}}</v-snackbar>
+    <v-snackbar :v-if=checkedInStatus id="notification" :timeout="2000" centered color="primary" elevation="24" v-model="snackbar">You have been checked-in to {{menu.name}}</v-snackbar>
     <NavBar></NavBar>
   </div>
 </template>
@@ -186,12 +187,13 @@ export default {
       }, 5000);
     },
     checkedIn() {
-      var checkedIn = localStorage.getItem('checked-in');
+      let checkedInStatus = this.checkedInStatus
 
-      if (checkedIn == 'true') 
+      if (checkedInStatus == true && checkedInStatus != null) {
         return true;
-      else 
+      } else {
         return false;
+      } 
     }
   },
   mounted: function() {
@@ -216,6 +218,7 @@ export default {
     ...mapGetters({
       displayNotification: "RestaurantsStore/getDisplayNotification",
       menu: "MenuStore/getMenu",
+      checkedInStatus: 'CustomerStore/getCheckedInStatus',
     }),
     activeCall() {
       if (!this.called) {

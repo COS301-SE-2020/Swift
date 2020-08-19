@@ -6,6 +6,7 @@ const initialState = () => ({
   customer: {},
   isAuthenticated: false,
   token: null,
+  checkedInStatus: null,
   checkedInQRCode: null,
   checkedInRestaurantId: null,
   checkedInTableId: null
@@ -25,6 +26,9 @@ const getters = {
   },
   getToken( state ) {
     return state.token;
+  },
+  getCheckedInStatus( state ) {
+    return state.checkedInStatus;
   },
   getCheckedInQRCode( state ) {
     return state.checkedInQRCode;
@@ -50,6 +54,7 @@ const actions = {
         "token": sessionStorage.getItem('authToken'),
       }
     ).then(result => {
+      commit('SET_CHECKED_IN_STATUS', true);
       commit('SET_CHECKED_IN_CODE', data.qrcode);
       commit('SET_CHECKED_IN_RESTAURANT_ID', result.data.restaurantId);
       commit('SET_CHECKED_IN_TABLE_ID', result.data.tableId);
@@ -174,6 +179,10 @@ const mutations = {
 
   UPDATE_CHECKED_IN(state, status) {
     state.checkedIn = data;
+  },
+
+  SET_CHECKED_IN_STATUS(state, status) {
+    state.checkedInStatus = status;
   },
 
   SET_CHECKED_IN_CODE(state, qrcode) {

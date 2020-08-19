@@ -8,19 +8,19 @@
     <div>
       <v-text-field class="searchBarBg" v-model="search" rounded clearable flat solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search"></v-text-field>
     </div>
-    <template v-if="!isLoading">
+    <template v-if="!isLoading && customerInfo.favourites.length != 0">
       <v-subheader v-once style="height: 20px" class="mt-3 mb-1 pl-1" v-text="customerInfo.favourites[0].restaurantName"></v-subheader>
       <v-list v-for="item in filteredList" :key="item.menuItemName" class="py-0">
-        <v-list-item @click="goToMenuItem(item.menuItemId)"  ripple class="py-1 pr-0">
-          <v-list-item-avatar tile  style="border-radius: 4px" size="45" >
+        <v-list-item class="py-1 pr-0">
+          <v-list-item-avatar @click="goToMenuItem(item.menuItemId)" tile  style="border-radius: 4px" size="45" >
             <v-img src="https://source.unsplash.com/hrlvr2ZlUNk/800x800/"></v-img>
           </v-list-item-avatar>
-          <v-list-item-content>
+          <v-list-item-content ripple @click="goToMenuItem(item.menuItemId)">
             <v-list-item-title v-html="item.menuItemName"></v-list-item-title>
             <v-list-item-subtitle v-html="item.menuItemDescription"></v-list-item-subtitle>
           </v-list-item-content>
           <v-list-item-action class="ml-0 mt-0">
-            <v-btn icon @click="removeFav(item.menuItemId)">
+            <v-btn :z-index="10" icon @click="removeFav(item.menuItemId)">
               <v-icon color="primary">mdi-heart</v-icon>
             </v-btn>
           </v-list-item-action>

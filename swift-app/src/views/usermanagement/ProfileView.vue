@@ -44,6 +44,23 @@
             </v-list-item-action>
           </v-list-item>
         </v-list>
+        <!-- Test check out -->
+        <v-list subheader>
+          <v-list-item @click=checkOut()  v-ripple>
+            <v-list-item-avatar>
+              <v-icon>mdi-logout</v-icon>
+            </v-list-item-avatar>
+            <v-list-item-content>
+              <v-list-item-title >Check out</v-list-item-title>
+            </v-list-item-content>
+
+            <v-list-item-action>
+              <v-btn icon>
+                <v-icon color="secondary">mdi-chevron-right</v-icon>
+              </v-btn>
+            </v-list-item-action>
+          </v-list-item>
+        </v-list>
 
       </v-tab-item>
       <v-tab-item>
@@ -70,7 +87,7 @@
 <script>
 import NavBar from '@/components/layout/NavBar';
 import store from '@/store/store.js';
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default {
   data: () => ({
@@ -98,6 +115,13 @@ export default {
     },
     editProfile () {
     },
+    checkOut() {
+      this.setCheckedInStatus(false)
+      this.$router.push('/')
+    },
+    ...mapMutations({
+      setCheckedInStatus : 'CustomerStore/SET_CHECKED_IN_STATUS',
+    }),
   },
   computed: {
     ...mapGetters({
@@ -106,7 +130,8 @@ export default {
     ...mapActions({
       loadCustomer: 'CustomerStore/loadCustomer',
       reset: 'CustomerStore/reset', 
-    })
+    }),
+    
   }
 }
 </script>
