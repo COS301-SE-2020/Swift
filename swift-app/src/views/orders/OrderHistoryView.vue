@@ -31,8 +31,8 @@
               <div v-if="itemsForStatus(status).length != 0">
                 <v-subheader style="height: 20px" class="mt-3 mb-1 pl-1" v-text="status"></v-subheader>
                 <v-list v-for="(item, index) in itemsForStatus(status).slice().reverse()" :key="index" class="py-2">
-                  <v-card ripple class="pt-1 pr-0 orderCard" elevation="2" @click="viewOrder(item)">
-                    <v-row class="mx-0 d-flex justify-space-around">
+                  <v-card class="pt-1 pr-0 orderCard" elevation="2">
+                    <v-row class="mx-0 d-flex justify-space-around" @click="viewOrder(item)">
                       <v-col cols="7" class="pb-0 pt-2">
                         <v-list-item-title class="restaurantName pb-1" v-text="item.restaurantName"></v-list-item-title>
                         <v-rating background-color="secondary" readonly size="13" dense color="yellow darken-3" :value="4"></v-rating>
@@ -41,7 +41,7 @@
                         <v-list-item-action-text class="orderDateTime" v-text="getDate(item.orderDateTime)"></v-list-item-action-text>
                       </v-col>
                     </v-row>
-                    <v-row class="mx-0" v-for="(orderItem, index) in item.items" :key="index">
+                    <v-row class="mx-0" v-for="(orderItem, index) in item.items" :key="index" @click="viewOrder(item)">
                       <v-col class="pb-0 pt-2" cols="8">
                         <v-icon size="15px">{{(parseInt(orderItem.progress) == 100) ? 'mdi-check-box-outline' : 'mdi-checkbox-blank-outline'}}</v-icon> 
                         <span class="pl-1 orderDetails">{{orderItem.menuItemName}}</span>
@@ -53,14 +53,14 @@
                     </v-row>
                     <v-row class="mx-0 pb-1 pr-1">
                       <v-col cols="5" class="pb-2 orderButtons ">
-                        <v-btn v-if="item.orderStatus != 'Received'" text class="pa-0 button">
+                        <v-btn  @click="addOrder(item)" text class="pa-0 button">
                           <v-icon color="primary" size="20px">mdi-history</v-icon> 
                           <span class="pl-1 orderOptions repeat">Repeat Order</span>
                         </v-btn>
-                        <v-btn v-else text class="pa-0 button">
+                        <!-- <v-btn v-else text class="pa-0 button" @click="goToOrderStatus">
                           <v-icon color="primary" size="20px">mdi-history</v-icon> 
                           <span class="pl-1 orderOptions repeat">Order Status</span>
-                        </v-btn>
+                        </v-btn> -->
                       </v-col>
                       <v-col cols="3" class="pb-2 px-1 orderButtons">
                         <v-btn v-if="item.orderStatus == 'Paid'" text class="pa-0 button">
@@ -86,9 +86,9 @@
           </v-container>
         </v-tab-item>
 
-        <v-tab-item style="width:100%;" v-if="getOrderStatusItem() != null">
-          <v-container fluid fill-height class="pa-0 d-flex align-start">
-            <v-row class="overflow-y-auto mt-3">
+        <v-tab-item v-if="getOrderStatusItem() != null">
+          <v-container fill-height fluid class="pa-0 d-flex align-start orderStatusTrack overflow-y-hidden overflow-x-hidden">
+            <v-row class="mt-3">
               <v-col cols="12" class="d-flex justify-center">
                   <div class="body-1 secondary--text">Order No: {{getOrderStatusItem().orderNumber}}</div>
               </v-col>
@@ -202,8 +202,36 @@ export default {
         return parseInt(orderItem.progress) < 100 || orderItem.orderStatus == "Received"
       }))
     },
+    addOrder (item) {
+      let itemsOrdered = [];
+      for (let i = 0; i < item.items.length; i++) {
+        let data = {
+          "menuItemId": item.items[i].menuItemId,
+          "quantity": item.items[i].quantity,
+          "orderSelections": item.items[i].orderSelections
+        };
+        itemsOrdered[i] = data;
+      }
+
+      let data = {
+        "orderInfo": {
+          "restaurantId": item.restaurantId,
+          "tableId": 1,
+          "employeeId": 2,
+          "orderTotal": item.total,
+          "waiterTip": item.waiterTip,
+          "orderItems": itemsOrdered
+        }
+      }
+      console.log("hello")
+      console.log(data)
+      this.addItemToOrder(data)
+      // this.$router.push("/cart");
+    },
+    goToOrderStatus() {
+      this.tab = 1;
+    },
     getDate(date) {
-      // return 'On ' + date.slice(11, 16) + ' ' + moment(String(date.slice(0, 10))).format('DD MMMM YYYY')
       return 'On ' + moment(String(date.slice(0, 10))).format('DD MMMM YYYY')
     },
     displayOrderTime() {
@@ -222,6 +250,7 @@ export default {
       }, 3000);  
     },
     ...mapActions({
+      addItemToOrder: "OrderStore/addItemToOrder",
       orderStatus: 'OrderStore/retrieveOrderStatus',
     }),
   },

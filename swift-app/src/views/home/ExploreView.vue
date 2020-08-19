@@ -270,17 +270,16 @@ export default {
     /* if (checkedInVal != null && this.checkedInRestaurantId == null) {
       this.checkInCustomer(checkedInVal)
     } */
+    // await this.clearMenu
+    var length = await this.allRestaurants.length;
+    var categoryLength = await this.exploreCategories.length;
 
-    var restaurantLength = await this.allRestaurants.length;
-    await this.clearMenu
-    var exploreCategoriesLength = await this.retrieveExploreCategories;
-
-    if (restaurantLength == undefined || exploreCategoriesLength == undefined) {
+    if (length == undefined && categoryLength == undefined) {
       this.isLoading = !this.isLoading;
-      var fetchAllRestaurantsResponse = await this.fetchAllRestaurants;
-      var exploreCategoriesResponse = await this.retrieveExploreCategories;
+      var response = await this.fetchAllRestaurants;
+      var response2 = await this.retrieveExploreCategories;
       
-      if (fetchAllRestaurantsResponse && exploreCategoriesResponse)
+      if (response && response2)
         this.isLoading = !this.isLoading;
     }
     

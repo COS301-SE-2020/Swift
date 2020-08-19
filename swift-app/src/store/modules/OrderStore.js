@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // State object
 const initialState = () => ({
-  orderInfo: [],
+  orderInfo: {},
   orderHistory: {},
   orderTotal: 0,
   orderFlag: false
@@ -98,7 +98,18 @@ const mutations = {
   },
 
   ADD_ITEM_TO_ORDER(state, orderItemInfo) {
-    state.orderInfo.push(orderItemInfo);
+    console.log("CHECKS:")
+    let empty = Object.keys(state.orderInfo).length === 0 && state.orderInfo.constructor === Object
+    console.log(orderItemInfo)
+    console.log(state.orderInfo)
+    console.log("check if null: "  + empty)
+    if (!empty) {
+      console.log(state.orderInfo.orderItems)
+      for (let i = 0; i < orderItemInfo.orderInfo.orderItems.length; i++)
+        state.orderInfo.orderItems.push(orderItemInfo.orderInfo.orderItems[i])
+    }else
+      state.orderInfo = orderItemInfo.orderInfo;
+    console.log(state.orderInfo)
   },
   
   UPDATE_ORDER_STATUS(state, data) {
