@@ -130,40 +130,69 @@ module.exports = {
     // Check token
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
-      return db.query(
-        'SELECT restaurantname FROM public.restaurant WHERE restaurant.restaurantid = $1::integer',
-        [reqBody.restaurantId]
-      )
-        .then((resCheck) => {
-          if (resCheck.rows.length === 0) {
+      return (async () => {
+        const client = await db.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+
+          // check if restaurant exists
+          const cRes = await client.query(
+            'SELECT restaurantname FROM public.restaurant WHERE restaurantid = $1::integer',
+            [reqBody.restaurantId]
+          );
+
+          if (cRes.rows.length === 0) {
             // restaurant does not exist
             return response.status(404).send({ status: 404, reason: 'Not Found' });
           }
 
-          const newTableStatus = 'Vacant';
-          // UUID version 4 with dashes removes
-          const qrcode = uuidv4().replace(/-/g, '');
-          return db.query(
+          // check user permissions
+          const requiredRole = 'admin';
+          const permRes = await client.query(
+            'SELECT employeerole FROM public.restaurantemployee'
+            + ' WHERE userid = $1::integer AND restaurantid = $2::integer AND LOWER(employeerole) = $3::text',
+            [userToken.data.userId, reqBody.restaurantId, requiredRole]
+          );
+
+          if (permRes.rows.length === 0) {
+            // Access denied
+            return response.status(403).send({ status: 403, reason: 'Access Denied' });
+          }
+
+          // create table
+          const qrcode = uuidv4().replace(/-/g, ''); // UUID v4 without dashes (10^-37 collison rate)
+          const tblRes = await client.query(
             'INSERT INTO public.restauranttable'
-            + ' (restaurantid, numseats, tablenumber, status, qrcode)'
-            + ' VALUES ($1::integer, $2::integer, $3::text, $4::text, $5::text)'
+            + ' (restaurantid, numseats, tablenumber, qrcode)'
+            + ' VALUES ($1::integer, $2::integer, $3::text, $4::text)'
             + ' RETURNING tableid;',
             [
               reqBody.restaurantId,
               parseInt(reqBody.seatCount, 10),
               reqBody.tableNumber,
-              newTableStatus,
               qrcode
             ]
-          )
-            .then((res) => response.status(201).send({ tableId: res.rows[0].tableid, qrcode }))
-            .catch((err) => {
-              console.error('Query Error [Restaurant - Create Restaurant Table]', err.stack);
-              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
-            });
-        })
+          );
+
+          // commit changes
+          await client.query('COMMIT');
+
+          // send response
+          return response.status(201).send({ tableId: tblRes.rows[0].tableid, qrcode });
+        } catch (err) {
+          // rollback changes
+          await client.query('ROLLBACK');
+
+          // throw error for async catch
+          throw err;
+        } finally {
+          // close connection
+          client.release();
+        }
+      })()
         .catch((err) => {
-          console.error('Query Error [Create Table - Check Restaurant Existence]', err.stack);
+          console.error('Query Error [Restaurant Admin - Create Restaurant Table]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }
