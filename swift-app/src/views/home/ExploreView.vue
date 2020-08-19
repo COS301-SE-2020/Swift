@@ -267,19 +267,20 @@ export default {
   async mounted() {
     let checkedInVal = this.checkedInQRCode;
     // Check-in customer again if system crashes 
-    if (checkedInVal != null && this.checkedInRestaurantId == null) {
+    /* if (checkedInVal != null && this.checkedInRestaurantId == null) {
       this.checkInCustomer(checkedInVal)
-    }
+    } */
 
-    var length = await this.allRestaurants.length;
+    var restaurantLength = await this.allRestaurants.length;
     await this.clearMenu
-    await this.retrieveExploreCategories;
+    var exploreCategoriesLength = await this.retrieveExploreCategories;
 
-    if (length == undefined) {
+    if (restaurantLength == undefined || exploreCategoriesLength == undefined) {
       this.isLoading = !this.isLoading;
-      var response = await this.fetchAllRestaurants;
+      var fetchAllRestaurantsResponse = await this.fetchAllRestaurants;
+      var exploreCategoriesResponse = await this.retrieveExploreCategories;
       
-      if (response)
+      if (fetchAllRestaurantsResponse && exploreCategoriesResponse)
         this.isLoading = !this.isLoading;
     }
     
