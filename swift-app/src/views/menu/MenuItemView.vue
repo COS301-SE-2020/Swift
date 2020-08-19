@@ -68,7 +68,7 @@
                     <v-list-item-title class="label pl-3" v-text="attribute.name"></v-list-item-title>
                   </v-list-item-content>
                 </template>
-                <v-list-item-group class="pl-4" :multiple="(attribute.field.type == 'radio') ? false : true" :mandatory="(attribute.field.type == 'radio') ? true : false" v-model="model[i]">
+                <v-list-item-group class="pl-4" :multiple="(parseInt(attribute.field.max) > 1) ? true : false" :mandatory="(attribute.field.min == '1') ? true : false" v-model="model[i]">
                   <template v-for="(value, j) in attribute.values">
                       <v-list-item @click="checkInput(i, j, value)" class="px-2 attributeValues" :key="`item-${j}`" :value="value.name">
                         <template v-slot:default="{ active }">
@@ -81,7 +81,7 @@
                             </v-col>
                           </v-row>
                           <v-list-item-action>
-                            <v-radio :id="`${i}${j}${(value.name).replace(/\s+/g, '')}`" checked v-if="attribute.field.type == 'radio'" :input-value="active" ></v-radio>
+                            <v-radio :id="`${i}${j}${(value.name).replace(/\s+/g, '')}`" checked v-if="attribute.field.max == '1' && attribute.field.min == '1'" :input-value="active" ></v-radio>
                             <v-checkbox v-else :input-value="active"></v-checkbox>
                           </v-list-item-action>
                         </template>
@@ -357,11 +357,11 @@ export default {
     detractPrice() {
       if (this.quantity > 1) 
         this.quantity--;
-      this.changeTotal();
+      this.changeTotal;
     },
     addPrice() {
       this.quantity++;
-      this.changeTotal();
+      this.changeTotal;
     },
     
     changeFavouriteComment: function (comment) {
@@ -391,7 +391,7 @@ export default {
       } else if ('fee' in value && !checked) {
         this.addOns += value.fee
       }
-      this.changeTotal();
+      this.changeTotal;
     },
     optionIcon: function (type) {
       if (type == "checkbox") {
@@ -451,7 +451,9 @@ export default {
         "orderInfo": {
           "restaurantId": 1,
           "tableId": 1,
-          "employeeId": 7,
+          "employeeId": 2,
+          "orderTotal": this.total.toFixed(2),
+          "waiterTip": 0,
           "orderItems": [
             {
               "menuItemId": this.newMenuItem.menuItemId,
@@ -461,9 +463,7 @@ export default {
               }
             }
           ]
-        },
-        "menuItemName": this.newMenuItem.menuItemName,
-        "total": this.total.toFixed(2),
+        }
       }
 
       console.log(data);
