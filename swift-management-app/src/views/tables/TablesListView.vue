@@ -17,15 +17,18 @@
           collapse-action
         >
           <vs-chip color="primary">Seats: {{table.numSeats}}</vs-chip>
-          <vs-chip color="primary">Checked In: {{ table.checkedIn.length }}</vs-chip>
+          <vs-chip color="primary">Checked In: {{ getLength(table.checkedIn) }}</vs-chip>
           <vs-divider border-style="solid" color="white"></vs-divider>
-          <span class="vs-input--label mb-4" v-if="table.checkedIn.length != 0">Customers</span>
+          <span class="vs-input--label mb-4" v-if="getLength(table.checkedIn) != 0">Customers</span>
           <div
             v-for="customer in table.checkedIn"
             :key="customer.name+customer.surname+customer.profileImageURL"
           >
-            <vs-avatar v-if="!customer.profileImageURL" :text="customer.name + ' ' + customer.surname" />
-            <vs-avatar v-if="customer.profileImageURL" src="customer.profileImageURL"/>
+            <vs-avatar
+              v-if="!customer.profileImageURL"
+              :text="customer.name + ' ' + customer.surname"
+            />
+            <vs-avatar v-if="customer.profileImageURL" src="customer.profileImageURL" />
             <span class="customerName">{{ customer.name +" " + customer.surname }}</span>
           </div>
           <qrcode-vue
@@ -104,12 +107,29 @@ export default {
       else return null;
     },
     tableCount() {
-      if (this.$store.state.tableList)
+      if (this.$store.state.tableList.tables)
         return this.$store.state.tableList.tables.length;
       else return null;
     },
   },
   methods: {
+    getLength(array) {
+      if (!array) return 0;
+      else return array.length;
+    },
+    addFirstItemPrompt() {
+      this.$vs.dialog({
+        color: "primary",
+        title: "Let's create your table!",
+        text:
+          "It looks like the current restaurant doesn't have any tables yet. Let's create your first table and get those customers checked in.",
+        accept: this.addFirstItem,
+        acceptText: "Add Table",
+      });
+    },
+    addFirstItem(){
+      this.addTablePopupActive = true;
+    },
     listTables() {
       this.$store.dispatch("tableList/listTables", {
         authKey: this.getAuthToken(),
@@ -119,11 +139,29 @@ export default {
       card.removeRefreshAnimation(3000);
     },
     addTable() {
-      this.$store.dispatch("tableList/addTable", {
-        tableNum: this.newTableNumber,
-        tableSeats: this.newTableSeats,
-        authKey: this.getAuthToken(),
-      });
+      this.$store
+        .dispatch("tableList/addTable", {
+          tableNum: this.newTableNumber,
+          tableSeats: this.newTableSeats,
+          authKey: this.getAuthToken(),
+        })
+        .then((res) => {
+          //TODO: update table seat count
+          if (res.status == 409) {
+            this.$vs.notify({
+              title: "Table number already exists",
+              text: "You cannot create two tables with the same Table Number.",
+              color: "danger",
+            });
+          } else if (res.status == 201) {
+            this.listTables();
+            this.$vs.notify({
+              title: "Table successfully created!",
+              text: "Wohoo!",
+              color: "success",
+            });
+          }
+        });
       this.addTablePopupActive = false;
       this.rowUpdateNum = this.rowUpdateNum + 1;
     },
@@ -141,8 +179,9 @@ export default {
       event.target.href = image;
     },
     getTableStatus(checkedIn) {
-      if (checkedIn.length == 0) return "Vacant";
-      else return "Ordering";
+      if (checkedIn)
+        if (checkedIn.length == 0) return "Vacant";
+        else return "Ordering";
     },
   },
   created() {
@@ -166,6 +205,7 @@ export default {
   watch: {
     tables(newCount, oldCount) {
       this.$vs.loading.close();
+      if (this.tableCount <= 0) this.addFirstItemPrompt();
     },
   },
 };

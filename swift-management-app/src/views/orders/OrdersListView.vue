@@ -1,44 +1,55 @@
 <template>
-  <div class="vx-row">
-    <div
-      v-for="order in orders"
-      :key="order.orderId"
-      class="vx-col w-full md:w-1/3 lg:w-1/3 xl:w-1/3 mb-base"
-    >
-      <vx-card
-        :title="'Order: Table ' + order.tableNumber"
-        :subtitle="'Placed: ' + order.timePlaced"
-        @refresh="closeCardAnimationDemo"
-        collapse-action
-        :data-item-count="order.items.length"
-        :data-progress="order.orderProgress"
-        :id="'OrderCard'+order.orderId"
+  <div>
+    <div class="router-header flex flex-wrap items-center mb-6">
+      <div class="content-area__heading pr-4">
+        <h2 class="mb-1">Orders</h2>
+      </div>
+    </div>
+    <div class="vx-row">
+      <div
+        v-for="order in orders"
+        :key="order.orderId"
+        class="vx-col w-full md:w-1/3 lg:w-1/3 xl:w-1/3 mb-base"
       >
-        <vs-chip class="employeeName" color="success">Waiter: {{order.employeeAssigned}}</vs-chip>
-        <vs-divider border-style="solid" color="white"></vs-divider>
-        <p>Order Progress:</p>
-        <vs-progress
-          :height="8"
-          :percent="parseInt(order.orderProgress)"
-          :color="getStatusColor(order.orderProgress)"
-        ></vs-progress>
-        <vs-list>
-          <vs-list-header :title="'Order Total: R'+order.orderTotal"></vs-list-header>
-          <div v-for="menuItem in order.items" :key="menuItem.menuItemName" class="singleMenuItem">
-            <vs-chip color="primary">R{{menuItem.menuItemPrice}}</vs-chip>
-            <vs-chip color="success">Qty: {{menuItem.menuItemQty}}</vs-chip>
-            <vs-list-item :title="menuItem.menuItemName" :subtitle="menuItem.menuItemDescription">
-              <vs-button
-                :id="'ItemProgressOrderID'+order.orderId+'ItemID'+menuItem.menuItemId"
-                :data-progress="menuItem.menuItemProgress"
-                size="small"
-                :color="getStatusColor(menuItem.menuItemProgress)"
-                @click.stop="updateMenuItemProgress(order.orderId,menuItem.menuItemId)"
-              >{{getMenuItemStatus(menuItem.menuItemProgress)}}</vs-button>
-            </vs-list-item>
-          </div>
-        </vs-list>
-      </vx-card>
+        <vx-card
+          :title="'Order: Table ' + order.tableNumber"
+          :subtitle="'Placed: ' + order.timePlaced"
+          @refresh="closeCardAnimationDemo"
+          collapse-action
+          :data-item-count="order.items.length"
+          :data-progress="order.orderProgress"
+          :id="'OrderCard'+order.orderId"
+        >
+          <vs-chip class="employeeName" color="success">Waiter: {{order.employeeAssigned}}</vs-chip>
+          <vs-divider border-style="solid" color="white"></vs-divider>
+          <p>Order Progress:</p>
+          <vs-progress
+            :height="8"
+            :percent="parseInt(order.orderProgress)"
+            :color="getStatusColor(order.orderProgress)"
+          ></vs-progress>
+          <vs-list>
+            <vs-list-header :title="'Order Total: R'+order.orderTotal"></vs-list-header>
+            <div
+              v-for="menuItem in order.items"
+              :key="menuItem.menuItemName"
+              class="singleMenuItem"
+            >
+              <vs-chip color="primary">R{{menuItem.menuItemPrice}}</vs-chip>
+              <vs-chip color="success">Qty: {{menuItem.menuItemQty}}</vs-chip>
+              <vs-list-item :title="menuItem.menuItemName" :subtitle="menuItem.menuItemDescription">
+                <vs-button
+                  :id="'ItemProgressOrderID'+order.orderId+'ItemID'+menuItem.menuItemId"
+                  :data-progress="menuItem.menuItemProgress"
+                  size="small"
+                  :color="getStatusColor(menuItem.menuItemProgress)"
+                  @click.stop="updateMenuItemProgress(order.orderId,menuItem.menuItemId)"
+                >{{getMenuItemStatus(menuItem.menuItemProgress)}}</vs-button>
+              </vs-list-item>
+            </div>
+          </vs-list>
+        </vx-card>
+      </div>
     </div>
   </div>
 </template>

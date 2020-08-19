@@ -247,8 +247,8 @@ export default {
       //TODO: Store current menu in cross page persistent store
       if (this.currentMenu != "" || !this.restaurantLoaded()) return;
 
-      if (this.primaryCategories.length <= 0) this.addFirstItemPrompt();
-      else this.currentMenu = this.primaryCategories[0].categoryName;
+      if (this.primaryCategories.length > 0)
+        this.currentMenu = this.primaryCategories[0].categoryName;
       //set the current menu filter
     },
   },
@@ -271,6 +271,8 @@ export default {
     restaurantObject(newCount, oldCount) {
       this.$vs.loading.close();
       this.loadInitialMenu();
+      if(this.primaryCategories)
+      if (this.primaryCategories.length <= 0) this.addFirstItemPrompt();
     },
   },
 };

@@ -3,7 +3,7 @@ import baseConfig from "@/../baseConfig.js"
 import colors from "@/../baseConfig.js"
 
 //User Profile
-const userDefaults = {
+var userDefaults = {
   uid         : 0,          // From Auth
   displayName : "Giovanni Joubert", // From Auth
   about       : "I am a driven entrepreneur & third year student at the University or Pretoria studying BSc Information and Knowledge Systems.",
