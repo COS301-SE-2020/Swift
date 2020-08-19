@@ -37,7 +37,7 @@ Quality requirements define the quality that our client expects from the system 
 2.  The database can also be split since we are using different storage methods e.g.  the NoSQLJSON object for menu items.
 3.  Analytics and Management only things can be placed in their own separate database anduse API calls if they require data from other databases.  We should however keep data inthe same database if the data is used together very often.
 
-## Technical Requirements
+## Technology Requirements
 
 ### Protocols
 * **HTTPS (Hyper Text Transfer Protocol Secure):** HTTPS adds security and trust in orderto make the website and application connection more secure.

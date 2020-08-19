@@ -76,15 +76,6 @@ module.exports = {
           ]
         }
       ],
-      '/user-manual/': [
-        {
-          title: 'User Manual',
-          collapsable: false,
-          children: [
-            '',
-          ]
-        }
-      ],
       '/api/': [
         {
           title: 'API',
