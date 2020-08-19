@@ -1,18 +1,8 @@
 <template>
-  <div>
-    <p class="demo">
-      {{ msg }}
-    </p>
-    <!-- <a href="../../static/user-manual.pdf" target="_blank">User Manual</a> -->
-  </div>
+  <a target="_blank" href="https://drive.google.com/file/d/126JpUB3yG6GSfKJJ3Hnvljq6qBqULci_/view">User Manual</a>
 </template>
 
 <script>
   export default {
-    data() {
-      return {
-        msg: 'Hello this is <user-manual>'
-      }
-    }
   }
 </script>
