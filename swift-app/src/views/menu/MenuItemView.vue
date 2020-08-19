@@ -483,17 +483,9 @@ export default {
       addItemToOrder: "OrderStore/addItemToOrder"
     }),
     checkedIn() {
-      /* let checkedInStatus = this.checkedInStatus
-
-      if (checkedInStatus == true && checkedInStatus != null) {
-        return true;
-      } else {
-        return false;
-      }  */
-
       let checkedInVal = this.checkedInQRCode;
 
-      if (checkedInVal != null && this.$route.params.menuId == this.checkedInRestaurantId) {
+      if (checkedInVal != null) {
         return true;
       } else {
         return false;
