@@ -27,14 +27,14 @@
             <v-progress-circular indeterminate color="primary"></v-progress-circular>
           </div>
           <v-container v-if="!isLoading" class="px-4">
-            <div v-for="status in statusList" :key="status">
+            <div v-for="status in statusList" :key="status" class="pt-2 pb-2">
               <div v-if="itemsForStatus(status).length != 0">
                 <v-subheader style="height: 20px" class="mt-3 mb-1 pl-1" v-text="status"></v-subheader>
                 <v-list v-for="(item, index) in itemsForStatus(status)" :key="index" class="py-2">
                   <v-card ripple class="pt-1 pr-0 orderCard" elevation="2">
                     <v-row class="mx-0 d-flex justify-space-around">
                       <v-col cols="7" class="pb-0 pt-2">
-                        <v-list-item-title class="restaurantName" v-text="item.restaurantName"></v-list-item-title>
+                        <v-list-item-title class="restaurantName pb-1" v-text="item.restaurantName"></v-list-item-title>
                         <v-rating background-color="secondary" readonly size="13" dense color="yellow darken-3" :value="4"></v-rating>
                       </v-col>
                       <v-col cols="5" class="pb-0 pt-2 d-flex justify-end">
@@ -42,11 +42,11 @@
                       </v-col>
                     </v-row>
                     <v-row class="mx-0" v-for="(orderItem, index) in item.items" :key="index">
-                      <v-col class="pb-0 pt-2" cols="7">
+                      <v-col class="pb-0 pt-2" cols="8">
                         <v-icon size="15px">mdi-check-box-outline</v-icon> 
                         <span class="pl-1 orderDetails">{{orderItem.menuItemName}}</span>
                       </v-col>
-                      <v-col class="pb-0 pt-2" cols="5">
+                      <v-col class="pb-0 pt-2 pl-0" cols="4">
                         <span class="orderDetails">{{orderItem.quantity}}x </span>
                         <v-rating background-color="secondary" readonly size="12" class="pl-2" dense color="yellow darken-3" :value="5" style="display: inline"></v-rating>
                       </v-col>
@@ -246,7 +246,7 @@ export default {
 
 .restaurantName {
   font-family: 'Helvetica';
-  font-size: 17px !important;
+  font-size: 16px !important;
   font-weight: 300;
 }
 
@@ -256,21 +256,22 @@ export default {
 }
 
 .orderDateTime {
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .orderDetails {
-  font-size: 15px;
+  font-size: 12px;
   font-weight: 300;
+  line-height: 1 !important;
 }
 
 .orderOptions {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 300 !important;
 }
 
 .orderPrice {
-  font-size: 16px;
+  font-size: 15px;
 }
 
 .orderButtons {
@@ -279,6 +280,7 @@ export default {
 
 .orderCard {
   border-radius: 13px !important;
+  line-height: 1.15 !important;
 }
 
 .orderSearchBar {
