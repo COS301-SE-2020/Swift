@@ -203,6 +203,8 @@ export default {
         return false;
       } */ 
 
+      console.log(this.checkedInRestaurantId)
+
       let checkedInVal = this.checkedInQRCode;
 
       if (checkedInVal != null) {
@@ -250,6 +252,7 @@ export default {
       menu: "MenuStore/getMenu",
       // checkedInStatus: 'CustomerStore/getCheckedInStatus',
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
+      checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
       checkedInTableId: 'CustomerStore/getCheckedInTableId',
     }),
     activeCall() {
