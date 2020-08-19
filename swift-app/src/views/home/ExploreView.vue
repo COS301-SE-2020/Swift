@@ -247,21 +247,21 @@ export default {
       this.$router.push('/cart')
     },
     checkedIn() {
-      let checkedInStatus = this.checkedInStatus
+      /* let checkedInStatus = this.checkedInStatus
 
       if (checkedInStatus == true && checkedInStatus != null) {
         return true;
       } else {
         return false;
-      } 
+      }  */
 
-      /* let checkedInVal = this.checkedInQRCode;
+      let checkedInVal = this.checkedInQRCode;
 
       if (checkedInVal != null) {
         return true;
       } else {
         return false;
-      } */
+      }
     }
   },
   async mounted() {
@@ -314,7 +314,7 @@ export default {
       allRestaurants: 'RestaurantsStore/getAllRestaurants',
       exploreCategories: 'RestaurantsStore/getExploreCategories',
       customerInfo: 'CustomerStore/getCustomerProfile',
-      checkedInStatus: 'CustomerStore/getCheckedInStatus',
+      // checkedInStatus: 'CustomerStore/getCheckedInStatus',
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
     }),

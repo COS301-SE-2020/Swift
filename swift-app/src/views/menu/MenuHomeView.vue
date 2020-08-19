@@ -88,7 +88,7 @@
         </v-tabs-items>
 
     </v-container>
-    <v-snackbar :v-if=checkedInStatus id="notification" :timeout="2000" centered color="primary" elevation="24" v-model="snackbar">You have been checked-in to {{menu.name}}</v-snackbar>
+    <!-- <v-snackbar :v-if=checkedIn id="notification" :timeout="2000" centered color="primary" elevation="24" v-model="snackbar">You have been checked-in to {{menu.name}}</v-snackbar> -->
     <NavBar></NavBar>
   </div>
 </template>
@@ -186,8 +186,8 @@ export default {
       this.$router.push('/')
     },
     async callWaiterPressed() {
-      var tableId = localStorage.getItem('checkedInTableId');
-      // await this.callWaiter(tableId)
+      // var tableId = localStorage.getItem('checkedInTableId');
+      // await this.callWaiter(checkedInTableId)
       this.called = true; 
       
       setTimeout(() => { 
@@ -195,13 +195,21 @@ export default {
       }, 5000);
     },
     checkedIn() {
-      let checkedInStatus = this.checkedInStatus
+      /* let checkedInStatus = this.checkedInStatus
 
       if (checkedInStatus == true && checkedInStatus != null) {
         return true;
       } else {
         return false;
-      } 
+      } */ 
+
+      let checkedInVal = this.checkedInQRCode;
+
+      if (checkedInVal != null) {
+        return true;
+      } else {
+        return false;
+      }
     },
     sortedItems (menuItems) {
       console.log()
@@ -240,7 +248,9 @@ export default {
     }),
     ...mapGetters({
       menu: "MenuStore/getMenu",
-      checkedInStatus: 'CustomerStore/getCheckedInStatus',
+      // checkedInStatus: 'CustomerStore/getCheckedInStatus',
+      checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
+      checkedInTableId: 'CustomerStore/getCheckedInTableId',
     }),
     activeCall() {
       if (!this.called) {

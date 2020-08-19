@@ -54,7 +54,7 @@ const actions = {
         "token": sessionStorage.getItem('authToken'),
       }
     ).then(result => {
-      commit('SET_CHECKED_IN_STATUS', true);
+      // commit('SET_CHECKED_IN_STATUS', true);
       commit('SET_CHECKED_IN_CODE', data.qrcode);
       commit('SET_CHECKED_IN_RESTAURANT_ID', result.data.restaurantId);
       commit('SET_CHECKED_IN_TABLE_ID', result.data.tableId);

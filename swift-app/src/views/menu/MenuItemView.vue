@@ -483,13 +483,21 @@ export default {
       addItemToOrder: "OrderStore/addItemToOrder"
     }),
     checkedIn() {
-      let checkedInStatus = this.checkedInStatus
+      /* let checkedInStatus = this.checkedInStatus
 
       if (checkedInStatus == true && checkedInStatus != null) {
         return true;
       } else {
         return false;
-      } 
+      }  */
+
+      let checkedInVal = this.checkedInQRCode;
+
+      if (checkedInVal != null) {
+        return true;
+      } else {
+        return false;
+      }
     }
   },
   computed: {
@@ -528,7 +536,8 @@ export default {
     ...mapGetters({
       menu: "MenuStore/getMenu",
       customer: "CustomerStore/getCustomerProfile",
-      checkedInStatus: 'CustomerStore/getCheckedInStatus',
+      // checkedInStatus: 'CustomerStore/getCheckedInStatus',
+      checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
     }),
   },
   mounted: function() {
