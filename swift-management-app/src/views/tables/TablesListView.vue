@@ -17,10 +17,15 @@
           collapse-action
         >
           <vs-chip color="primary">Seats: {{table.numSeats}}</vs-chip>
-          <vs-chip color="primary">Checked In:  {{getCheckInCount(table.status)}}</vs-chip>
+          <vs-chip color="primary">Checked In: {{getCheckInCount(table.status)}}</vs-chip>
           <vs-divider border-style="solid" color="white"></vs-divider>
-		  <qrcode-vue class="tableQR" :value="table.qrcode" :size="qrSize" level="H"></qrcode-vue>
-          <vs-button :disabled="table.status === 'Vacant'" color="primary" @click="goToOrder(table.tableId)" type="filled">View order</vs-button>
+          <qrcode-vue class="tableQR" :value="table.qrcode" :size="qrSize" level="H"></qrcode-vue>
+          <vs-button
+            :disabled="table.status === 'Vacant'"
+            color="primary"
+            @click="goToOrder(table.tableId)"
+            type="filled"
+          >View order</vs-button>
         </vx-card>
       </div>
 
@@ -57,20 +62,20 @@
 
 <script>
 import moduleDataList from "@/store/tables/tablesDataList.js";
-import QrcodeVue from 'qrcode.vue'
+import QrcodeVue from "qrcode.vue";
 
 export default {
-	 components: {
-      QrcodeVue,
-    },
+  components: {
+    QrcodeVue,
+  },
   data() {
     return {
-    qrSize: 120,
+      qrSize: 120,
       viewUpdateNum: 1,
       isMounted: false,
       addTablePopupActive: false,
       newTableNumber: 1,
-      newTableSeats: 1
+      newTableSeats: 1,
     };
   },
   computed: {
@@ -83,11 +88,13 @@ export default {
       if (this.$store.state.tableList)
         return this.$store.state.tableList.tables.length;
       else return null;
-    }
+    },
   },
   methods: {
     listTables() {
-      this.$store.dispatch("tableList/listTables");
+      this.$store.dispatch("tableList/listTables", {
+        authKey: this.getAuthToken(),
+      });
     },
     closeCardAnimationDemo(card) {
       card.removeRefreshAnimation(3000);
@@ -95,29 +102,30 @@ export default {
     addTable() {
       this.$store.dispatch("tableList/addTable", {
         tableNum: this.newTableNumber,
-        tableSeats: this.newTableSeats
+        tableSeats: this.newTableSeats,
+        authKey: this.getAuthToken(),
       });
       this.addTablePopupActive = false;
       this.rowUpdateNum = this.rowUpdateNum + 1;
-	},
-	getCheckInCount(status){
-		if(status == "Vacant")
-			return 0
-		else 
-			return status.split(" ")[0];
-  },
-  goToOrder(tableId){
-    this.$router.push('/orders');
-  }
+    },
+    getCheckInCount(status) {
+      if (status == "Vacant") return 0;
+      else return status.split(" ")[0];
+    },
+    goToOrder(tableId) {
+      this.$router.push("/orders");
+    },
   },
   created() {
-    if (!moduleDataList.isRegistered) {
-      this.$store.registerModule("tableList", moduleDataList);
-      moduleDataList.isRegistered = true;
-    }
-    if (!this.tableCount > 0) this.$vs.loading();
+    if (this.getAuthToken() != null) {
+      if (!moduleDataList.isRegistered) {
+        this.$store.registerModule("tableList", moduleDataList);
+        moduleDataList.isRegistered = true;
+      }
+      if (!this.tableCount > 0) this.$vs.loading();
 
-    this.listTables();
+      this.listTables();
+    }
   },
   mounted() {
     this.isMounted = true;
@@ -125,8 +133,8 @@ export default {
   watch: {
     tableCount(newCount, oldCount) {
       this.$vs.loading.close();
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -141,12 +149,12 @@ export default {
   text-align: center;
   margin: 10px;
 }
-.tableQR >>> canvas{
-	padding-left: 0;
-    padding-right: 0;
-    margin-left: auto;
-    margin-right: auto;
-	margin-bottom: 20px;
-    display: block;
+.tableQR >>> canvas {
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 20px;
+  display: block;
 }
 </style>

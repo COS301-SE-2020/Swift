@@ -31,6 +31,19 @@ require('./assets/css/iconfont.css')
 
 Vue.config.productionTip = false
 
+Vue.mixin({
+  methods: {
+    getAuthToken() {
+      if (localStorage.getItem('authToken') != "null") {
+        return localStorage.getItem('authToken');
+      } else {
+        this.$router.push('/login');
+        return null;
+      }
+    }
+  }
+})
+
 new Vue({
   router,
   store,

@@ -414,13 +414,17 @@ export default {
     },
   },
   created() {
-    if (!modulemenuList.isRegistered) {
-      this.$store.registerModule("menuList", modulemenuList);
-      modulemenuList.isRegistered = true;
-    }
-    //if menu has not been loaded yet, load it first
-    if (!this.restaurantLoaded()) {
-      this.$store.dispatch("menuList/listMenuItems");
+    if (this.getAuthToken() != null) {
+      if (!modulemenuList.isRegistered) {
+        this.$store.registerModule("menuList", modulemenuList);
+        modulemenuList.isRegistered = true;
+      }
+      //if menu has not been loaded yet, load it first
+      if (!this.restaurantLoaded()) {
+        this.$store.dispatch("menuList/listMenuItems", {
+          authKey: this.getAuthToken(),
+        });
+      }
     }
   },
 };

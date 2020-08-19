@@ -53,8 +53,8 @@ export default {
   },
   methods: {
     logout() {
-      // This is just for demo Purpose. If user clicks on logout -> redirect
-      this.$router.push('/pages/login').catch(() => {})
+      localStorage.setItem("authToken", null);
+      this.$router.push('/login').catch(() => {})
     },
   }
 }

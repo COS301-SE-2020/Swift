@@ -5,7 +5,7 @@ export default {
     login({commit, dispatch}, data) {
         axios.post('https://api.swiftapp.ml', 
           {
-            "requestType": "loginAdmin",
+            "requestType": "login",
             "email": data.userDetails.email,
             "password": data.userDetails.password
           }
@@ -13,9 +13,8 @@ export default {
           commit('SAVE_TOKEN', result.data.token);
           commit('SAVE_USER', result.data);
           commit('SET_AUTHENTICATION', true);
+          console.log(result.data.token);
           router.push('/') 
-          //TODO: Load dashboard stats
-          //     this.dispatch('/');
         }).catch(({ response }) => 
         {
           console.log(response);
@@ -24,16 +23,15 @@ export default {
     register({commit}, data) {
         axios.post('https://api.swiftapp.ml', 
           {
-            "requestType": "registerAdmin",
+            "requestType": "register",
             "name": data.userDetails.name,
             "surname": data.userDetails.surname,
-            "username": data.userDetails.username,
             "email": data.userDetails.email,
             "password": data.userDetails.password
           }
         ).then(result => {
           console.log(result);
-          commit('SAVE_CUSTOMER', result.data);
+          commit('SAVE_USER', result.data);
         }).catch(({ response }) => {
           console.log(response);
         });

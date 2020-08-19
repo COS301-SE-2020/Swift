@@ -23,7 +23,7 @@
                 color="primary"
               >Branch: Centurion Mall</vs-chip>
               <div
-                class="restaurantDescription mb-4"
+                class="newRestaurantDescription mb-4"
               >O’Galito is an upmarket restaurant specialising in preparing exceptionally fine Portuguese dishes, complimented with world class service.</div>
 
               <vs-button @click="editRestaurant()" type="border">
@@ -63,7 +63,7 @@
             <vs-input
               label="Restaurant Name"
               placeholder="Mug & Bean"
-              v-model.trim="$v.restaurantName.$model"
+              v-model.trim="$v.newRestaurantName.$model"
             />
           </vs-col>
           <vs-col
@@ -74,7 +74,7 @@
             vs-lg="6"
             vs-sm="12"
           >
-            <vs-input label="Branch" placeholder="Centurion Mall" v-model="restaurantBranch" />
+            <vs-input label="Branch" placeholder="Centurion Mall" v-model="newRestaurantBranch" />
           </vs-col>
         </vs-row>
         <vs-row>
@@ -87,7 +87,7 @@
             vs-lg="10"
             vs-sm="12"
           >
-            <vs-textarea label="Description" v-model="restaurantDesc" />
+            <vs-textarea label="Description" v-model="newRestaurantDesc" />
           </vs-col>
         </vs-row>
 
@@ -120,7 +120,7 @@
             id="restaurantCoverUploadPreview"
             hidden
             class="mt-4 rounded-lg"
-            :style="'background-image:url('+restaurantImage+')'"
+            :style="'background-image:url('+newRestaurantImage+')'"
           ></div>
         </vx-card>
         <vs-button
@@ -144,11 +144,11 @@ export default {
       restaurantPopupTitle: "",
       restaurantPopupButton: "",
       restaurantPopupActive: false,
-      restaurantName: "",
-      restaurantBranch: "",
-      restaurantDesc: "",
-      restaurantImage: "",
-      restaurantCategories: [],
+      newRestaurantName: "",
+      newRestaurantBranch: "",
+      newRestaurantDesc: "",
+      newRestaurantImage: "",
+      newRestaurantCategories: [],
     };
   },
   computed: {
@@ -159,13 +159,13 @@ export default {
   methods: {
     selectCategory(event, id) {
       var cardElement = event.target;
-      var index = this.restaurantCategories.indexOf(id);
+      var index = this.newRestaurantCategories.indexOf(id);
 
       if (index > -1) {
         cardElement.style.opacity = "0.5";
-        this.restaurantCategories.splice(index, 1);
-      } else if (this.restaurantCategories.length < 3) {
-        this.restaurantCategories.push(id);
+        this.newRestaurantCategories.splice(index, 1);
+      } else if (this.newRestaurantCategories.length < 3) {
+        this.newRestaurantCategories.push(id);
         cardElement.style.opacity = "1";
       }
     },
@@ -178,14 +178,14 @@ export default {
         document.getElementById("uploadImageInput").files[0]
       );
       reader.onload = () => {
-        this.setRestaurantImage(reader.result);
+        this.setnewRestaurantImage(reader.result);
       };
       reader.onerror = function (error) {
         console.log("Error: ", error);
       };
     },
-    setRestaurantImage(image) {
-      this.restaurantImage = image;
+    setnewRestaurantImage(image) {
+      this.newRestaurantImage = image;
       document.getElementById("restaurantCoverUploadPreview").style.display =
         "block";
     },
@@ -204,36 +204,40 @@ export default {
     restaurantPopupSubmit() {
       if (this.restaurantPopupAction == "add") {
         this.$store.dispatch("mybusinessData/addNewRestaurant", {
-          restaurantName: this.restaurantName,
-          restaurantDesc: this.restaurantDesc,
-          restaurantBranch: this.restaurantBranch,
-          restaurantImage: this.restaurantImage,
-          restaurantCategories: JSON.stringify(this.restaurantCategories),
+          restaurantName: this.newRestaurantName,
+          restaurantDesc: this.newRestaurantDesc,
+          restaurantBranch: this.newRestaurantBranch,
+          restaurantImage: this.newRestaurantImage,
+          restaurantCategories: JSON.stringify(this.newRestaurantCategories),
+          authKey: this.getAuthToken(),
         });
         this.restaurantPopupActive = false;
-      } else if (this.restaurantPopupAction == "add") {
-        return;
+      } else if (this.restaurantPopupAction == "edit") {
+        this.restaurantPopupActive;
       }
     },
     listBusinesses() {
-      this.$store.dispatch("mybusinessData/retrieveRestaurantCategories");
+      this.$store.dispatch("mybusinessData/retrieveRestaurantCategories", {
+        authKey: this.getAuthToken(),
+      });
 
       return;
     },
   },
   created() {
-    if (!moduleDataList.isRegistered) {
-      this.$store.registerModule("mybusinessData", moduleDataList);
-      moduleDataList.isRegistered = true;
+    if (this.getAuthToken() != null) {
+      if (!moduleDataList.isRegistered) {
+        this.$store.registerModule("mybusinessData", moduleDataList);
+        moduleDataList.isRegistered = true;
+      }
+      this.listBusinesses();
     }
-
-    this.listBusinesses();
   },
   mounted() {
     this.isMounted = true;
   },
   validations: {
-    restaurantName: {
+    newRestaurantName: {
       required,
     },
   },
@@ -241,7 +245,7 @@ export default {
 </script>
 
 <style scoped>
-.restaurantDescription {
+.newRestaurantDescription {
   font-size: 15px;
   font-weight: 300;
   max-width: 90%;

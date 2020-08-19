@@ -204,7 +204,7 @@ export default {
         text:
           "It looks like the current restaurant doesn't have any items yet. Let's create your first menu item.",
         accept: this.addMenuItem,
-        acceptText: "Add Menu Item"
+        acceptText: "Add Menu Item",
       });
     },
     addMenuItem() {
@@ -232,7 +232,9 @@ export default {
       return "primary";
     },
     listMenuItems() {
-      this.$store.dispatch("menuList/listMenuItems");
+      this.$store.dispatch("menuList/listMenuItems", {
+        authKey: this.getAuthToken(),
+      });
     },
     restaurantLoaded() {
       if (Object.keys(this.restaurantObject).length === 0) return false;
@@ -251,14 +253,16 @@ export default {
     },
   },
   created() {
-    if (!modulemenuList.isRegistered) {
-      this.$store.registerModule("menuList", modulemenuList);
-      modulemenuList.isRegistered = true;
-    }
-    if (!this.restaurantLoaded()) this.$vs.loading();
-    else this.loadInitialMenu();
+    if (this.getAuthToken() != null) {
+      if (!modulemenuList.isRegistered) {
+        this.$store.registerModule("menuList", modulemenuList);
+        modulemenuList.isRegistered = true;
+      }
+      if (!this.restaurantLoaded()) this.$vs.loading();
+      else this.loadInitialMenu();
 
-    this.listMenuItems();
+      this.listMenuItems();
+    }
   },
   mounted() {
     this.isMounted = true;
