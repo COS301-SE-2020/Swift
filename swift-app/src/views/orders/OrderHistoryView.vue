@@ -243,13 +243,13 @@ export default {
     },
     payForOrder(item) {
 
-      // console.log(item)
-
+      console.log(this.paymentInfo)
+      // if ()
       let data = {
         "orderId": item.orderId,
         "paymentMethod": "Card",
-        "amountPaid": parseFloat(item.waiterTip) + parseFloat(this.calculateTotal(item) * 0.14) + parseFloat(this.calculateTotal(item)),
-        "waiterTip": item.waiterTip,
+        "amountPaid": parseFloat((item.orderTax != null) ? item.orderTax : 0) + parseFloat((item.orderTotal != null) ? item.orderTotal : 0) + parseFloat((item.waiterTip != null) ? item.waiterTip : 0),
+        "waiterTip": parseFloat((item.waiterTip != null) ? item.waiterTip : 0),
         "orderTotal": parseFloat(this.calculateTotal(item)),
         "orderTax": parseFloat(this.calculateTotal(item) * 0.14)
       }

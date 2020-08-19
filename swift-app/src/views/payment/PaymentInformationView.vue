@@ -131,7 +131,7 @@
       </v-row>
     </v-card>
 
-    <v-overlay relative opacity="0.25" :value="orderFlag" z-index="10">
+    <v-overlay relative opacity="0.25" :value="showPopUp()" z-index="10">
       <v-avatar elevation="3" color="accent" class="pl-0 pr-0" absolute style="position: absolute; z-index: 12">
         <v-icon size="33px" color="white" v-text="'mdi-check'"></v-icon>
       </v-avatar>
@@ -223,10 +223,13 @@ export default {
       this.$router.push('/orders')
     },
     calculateTotal() {
-      console.log("in here")
-      console.log(this.orderFlag())
-      console.log(this.paymentInfo().waiterTip)
+      // console.log(this.paymentInfo().waiterTip)
       return (parseFloat((this.paymentInfo().orderTax != null) ? this.paymentInfo().orderTax : 0) + parseFloat((this.paymentInfo().orderTotal != null) ? this.paymentInfo().orderTotal : 0) + parseFloat((this.paymentInfo().waiterTip != null) ? this.paymentInfo().waiterTip : 0)).toFixed(2)
+    },
+    showPopUp() {
+      console.log("in here2")
+      console.log(this.orderFlag())
+      return this.orderFlag()
     },
     goToPayment (){
       this.setTotal(this.calculateTotal())
