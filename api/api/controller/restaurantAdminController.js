@@ -1,15 +1,13 @@
 const { v4: uuidv4 } = require('uuid');
 const db = require('../db');
 const { validateToken, tokenState } = require('../helper/tokenHandler');
-/*
 const {
   getReviews,
-  getRatingPhrasesObj,
+  // getRatingPhrasesObj,
   getMenuCategories,
-  getOrderHistory,
-  getOrderItems
+  // getOrderHistory,
+  // getOrderItems
 } = require('../helper/objectBuilder');
-*/
 
 module.exports = {
   createRestaurant: async (reqBody, response) => {
@@ -449,4 +447,89 @@ module.exports = {
     // Invalid token
     return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
   },
+  getRestaurantList: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'includeImage')
+      || Object.keys(reqBody).length !== 3) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    const userToken = validateToken(reqBody.token, true);
+
+    if (userToken.state === tokenState.VALID) {
+      return (async () => {
+        const client = await db.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+          const res = await client.query(
+            'SELECT restaurant.restaurantid, restaurant.restaurantname, restaurant.branch,'
+            + ' restaurant.location, restaurant.coverimageurl, restaurantemployee.employeerole'
+            + ' FROM public.restaurantemployee'
+            + ' INNER JOIN public.restaurant ON restaurant.restaurantid = restaurantemployee.restaurantid'
+            + ' WHERE restaurantemployee.userid = $1::integer',
+            [userToken.data.userId]
+          );
+
+          const restaurantResponse = {};
+          restaurantResponse.restaurants = [];
+
+          for (let r = 0; r < res.rows.length; r++) {
+            restaurantResponse.restaurants[r] = {};
+            restaurantResponse.restaurants[r].restaurantId = res.rows[r].restaurantid;
+            restaurantResponse.restaurants[r].name = res.rows[r].restaurantname;
+            restaurantResponse.restaurants[r].yourRole = res.rows[r].employeerole;
+            restaurantResponse.restaurants[r].branch = res.rows[r].branch;
+            restaurantResponse.restaurants[r].location = res.rows[r].location;
+            restaurantResponse.restaurants[r].image = (reqBody.includeImage === true)
+              ? res.rows[r].coverimageurl : null;
+
+            // eslint-disable-next-line operator-linebreak
+            restaurantResponse.restaurants[r].categories =
+              // eslint-disable-next-line no-await-in-loop
+              await getMenuCategories(res.rows[r].restaurantid);
+            // eslint-disable-next-line no-await-in-loop
+            restaurantResponse.restaurants[r].reviews = await getReviews(res.rows[r].restaurantid);
+
+            // eslint-disable-next-line no-await-in-loop
+            const ratingRes = await client.query(
+              'SELECT AVG(ratingscore) AS "rating" FROM public.review'
+              + ' WHERE restaurantid = $1::integer AND ratingscore IS NOT NULL;',
+              [res.rows[r].restaurantid]
+            );
+
+            if (ratingRes.rows[0].rating != null) {
+              restaurantResponse.restaurants[r].rating = ratingRes.rows[0].rating;
+            } else {
+              // no rating available
+              restaurantResponse.restaurants[r].rating = 0.0;
+            }
+          }
+
+          // commit changes
+          await client.query('COMMIT');
+
+          return response.status(200).send(restaurantResponse);
+        } catch (err) {
+          // rollback changes
+          await client.query('ROLLBACK');
+          throw err;
+        } finally {
+          client.release();
+        }
+      })()
+        .catch((err) => {
+          console.error('Query Error [Restaurant - Get Admin Restaurant List]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  }
 };
