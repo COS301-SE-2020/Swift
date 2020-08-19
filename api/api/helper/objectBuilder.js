@@ -3,8 +3,8 @@ const db = require('../db');
 // helper to get individual order items
 const getOrderItems = async (oid = 0) => db.query(
   'SELECT menuitem.menuitemid, menuitem.menuitemname, menuitem.menuitemdescription,'
-    + ' menuitem.price, itemordered.quantity, itemordered.orderselections'
-    + ' FROM public.itemordered'
+    + ' menuitem.price, itemordered.quantity, itemordered.orderselections,'
+    + ' itemordered.progress FROM public.itemordered'
     + ' INNER JOIN public.menuitem ON menuitem.menuitemid = itemordered.menuitemid'
     + ' WHERE itemordered.orderid = $1::integer;',
   [oid]
@@ -19,6 +19,7 @@ const getOrderItems = async (oid = 0) => db.query(
       orderItem.menuItemDescription = ordItem.menuitemdescription;
       orderItem.price = ordItem.price;
       orderItem.quantity = ordItem.quantity;
+      orderItem.progress = ordItem.progress;
       orderItem.orderselections = ordItem.orderselections;
       orderTotal += (orderItem.price * ordItem.quantity);
       orderHistoryItems.push(orderItem);
@@ -156,7 +157,7 @@ module.exports = {
   getOrderHistory: (userId = 0) => db.query(
     'SELECT customerorder.orderid, restaurant.restaurantid, restaurant.restaurantname,'
     + ' restaurant.location, customerorder.orderdatetime, customerorder.ordercompletiontime,'
-    + ' customerorder.orderstatus, customerorder.waitertip, customerorder.ordertotal,'
+    + ' customerorder.orderstatus, customerorder.progress, customerorder.waitertip, customerorder.ordertotal,'
     + ' customerorder.ordernumber, person.name AS "ename", person.surname AS "esurname"'
     + ' FROM public.customerorder'
     + ' INNER JOIN public.restauranttable ON customerorder.tableid = restauranttable.tableid'
@@ -179,6 +180,7 @@ module.exports = {
             historyItem.orderDateTime = hist.orderdatetime;
             historyItem.orderCompletionTime = hist.ordercompletiontime;
             historyItem.orderStatus = hist.orderstatus;
+            historyItem.progress = hist.progress;
             // historyItem.total = orderItems.orderTotal;
             historyItem.waiterTip = hist.waitertip;
             historyItem.total = hist.ordertotal;
