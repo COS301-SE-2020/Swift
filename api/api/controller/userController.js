@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const validator = require('email-validator');
 const db = require('../db');
-const sendEmail = require('../helper/notifications/sendEmail');
+const { registrationEmail, passResetEmail } = require('../helper/notifications/sendEmail');
 const { generateToken, validateToken, tokenState } = require('../helper/tokenHandler');
 const { getFavourites, getOrderHistory } = require('../helper/objectBuilder');
 const phImg = require('../helper/assets/placeholderImage.json');
@@ -95,6 +95,120 @@ module.exports = {
       })
       .catch((err) => {
         console.error('Query Error [Login - Check Account Existence]', err.stack);
+        return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+      });
+  },
+  resetPassword: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'email')
+    || Object.keys(reqBody).length !== 2) { //  request type
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+    const { email } = reqBody;
+    if (!validator.validate(email)) {
+      // invalid email
+      return response.status(400).send({ status: 400, reason: 'Invalid Email' });
+    }
+    // check if user exists
+    return db.query(
+      'SELECT userid, name, surname, email, password, theme, checkedin'
+        + ' FROM public.person WHERE person.email = $1::text',
+      [email]
+    )
+      // eslint-disable-next-line consistent-return
+      .then((res) => {
+        if (res.rows.length === 0) {
+          // user does not exist
+          return response.status(404).send({ status: 404, reason: 'User Not Found' });
+        }
+        if (res.rows.length > 0) {
+          // get a token
+          const newTokenPair = generateToken(res.rows[0].userid);
+          const LongToken = newTokenPair.token;
+          const value = LongToken.substring(8, 12); // get first 4 digits
+          value.trim();
+          const sendData = {
+            ShortToken: value,
+            email
+          };
+
+          if (sendData.ShortToken.length !== 0) { // Check if short token was received
+            passResetEmail(sendData);
+            return response.status(200).send(LongToken);
+          }
+        } else {
+          return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+        }
+      })
+      .catch((err) => {
+        console.error('Query Error [reset password - Check Account Existence]', err.stack);
+        return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+      });
+  },
+  // eslint-disable-next-line consistent-return
+  verifyToken: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'fullToken')
+     || !Object.prototype.hasOwnProperty.call(reqBody, 'shortToken') // shortToken - 4 digit pin
+     || Object.keys(reqBody).length !== 3) { // request type
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+    // check if full token is valid
+    const userToken = validateToken(reqBody.fullToken, true);
+    if (userToken.state === tokenState.VALID) {
+      const value = reqBody.fullToken.substring(8, 12); /// confrim this
+      value.trim();
+
+      if (value === reqBody.shortToken) {
+        return response.status(201).send({ status: 201, reason: 'Valid verification Token' });
+      }
+
+      return response.status(403).send({ status: 403, reason: 'Invalid verification Token ' });
+    }
+
+    if (userToken.state === tokenState.INVALID) {
+      // Invalid token
+      return response.status(403).send({ status: 403, reason: 'Invalid Token Pair' });
+    }
+  },
+  updatePassword: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'email')
+    || !Object.prototype.hasOwnProperty.call(reqBody, 'password')
+    || Object.keys(reqBody).length !== 3) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    const { email } = reqBody;
+
+    // validate email
+    if (!validator.validate(email)) {
+      return response.status(400).send({ status: 400, reason: 'Invalid Email' });
+    }
+    // Check if user exists
+    return db.query(
+      'SELECT userid, name, surname, email, password, theme, checkedin'
+          + ' FROM public.person WHERE person.email = $1::text',
+      [email]
+    )
+    // eslint-disable-next-line consistent-return
+      .then((res) => {
+        if (res.rows.length === 0) {
+          // user does not exist
+          return response.status(404).send({ status: 404, reason: 'Not Found' });
+        }
+
+        return db.query(
+          'UPDATE public.person SET password = $1::text WHERE email = $2::text;',
+          [bcrypt.hashSync(reqBody.password, BC_SALT_ROUNDS), reqBody.email]
+        )
+          .then(() => response.status(201).send({ status: 201, reason: 'Password successfully updated' }))
+          .catch((err) => {
+            console.error('Query Error [Password correctness - Check if user]', err.stack);
+            return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+          });
+      })
+      .catch((err) => {
+        console.error('Query Error [update password - Check Account Existence]', err.stack);
         return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
       });
   },
@@ -303,7 +417,7 @@ module.exports = {
         )
           .then(() => {
             // sends account activation email
-            sendEmail.registrationEmail(newUserData);
+            registrationEmail(newUserData);
 
             if (socialRegistration) {
               return { status: 201, reason: 'Customer Account Created' };

@@ -68,3 +68,23 @@ module.exports.paymentEmail = (req, res) => {
     });
   });
 };
+
+/** *****Password reset Email ******** */
+// eslint-disable-next-line no-unused-vars
+module.exports.passResetEmail = (req, res) => {
+  ejs.renderFile(`${__dirname}/PasswordResetTemp.ejs`, { token: req.ShortToken }, (err, data) => {
+    const mailOptions = {
+      from: process.env.MG_EMAIL_FROM || config.emailFrom,
+      to: req.email,
+      subject: 'Swift-app Password Reset',
+      html: data
+    };
+    apiTransporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error(`error occurs : ${error}`);
+      } else { // eslint-disable-next-line no-console
+        console.log(`Email successfully sent to: ${info.response}`);
+      }
+    });
+  });
+};
