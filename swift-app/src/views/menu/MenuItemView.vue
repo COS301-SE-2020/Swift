@@ -1,24 +1,28 @@
 <template>
   <v-card class="mx-auto" flat>
-    <v-carousel height="200px" :show-arrows="false" hide-delimiter-background continuous>
+    <div v-if="arActive" fill-height fill-width>
+      <v-btn width="30px" height="30px" @click="exitAR" color="secondary" absolute small fab style="z-index:11; top: 20px; left: 15px">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
+      <span class="title black--text" style=" position: absolute; z-index:11; top: 20px; left: 65px">{{newMenuItem.menuItemName}}</span>
+      <iframe style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:10;" src="https://studio.onirix.com/modelviewer/012b5b7f41d14cbba1d8728d960d9011?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUyMDIsImFzc2V0SWQiOjEzOTU4NCwicm9sZSI6OCwiaWF0IjoxNTkxMDMwNDg0fQ.LgMQAzyY6tmJyGY2-_RcT38SEibg-eWoHRmtQoUMkK8"  frameborder="0"></iframe>
+    </div>
+    <v-carousel v-if="!arActive" height="200px" :show-arrows="false" hide-delimiter-background continuous>
       <v-carousel-item v-for="(item,i) in items" :key="i" :src="item.img"></v-carousel-item>
-      <!-- <v-carousel-item>
-        <iframe src="https://studio.onirix.com/modelviewer/012b5b7f41d14cbba1d8728d960d9011?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUyMDIsImFzc2V0SWQiOjEzOTU4NCwicm9sZSI6OCwiaWF0IjoxNTkxMDMwNDg0fQ.LgMQAzyY6tmJyGY2-_RcT38SEibg-eWoHRmtQoUMkK8"  frameborder="0"></iframe>
-      </v-carousel-item> -->
     </v-carousel>
-    <v-btn width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 10px; left: 10px;">
+    <v-btn v-if="!arActive" width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 20px; left: 15px">
       <v-icon>mdi-chevron-left</v-icon>
     </v-btn>
-    <v-btn @click="openARScanner" color="secondary" absolute small fab style="top: 175px; right: 65px;">
+    <v-btn v-if="!arActive" @click="openARScanner" color="secondary" absolute small fab style="top: 175px; right: 65px;">
       <v-icon>mdi-cube-scan</v-icon>
     </v-btn>
-    <v-fab-transition>
+    <v-fab-transition v-if="!arActive">
       <v-btn @click="changeFavourite" :key="activateFavourite.icon" :color="activateFavourite.color" style="top: 175px;" absolute small fab  right >
         <v-icon>{{ activateFavourite.icon }}</v-icon>
       </v-btn>
     </v-fab-transition>
 
-    <v-card-text class="pb-0 pt-3">
+    <v-card-text v-if="!arActive" class="pb-0 pt-3">
       <v-row class="mx-0">
         <v-col cols="8" class="pl-0 pb-0">
           <span class="title black--text">{{newMenuItem.menuItemName}}</span>
@@ -29,7 +33,7 @@
       </v-row>
     </v-card-text>
 
-    <v-card-text class="pt-0" >
+    <v-card-text v-if="!arActive" class="pt-0" >
       <v-row align="center" class="mx-0 my-4" >
         <v-col cols="8" class="px-0 py-0">
           <v-rating readonly size="18" dense color="yellow darken-3" background-color="secondary" :value="newMenuItem.rating"></v-rating>
@@ -42,7 +46,7 @@
     </v-card-text>
 
     
-    <v-tabs v-model="tab" background-color="white" grow>
+    <v-tabs v-if="!arActive" v-model="tab" background-color="white" grow>
       <v-tab v-if="newMenuItem.attributes != null && checkedIn()">
         Details
       </v-tab>
@@ -52,7 +56,7 @@
     </v-tabs>
     
 
-    <v-tabs-items v-model="tab">
+    <v-tabs-items v-if="!arActive" v-model="tab">
       <v-tab-item v-if="newMenuItem.attributes != null && checkedIn()">
         <v-card flat>
           <v-card-title class="pb-0 pt-4">Customise Order</v-card-title>
@@ -259,6 +263,7 @@ export default {
       favourited: false,
       muesliSelected: true,
       honeySelected: false,
+      arActive: false,
       // menuItemSelections: [
       //   {
       //     title: 'Choose fruit:',
@@ -427,7 +432,10 @@ export default {
           buttons: ['OK']
         })
         .then(a => a.present())   */
-        window.location.href = 'https://studio.onirix.com/modelviewer/012b5b7f41d14cbba1d8728d960d9011?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjUyMDIsImFzc2V0SWQiOjEzOTU4NCwicm9sZSI6OCwiaWF0IjoxNTkxMDMwNDg0fQ.LgMQAzyY6tmJyGY2-_RcT38SEibg-eWoHRmtQoUMkK8'
+      this.arActive = true;
+    },
+    exitAR() {
+      this.arActive = false;
     },
     addToOrder() {;
       let selectionValues = [];

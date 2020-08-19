@@ -21,6 +21,9 @@
                   </v-row>
                 </v-carousel-item>
               </v-carousel>
+              <v-btn width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 20px; left: 15px;">
+                <v-icon>mdi-chevron-left</v-icon>
+              </v-btn>
               <v-btn v-if="checkedIn()" width="30px" height="30px" @click="callWaiterPressed()" :key="activeCall.icon" :color="activeCall.color" absolute small fab style="top: 20px; right: 10px;">
                 <v-icon :style="called ? { 'transform': 'rotate(45deg)' } : { 'transform': 'rotate(0deg)' }">{{ activeCall.icon }}</v-icon>
               </v-btn>
@@ -175,7 +178,7 @@ export default {
       this.favourited = !this.favourited;
     },
     backNavigation () {
-      this.$router.push("/");
+      this.$router.push('/')
     },
     async callWaiterPressed() {
       var tableId = localStorage.getItem('checkedInTableId');
