@@ -47,6 +47,18 @@ router.post('/', (req, res) => {
         userController.loginUser(req.body, res);
         break;
       }
+      case 'reset': { //  for the reset password
+        userController.resetPassword(req.body, res);
+        break;
+      }
+      case 'verify': {
+        userController.verifyToken(req.body, res);
+        break;
+      }
+      case 'updatePassword': {
+        userController.updatePassword(req.body, res);
+        break;
+      }
       case 'loginAdmin': {
         adminController.loginAdmin(req.body, res);
         break;
