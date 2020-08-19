@@ -34,8 +34,8 @@ export default {
         "qrcode": result
       }
       var response = await this.checkInCustomer(data);
-      
-      this.goToRestaurant(response.restaurantId);
+      console.log(response.restaurantId)
+      this.$router.push("/menu/" + response.restaurantId);
     },
     ...mapMutations({
       setTable : 'RestaurantStore/setTableNumber',

@@ -493,7 +493,7 @@ export default {
 
       let checkedInVal = this.checkedInQRCode;
 
-      if (checkedInVal != null) {
+      if (checkedInVal != null && this.$route.params.menuId == this.checkedInRestaurantId) {
         return true;
       } else {
         return false;
@@ -538,6 +538,7 @@ export default {
       customer: "CustomerStore/getCustomerProfile",
       // checkedInStatus: 'CustomerStore/getCheckedInStatus',
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
+      checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
     }),
   },
   mounted: function() {

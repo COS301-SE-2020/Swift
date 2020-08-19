@@ -104,6 +104,8 @@ $(window).scroll(function(){
   $(".backgroundImage").css("opacity", 1 - $(window).scrollTop() / 250);
 });
 
+
+
 export default {
   components: {
     NavBar: NavBar,
@@ -202,12 +204,9 @@ export default {
       } else {
         return false;
       } */ 
-
-      console.log(this.checkedInRestaurantId)
-
       let checkedInVal = this.checkedInQRCode;
 
-      if (checkedInVal != null) {
+      if (checkedInVal != null && this.$route.params.menuId == this.checkedInRestaurantId) {
         return true;
       } else {
         return false;
