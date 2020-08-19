@@ -53,14 +53,14 @@
                     </v-row>
                     <v-row class="mx-0 pb-1 pr-1">
                       <v-col cols="5" class="pb-2 orderButtons ">
-                        <v-btn  @click="addOrder(item)" text class="pa-0 button">
+                        <v-btn v-if="item.orderStatus != 'Received'" @click="addOrder(item)" text class="pa-0 button">
                           <v-icon color="primary" size="20px">mdi-history</v-icon> 
                           <span class="pl-1 orderOptions repeat">Repeat Order</span>
                         </v-btn>
-                        <!-- <v-btn v-else text class="pa-0 button" @click="goToOrderStatus">
+                        <v-btn v-else text class="pa-0 button" @click="goToOrderStatus">
                           <v-icon color="primary" size="20px">mdi-history</v-icon> 
                           <span class="pl-1 orderOptions repeat">Order Status</span>
-                        </v-btn> -->
+                        </v-btn>
                       </v-col>
                       <v-col cols="3" class="pb-2 px-1 orderButtons">
                         <v-btn v-if="item.orderStatus == 'Paid'" text class="pa-0 button">
@@ -223,10 +223,10 @@ export default {
           "orderItems": itemsOrdered
         }
       }
-      console.log("hello")
+      // console.log("hello")
       console.log(data)
       this.addItemToOrder(data)
-      // this.$router.push("/cart");
+      this.$router.push("/cart");
     },
     goToOrderStatus() {
       this.tab = 1;

@@ -57,8 +57,22 @@ export default {
 
       this.$store
         .dispatch("authData/login", payload)
-        .then(() => {
+        .then((res) => {
           this.$vs.loading.close();
+          if (res.status != 200) {
+            this.$vs.notify({
+              title: "Invalid login",
+              text: "The supplied email & password combination is incorrect.",
+              color: "danger",
+            });
+          } else {
+            this.$vs.notify({
+              title: "Successful login",
+              text: "Let's get cracking!",
+              color: "success",
+            });
+            this.$router.push("/");
+          }
         })
         .catch((error) => {
           this.$vs.loading.close();
