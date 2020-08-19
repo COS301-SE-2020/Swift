@@ -257,6 +257,7 @@ export default {
     }
   },
   async mounted() {
+    let checkedInVal = this.checkedInQRCode;
     // Check-in customer again if system crashes 
     if (checkedInVal != null && this.checkedInRestaurantId == null) {
       this.checkInCustomer(checkedInVal)

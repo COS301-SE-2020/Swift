@@ -118,12 +118,6 @@ export default {
       !this.$v.password.required && errors.push('Password is required.')
       return errors
     },
-    loginFailed () {
-      const errors = []
-      if (!this.$v.loginFailed.$dirty) return errors
-      !this.$v.loginFailed.required && errors.push('Login Failed.')
-      return errors
-    },
   },
 }
 </script>

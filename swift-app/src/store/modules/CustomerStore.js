@@ -121,7 +121,8 @@ const actions = {
     axios.post('https://api.swiftapp.ml', 
     {
       "requestType": "addFavourite",
-      "token": this.getters['CustomerStore/getToken'],
+      // "token": this.getters['CustomerStore/getToken'],
+      "token": sessionStorage.getItem('authToken'),
       "menuItemId": data.menuItemId
     } 
     ).then(result => {
