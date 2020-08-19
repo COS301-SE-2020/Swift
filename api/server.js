@@ -7,7 +7,7 @@ const DEFAULT_PORT = 3264;
 const SERVER_PORT = process.env.PORT || DEFAULT_PORT;
 
 // Parse JSON bodies
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '8192kb' })); // 8192 kb (8mb) max header size
 
 // Enable CORS
 app.use(cors());
