@@ -3,6 +3,7 @@ import axios from 'axios'
 // State object
 const initialState = () => ({
   orderInfo: {},
+  paymentInfo: {},
   orderHistory: {},
   orderTotal: 0,
   orderFlag: false
@@ -31,12 +32,15 @@ const getters = {
   getOrderFlag(state) {
     return state.orderFlag;
   },
+
+  getPaymentInfo(state) {
+    return state.paymentInfo;
+  }
 }
 
 // Actions 
 const actions = {
   submitOrder({commit}) {
-    // console.log(this.orderInfo);
     axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "addOrder",
@@ -49,6 +53,42 @@ const actions = {
     });
   },
 
+  submitPayment({commit}) {
+    console.log("PAYMENT INFO:")
+    console.log(this.getters['CustomerStore/getCustomerProfile']);
+    console.log(this.getters['OrderStore/getPaymentInfo']);
+    let data = {
+      "requestType": "payment",
+        "token": sessionStorage.getItem('authToken'),
+        "orderId": this.getters['OrderStore/getPaymentInfo'].orderId,
+        "paymentMethod": this.getters['OrderStore/getPaymentInfo'].paymentMethod,
+        "amountPaid": this.getters['OrderStore/getPaymentInfo'].amountPaid,
+        "name": this.getters['CustomerStore/getCustomerProfile'].name,
+        "email": this.getters['CustomerStore/getCustomerProfile'].email,
+        "waiterTip": this.getters['OrderStore/getPaymentInfo'].waiterTip,
+        "orderTotal": this.getters['OrderStore/getPaymentInfo'].orderTotal,
+        "orderTax": this.getters['OrderStore/getPaymentInfo'].orderTax
+    }
+    console.log(data)
+    axios.post('https://api.swiftapp.ml', 
+      {
+        "requestType": "payment",
+        "token": sessionStorage.getItem('authToken'),
+        "orderId": this.getters['OrderStore/getPaymentInfo'].orderId,
+        "paymentMethod": this.getters['OrderStore/getPaymentInfo'].paymentMethod,
+        "amountPaid": this.getters['OrderStore/getPaymentInfo'].amountPaid,
+        "name": this.getters['CustomerStore/getCustomerProfile'].name,
+        "email": this.getters['CustomerStore/getCustomerProfile'].email,
+        "waiterTip": this.getters['OrderStore/getPaymentInfo'].waiterTip,
+        "orderTotal": this.getters['OrderStore/getPaymentInfo'].orderTotal,
+        "orderTax": this.getters['OrderStore/getPaymentInfo'].orderTax
+      }
+    ).then(result => {
+      // commit('UPDATE_ORDER_HISTORY', result.data.orderHistory);
+    }).catch(({ response }) => {
+    });
+  },
+
   initOrderHistory({commit, state}) {
     var orderHistory = this.getters['CustomerStore/getCustomerOrderHistory']
     commit('SET_ORDER_HISTORY', orderHistory);
@@ -56,6 +96,14 @@ const actions = {
 
   addItemToOrder({commit,}, orderItemInfo) {
     commit('ADD_ITEM_TO_ORDER', orderItemInfo);
+  },
+
+  clearOrder({commit,}) {
+    commit('CLEAR_ORDER');
+  },
+
+  addPaymentInfo({commit,}, orderPaymentinfo) {
+    commit('ADD_PAYMENT', orderPaymentinfo);
   },
 
   retrieveOrderStatus({commit}, data) {
@@ -83,7 +131,7 @@ const actions = {
   },
 
   updateOrderFlag({commit}, orderFlag) {
-    commit('updateOrderFlag', orderFlag);
+    commit('UPDATE_ORDER_FLAG', orderFlag);
   }
 }
 
@@ -95,6 +143,11 @@ const mutations = {
 
   SET_ORDER_HISTORY(state, orderHistory) {
     state.orderHistory = orderHistory;
+  },
+
+  CLEAR_ORDER(state) {
+    state.orderInfo = {}
+    // console.log("now empty")
   },
 
   ADD_ITEM_TO_ORDER(state, orderItemInfo) {
@@ -110,6 +163,12 @@ const mutations = {
     }else
       state.orderInfo = orderItemInfo.orderInfo;
     console.log(state.orderInfo)
+  },
+
+  ADD_PAYMENT(state, orderPaymentinfo) {
+    state.paymentInfo = orderPaymentinfo;
+    console.log("payment added")
+    console.log(state.paymentInfo)
   },
   
   UPDATE_ORDER_STATUS(state, data) {
@@ -138,7 +197,8 @@ const mutations = {
     state.orderTotal = data;
   },
 
-  updateOrderFlag(state, orderFlag) {
+  UPDATE_ORDER_FLAG(state, orderFlag) {
+    console.log("flag: " + orderFlag)
     state.orderFlag = orderFlag;
   }
 }

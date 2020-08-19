@@ -124,21 +124,21 @@
     <v-card flat class="mx-auto mt-4" >
       <v-row>
         <v-col cols="12" class="pr-0 pt-1 pb-0" align="center">
-          <div style="font-size: 27px; text-align: center" class="mt-1">Total: R{{orderTotal}}</div>
+          <div style="font-size: 27px; text-align: center" class="mt-1">Total: R{{calculateTotal()}}</div>
           <v-btn @click="requestReceipt" v-if="type == 'Cash'" class="mt-6 subtitle-1" height="50px" width="180px" rounded large color="accent">Request Bill</v-btn>
           <v-btn @click="goToPayment" v-else class="mt-6 subtitle-1" height="50px" width="180px" rounded large color="accent">Pay Now</v-btn>
         </v-col>
       </v-row>
     </v-card>
 
-    <v-overlay relative opacity="0.25" :value="paymentMade" z-index="10">
+    <v-overlay relative opacity="0.25" :value="orderFlag" z-index="10">
       <v-avatar elevation="3" color="accent" class="pl-0 pr-0" absolute style="position: absolute; z-index: 12">
         <v-icon size="33px" color="white" v-text="'mdi-check'"></v-icon>
       </v-avatar>
       <v-alert color="white" transition="scale-transition" class="alert" align="center" style="margin-top: 20px">
         <div style="font-size: 22px !important; color: #343434" class="pl-8 pr-8 mt-8">Payment successful</div>
         <div class="mt-2" style="font-size: 16px !important; color: #343434">You successfully paid for your order.</div>
-        <div class="mt-2" style="font-size: 22px !important; color: #343434">R{{orderTotal}}</div>
+        <div class="mt-2" style="font-size: 22px !important; color: #343434">R{{calculateTotal()}}</div>
         <v-btn text @click="hideAlert" class="mt-6 mb-1">
           <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline">Continue</div>
         </v-btn>
@@ -164,7 +164,7 @@ export default {
       paymentMade: false,
       type: "Card",
       selectedItemPublic: [],
-      orderTotal: 126.36,
+      orderTotal: 0,
       creditCardInformation: [
         {
           type: "MasterCard",
@@ -218,15 +218,31 @@ export default {
       this.$router.go(-1)
     },
     hideAlert () {
-      this.$router.push('orders')
+      this.submitPayment()
+      this.updateOrderFlag(false);
+      this.$router.push('/orders')
+    },
+    calculateTotal() {
+      console.log("in here")
+      console.log(this.orderFlag())
+      console.log(this.paymentInfo().waiterTip)
+      return (parseFloat((this.paymentInfo().orderTax != null) ? this.paymentInfo().orderTax : 0) + parseFloat((this.paymentInfo().orderTotal != null) ? this.paymentInfo().orderTotal : 0) + parseFloat((this.paymentInfo().waiterTip != null) ? this.paymentInfo().waiterTip : 0)).toFixed(2)
     },
     goToPayment (){
-      this.setTotal(this.orderTotal)
+      this.setTotal(this.calculateTotal())
       // this.paymentMade = !this.paymentMade
       this.$router.push('pay')
     },
     ...mapMutations({
       setTotal : 'OrderStore/setOrderTotal'
+    }),
+    ...mapActions({
+      submitPayment: 'OrderStore/submitPayment',
+      updateOrderFlag: 'OrderStore/updateOrderFlag',
+    }),
+    ...mapGetters({
+      paymentInfo: 'OrderStore/getPaymentInfo',
+      orderFlag: 'OrderStore/getOrderFlag'
     }),
   },
   computed: {

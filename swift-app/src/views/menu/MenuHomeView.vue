@@ -226,7 +226,6 @@ export default {
 
     var obj = await this.menu;
     var id = await this.$route.params.menuId;
-    var response = await this.retrieveMenu;
 
     if (Object.keys(obj).length == 0 || Object.keys(obj).length == undefined) { 
       this.isLoading = !this.isLoading;

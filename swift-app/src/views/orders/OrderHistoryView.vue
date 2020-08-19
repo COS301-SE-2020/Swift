@@ -67,7 +67,7 @@
                           <v-icon size="17px">mdi-comment-edit</v-icon> 
                           <span class="pl-1 orderOptions">Rate</span>
                         </v-btn>
-                        <v-btn v-if="item.orderStatus == 'Received'" text class="pa-0 pl-1 button">
+                        <v-btn v-if="item.orderStatus == 'Received'" @click="payForOrder(item)" text class="pa-0 pl-1 button">
                           <v-icon color="accent" size="17px">mdi-currency-usd</v-icon> 
                           <span class="pl-1 orderOptions payNow">Pay Now</span>
                         </v-btn>
@@ -75,7 +75,7 @@
                       <v-col cols="4" class="pb-2 d-flex justify-end">
                         <div>
                           <div class="totalTitle">TOTAL</div>
-                          <div class="orderPrice">R{{calculateTotal(item)}}</div>
+                          <div class="orderPrice">R{{calculateFullTotal(item)}}</div>
                         </div>
                       </v-col>
                     </v-row>
@@ -176,17 +176,23 @@ export default {
       this.$router.push('/rating')
     },
     viewOrder (item) {
-      console.log(item)
+      this.clearOrder()
+      this.addOrder(item)
+    },
+    calculateFullTotal(item) {
+      let total = parseFloat(this.calculateTotal(item));
+      total += (parseFloat(total) * 0.14);
+      total += (parseFloat((item.waiterTip != null) ? item.waiterTip : 0));
+      return parseFloat(total).toFixed(2);
     },
     calculateTotal(item) {
-      if (item.total == null) {
-        return (0).toFixed(2);
-      } else {
-        let total = parseInt((item.total).toFixed(2));
-        total += parseInt((item.waiterTip).toFixed(2));
-        total += parseInt((item.total).toFixed(2)) * 0.14;
-        return total.toFixed(2);
+      let total = 0;
+      if (item.items != undefined) {
+        for (let i = 0; i < item.items.length; i++) {
+          total += parseFloat((item.items[i].itemTotal != null) ? item.items[i].itemTotal : 0);
+        }
       }
+      return parseFloat(total).toFixed(2);
     },
     itemsForStatus(status) {
       return this.orderHistory.filter(orderItem => {
@@ -202,7 +208,7 @@ export default {
         return parseInt(orderItem.progress) < 100 || orderItem.orderStatus == "Received"
       }))
     },
-    addOrder (item) {
+    createOrderObject(item) {
       let itemsOrdered = [];
       for (let i = 0; i < item.items.length; i++) {
         let data = {
@@ -213,6 +219,7 @@ export default {
         itemsOrdered[i] = data;
       }
 
+      
       let data = {
         "orderInfo": {
           "restaurantId": item.restaurantId,
@@ -223,10 +230,33 @@ export default {
           "orderItems": itemsOrdered
         }
       }
+
+      return data;
+    },
+    addOrder(item) {
+      
+      let data = this.createOrderObject(item);
       // console.log("hello")
       console.log(data)
       this.addItemToOrder(data)
       this.$router.push("/cart");
+    },
+    payForOrder(item) {
+
+      // console.log(item)
+
+      let data = {
+        "orderId": item.orderId,
+        "paymentMethod": "Card",
+        "amountPaid": parseFloat(item.waiterTip) + parseFloat(this.calculateTotal(item) * 0.14) + parseFloat(this.calculateTotal(item)),
+        "waiterTip": item.waiterTip,
+        "orderTotal": parseFloat(this.calculateTotal(item)),
+        "orderTax": parseFloat(this.calculateTotal(item) * 0.14)
+      }
+
+      this.addPaymentInfo(data);
+      this.$router.push("/paymentinformation");
+
     },
     goToOrderStatus() {
       this.tab = 1;
@@ -251,6 +281,8 @@ export default {
     },
     ...mapActions({
       addItemToOrder: "OrderStore/addItemToOrder",
+      addPaymentInfo: "OrderStore/addPaymentInfo",
+      clearOrder: "OrderStore/clearOrder",
       orderStatus: 'OrderStore/retrieveOrderStatus',
     }),
   },

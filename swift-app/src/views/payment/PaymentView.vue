@@ -41,9 +41,9 @@ export default {
         if(this.loadCount == 3)
           this.goToHome();
     },
-    goToHome () {
-      this.updateOrderFlag(true);
-      this.$router.go('/paymentInformation')
+    async goToHome () {
+      await this.updateOrderFlag(true);
+      this.$router.push('/paymentInformation')
     },
     ...mapActions({
       updateOrderFlag: 'OrderStore/updateOrderFlag',

@@ -32,7 +32,7 @@
         <div>
           <!-- <v-card v-for="(item,i) in orderInfo()" :key="i" flat> -->
             <v-list v-for="(orderMenuItem,j) in orderInfo().orderItems" :key="j" class="py-2">
-              <v-card>
+              <v-card :disabled="!checkedIn()">
                 <v-list-item class="pt-1">
                   <v-list-item-content>
                     <v-row>
@@ -41,7 +41,7 @@
                       </v-col>
                       <v-col cols="3 d-flex justify-end">
                         <div>
-                          <v-list-item-title>R{{(orderInfo().orderTotal != null) ? orderInfo().orderTotal : (0).toFixed(2)}}</v-list-item-title>
+                          <v-list-item-title>R{{(orderMenuItem.itemTotal != null) ? orderMenuItem.itemTotal : (0).toFixed(2)}}</v-list-item-title>
                         </div>
                       </v-col>
                     </v-row>
@@ -55,7 +55,7 @@
                         </div>
                       </v-col>
                       <v-col cols="4" class="py-0 d-flex justify-end">
-                        <div>
+                        <div v-if="checkedIn()">
                     <!-- <v-list-item-action-text>R{{(orderInfo().orderTotal != null) ? orderInfo().orderTotal : (0).toFixed(2)}}</v-list-item-action-text> -->
                           <!-- <v-list-item-action-text> -->
                             <v-btn @click="decreaseQuantity(orderMenuItem)" fab elevation="2" width="22px" height="22px" class="mr-2">
@@ -121,7 +121,7 @@
             </v-card>
           </v-col>
         </v-row>
-        <v-row class="d-flex justify-space-around mt-5 mb-3">
+        <v-row class="d-flex justify-space-around mt-5 mb-3" v-if="checkedIn()">
           <v-col cols="5" class="pa-0">
               <v-btn rounded color="primary" elevation="2" class="body-2" width="100%" @click="goToOrder">Order Now, Pay Later</v-btn>
           </v-col>
@@ -198,7 +198,15 @@ export default {
         item.quantity--;
         this.subtotal -= parseFloat(singlePrice)
       }
-        
+    },
+    checkedIn() {
+      let checkedInVal = this.checkedInQRCode;
+
+      if (checkedInVal != null && this.orderInfo.restaurantId == this.checkedInRestaurantId) {
+        return true;
+      } else {
+        return false;
+      }
     },
     increaseQuantity(item) {
       let singlePrice = this.subtotal/item.quantity
@@ -212,6 +220,8 @@ export default {
     ...mapGetters({
       menu: "MenuStore/getMenu",
       orderInfo: "OrderStore/getOrderInfo",
+      checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
+      checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
     }),
     calculateTotal() {
       let tax = (this.subtotal * 0.14).toFixed(2);
@@ -221,8 +231,9 @@ export default {
     getItemName(id) {
       console.log("here")
       console.log(this.menu())
+      
       let category = this.menu().categories.find(
-        category => category.menuItems.find(menuItem => menuItem.menuItemId === id )
+        category => {if (category != undefined && category.menuItems != undefined) return category.menuItems.find(menuItem => menuItem.menuItemId === id )}
       )
 
       let item = category.menuItems.find(menuItem => menuItem.menuItemId === id )
