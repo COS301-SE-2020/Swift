@@ -243,7 +243,8 @@ module.exports = {
           }
 
           const rtRes = await client.query(ecQuery, [queryID]);
-          if (rtRes.rows.length === 0) {
+          if (rtRes.rows.length === 0 && !allTablesStatus) {
+            // restaurant does not exist
             return response.status(404).send({ status: 404, reason: 'Not Found' });
           }
 
