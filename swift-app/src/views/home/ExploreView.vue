@@ -50,7 +50,7 @@
     </v-container>
     <v-container v-show="!isLoading" class="px-0 py-0" v-if="search == ''">
       <v-container py-0>
-        <v-carousel v-model="carouselIndex" class="promotionalMaterial" :continuous="false" :cycle="cycle" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="210px">
+        <v-carousel v-model="carouselIndex" class="promotionalMaterial" :continuous="true" :cycle="cycle" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="210px">
           <v-carousel-item v-for="(promotion, i) in promotions" :key="i">
             <v-sheet color="secondary" height="190px" flat tile style="border-radius: 13px !important" class="mt-5">
               <v-row class="d-flex justify-space-between specialsInfo">
@@ -85,12 +85,12 @@
         </v-row>
         <v-sheet class="mx-auto" max-width="700">
           <v-slide-group multiple>
-            <v-slide-item v-for="(category, index) in categories" :key="index">
+            <v-slide-item v-for="(category, index) in exploreCategories" :key="index">
               <div class="mr-3" align="center">
                 <v-btn width="50px" height="50px" min-width="50px">
-                  <v-img height="50px" width="50px" :src="require('../../assets/exploreImages/' + category.imageURL)"></v-img>
+                  <v-img height="50px" width="50px" :src="category.categoryImage"></v-img>
                 </v-btn>
-                <div class="mt-1 caption">{{category.name}}</div>
+                <div class="mt-1 caption">{{category.categoryName}}</div>
               </div>
             </v-slide-item>
           </v-slide-group>
@@ -193,7 +193,7 @@
 import NavBar from '@/components/layout/NavBar';
 import RestaurantSearchToolBar from '@/components/layout/RestaurantSearchToolBar';
 import store from '@/store/store.js';
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default {
   components: {
@@ -225,7 +225,7 @@ export default {
     called: false,
     // checkedIn: false,
     restaurant: "Mugg & Bean",
-    cycle: false,
+    cycle: true,
     isLoading: false,
     carouselIndex: 0
   }),
@@ -272,12 +272,17 @@ export default {
     }
 
     var length = await this.allRestaurants.length;
+    await this.clearMenu
+    await this.retrieveExploreCategories;
+
     if (length == undefined) {
       this.isLoading = !this.isLoading;
       var response = await this.fetchAllRestaurants;
+      
       if (response)
         this.isLoading = !this.isLoading;
     }
+    
   },
   computed: {
     activeCall() {
@@ -299,9 +304,14 @@ export default {
     ...mapActions({
       fetchAllRestaurants: 'RestaurantsStore/allRestaurants',
       checkInCustomer: 'CustomerStore/checkInCustomer',
+      retrieveExploreCategories: 'RestaurantsStore/retrieveExploreCategories',
+    }),
+    ...mapMutations({
+      clearMenu: 'MenuStore/CLEAR_MENU',
     }),
     ...mapGetters({
       allRestaurants: 'RestaurantsStore/getAllRestaurants',
+      exploreCategories: 'RestaurantsStore/getExploreCategories',
       customerInfo: 'CustomerStore/getCustomerProfile',
       checkedInStatus: 'CustomerStore/getCheckedInStatus',
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',

@@ -1,7 +1,10 @@
 <template>
   <div class="homemenu">
     <!-- <MenuSearchToolBar></MenuSearchToolBar> -->
-    <v-container class="pb-0">
+    <div v-show="isLoading" style="display: flex; align-items: center; justify-content: center;">
+      <v-progress-circular style="height: 400px" indeterminate color="primary"></v-progress-circular>
+    </div>
+    <v-container v-show="!isLoading" class="pb-0">
       <div class="backgroundImage" style="margin-top: 0px">
         <v-row style="margin-top: -12px; margin-bottom: 10px"> 
             <v-col cols="12" class="pt-0 px-0 pb-0">
@@ -25,13 +28,13 @@
                 <v-icon>mdi-chevron-left</v-icon>
               </v-btn>
               <v-btn v-if="checkedIn()" width="30px" height="30px" @click="callWaiterPressed()" :key="activeCall.icon" :color="activeCall.color" absolute small fab style="top: 20px; right: 10px;">
-                <v-icon :style="called ? { 'transform': 'rotate(45deg)' } : { 'transform': 'rotate(0deg)' }">{{ activeCall.icon }}</v-icon>
+                <v-icon class="callWaiter" :style="called ? { 'animation-name': 'callWaiterAnimation', 'animation-duration': '5s' } : { 'transform': 'rotate(0deg)' }">{{ activeCall.icon }}</v-icon>
               </v-btn>
             </v-col>
           </v-row>
         </div>
     </v-container>
-    <v-container class="px-0 overflow-x-hidden" transition="slide-x-transition">
+    <v-container v-show="!isLoading" class="px-0 overflow-x-hidden" transition="slide-x-transition">
       <v-row style="max-width: 400px" class="overflow-y-auto">
         <v-col cols="12" class="pt-0">
           <div class="title pl-3">Categories</div>
@@ -91,10 +94,11 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
+import { mapActions, mapGetters, mapMutations } from "vuex";
 import NavBar from "@/components/layout/NavBar";
 import MenuSearchToolBar from "@/components/layout/MenuSearchToolBar";
 import $ from 'jquery';
+import store from '@/store/store.js';
 
 $(window).scroll(function(){
   $(".backgroundImage").css("opacity", 1 - $(window).scrollTop() / 250);
@@ -109,6 +113,7 @@ export default {
     restaurantImages: [
       { img: 'https://source.unsplash.com/GXXYkSwndP4/800x800/' },
     ],
+    isLoading: false,
     search: '',
     primaryCategoryTab: null,
     secondaryCategoryTab: null,
@@ -204,10 +209,21 @@ export default {
     	  // return menuItems.sort((a, b) => a.menuItemName < b.menuItemNam ? 1 : -1)
     }
   },
-  mounted: function() {
+  async mounted() {
     if (this.displayNotification) {
       document.getElementById("notification").style.display = "block";
       this.updateDisplayNotification(false);
+    }
+
+    var obj = await this.menu;
+    var id = await this.$route.params.menuId;
+    var response = await this.retrieveMenu;
+
+    if (Object.keys(obj).length == 0 || Object.keys(obj).length == undefined) { 
+      this.isLoading = !this.isLoading;
+      var response = await this.$store.dispatch('MenuStore/retrieveMenu', id);
+      if (response)
+        this.isLoading = !this.isLoading;
     }
   },
   computed: {
@@ -219,12 +235,10 @@ export default {
       }
     },
     ...mapActions({
-      updateDisplayNotification: 'RestaurantsStore/updateDisplayNotification',
       retrieveMenu: 'MenuStore/retrieveMenu',
       callWaiter: 'CustomerStore/callWaiter'
     }),
     ...mapGetters({
-      displayNotification: "RestaurantsStore/getDisplayNotification",
       menu: "MenuStore/getMenu",
       checkedInStatus: 'CustomerStore/getCheckedInStatus',
     }),
@@ -275,4 +289,29 @@ label {
   caret-color: #343434 !important;
   color: #343434 !important;
 }
+
+@keyframes callWaiterAnimation {
+  0%   {transform: rotate(0deg);}
+  5%   {transform: rotate(-45deg);}
+  10%   {transform: rotate(0deg);}
+  15%   {transform: rotate(45deg);}
+  20%   {transform: rotate(0deg);}
+  25%   {transform: rotate(-45deg);}
+  30%   {transform: rotate(0deg);}
+  35%   {transform: rotate(45deg);}
+  40%   {transform: rotate(0deg);}
+  45%   {transform: rotate(-45deg);}
+  50%   {transform: rotate(0deg);}
+  55%   {transform: rotate(45deg);}
+  60%   {transform: rotate(0deg);}
+  65%   {transform: rotate(-45deg);}
+  70%   {transform: rotate(0deg);}
+  75%   {transform: rotate(45deg);}
+  80%   {transform: rotate(0deg);}
+  85%   {transform: rotate(-45deg);}
+  90%   {transform: rotate(0deg);}
+  95%   {transform: rotate(45deg);}
+  100%   {transform: rotate(0deg);}
+}
+
 </style>

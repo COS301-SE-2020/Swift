@@ -6,6 +6,7 @@ const initialState = () => ({
   tableNumber: "",
   checkedIn: false,
   displayNotification: false,
+  exploreCategories: {}
 });
 
 const state = initialState();
@@ -23,6 +24,9 @@ const getters = {
   },
   getDisplayNotification(state) {
     return state.displayNotification;
+  },
+  getExploreCategories(state) {
+    return state.exploreCategories;
   },
 }
 
@@ -43,6 +47,19 @@ const actions = {
 
   retrieveRestaurantMenu({commit, dispatch}, restaurantId) {
     this.dispatch('MenuStore/retrieveMenu', restaurantId);
+  },
+
+  retrieveExploreCategories({commit}, data) {
+    return axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "allRestaurantCategories",
+      "token": sessionStorage.getItem('authToken'),
+    }
+    ).then(result => {
+      commit('SAVE_ALL_EXPLORE_CATEGORIES', result.data.categories);
+      return true;
+    }).catch(({ response }) => {
+    });
   },
 
   // Used to reset the store
@@ -75,6 +92,10 @@ const mutations = {
 
   setTableNumber(state, data) {
     state.tableNumber = data;
+  },
+
+  SAVE_ALL_EXPLORE_CATEGORIES(state, categories) {
+    state.exploreCategories = categories;
   },
 
   updateCheckInFlag(state, data) {

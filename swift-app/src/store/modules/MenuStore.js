@@ -19,15 +19,15 @@ const getters = {
 // Actions 
 const actions = {
   retrieveMenu({commit}, restaurantId) {
-    axios.post('https://api.swiftapp.ml', 
+    return axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "restaurantMenu",
         "restaurantId": restaurantId,
         "token": sessionStorage.getItem('authToken'),
       }
     ).then(result => {
-      // console.log("MENU: ", result.data)
       commit('SAVE_MENU', result.data);
+      return true;
     }).catch(({ response }) => {
     });
   },
@@ -41,6 +41,10 @@ const actions = {
 const mutations = {
   SAVE_MENU(state, menu) {
     state.menu = menu;
+  },
+
+  CLEAR_MENU(state) {
+    state.menu = {};
   },
 
   // Used to reset the store
