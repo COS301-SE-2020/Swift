@@ -50,78 +50,92 @@
       :title="restaurantPopupTitle"
       :active.sync="restaurantPopupActive"
     >
-      <vs-row>
-        <vs-col
-          class="mb-4"
-          vs-type="flex"
-          vs-justify="center"
-          vs-align="center"
-          vs-lg="6"
-          vs-sm="12"
-        >
-          <vs-input label="Restaurant Name" placeholder="Mug & Bean" v-model="restaurantName" />
-        </vs-col>
-        <vs-col
-          class="mb-4"
-          vs-type="flex"
-          vs-justify="center"
-          vs-align="center"
-          vs-lg="6"
-          vs-sm="12"
-        >
-          <vs-input label="Branch" placeholder="Centurion Mall" v-model="restaurantBranch" />
-        </vs-col>
-      </vs-row>
-      <vs-row>
-        <vs-col
-          vs-offset="1"
-          class="mb-2"
-          vs-type="flex"
-          vs-justify="center"
-          vs-align="center"
-          vs-lg="10"
-          vs-sm="12"
-        >
-          <vs-textarea label="Description" v-model="restaurantDesc" />
-        </vs-col>
-      </vs-row>
+      <form>
+        <vs-row>
+          <vs-col
+            class="mb-4"
+            vs-type="flex"
+            vs-justify="center"
+            vs-align="center"
+            vs-lg="6"
+            vs-sm="12"
+          >
+            <vs-input
+              label="Restaurant Name"
+              placeholder="Mug & Bean"
+              v-model.trim="$v.restaurantName.$model"
+            />
+          </vs-col>
+          <vs-col
+            class="mb-4"
+            vs-type="flex"
+            vs-justify="center"
+            vs-align="center"
+            vs-lg="6"
+            vs-sm="12"
+          >
+            <vs-input label="Branch" placeholder="Centurion Mall" v-model="restaurantBranch" />
+          </vs-col>
+        </vs-row>
+        <vs-row>
+          <vs-col
+            vs-offset="1"
+            class="mb-2"
+            vs-type="flex"
+            vs-justify="center"
+            vs-align="center"
+            vs-lg="10"
+            vs-sm="12"
+          >
+            <vs-textarea label="Description" v-model="restaurantDesc" />
+          </vs-col>
+        </vs-row>
 
-      <label class="vs-input--label">Select (up to 3) Restaurant Categories</label>
-      <div style="margin: auto" class="vx-row mt-4">
-        <vx-card
-          style="pointer-events: all;cursor: pointer;"
-          @click="selectCategory($event, category.categoryId)"
-          class="categoryOptionCards mr-2 ml-2 mb-6 md:w-1/6 lg:w-1/6 xl:w-1/6"
-          v-for="category in restaurantCategoryOptions"
-          :key="category.categoryId"
-          type="border"
-          :card-background="'linear-gradient(120deg ,rgba(0,0,0,.6), rgba(0,0,0,0.1)),url('+category.categoryImage+')'"
-        >
-          <p style="color:white;pointer-events: none;">{{ category.categoryName }}</p>
+        <label class="vs-input--label">Select (up to 3) Restaurant Categories</label>
+        <div style="margin: auto" class="vx-row mt-4">
+          <vx-card
+            style="pointer-events: all;cursor: pointer;"
+            @click="selectCategory($event, category.categoryId)"
+            class="categoryOptionCards mr-2 ml-2 mb-6 md:w-1/6 lg:w-1/6 xl:w-1/6"
+            v-for="category in restaurantCategoryOptions"
+            :key="category.categoryId"
+            type="border"
+            :card-background="'linear-gradient(120deg ,rgba(0,0,0,.6), rgba(0,0,0,0.1)),url('+category.categoryImage+')'"
+          >
+            <p style="color:white;pointer-events: none;">{{ category.categoryName }}</p>
+          </vx-card>
+        </div>
+
+        <vx-card>
+          <vs-button type="border" size="small" @click="chooseFiles()">Choose header image</vs-button>
+          <input
+            hidden
+            ref="uploadImageInputRef"
+            id="uploadImageInput"
+            type="file"
+            @change="updateImage"
+            accept="image/*"
+          />
+          <div
+            id="restaurantCoverUploadPreview"
+            hidden
+            class="mt-4 rounded-lg"
+            :style="'background-image:url('+restaurantImage+')'"
+          ></div>
         </vx-card>
-      </div>
-
-      <vx-card>
-        <vs-button type="border" size="small" @click="chooseFiles()">Choose header image</vs-button>
-        <input hidden id="uploadImageInput" type="file" @change="updateImage" accept="image/*" />
-        <div
-          id="restaurantCoverUploadPreview"
-          hidden
-          class="mt-4 rounded-lg"
-          :style="'background-image:url('+restaurantImage+')'"
-        ></div>
-      </vx-card>
-      <vs-button
-        @click="restaurantPopupSubmit()"
-        style="margin-top:15px"
-        color="primary"
-        type="filled"
-      >{{ restaurantPopupButton }}</vs-button>
+        <vs-button
+          @click="restaurantPopupSubmit"
+          style="margin-top:15px"
+          color="primary"
+          type="filled"
+        >{{ restaurantPopupButton }}</vs-button>
+      </form>
     </vs-popup>
   </div>
 </template>
 <script>
 import moduleDataList from "@/store/mybusiness/mybusinessDataList.js";
+import { required, minLength, between } from "vuelidate/lib/validators";
 
 export default {
   data() {
@@ -156,7 +170,7 @@ export default {
       }
     },
     chooseFiles() {
-      document.getElementById("uploadImageInput").click();
+      this.$refs.uploadImageInputRef.click();
     },
     updateImage() {
       var reader = new FileReader();
@@ -194,7 +208,9 @@ export default {
           restaurantDesc: this.restaurantDesc,
           restaurantBranch: this.restaurantBranch,
           restaurantImage: this.restaurantImage,
+          restaurantCategories: JSON.stringify(this.restaurantCategories),
         });
+        this.restaurantPopupActive = false;
       } else if (this.restaurantPopupAction == "add") {
         return;
       }
@@ -215,6 +231,11 @@ export default {
   },
   mounted() {
     this.isMounted = true;
+  },
+  validations: {
+    restaurantName: {
+      required,
+    },
   },
 };
 </script>
