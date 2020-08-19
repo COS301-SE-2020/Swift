@@ -30,8 +30,8 @@
             <div v-for="status in statusList" :key="status" class="pt-2 pb-2">
               <div v-if="itemsForStatus(status).length != 0">
                 <v-subheader style="height: 20px" class="mt-3 mb-1 pl-1" v-text="status"></v-subheader>
-                <v-list v-for="(item, index) in itemsForStatus(status)" :key="index" class="py-2">
-                  <v-card ripple class="pt-1 pr-0 orderCard" elevation="2">
+                <v-list v-for="(item, index) in itemsForStatus(status).slice().reverse()" :key="index" class="py-2">
+                  <v-card ripple class="pt-1 pr-0 orderCard" elevation="2" @click="viewOrder(item)">
                     <v-row class="mx-0 d-flex justify-space-around">
                       <v-col cols="7" class="pb-0 pt-2">
                         <v-list-item-title class="restaurantName pb-1" v-text="item.restaurantName"></v-list-item-title>
@@ -43,12 +43,12 @@
                     </v-row>
                     <v-row class="mx-0" v-for="(orderItem, index) in item.items" :key="index">
                       <v-col class="pb-0 pt-2" cols="8">
-                        <v-icon size="15px">mdi-check-box-outline</v-icon> 
+                        <v-icon size="15px">{{(parseInt(orderItem.progress) == 100) ? 'mdi-check-box-outline' : 'mdi-checkbox-blank-outline'}}</v-icon> 
                         <span class="pl-1 orderDetails">{{orderItem.menuItemName}}</span>
                       </v-col>
                       <v-col class="pb-0 pt-2 pl-0" cols="4">
                         <span class="orderDetails">{{orderItem.quantity}}x </span>
-                        <v-rating background-color="secondary" readonly size="12" class="pl-2" dense color="yellow darken-3" :value="5" style="display: inline"></v-rating>
+                        <v-rating background-color="secondary" readonly size="11" class="pl-2" dense color="yellow darken-3" :value="5" style="display: inline"></v-rating>
                       </v-col>
                     </v-row>
                     <v-row class="mx-0 pb-1 pr-1">
@@ -75,7 +75,7 @@
                       <v-col cols="4" class="pb-2 d-flex justify-end">
                         <div>
                           <div class="totalTitle">TOTAL</div>
-                          <div class="orderPrice">R{{(item.total == null) ? (0).toFixed(2) : (item.total).toFixed(2)}}</div>
+                          <div class="orderPrice">R{{calculateTotal(item)}}</div>
                         </div>
                       </v-col>
                     </v-row>
@@ -90,14 +90,14 @@
           <v-container fluid fill-height class="pa-0 d-flex align-start">
             <v-row class="overflow-y-auto mt-3">
               <v-col cols="12" class="d-flex justify-center">
-                  <div class="body-1 secondary--text">Order No: 53234</div>
+                  <div class="body-1 secondary--text">Order No: {{getOrderStatusItem().orderNumber}}</div>
               </v-col>
             </v-row>
 
             <v-row class="mt-12 mb-0 py-0 mx-1">
               <v-col cols="5" class="pb-0 pl-4 py-0">
                   <div class="mt-2 body-1 secondary--text">Order Placed</div>
-                  <div class="secondary--text" style="font-size:10px"><v-icon size="13px" class="font-weight-light">mdi-clock-time-four-outline</v-icon> 10:30, 20 June 2020</div>
+                  <div class="secondary--text" style="font-size:10px"><v-icon size="13px" class="font-weight-light">mdi-clock-time-four-outline</v-icon> {{displayOrderTime()}} </div>
               </v-col>
               <v-col cols="2" class="pb-0 pl-0 py-0" style="margin-left: 2px;">
                   <v-icon id="orderPlacedIcon" size="50" class="pb-0 font-weight-light" color="primary">mdi-clock-time-four</v-icon>
@@ -107,19 +107,18 @@
             <v-row class="my-0 py-0 mx-0">
               <v-col cols="6" class="py-0 px-0 mx-0" style="display: table;">
                 <div style="height: 0; padding: 43% 0;">
-                  <v-progress-linear stream buffer-value="0" :value="getOrderStatusItem().orderStatus == 'in-progress' ? 0 : getOrderStatusItem().orderStatus" style="display: block; transform-origin: top right; transform: rotate(90deg); margin-top: 50%; white-space: nowrap; progressBar"></v-progress-linear>
+                  <v-progress-linear stream buffer-value="0" :value="getOrderStatusItem().progress" style="display: block; transform-origin: top right; transform: rotate(90deg); margin-top: 50%; white-space: nowrap; progressBar"></v-progress-linear>
                 </div>
               </v-col>
               <v-col cols="6" class="pb-0 pl-5">
                   <div class="mt-2 body-1 secondary--text d-flex justify-center">Complete</div>
-                  <div class="secondary--text d-flex justify-center" style="font-size:35px">{{getOrderStatusItem().orderStatus == 'Received' ? 0 : getOrderStatusItem().orderStatus}}%</div>
-                  
+                  <div class="secondary--text d-flex justify-center" style="font-size:35px">{{getOrderStatusItem().progress}}%</div>
               </v-col>
             </v-row>
 
             <v-row class="mt-0 mb-0 py-0 mx-1">
               <v-col cols="5" class="pb-0 pl-4">
-                  <div class="mt-2 body-1 secondary--text">Order Busy</div>
+                  <div class="mt-2 body-1 secondary--text" v-show="parseInt(getOrderStatusItem().progress) > 0">Order Busy</div>
               </v-col>
               <v-col cols="1" class="pb-0 pl-0" style="margin-left: 4px;">
                   <v-avatar color="primary" id="orderDoneIcon" size="45" class="ma-0 pa-0" >
@@ -127,7 +126,7 @@
                   </v-avatar>
               </v-col>
               <v-col cols="5" class="pb-0 pl-7 pr-0">
-                  <div class="secondary--text" style="font-size:12px">Our chef is busy preparing your order</div>
+                  <div class="secondary--text" style="font-size:12px" v-show="parseInt(getOrderStatusItem().progress) > 0">Our chef is busy preparing your order</div>
               </v-col>
             </v-row>
           </v-container>
@@ -176,24 +175,39 @@ export default {
     goToRating () {
       this.$router.push('/rating')
     },
-
+    viewOrder (item) {
+      console.log(item)
+    },
+    calculateTotal(item) {
+      if (item.total == null) {
+        return (0).toFixed(2);
+      } else {
+        let total = parseInt((item.total).toFixed(2));
+        total += parseInt((item.waiterTip).toFixed(2));
+        total += parseInt((item.total).toFixed(2)) * 0.14;
+        return total.toFixed(2);
+      }
+    },
     itemsForStatus(status) {
       return this.orderHistory.filter(orderItem => {
         if (status == 'Completed') {
-          return orderItem.restaurantName.toLowerCase().includes(this.search != null ? this.search.toLowerCase() : '') && (orderItem.orderStatus != "Received")
+          return orderItem.restaurantName.toLowerCase().includes(this.search != null ? this.search.toLowerCase() : '') && (parseInt(orderItem.progress) == 100 && orderItem.orderStatus != "Received")
         } else { 
-          // return orderItem.restaurantName.toLowerCase().includes(this.search != null ? this.search.toLowerCase() : '') && (parseInt(orderItem.progress) < 100 || orderItem.orderStatus == "Received")
-          return orderItem.restaurantName.toLowerCase().includes(this.search != null ? this.search.toLowerCase() : '') && (orderItem.orderStatus == "Received")
+          return orderItem.restaurantName.toLowerCase().includes(this.search != null ? this.search.toLowerCase() : '') && (parseInt(orderItem.progress) < 100 || orderItem.orderStatus == "Received")
         }
       })
     },
     getOrderStatusItem() {
       return (this.orderHistory.find(orderItem => {
-        return parseInt(orderItem.orderStatus) < 100 || orderItem.orderStatus == "in-progress"
+        return parseInt(orderItem.progress) < 100 || orderItem.orderStatus == "Received"
       }))
     },
     getDate(date) {
+      // return 'On ' + date.slice(11, 16) + ' ' + moment(String(date.slice(0, 10))).format('DD MMMM YYYY')
       return 'On ' + moment(String(date.slice(0, 10))).format('DD MMMM YYYY')
+    },
+    displayOrderTime() {
+      return this.getOrderStatusItem().orderDateTime.slice(11, 16) + ', ' + moment(String(this.getOrderStatusItem().orderDateTime.slice(0, 10))).format('DD MMMM YYYY')
     },
     updateOrderStatus() {
       let self = this;
