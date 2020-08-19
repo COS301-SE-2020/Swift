@@ -248,7 +248,7 @@ module.exports = {
       )
         .then(() => response.status(200).send({ status: 200, reason: 'Checked Out' }))
         .catch((err) => {
-          console.error('Query Error [Restaurant - Get CheckIn Details]', err.stack);
+          console.error('Query Error [Restaurant - Checkout User]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }
