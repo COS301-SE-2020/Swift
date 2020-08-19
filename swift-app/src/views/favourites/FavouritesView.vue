@@ -20,7 +20,7 @@
             <v-list-item-subtitle v-html="item.menuItemDescription"></v-list-item-subtitle>
           </v-list-item-content>
           <v-list-item-action class="ml-0 mt-0">
-            <v-btn :z-index="10" icon @click="removeFav(item.menuItemId)">
+            <v-btn icon @click="removeFav(item.menuItemId)">
               <v-icon color="primary">mdi-heart</v-icon>
             </v-btn>
           </v-list-item-action>

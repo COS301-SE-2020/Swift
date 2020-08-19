@@ -165,7 +165,7 @@ export default {
     ],
     called: false,
     favourited: false,
-    snackbar: true
+    snackbar: true,
   }),
   methods: {
     goToMenuItem(id) {
@@ -194,6 +194,11 @@ export default {
       } else {
         return false;
       } 
+    },
+    sortedItems (menuItems) {
+      console.log()
+      // if (menuItems.length != undefined)
+    	  // return menuItems.sort((a, b) => a.menuItemName < b.menuItemNam ? 1 : -1)
     }
   },
   mounted: function() {

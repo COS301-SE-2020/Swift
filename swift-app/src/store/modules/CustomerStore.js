@@ -63,6 +63,15 @@ const actions = {
     });
   },
 
+  checkOutCustomer({commit}, data) {
+    return axios.post('https://api.swiftapp.ml', 
+      {
+        "requestType": "checkout",
+        "token": sessionStorage.getItem('authToken'),
+      }
+    )
+  },
+
   login({commit}, data) {
     return axios.post('https://api.swiftapp.ml', 
       {
