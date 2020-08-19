@@ -40,7 +40,7 @@
     "nodemailer": "^6.4.11",
     "nodemailer-mailgun-transport": "^2.0.0",
     "path": "^0.12.7",
-    "pg": "^8.3.0",
+    "pg": "^8.3.2",
     "uuid": "^8.3.0"
   },
   "devDependencies": {
