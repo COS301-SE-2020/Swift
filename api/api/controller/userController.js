@@ -148,18 +148,18 @@ module.exports = {
   // eslint-disable-next-line consistent-return
   verifyToken: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
-    if (!Object.prototype.hasOwnProperty.call(reqBody, 'fullToken')
-     || !Object.prototype.hasOwnProperty.call(reqBody, 'shortToken') // shortToken - 4 digit pin
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+     || !Object.prototype.hasOwnProperty.call(reqBody, 'code') // shortToken - 4 digit pin
      || Object.keys(reqBody).length !== 3) { // request type
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
     // check if full token is valid
-    const userToken = validateToken(reqBody.fullToken, true);
+    const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
-      const value = reqBody.fullToken.substring(8, 12); /// confrim this
+      const value = reqBody.token.substring(8, 12); /// confrim this-randomize this
       value.trim();
 
-      if (value === reqBody.shortToken) {
+      if (value === reqBody.code) {
         return response.status(201).send({ status: 201, reason: 'Valid verification Token' });
       }
 
@@ -203,7 +203,7 @@ module.exports = {
         )
           .then(() => response.status(201).send({ status: 201, reason: 'Password successfully updated' }))
           .catch((err) => {
-            console.error('Query Error [Password correctness - Check if user]', err.stack);
+            console.error('Query Error [Password correctness - Check user code]', err.stack);
             return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
           });
       })
