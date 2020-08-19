@@ -365,6 +365,7 @@ module.exports = {
       const { orderInfo } = reqBody;
       const customerId = userToken.data.userId;
 
+      // TODO: Add checks for waiter tip and employee id in order info object
       // Check if orderInfo is valid
       if (!Object.prototype.hasOwnProperty.call(orderInfo, 'restaurantId')
         || !Object.prototype.hasOwnProperty.call(orderInfo, 'tableId')
@@ -378,15 +379,23 @@ module.exports = {
       }
 
       // TODO: Get restaurant and table information from check in records
-      // check if restaurant exists
-      return db.query(
-        'SELECT restaurantname FROM public.restaurant'
-        + ' INNER JOIN public.restauranttable ON restaurant.restaurantid = restauranttable.restaurantid'
-        + ' WHERE restaurant.restaurantid = $1::integer AND restauranttable.tableid = $2::integer',
-        [orderInfo.restaurantId, orderInfo.tableId]
-      )
-        // eslint-disable-next-line consistent-return
-        .then((res) => {
+      // check if a user is checked in to that table
+
+      // eslint-disable-next-line consistent-return
+      return (async () => {
+        const client = await db.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+
+          // check if restaurant exists
+          const res = await client.query(
+            'SELECT restaurantname FROM public.restaurant'
+            + ' INNER JOIN public.restauranttable ON restaurant.restaurantid = restauranttable.restaurantid'
+            + ' WHERE restaurant.restaurantid = $1::integer AND restauranttable.tableid = $2::integer',
+            [orderInfo.restaurantId, orderInfo.tableId]
+          );
+
           if (res.rows.length === 0) {
             // restaurant and/or table does not exist
             return response.status(404).send({ status: 404, reason: 'Not Found' });
@@ -397,11 +406,11 @@ module.exports = {
           const initialProgress = 0;
 
           // create order
-          // TODO: Work of order completion time
-          db.query(
+          // TODO: Work out order completion time from estimated time
+          const resOrderId = await client.query(
             'INSERT INTO public.customerorder (customerid, employeeid, tableid, ordernumber, orderdatetime,'
-            + ' ordercompletiontime, orderstatus, progress, waitertip, ordertotal)'
-            + ' VALUES ($1::integer,$2::integer,$3::integer,\'0\',NOW(),NOW(),$4::text,$5::integer,$6::real,$7::real)'
+            + ' ordercompletiontime, orderstatus, progress, waitertip)'
+            + ' VALUES ($1::integer,$2::integer,$3::integer,\'0\',NOW(),NOW(),$4::text,$5::integer,$6::real)'
             + ' RETURNING orderid',
             [
               customerId,
@@ -409,78 +418,79 @@ module.exports = {
               orderInfo.tableId,
               orderStatus,
               initialProgress,
-              orderInfo.waiterTip,
-              orderInfo.orderTotal
+              orderInfo.waiterTip
             ]
-          )
-            .then((resOrderId) => {
-              // Order number format: userId-restauramtId-orderid (without dashes)
-              const orderNum = `${userToken.data.userId}${orderInfo.restaurantId}${resOrderId.rows[0].orderid}`;
+          );
 
-              // Update order number
-              Promise.resolve(db.query(
-                'UPDATE public.customerorder SET ordernumber = $1::text WHERE orderid = $2::integer',
-                [orderNum, resOrderId.rows[0].orderid]
-              ))
-                .then(() => { })
-                .catch((err) => {
-                  console.error('Query Error [Add Order - Update Order Number]', err.stack);
-                  return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
-                });
+          // Order number format: userId-restauramtId-orderid (without dashes)
+          const orderNum = `${userToken.data.userId}${orderInfo.restaurantId}${resOrderId.rows[0].orderid}`;
 
-              orderInfo.orderItems.forEach((orderItem) => {
-                // add items to order
-                db.query(
-                  'INSERT INTO public.itemordered (orderid, menuitemid, quantity, orderselections, progress)'
-                  + ' VALUES ($1::integer, $2::integer, $3::integer, $4::json,  $5::integer)',
-                  [
-                    resOrderId.rows[0].orderid,
-                    orderItem.menuItemId,
-                    orderItem.quantity,
-                    // eslint-disable-next-line max-len
-                    Object.keys(orderItem.orderSelections).length === 0 ? null : orderItem.orderSelections,
-                    initialProgress
-                  ]
-                )
-                  .then(() => { })
-                  .catch((err) => {
-                    console.error('Query Error [Add Order - Add Order Items]', err.stack);
-                    return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
-                  });
-              });
-            })
-            .catch((err) => {
-              console.error('Query Error [Add Order - Create Customer Order]', err.stack);
-              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
-            });
+          // Update order number
+          await client.query(
+            'UPDATE public.customerorder SET ordernumber = $1::text WHERE orderid = $2::integer',
+            [orderNum, resOrderId.rows[0].orderid]
+          );
+
+          let orderTotal = 0.0;
+          for (let oi = 0; oi < orderInfo.orderItems.length; oi++) {
+            // add items to order
+            // eslint-disable-next-line no-await-in-loop
+            await client.query(
+              'INSERT INTO public.itemordered (orderid, menuitemid, quantity, orderselections, progress, itemtotal)'
+              + ' VALUES ($1::integer, $2::integer, $3::integer, $4::json, $5::integer, $6::real)',
+              [
+                resOrderId.rows[0].orderid,
+                orderInfo.orderItems[oi].menuItemId,
+                orderInfo.orderItems[oi].quantity,
+                // eslint-disable-next-line max-len
+                Object.keys(orderInfo.orderItems[oi].orderSelections).length === 0
+                  ? null : orderInfo.orderItems[oi].orderSelections,
+                initialProgress,
+                orderInfo.orderItems[oi].itemTotal
+              ]
+            );
+
+            orderTotal += parseFloat(orderInfo.orderItems[oi].itemTotal);
+          }
+
+          // update order total
+          await client.query(
+            'UPDATE public.customerorder SET ordertotal = $1::real WHERE orderid = $2::integer',
+            [orderTotal, resOrderId.rows[0].orderid]
+          );
+
+          // commit changes
+          await client.query('COMMIT');
 
           // Get order history
           const orderResponse = {};
-          const orderPromises = [];
+          const orderHistoryPromise = await getOrderHistory(customerId);
 
-          orderPromises.push(new Promise((resolve, reject) => {
-            orderPromises.push(getOrderHistory(customerId).then((orderHistoryPromise) => {
-              orderResponse.orderHistory = [];
-              Promise.all(orderHistoryPromise)
-                .then((orderHistoryItem) => {
-                  orderHistoryItem.forEach((ordHistItem) => {
-                    orderResponse.orderHistory.push(ordHistItem);
-                  });
-                  resolve();
-                })
-                .catch((err) => {
-                  reject(err);
-                });
-            }));
-          }));
-
-          Promise.all(orderPromises).then(() => response.status(201).send(orderResponse))
+          orderResponse.orderHistory = [];
+          Promise.all(orderHistoryPromise)
+            .then((orderHistoryItem) => {
+              orderHistoryItem.forEach((ordHistItem) => {
+                orderResponse.orderHistory.push(ordHistItem);
+              });
+              return response.status(201).send(orderResponse);
+            })
             .catch((err) => {
               console.error('Add Order Promise Error', err.stack);
               return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
             });
-        }).catch((err) => {
-          console.error('Query Error [Add Order - Check Restaurant Existence]', err.stack);
+        } catch (err) {
+          // rollback changes
+          await client.query('ROLLBACK');
+
+          // throw error for async catch
+          throw err;
+        } finally {
+          // close connection
+          client.release();
+        }
+      })()
+        .catch((err) => {
+          console.error('Query Error [Add Order]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }
