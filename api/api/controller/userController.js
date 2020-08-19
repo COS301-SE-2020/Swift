@@ -215,7 +215,7 @@ module.exports = {
     )
       .then((res) => {
         if (res.rows.length === 0) {
-        // user/token not found
+          // user/token not found
           return response.status(403).send({ status: 403, reason: 'Invalid Token Pair' });
         }
 
