@@ -25,7 +25,7 @@
             <v-col cols="10" class="d-flex justify-center px-0">
               <div style="text-align: center" class="checkedInBannerText">
                 <div class="specialsText font-weight-light">You are checked-in to</div>
-                <div class="specialsText checkedRestaurant font-weight-light">{{restaurant}}</div>
+                <div class="specialsText checkedRestaurant font-weight-light">{{getCheckedInRestaurantName(checkedInRestaurantId)}}</div>
               </div>
             </v-col>
             <v-col cols="2" class="d-flex align-center px-0">
@@ -246,22 +246,33 @@ export default {
     goToCart() {
       this.$router.push('/cart')
     },
+    getCheckedInRestaurantName(id) {
+      // console.log(id)
+      // console.log(this.allRestaurants)
+      if (this.allRestaurants != undefined && id != null) {
+        // console.log("entered")
+        let item = this.allRestaurants.find(
+          restaurant => restaurant.restaurantId === id
+        )
+        return item.name;
+      }
+    },
     checkedIn() {
-      let checkedInStatus = this.checkedInStatus
+      /* let checkedInStatus = this.checkedInStatus
 
       if (checkedInStatus == true && checkedInStatus != null) {
         return true;
       } else {
         return false;
-      } 
+      }  */
 
-      /* let checkedInVal = this.checkedInQRCode;
+      let checkedInVal = this.checkedInQRCode;
 
       if (checkedInVal != null) {
         return true;
       } else {
         return false;
-      } */
+      }
     }
   },
   async mounted() {
@@ -313,7 +324,7 @@ export default {
       allRestaurants: 'RestaurantsStore/getAllRestaurants',
       exploreCategories: 'RestaurantsStore/getExploreCategories',
       customerInfo: 'CustomerStore/getCustomerProfile',
-      checkedInStatus: 'CustomerStore/getCheckedInStatus',
+      // checkedInStatus: 'CustomerStore/getCheckedInStatus',
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
     }),

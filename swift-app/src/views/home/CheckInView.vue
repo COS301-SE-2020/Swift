@@ -10,13 +10,12 @@
     </div>
     <div class="row d-flex flex-column align-center">
       <v-row class="justify-space-around">
-        <v-col cols="6">
+        <v-col cols="12">
           <v-btn large @click="goToHome" rounded>Cancel</v-btn>
         </v-col>
-        <v-col cols="6">
-          <!-- TODO: Manual Table input popup -->
+        <!-- <v-col cols="6">
           <v-btn large rounded @click="goToRestaurant" color="primary">Check-in</v-btn>
-        </v-col>
+        </v-col> -->
       </v-row>
     </div>
   </v-container>
@@ -27,10 +26,6 @@ import { mapActions, mapGetters, mapMutations } from "vuex";
 
 export default {
   methods: {
-    goToRestaurant(restaurantId) {
-      this.$router.push("/")
-      this.setCheckedInStatus(true)
-    },
     goToHome() {
       this.$router.push("/")
     },
@@ -39,8 +34,8 @@ export default {
         "qrcode": result
       }
       var response = await this.checkInCustomer(data);
-      
-      this.goToRestaurant(response.restaurantId);
+      console.log(response.restaurantId)
+      this.$router.push("/menu/" + response.restaurantId);
     },
     ...mapMutations({
       setTable : 'RestaurantStore/setTableNumber',

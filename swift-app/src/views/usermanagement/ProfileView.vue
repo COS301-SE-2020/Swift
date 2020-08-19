@@ -115,12 +115,17 @@ export default {
     },
     editProfile () {
     },
-    checkOut() {
-      this.setCheckedInStatus(false)
+    async checkOut() {
+      await this.checkout
+      await this.setCheckedInQRCode (null)
+      await this.setCheckedInRestaurantId (null)
+      await this.setCheckedInTableId (null)
       this.$router.push('/')
     },
     ...mapMutations({
-      setCheckedInStatus : 'CustomerStore/SET_CHECKED_IN_STATUS',
+      setCheckedInQRCode : 'CustomerStore/SET_CHECKED_IN_CODE',
+      setCheckedInRestaurantId : 'CustomerStore/SET_CHECKED_IN_RESTAURANT_ID',
+      setCheckedInTableId : 'CustomerStore/SET_CHECKED_IN_TABLE_ID',
     }),
   },
   computed: {
@@ -129,7 +134,7 @@ export default {
     }),
     ...mapActions({
       loadCustomer: 'CustomerStore/loadCustomer',
-      reset: 'CustomerStore/reset', 
+      checkout: 'CustomerStore/checkOutCustomer', 
     }),
     
   }
