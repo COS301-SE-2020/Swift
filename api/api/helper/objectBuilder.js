@@ -3,7 +3,7 @@ const db = require('../db');
 // helper to get individual order items
 const getOrderItems = async (oid = 0) => db.query(
   'SELECT menuitem.menuitemid, menuitem.menuitemname, menuitem.menuitemdescription,'
-    + ' menuitem.price, itemordered.quantity, itemordered.orderselections,'
+    + ' itemordered.itemtotal, itemordered.quantity, itemordered.orderselections,'
     + ' itemordered.progress FROM public.itemordered'
     + ' INNER JOIN public.menuitem ON menuitem.menuitemid = itemordered.menuitemid'
     + ' WHERE itemordered.orderid = $1::integer;',
@@ -17,7 +17,7 @@ const getOrderItems = async (oid = 0) => db.query(
       orderItem.menuItemId = ordItem.menuitemid;
       orderItem.menuItemName = ordItem.menuitemname;
       orderItem.menuItemDescription = ordItem.menuitemdescription;
-      orderItem.price = ordItem.price;
+      orderItem.itemTotal = ordItem.itemtotal;
       orderItem.quantity = ordItem.quantity;
       orderItem.progress = ordItem.progress;
       orderItem.orderselections = ordItem.orderselections;
