@@ -9,23 +9,42 @@
       <div
         v-for="table in tables"
         :key="table.tableId"
-        class="vx-col w-full lg:w-1/6 sm:w-1/6 w-full mb-base"
+        class="vx-col w-full lg:w-1/6 sm:w-1/1 w-full mb-base"
       >
         <vx-card
           :title="'Table ' + table.tableNumber"
-          :subtitle="'Status: ' + table.status"
+          :subtitle="'Status: ' + getTableStatus(table.checkedIn)"
           collapse-action
         >
           <vs-chip color="primary">Seats: {{table.numSeats}}</vs-chip>
-          <vs-chip color="primary">Checked In: {{getCheckInCount(table.status)}}</vs-chip>
+          <vs-chip color="primary">Checked In: {{ table.checkedIn.length }}</vs-chip>
           <vs-divider border-style="solid" color="white"></vs-divider>
-          <qrcode-vue class="tableQR" :value="table.qrcode" :size="qrSize" level="H"></qrcode-vue>
+          <span class="vs-input--label mb-4" v-if="table.checkedIn.length != 0">Customers</span>
+          <div
+            v-for="customer in table.checkedIn"
+            :key="customer.name+customer.surname+customer.profileImageURL"
+          >
+            <vs-avatar v-if="!customer.profileImageURL" :text="customer.name + ' ' + customer.surname" />
+            <vs-avatar v-if="customer.profileImageURL" src="customer.profileImageURL"/>
+            <span class="customerName">{{ customer.name +" " + customer.surname }}</span>
+          </div>
+          <qrcode-vue
+            class="tableQR"
+            :id="'qrCodeDisplay'+table.tableId"
+            :value="table.qrcode"
+            :size="qrSize"
+            level="H"
+          ></qrcode-vue>
           <vs-button
-            :disabled="table.status === 'Vacant'"
-            color="primary"
-            @click="goToOrder(table.tableId)"
-            type="filled"
-          >View order</vs-button>
+            @click="downloadQrCode($event, table.tableId)"
+            size="small"
+            type="line"
+            class="mb-2 mr-4"
+            icon-pack="feather"
+            icon="icon-save"
+          >
+            <a href :download="'QRCode-Table'+table.tableNumber+'.png'">Download Table QRCode</a>
+          </vs-button>
         </vx-card>
       </div>
 
@@ -70,7 +89,7 @@ export default {
   },
   data() {
     return {
-      qrSize: 120,
+      qrSize: 250,
       viewUpdateNum: 1,
       isMounted: false,
       addTablePopupActive: false,
@@ -108,12 +127,22 @@ export default {
       this.addTablePopupActive = false;
       this.rowUpdateNum = this.rowUpdateNum + 1;
     },
-    getCheckInCount(status) {
-      if (status == "Vacant") return 0;
-      else return status.split(" ")[0];
-    },
     goToOrder(tableId) {
       this.$router.push("/orders");
+    },
+    downloadQrCode(event, tableId) {
+      var QRCode = document.querySelector(
+        "#qrCodeDisplay" + tableId + " canvas"
+      );
+      var image = QRCode.toDataURL("image/png").replace(
+        /^data:image\/[^;]+/,
+        "data:application/octet-stream"
+      );
+      event.target.href = image;
+    },
+    getTableStatus(checkedIn) {
+      if (checkedIn.length == 0) return "Vacant";
+      else return "Ordering";
     },
   },
   created() {
@@ -122,16 +151,20 @@ export default {
         this.$store.registerModule("tableList", moduleDataList);
         moduleDataList.isRegistered = true;
       }
-      if (!this.tableCount > 0) this.$vs.loading();
+      if (this.tables == null) this.$vs.loading();
 
       this.listTables();
+
+      setInterval(() => {
+        //  this.listTables();
+      }, 5000);
     }
   },
   mounted() {
     this.isMounted = true;
   },
   watch: {
-    tableCount(newCount, oldCount) {
+    tables(newCount, oldCount) {
       this.$vs.loading.close();
     },
   },
@@ -139,10 +172,17 @@ export default {
 </script>
 
 <style scoped>
+.customerName {
+  position: absolute;
+  margin-top: 10px;
+}
+.tableQR >>> canvas {
+  display: none !important;
+}
 .vs-button-primary {
   width: 100%;
 }
-.addTablePopup .vs-popup {
+.addTablePopup >>> .vs-popup {
   max-width: 300px;
 }
 .popupTitles {

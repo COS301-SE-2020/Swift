@@ -6,7 +6,7 @@ export default {
   }, payload) {
     axios.post('https://api.swiftapp.ml', {
       "requestType": "restaurantMenu",
-      "restaurantId": "1",
+      "restaurantId": "35",
       "disableFields": ["image", "ratingPhrases", "reviews"],
       "token": payload.authKey,
     }).then(result => {

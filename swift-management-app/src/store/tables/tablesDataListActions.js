@@ -6,38 +6,31 @@ export default {
   }, payload) {
     axios.post('https://api.swiftapp.ml', {
       "requestType": "getTableStatus",
+      "includeProfileImage": false,
       "token": payload.authKey,
-      "restaurantId": 1,
-    }).then(result => {
-      console.log(result)
-      result.data.result.forEach(function (table) {
-        var tableItem = {
-          tableId: table.tableId,
-          tableNumber: table.tableNumber,
-          numSeats: table.numSeats,
-          checkedIn: table.checkedIn,
-          qrcode: table.qrcode
-        }
-        console.log(tableItem);
-        commit('ADD_ITEM', tableItem);
-      });
+      "restaurantId": 35,
+    }).then(response => {
+      console.log(response);
+      if (response.data.result.length == 0) {
+        commit('SET_TABLE_OBJECT', "no tables");
+      } else commit('SET_TABLE_OBJECT', response.data.result);
     }).catch(({
       response
     }) => {});
   },
   addTable({
     commit
-  }, {
-    payload
-  }) {
+  }, payload) {
     axios.post('https://api.swiftapp.ml', {
       "requestType": "createTable",
       "token": payload.authKey,
-      "restaurantId": 1,
+      "restaurantId": 35,
       "tableNumber": payload.tableNum,
       "seatCount": payload.tableSeats
     }).then(result => {
-      //TODO: Add notification for successfull table add
+      //TODO: Add notification for successful table add
+      //TODO: Check that same table doesn't exist
+      console.log(result);
     }).catch(({
       response
     }) => {
