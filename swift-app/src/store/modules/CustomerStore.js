@@ -13,6 +13,8 @@ const state = initialState();
 // Getter functions
 const getters = {
   getCustomerProfile( state ) {
+    console.log("history:")
+    console.log(state.customer.orderHistory)
     return state.customer;
   },
   getCustomerOrderHistory( state ) {

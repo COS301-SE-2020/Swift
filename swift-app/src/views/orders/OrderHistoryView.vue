@@ -26,7 +26,7 @@
           <div v-if="isLoading" style="display: flex; align-items: center; justify-content: center; margin-top: 10px">
             <v-progress-circular indeterminate color="primary"></v-progress-circular>
           </div>
-          <v-container v-if="!isLoading">
+          <v-container v-if="!isLoading" class="px-4">
             <div v-for="status in statusList" :key="status">
               <div v-if="itemsForStatus(status).length != 0">
                 <v-subheader style="height: 20px" class="mt-3 mb-1 pl-1" v-text="status"></v-subheader>
@@ -42,27 +42,41 @@
                       </v-col>
                     </v-row>
                     <v-row class="mx-0" v-for="(orderItem, index) in item.items" :key="index">
-                      <v-col class="pb-0 pt-2" cols="5">
+                      <v-col class="pb-0 pt-2" cols="7">
                         <v-icon size="15px">mdi-check-box-outline</v-icon> 
                         <span class="pl-1 orderDetails">{{orderItem.menuItemName}}</span>
                       </v-col>
-                      <v-col class="pb-0 pt-2" cols="7">
+                      <v-col class="pb-0 pt-2" cols="5">
                         <span class="orderDetails">{{orderItem.quantity}}x </span>
                         <v-rating background-color="secondary" readonly size="12" class="pl-2" dense color="yellow darken-3" :value="5" style="display: inline"></v-rating>
                       </v-col>
                     </v-row>
-                    <v-row class="mx-0 pb-1">
-                      <v-col cols="5" class="pb-2 orderButtons">
-                        <v-icon color="primary" size="20px">mdi-history</v-icon> 
-                        <span class="pl-1 orderOptions repeat">Repeat Order</span>
+                    <v-row class="mx-0 pb-1 pr-1">
+                      <v-col cols="5" class="pb-2 orderButtons ">
+                        <v-btn v-if="item.orderStatus != 'Received'" text class="pa-0 button">
+                          <v-icon color="primary" size="20px">mdi-history</v-icon> 
+                          <span class="pl-1 orderOptions repeat">Repeat Order</span>
+                        </v-btn>
+                        <v-btn v-else text class="pa-0 button">
+                          <v-icon color="primary" size="20px">mdi-history</v-icon> 
+                          <span class="pl-1 orderOptions repeat">Order Status</span>
+                        </v-btn>
                       </v-col>
-                      <v-col cols="4" class="pb-2 orderButtons">
-                        <v-icon size="17px">mdi-comment-edit</v-icon> 
-                        <span class="pl-1 orderOptions">Rated</span>
+                      <v-col cols="3" class="pb-2 px-1 orderButtons">
+                        <v-btn v-if="item.orderStatus == 'Paid'" text class="pa-0 button">
+                          <v-icon size="17px">mdi-comment-edit</v-icon> 
+                          <span class="pl-1 orderOptions">Rate</span>
+                        </v-btn>
+                        <v-btn v-if="item.orderStatus == 'Received'" text class="pa-0 pl-1 button">
+                          <v-icon color="accent" size="17px">mdi-currency-usd</v-icon> 
+                          <span class="pl-1 orderOptions payNow">Pay Now</span>
+                        </v-btn>
                       </v-col>
-                      <v-col cols="3" class="pb-2">
-                        <div class="totalTitle">TOTAL</div>
-                        <div class="orderPrice">R{{(item.total).toFixed(2)}}</div>
+                      <v-col cols="4" class="pb-2 d-flex justify-end">
+                        <div>
+                          <div class="totalTitle">TOTAL</div>
+                          <div class="orderPrice">R{{(item.total == null) ? (0).toFixed(2) : (item.total).toFixed(2)}}</div>
+                        </div>
                       </v-col>
                     </v-row>
                   </v-card>
@@ -98,7 +112,7 @@
               </v-col>
               <v-col cols="6" class="pb-0 pl-5">
                   <div class="mt-2 body-1 secondary--text d-flex justify-center">Complete</div>
-                  <div class="secondary--text d-flex justify-center" style="font-size:35px">{{getOrderStatusItem().orderStatus == 'in-progress' ? 0 : getOrderStatusItem().orderStatus}}%</div>
+                  <div class="secondary--text d-flex justify-center" style="font-size:35px">{{getOrderStatusItem().orderStatus == 'Received' ? 0 : getOrderStatusItem().orderStatus}}%</div>
                   
               </v-col>
             </v-row>
@@ -132,7 +146,7 @@ import moment from 'moment'
 export default {
   data () {
     return {
-      statusList: ['In Progress', 'Completed'],
+      statusList: ['Ongoing', 'Completed'],
       tab: null,
       progressValue: 33,
       itemsCompleted: 3,
@@ -166,9 +180,10 @@ export default {
     itemsForStatus(status) {
       return this.orderHistory.filter(orderItem => {
         if (status == 'Completed') {
-          return orderItem.restaurantName.toLowerCase().includes(this.search != null ? this.search.toLowerCase() : '') && (orderItem.orderStatus == "Paid" || orderItem.orderStatus == "100")
+          return orderItem.restaurantName.toLowerCase().includes(this.search != null ? this.search.toLowerCase() : '') && (orderItem.orderStatus != "Received")
         } else { 
-          return orderItem.restaurantName.toLowerCase().includes(this.search != null ? this.search.toLowerCase() : '') && (parseInt(orderItem.orderStatus) < 100 || orderItem.orderStatus == "in-progress")
+          // return orderItem.restaurantName.toLowerCase().includes(this.search != null ? this.search.toLowerCase() : '') && (parseInt(orderItem.progress) < 100 || orderItem.orderStatus == "Received")
+          return orderItem.restaurantName.toLowerCase().includes(this.search != null ? this.search.toLowerCase() : '') && (orderItem.orderStatus == "Received")
         }
       })
     },
@@ -231,8 +246,8 @@ export default {
 
 .restaurantName {
   font-family: 'Helvetica';
-  font-size: 18px !important;
-  /* font-weight: 400; */
+  font-size: 17px !important;
+  font-weight: 300;
 }
 
 .totalTitle {
@@ -250,12 +265,12 @@ export default {
 }
 
 .orderOptions {
-  font-size: 15px;
-  font-weight: 300;
+  font-size: 14px;
+  font-weight: 300 !important;
 }
 
 .orderPrice {
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .orderButtons {
@@ -273,5 +288,16 @@ export default {
 
 .repeat {
   color: #f75564;
+}
+
+.payNow {
+  color: #76C5BA;
+}
+
+.button {
+  font-family: "Roboto", sans-serif !important;
+  height: 17px !important;
+  font-weight: 300 !important;
+  letter-spacing: 0ch !important;
 }
 </style>
