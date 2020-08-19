@@ -449,7 +449,7 @@ export default {
 
       let data = {
         "orderInfo": {
-          "restaurantId": 1,
+          "restaurantId": this.checkedInRestaurantId,
           "tableId": this.checkedInTableId,
           "employeeId": 6,
           "waiterTip": 0,

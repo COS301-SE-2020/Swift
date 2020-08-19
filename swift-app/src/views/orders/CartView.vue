@@ -32,7 +32,7 @@
         <div>
           <!-- <v-card v-for="(item,i) in orderInfo()" :key="i" flat> -->
             <v-list v-for="(orderMenuItem,j) in orderInfo().orderItems" :key="j" class="py-2">
-              <v-card :disabled="!checkedIn()" @click="editItem(orderMenuItem)">
+              <v-card  @click="editItem(orderMenuItem)">
                 <v-list-item class="pt-1">
                   <v-list-item-content>
                     <v-row>
@@ -118,7 +118,7 @@
             </v-card>
           </v-col>
         </v-row>
-        <v-row class="d-flex justify-space-around mt-5 mb-3" v-if="checkedIn()">
+        <v-row class="d-flex justify-space-around mt-5 mb-3" >
           <v-col cols="5" class="pa-0">
               <v-btn rounded color="primary" elevation="2" class="body-2" width="100%" @click="goToOrder">Order Now, Pay Later</v-btn>
           </v-col>
