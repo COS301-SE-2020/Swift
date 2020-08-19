@@ -160,6 +160,18 @@ module.exports = {
             return response.status(403).send({ status: 403, reason: 'Access Denied' });
           }
 
+          // check if the table number is now already in use
+          const tblDup = await client.query(
+            'SELECT tablenumber FROM public.restauranttable'
+            + ' WHERE restaurantid = $1::integer AND tablenumber = $2::text',
+            [reqBody.restaurantId, reqBody.tableNumber]
+          );
+
+          if (tblDup.rows.length > 0) {
+            // table number already in use
+            return response.status(409).send({ status: 409, reason: 'Table Number Already In Use' });
+          }
+
           // create table
           const qrcode = uuidv4().replace(/-/g, ''); // UUID v4 without dashes (~10^-37 collison rate)
           const tblRes = await client.query(
