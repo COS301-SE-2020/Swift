@@ -8,7 +8,7 @@
   export default {
     data() {
       return {
-        msg: 'Hello this is <demo-component>'
+        msg: 'Hello this is <user-manual>'
       }
     }
   }

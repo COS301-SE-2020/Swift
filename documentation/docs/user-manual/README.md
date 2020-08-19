@@ -4,6 +4,8 @@ sidebar: auto
 
 # User Manual
 
+<usermanual/>
+
 ## foo
 
 - Type: `string`
