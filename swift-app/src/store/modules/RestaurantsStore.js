@@ -29,11 +29,10 @@ const getters = {
 // Actions 
 const actions = {
   allRestaurants({commit}, data) {
-    var token = this.getters['CustomerStore/getToken']
     return axios.post('https://api.swiftapp.ml', 
     {
       "requestType": "allRestaurants",
-      "token": token,
+      "token": sessionStorage.getItem('authToken'),
     }
     ).then(result => {
       commit('SAVE_ALL_RESTAURANTS', result.data.restaurants);

@@ -19,12 +19,11 @@ const getters = {
 // Actions 
 const actions = {
   retrieveMenu({commit}, restaurantId) {
-    var token = this.getters['CustomerStore/getToken']
     axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "restaurantMenu",
         "restaurantId": restaurantId,
-        "token": token,
+        "token": sessionStorage.getItem('authToken'),
       }
     ).then(result => {
       // console.log("MENU: ", result.data)

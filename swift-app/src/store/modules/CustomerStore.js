@@ -47,7 +47,7 @@ const actions = {
       {
         "requestType": "checkin",
         "qrcode": data.qrcode,
-        "token": this.getters['CustomerStore/getToken'],
+        "token": sessionStorage.getItem('authToken'),
       }
     ).then(result => {
       commit('SET_CHECKED_IN_CODE', data.qrcode);
@@ -67,7 +67,7 @@ const actions = {
       }
     ).then(result => {
       commit('SAVE_TOKEN', result.data.token);
-      // sessionStorage.setItem('authToken', result.data.token);
+      sessionStorage.setItem('authToken', result.data.token);
       commit('SET_CHECKED_IN_CODE', result.data.checkedIn);
       commit('SAVE_CUSTOMER', result.data);
       this.dispatch('OrderStore/initOrderHistory');
@@ -149,7 +149,7 @@ const actions = {
     {
       "requestType": "callWaiter",
       "tableId": data.tableId,
-      "token": this.getters['CustomerStore/getToken']
+      "token": sessionStorage.getItem('authToken')
     })
   },
   

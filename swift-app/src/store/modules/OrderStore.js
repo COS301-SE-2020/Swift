@@ -40,7 +40,7 @@ const actions = {
     axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "addOrder",
-        "token": this.getters['CustomerStore/getToken'],
+        "token": sessionStorage.getItem('authToken'),
         "orderInfo": this.getters['OrderStore/getOrderInfo'].orderInfo
       }
     ).then(result => {
@@ -59,14 +59,13 @@ const actions = {
   },
 
   retrieveOrderStatus({commit}, data) {
-    var token = this.getters['CustomerStore/getToken'];
     var orderId = data.orderId;
     // console.log(orderId)
     axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "orderStatus",
         "orderId": orderId,
-        "token": token
+        "token": sessionStorage.getItem('authToken')
       }
     ).then(result => {
       var data = {
