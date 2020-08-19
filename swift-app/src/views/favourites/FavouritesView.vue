@@ -82,10 +82,6 @@ export default {
     ...mapGetters({
       customerInfo: 'CustomerStore/getCustomerProfile',
     }),
-    
-    filteredKeys () {
-      return this.keys.filter(key => key !== `menuItemName`)
-    },
     filteredList() {
       return this.customerInfo.favourites.filter(favourite => {
         return favourite.menuItemName.toLowerCase().includes(this.search.toLowerCase())

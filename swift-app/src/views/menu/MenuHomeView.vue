@@ -62,7 +62,7 @@
       <!-- =========================================================================================================== -->
 
         <v-tabs  v-model="secondaryCategoryTab" background-color="secondary" color="primary" dark>
-          <v-tab v-for="(category, index) in menu.categories" :key="index">
+          <v-tab v-for="(category, index) in filteredList" :key="index">
             {{ category.categoryName }}
           </v-tab>
         </v-tabs>
@@ -247,6 +247,13 @@ export default {
         return { color: "white", icon: "mdi-bell-outline" };
       } else {
         return { color: "primary", icon: "mdi-bell-outline" };
+      }
+    },
+    filteredList() {
+      if (this.menu.categories != undefined) {
+        return this.menu.categories.filter(category => {
+          return category.categoryName.toLowerCase().includes(this.search.toLowerCase())
+        })
       }
     },
   }
