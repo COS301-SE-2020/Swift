@@ -72,7 +72,8 @@
             <v-list v-for="(menuItem, i) in category.menuItems" :key="i" class="py-0">
               <v-list-item @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1 ">
                 <v-list-item-avatar tile  style="border-radius: 4px" size="45" >
-                  <img src="https://source.unsplash.com/collection/767186/800x800">
+                  <img v-if="menuItem.images.length != 0" :src="menuItem.images[0]">
+                  <img v-else src="../../assets/menuItemImages/item-placeholder.png">
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title v-html="menuItem.menuItemName"></v-list-item-title>

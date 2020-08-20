@@ -8,7 +8,7 @@
       <iframe style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:10;" :src="(newMenuItem.arAsset != null) ? newMenuItem.arAsset : ''"  frameborder="0"></iframe>
     </div>
     <v-carousel v-if="!arActive" height="200px" :show-arrows="false" hide-delimiter-background continuous>
-      <v-carousel-item v-for="(item,i) in items" :key="i" :src="item.img"></v-carousel-item>
+      <v-carousel-item v-for="(imageSrc,i) in newMenuItem.images" :key="i" :src="imageSrc"></v-carousel-item>
     </v-carousel>
     <v-btn v-if="!arActive" width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 20px; left: 15px">
       <v-icon>mdi-chevron-left</v-icon>
@@ -65,10 +65,10 @@
               <v-list-group class="attributeElements" v-for="(attribute, i) in newMenuItem.attributes.attributes" :key="i" no-action value="true">
                 <template v-slot:activator>
                   <v-list-item-content>
-                    <v-list-item-title class="label pl-3" v-text="attribute.name"></v-list-item-title>
+                    <v-list-item-title class="label pl-3" v-text="attribute.attributeName"></v-list-item-title>
                   </v-list-item-content>
                 </template>
-                <v-list-item-group class="pl-4" :multiple="(parseInt(attribute.field.max) > 1) ? true : false" :mandatory="(attribute.field.min == '1') ? true : false" v-model="model[i]">
+                <v-list-item-group class="pl-4" :multiple="(parseInt(attribute.max) > 1) ? true : false" :mandatory="(attribute.min == '1') ? true : false" v-model="model[i]">
                   <template v-for="(value, j) in attribute.values">
                       <v-list-item @click="checkInput(i, j, value)" class="px-2 attributeValues" :key="`item-${j}`" :value="value.name">
                         <template v-slot:default="{ active }">
@@ -81,7 +81,7 @@
                             </v-col>
                           </v-row>
                           <v-list-item-action>
-                            <v-radio :id="`${i}${j}${(value.name).replace(/\s+/g, '')}`" checked v-if="attribute.field.max == '1' && attribute.field.min == '1'" :input-value="active" ></v-radio>
+                            <v-radio :id="`${i}${j}${(value.name).replace(/\s+/g, '')}`" checked v-if="attribute.max == '1' && attribute.min == '1'" :input-value="active" ></v-radio>
                             <v-checkbox v-else :input-value="active"></v-checkbox>
                           </v-list-item-action>
                         </template>
