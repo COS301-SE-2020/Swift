@@ -46,6 +46,14 @@ if (typeof process.env.NODE_ENV !== 'undefined' && process.env.NODE_ENV.trim() =
   });
 }
 
+// Check for valid tokens before going any further
+// eslint-disable-next-line arrow-body-style
+app.use((req, res, next) => {
+  // TODO: Check tokens in req.body
+  // GitHub issue #40
+  return next();
+});
+
 // API handle requests
 app.delete('/', require('./api/api'));
 app.get('/', require('./api/api'));

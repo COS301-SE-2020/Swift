@@ -532,5 +532,108 @@ module.exports = {
 
     // Invalid token
     return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  addMenuCategory: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'categoryName')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'categoryDescription')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'categoryType')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'parentCategoryId')
+      || (reqBody.categoryType.toLowerCase() !== 'primary'
+        && reqBody.categoryType.toLowerCase() !== 'secondary')
+      || (reqBody.categoryType.toLowerCase() === 'secondary'
+        // eslint-disable-next-line no-restricted-globals
+        && (isNaN(reqBody.parentCategoryId) || reqBody.parentCategoryId == null))
+      || Object.keys(reqBody).length !== 7) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    const userToken = validateToken(reqBody.token, true);
+
+    if (userToken.state === tokenState.VALID) {
+      return (async () => {
+        const client = await db.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+
+          // check if restaurant exists
+          const cRes = await client.query(
+            'SELECT restaurantname FROM public.restaurant WHERE restaurantid = $1::integer',
+            [reqBody.restaurantId]
+          );
+
+          if (cRes.rows.length === 0) {
+            // restaurant does not exist
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          // check user permissions
+          const requiredRole = 'admin';
+          const permRes = await client.query(
+            'SELECT employeerole FROM public.restaurantemployee'
+            + ' WHERE userid = $1::integer AND restaurantid = $2::integer AND LOWER(employeerole) = $3::text',
+            [userToken.data.userId, reqBody.restaurantId, requiredRole]
+          );
+
+          if (permRes.rows.length === 0) {
+            // Access denied
+            return response.status(403).send({ status: 403, reason: 'Access Denied' });
+          }
+
+          // check for parent category
+          if (reqBody.categoryType.toLowerCase() === 'secondary') {
+            const pRes = await client.query(
+              'SELECT categoryname FROM public.menucategory WHERE categoryid = $1::integer',
+              [reqBody.parentCategoryId]
+            );
+
+            if (pRes.rows.length === 0) {
+              // parent category not found
+              return response.status(404).send({ status: 404, reason: 'Not Found' });
+            }
+          }
+
+          // insert new category
+          const catId = await client.query(
+            'INSERT INTO public.menucategory'
+            + ' (categoryname, categorydescription, categorytype, parentcategoryid, restaurantid)'
+            + ' VALUES ($1::text, $2::text, $3::text, $4::integer, $5::integer)'
+            + ' RETURNING categoryid',
+            [
+              reqBody.categoryName,
+              reqBody.categoryDescription,
+              reqBody.categoryType,
+              (reqBody.categoryType.toLowerCase() === 'secondary') ? reqBody.parentCategoryId : null,
+              reqBody.restaurantId
+            ]
+          );
+
+          // commit changes and end transaction
+          await client.query('COMMIT');
+
+          // return newly created category id
+          return response.status(201).send({ categoryId: catId.rows[0].categoryid });
+        } catch (err) {
+          await client.query('ROLLBACK');
+          throw err;
+        } finally {
+          client.release();
+        }
+      })()
+        .catch((err) => {
+          console.error('Query Error [Restaurant - Add Menu Category]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
   }
 };
