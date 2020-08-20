@@ -99,7 +99,7 @@
 
         <v-row style="max-width: 400px" class="overflow-y-auto">
           <v-col cols="12">
-            <div class="categoryTitle">Nearby</div>
+            <div class="categoryTitle">Most Popular</div>
           </v-col>
         </v-row>
         <v-sheet class="mx-auto" max-width="700">
@@ -230,7 +230,8 @@ export default {
     carouselIndex: 0
   }),
   methods: {
-    goToRestaurant (id) {
+    async goToRestaurant (id) {
+      await this.clearMenu;
       this.$store.dispatch('RestaurantsStore/retrieveRestaurantMenu', id);
       this.$router.push("/menu/" + id);
     },
@@ -247,10 +248,7 @@ export default {
       this.$router.push('/cart')
     },
     getCheckedInRestaurantName(id) {
-      // console.log(id)
-      // console.log(this.allRestaurants)
       if (this.allRestaurants != undefined && id != null) {
-        // console.log("entered")
         let item = this.allRestaurants.find(
           restaurant => restaurant.restaurantId === id
         )
@@ -258,17 +256,10 @@ export default {
       }
     },
     checkedIn() {
-      /* let checkedInStatus = this.checkedInStatus
-
-      if (checkedInStatus == true && checkedInStatus != null) {
-        return true;
-      } else {
-        return false;
-      }  */
-
       let checkedInVal = this.checkedInQRCode;
+      let checkedInRestaurantId = this.checkedInRestaurantId;
 
-      if (checkedInVal != null) {
+      if (checkedInVal != null && checkedInRestaurantId != null) {
         return true;
       } else {
         return false;
@@ -278,10 +269,10 @@ export default {
   async mounted() {
     let checkedInVal = this.checkedInQRCode;
     // Check-in customer again if system crashes 
-    /* if (checkedInVal != null && this.checkedInRestaurantId == null) {
+    if (checkedInVal != null && this.checkedInRestaurantId == null) {
       this.checkInCustomer(checkedInVal)
-    } */
-    // await this.clearMenu
+    }
+    
     var length = await this.allRestaurants.length;
     var categoryLength = await this.exploreCategories.length;
 
