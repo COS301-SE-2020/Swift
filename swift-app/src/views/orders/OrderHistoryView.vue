@@ -295,6 +295,7 @@ export default {
     },
     ...mapGetters({
       orderHistory: 'CustomerStore/getCustomerOrderHistory',
+      checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
     }),
     
   },

@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import OrdersView from '../views/orders/OrdersView.vue'
 import OrderHistoryView from '../views/orders/OrderHistoryView.vue'
 import RatingView from '../views/orders/RatingView.vue'
 import CartView from '../views/orders/CartView.vue'

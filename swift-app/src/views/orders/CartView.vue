@@ -203,10 +203,13 @@ export default {
       this.$router.push("/menuItem/" + item.menuItemId);
     },
     checkedIn() {
-      let checkedInVal = this.checkedInQRCode();
+      let checkedInVal = this.checkedInQRCode;
+      let checkedInRestaurantId = this.checkedInRestaurantId;
 
-      if (checkedInVal != null && this.orderInfo().restaurantId == this.checkedInRestaurantId()) {
-        return true;
+      if (checkedInVal != null && checkedInRestaurantId != null) {
+        if (this.orderInfo().restaurantId == this.checkedInRestaurantId) {
+          return true;
+        }
       } else {
         return false;
       }
