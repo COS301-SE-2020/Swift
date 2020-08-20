@@ -90,10 +90,12 @@ export default {
           password: this.password,
         }
         
-        await this.register(data).then(result => {
+        var hasRegistered = await this.register(data)
+
+        if (hasRegistered) {
           this.isLoading = false
           this.$router.push('/location')
-        })
+        }
       }
 
       

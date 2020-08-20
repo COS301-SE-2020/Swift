@@ -79,7 +79,7 @@
                   <v-list-item-title v-html="menuItem.menuItemName"></v-list-item-title>
                   <v-list-item-subtitle v-html="menuItem.menuItemDescription"></v-list-item-subtitle>
                 </v-list-item-content>
-                <v-list-item-action-text class="subtitle-1">R{{menuItem.price}}0</v-list-item-action-text>
+                <v-list-item-action-text class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</v-list-item-action-text>
                 
 
               </v-list-item>

@@ -127,7 +127,7 @@
       </v-container>
 
       <v-container v-show="!isLoading" pt-0>
-        <v-card @click="goToRestaurant(1)" color="primary" height="140px" flat tile style="border-radius: 13px !important" class="mt-5">
+        <v-card color="primary" height="140px" flat tile style="border-radius: 13px !important" class="mt-5">
           <v-row class="px-0 py-0 specialsInfo">
             <v-col cols="6" class="pl-7 py-3 pr-0">
               <v-layout column justify-space-between fill-height>

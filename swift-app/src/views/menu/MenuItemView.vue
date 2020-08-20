@@ -80,7 +80,7 @@
                               <v-list-item-title v-text="value.name"></v-list-item-title>
                             </v-col>
                             <v-col>
-                              <v-list-item-title v-if="'fee' in value" v-text="`+ R${(value.fee).toFixed(2)}`"></v-list-item-title>
+                              <v-list-item-title v-if="value.price != 0" v-text="`+ R${(value.price).toFixed(2)}`"></v-list-item-title>
                             </v-col>
                           </v-row>
                           <v-list-item-action>
@@ -303,7 +303,7 @@ export default {
           likes: '11',
           adminName: 'Mugg and Bean',
           adminProfileImage: 'https://source.unsplash.com/800x800/?restaurant',
-          response: 'Thank you for your feedback! We appreciate your help.',
+          response: 'Thank you for your pricedback! We appreciate your help.',
           responseDate: '09:30 June 25, 2020'
         },
         {
@@ -389,10 +389,10 @@ export default {
 
       let checked = $(".attributeElements").eq(i).find(".attributeValues").eq(j).hasClass("v-item--active v-list-item--active");
 
-      if ('fee' in value && checked) {
-        this.addOns -= value.fee
-      } else if ('fee' in value && !checked) {
-        this.addOns += value.fee
+      if ('price' in value && checked) {
+        this.addOns -= value.price
+      } else if ('price' in value && !checked) {
+        this.addOns += value.price
       }
       this.changeTotal;
     },
