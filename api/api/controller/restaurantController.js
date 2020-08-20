@@ -52,7 +52,20 @@ module.exports = {
               restaurantResponse.restaurants[r].categories.push(categoryId.categoryid);
             });
 
-            // TODO: get top 2 rating phrases
+            const ratingPhraseFetchLimit = 2;
+            // eslint-disable-next-line no-await-in-loop
+            const ratePhraseQ = await client.query(
+              'SELECT ratingphrase.phrasedescription, customerphraserating.ratingscore'
+              + ' FROM public.customerphraserating'
+              + ' INNER JOIN public.review ON customerphraserating.reviewid = review.reviewid'
+              + ' INNER JOIN public.ratingphrase ON customerphraserating.phraseid = ratingphrase.phraseid'
+              + ' ORDER BY customerphraserating.ratingscore DESC LIMIT $1::integer',
+              [ratingPhraseFetchLimit]
+            );
+
+            ratePhraseQ.rows.forEach((ratePhrase) => {
+              restaurantResponse.restaurants[r].phrases.push(ratePhrase.phrasedescription);
+            });
 
             // eslint-disable-next-line no-await-in-loop
             const ratingRes = await client.query(
