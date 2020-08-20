@@ -95,6 +95,10 @@ router.post('/', (req, res) => {
         restaurantAdminController.addMenuCategory(req.body, res);
         break;
       }
+      case 'addMenuItem': {
+        restaurantAdminController.addMenuItem(req.body, res);
+        break;
+      }
       case 'listAdminRestaurants': {
         restaurantAdminController.getRestaurantList(req.body, res);
         break;
