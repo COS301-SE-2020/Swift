@@ -29,35 +29,23 @@
               <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
             </div>
             <vs-dropdown-menu style="z-index:99999">
-              <vs-dropdown-item v-for="category in primaryCategories" :key="category.categoryName">
-                <span @click="itemCategory = category.categoryName">{{ category.categoryName }}</span>
+              <vs-dropdown-item v-for="category in allCategories" :key="category.categoryName">
+                <span
+                  v-if="category.type == 'primary'"
+                  @click="itemCategoryName = category.categoryName; itemCategory = category.categoryId"
+                >{{ category.categoryName }}</span>
+
+                <span
+                  v-if="category.type == 'secondary'"
+                  class="ml-4"
+                  @click="itemCategoryName = category.categoryName; itemCategory = category.categoryId"
+                >{{ category.categoryName }}</span>
               </vs-dropdown-item>
               <vs-dropdown-item v-if="primaryCategories.length == 0">
                 <span @click="addCategoryPopupActive=true">No categories yet</span>
               </vs-dropdown-item>
             </vs-dropdown-menu>
           </vs-dropdown>
-          <vs-dropdown
-            v-if="itemCategory"
-            vs-trigger-click
-            class="dd-actions cursor-pointer mr-4 mb-4"
-          >
-            <div
-              class="p-4 shadow-drop rounded-lg d-theme-dark-bg cursor-pointer flex items-center justify-center text-lg font-medium w-32 w-full"
-            >
-              <span class="mr-2">{{ itemSubCategoryTitle }}</span>
-              <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
-            </div>
-            <vs-dropdown-menu>
-              <vs-dropdown-item
-                v-for="category in secondaryCategories"
-                :key="category.categoryName"
-              >
-                <span @click="itemSubCategory = category.categoryName">{{ category.categoryName }}</span>
-              </vs-dropdown-item>
-            </vs-dropdown-menu>
-          </vs-dropdown>
-
           <vs-button @click="addCategoryPopupActive=true" type="border" class="mb-4 mr-4">
             <span class="flex items-center">
               <feather-icon icon="PlusIcon" svgClasses="h-4 w-4 mr-1" />
@@ -113,7 +101,7 @@
           <vs-divider>Add-ons</vs-divider>
 
           <vs-list v-for="addOn in itemAddons" :key="addOn.id">
-            <vs-list-header :title="addOn.attributeName"></vs-list-header>
+            <vs-list-header v-if="addOn.attributeName" :title="addOn.attributeName"></vs-list-header>
 
             <vs-list-item
               v-for="attributeValue in addOn.values"
@@ -142,7 +130,11 @@
         <vs-divider color="primary">{{ addOn.attributeName }}</vs-divider>
         <vs-row class="mb-4">
           <vs-col vs-type="flex" vs-justify="center" vs-align="center" vs-w="4">
-            <vs-input label="Attribute Name" v-model="addOn.attributeName" />
+            <vs-input
+              label="Attribute Name"
+              placeholder="Preperation of Eggs"
+              v-model="addOn.attributeName"
+            />
           </vs-col>
           <vs-col vs-type="flex" vs-justify="center" vs-align="center" vs-w="4">
             <p>How many can they select:</p>
@@ -173,7 +165,11 @@
           <vs-row class="mb-8">
             <vs-col vs-type="flex" vs-justify="left" vs-align="left" vs-w="3"></vs-col>
             <vs-col vs-type="flex" vs-justify="left" vs-align="left" vs-w="2">
-              <vs-input label="Value name" v-model="attributeValue.name" />
+              <vs-input
+                label="Value name"
+                placeholder="Hard, soft, etc."
+                v-model="attributeValue.name"
+              />
             </vs-col>
             <vs-col vs-type="flex" vs-justify="left" vs-align="left" vs-w="2">
               <vs-input
@@ -221,14 +217,36 @@
       collapse-action
       subtitle="Bring the menu item to life with vibrant images"
     >
-      <vs-upload
-        multiple
-        max="3"
-        text="Upload Images"
-        action="https://jsonplaceholder.typicode.com/posts/"
-        @on-success="successUpload"
-      />
+      <vs-row vs-w="12" class="text-center">
+        <vs-col
+          style="margin: auto"
+          vs-type="flex"
+          vs-justify="center"
+          vs-align="center"
+          vs-lg="6"
+          vs-xs="12"
+        >
+          <vx-card>
+            <vs-button type="border" size="small" @click="chooseFiles()">Choose item image</vs-button>
+            <input
+              hidden
+              ref="uploadImageInputRef"
+              id="uploadImageInput"
+              type="file"
+              @change="updateItemImage"
+              accept="image/*"
+            />
+            <div
+              id="itemImageUploadPreview"
+              hidden
+              class="mt-4 rounded-lg"
+              :style="'background-image:url('+itemImage+')'"
+            ></div>
+          </vx-card>
+        </vs-col>
+      </vs-row>
     </vx-card>
+
     <div class="text-center">
       <vs-button @click="addMenuItem()" type="filled" class="mb-4 mr-4">
         <span class="flex items-center">
@@ -263,7 +281,9 @@
           </div>
           <vs-dropdown-menu style="z-index:99999">
             <vs-dropdown-item v-for="category in primaryCategories" :key="category.categoryName">
-              <span @click="newCategoryParent = category.categoryName">{{ category.categoryName }}</span>
+              <span
+                @click="newCategoryParentName = category.categoryName; newCategoryParent = category.categoryId"
+              >{{ category.categoryName }}</span>
             </vs-dropdown-item>
           </vs-dropdown-menu>
         </vs-dropdown>
@@ -276,8 +296,9 @@
         placeholder="Drinks"
         v-model="newCategoryName"
       />
+      <vs-textarea label="Category Description" v-model="newCategoryDescription" />
 
-      <vs-button>Add Category</vs-button>
+      <vs-button @click="addMenuCategory()">Add Category</vs-button>
     </vs-popup>
   </div>
 </template>
@@ -288,20 +309,21 @@ import modulemenuList from "@/store/menu/menuDataList.js";
 export default {
   data() {
     return {
+      newCategoryParentName: "",
+      newCategoryDescription: "",
       newCategoryType: "primary",
       newCategoryName: "",
-      newCategoryParent: "",
+      newCategoryParent: null,
       addCategoryPopupActive: false,
+      itemCategoryName: "",
       itemName: "",
-      itemDescription:
-        "",
+      itemDescription: "",
       itemPrice: 20.5,
       itemPrepTime: 10,
       itemCategory: "",
-      itemSubCategory: "",
+      itemImage: "",
       itemAddons: [
         {
-          //TODO: Update itemAddon ids
           id: Math.random(),
           attributeName: "",
           min: 0,
@@ -311,7 +333,7 @@ export default {
               id: Math.random(),
               name: "",
               price: 0,
-              selectedByDefault: true,
+              selectedByDefault: false,
             },
           ],
         },
@@ -323,16 +345,30 @@ export default {
       return this.$store.state.menuList.restaurantObject;
     },
     itemCategoryTitle() {
-      if (this.itemCategory) return this.itemCategory;
+      if (this.itemCategoryName) return this.itemCategoryName;
       else return "Item Menu";
     },
     newItemCategoryTitle() {
-      if (this.newCategoryParent) return this.newCategoryParent;
+      if (this.newCategoryParentName) return this.newCategoryParentName;
       else return "Item Menu";
     },
-    itemSubCategoryTitle() {
-      if (this.itemSubCategory) return this.itemSubCategory;
-      else return "Item Sub-Category";
+    allCategories() {
+      if (this.restaurantLoaded()) {
+        var myCategories = [];
+        this.restaurantObject.categories.forEach((category) => {
+          if (category.type === "primary") {
+            myCategories.push(category);
+            this.restaurantObject.categories.forEach((subcategory) => {
+              if (subcategory.type === "secondary") {
+                if (subcategory.parentCategoryId === category.categoryId) {
+                  myCategories.push(subcategory);
+                }
+              }
+            });
+          }
+        });
+        return myCategories;
+      } else return null;
     },
     primaryCategories() {
       if (this.restaurantLoaded())
@@ -350,19 +386,77 @@ export default {
     },
   },
   methods: {
-    addMenuItem() {
-      this.$vs.notify({
-        title: "Success",
-        text: "Your menu item: <b>" + this.itemName + "</b> has been added." ,
-        color: "success",
-      });
+    chooseFiles() {
+      this.$refs.uploadImageInputRef.click();
     },
-    successUpload() {
-      this.$vs.notify({
-        color: "success",
-        title: "Upload Success",
-        text: "Lorem ipsum dolor sit amet, consectetur",
-      });
+    updateItemImage() {
+      var reader = new FileReader();
+      reader.readAsDataURL(
+        document.getElementById("uploadImageInput").files[0]
+      );
+      reader.onload = () => {
+        this.setItemImagePreview(reader.result);
+      };
+      reader.onerror = function (error) {
+        console.log("Error: ", error);
+      };
+    },
+    setItemImagePreview(image) {
+      this.itemImage = image;
+      document.getElementById("itemImageUploadPreview").style.display = "block";
+    },
+    addMenuCategory() {
+      this.$store
+        .dispatch("menuList/addMenuCategory", {
+          currentRestaurantId: this.getCurrentRestaurantId(),
+          categoryName: this.newCategoryName,
+          categoryDescription: this.newCategoryDescription,
+          categoryType: this.newCategoryType,
+          parentCategoryId: this.newCategoryParent,
+          authKey: this.getAuthToken(),
+        })
+        .then(() => {
+          this.$vs.notify({
+            title: "Successfully added category",
+            text:
+              "Your new category <b>" +
+              this.newCategoryName +
+              "</b> has been added.",
+            color: "success",
+          });
+          this.addCategoryPopupActive = false;
+          this.newCategoryDescription = "";
+          this.newCategoryType = "";
+          this.newCategoryParentName = "";
+          this.newCategoryName = "";
+          this.newCategoryParent = null;
+        });
+    },
+    addMenuItem() {
+      this.$store
+        .dispatch("menuList/addMenuItem", {
+          authKey: this.getAuthToken(),
+          currentRestaurantId: this.getCurrentRestaurantId(),
+          categoryId: this.itemCategory,
+          itemName: this.itemName,
+          itemDescription: this.itemDescription,
+          itemPrice: this.itemPrice,
+          itemWaitingTime: this.itemPrepTime,
+          itemAttributes: {
+            attributes: this.itemAddons,
+          },
+          arAsset: "",
+          available: true,
+          itemImages: [this.itemImage],
+        })
+        .then(() => {
+          this.$vs.notify({
+            title: "Success",
+            text:
+              "Your menu item: <b>" + this.itemName + "</b> has been added.",
+            color: "success",
+          });
+        });
     },
     restaurantLoaded() {
       if (Object.keys(this.restaurantObject).length === 0) return false;
@@ -370,28 +464,15 @@ export default {
     },
     addAddOn() {
       var newAddOn = {
-        //TODO: Update itemAddon ids
         id: Math.random(),
-        attributeName: "Preperation of Eggs",
+        attributeName: "",
         min: 0,
         max: 10,
         values: [
           {
             id: Math.random(),
-            name: "fried",
+            name: "",
             price: 10,
-            selectedByDefault: true,
-          },
-          {
-            id: Math.random(),
-            name: "scrambled",
-            price: 20,
-            selectedByDefault: false,
-          },
-          {
-            id: Math.random(),
-            name: "poached",
-            price: 30,
             selectedByDefault: false,
           },
         ],
@@ -400,10 +481,9 @@ export default {
     },
     addAddOnValue(id) {
       var newAddOnValue = {
-        id: Math.random(),
-        name: "fried",
+        name: "",
         price: 10,
-        selectedByDefault: true,
+        selectedByDefault: false,
       };
       this.itemAddons.find((i) => i.id === id).values.push(newAddOnValue);
     },
@@ -417,6 +497,7 @@ export default {
       //if menu has not been loaded yet, load it first
       if (!this.restaurantLoaded()) {
         this.$store.dispatch("menuList/listMenuItems", {
+          currentRestaurantId: this.getCurrentRestaurantId(),
           authKey: this.getAuthToken(),
         });
       }
@@ -425,6 +506,14 @@ export default {
 };
 </script>
 <style scoped>
+#itemImageUploadPreview {
+  height: 400px;
+  width: 100%;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  display: none;
+}
 .addCategoryPopup >>> .vs-popup {
   max-width: 300px;
 }

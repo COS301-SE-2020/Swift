@@ -9,7 +9,7 @@ export default {
       "requestType": "listOrders",
       "token": payload.authKey,
       "restaurantId": payload.currentRestaurantId,
-      "getAllOrders": false
+      "getAllOrders": true
     }).then(response => {
       console.log("ORDERS", response);
       commit('SET_ORDERS_OBJECT', response.data.orders);

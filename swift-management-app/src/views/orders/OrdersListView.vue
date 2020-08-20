@@ -4,6 +4,8 @@
       <div class="content-area__heading pr-4">
         <h2 class="mb-1">Orders</h2>
       </div>
+      <label class="mr-4">Show all orders</label>
+      <vs-switch color="success" v-model="showAll" />
     </div>
     <vs-row v-if="orderCount <= 0" vs-type="flex" vs-justify="center" vs-align="center" vs-w="12">
       <vs-col class="mt-20" vs-sm="12" vs-lg="6">
@@ -37,7 +39,7 @@
           <p>Order Progress:</p>
           <vs-progress :height="8" :percent="parseInt(0)" :color="getStatusColor(0)"></vs-progress>
           <vs-list>
-            <vs-list-header :title="'Order Total: R'+order.orderDetails.orderTotal"></vs-list-header>
+            <vs-list-header :title="'Order Total: R'+order.orderTotal"></vs-list-header>
             <div
               v-for="menuItem in order.orderDetails.items"
               :key="menuItem.menuItemName"
@@ -61,11 +63,7 @@
                   >{{getMenuItemStatus(menuItem.progress)}}</vs-button>
                 </vs-list-item>
               </vs-row>
-              <vs-collapse
-                v-if="menuItem.orderselections.selections.length > 0"
-                type="margin"
-                class="pt-0"
-              >
+              <vs-collapse v-if="menuItem.orderselections0" type="margin" class="pt-0">
                 <vs-collapse-item class="addonsSection">
                   <div slot="header">Add-ons</div>
                   <vs-list-item
@@ -92,13 +90,21 @@ export default {
   data() {
     return {
       isMounted: false,
+      showAll: true,
     };
   },
   computed: {
     orders() {
-      if (this.$store.state.orderList)
-        return this.$store.state.orderList.orders;
-      else return null;
+      if (this.$store.state.orderList) {
+        if (this.$store.state.orderList.orders)
+          if (this.showAll) {
+            return this.$store.state.orderList.orders;
+          } else {
+            return this.$store.state.orderList.orders.filter(
+              (i) => i.orderStatus != "Paid"
+            );
+          }
+      } else return null;
     },
     orderCount() {
       if (this.orders) return this.orders.length;
@@ -107,7 +113,11 @@ export default {
   },
   methods: {
     orderTimePlaced(time) {
-      return new Date(time).toLocaleTimeString();
+      return (
+        new Date(time).toLocaleTimeString() +
+        ", " +
+        new Date(time).toDateString()
+      );
     },
     increaseItemPercentage(orderId, itemId, percentage) {
       this.$store.dispatch("orderList/increaseItemPercentage", {
