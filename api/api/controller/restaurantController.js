@@ -946,7 +946,7 @@ module.exports = {
           if (resOrderStatus.rows[0].orderstatus.toLowerCase() === 'paid'
           || resOrderStatus.rows[0].orderstatus.toLowerCase() === 'rated') {
             // order has already been paid for (and rated)
-            return response.status(205).send();
+            return response.status(205).send({ status: 205, reason: ' Order has already been paid for ' });
           }
 
           // for payment email data
@@ -974,7 +974,7 @@ module.exports = {
             )
               .then(() => {
                 paymentEmail.paymentEmail(paymentData); // send payment email
-                return response.status(200).send('Payment successful');
+                return response.status(200).send({ status: 200, reason: ' Payment Successful ' });
               })
               .catch((err) => {
                 console.error('Query Error [Order Payment - Update Order Status]', err.stack);
