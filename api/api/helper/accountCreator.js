@@ -1,5 +1,7 @@
 const db = require('../db');
 
+// TODO: Delete File
+
 module.exports = {
   createCustomer: (customerData) => db.query(
     'INSERT INTO public.customer (name, surname, email, password, refreshtoken, theme)'
