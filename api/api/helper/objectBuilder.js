@@ -11,7 +11,7 @@ const getOrderItems = async (oid = 0) => db.query(
 )
   .then((orderItems) => {
     const orderHistoryItems = [];
-    let orderTotal = 0.0;
+    // let orderTotal = 0.0;
     orderItems.rows.forEach((ordItem) => {
       const orderItem = {};
       orderItem.menuItemId = ordItem.menuitemid;
@@ -21,10 +21,10 @@ const getOrderItems = async (oid = 0) => db.query(
       orderItem.quantity = ordItem.quantity;
       orderItem.progress = ordItem.progress;
       orderItem.orderselections = ordItem.orderselections;
-      orderTotal += (orderItem.price * ordItem.quantity);
+      // orderTotal += ordItem.itemtotal;
       orderHistoryItems.push(orderItem);
     });
-    return { orderTotal, items: orderHistoryItems };
+    return { items: orderHistoryItems };
   })
   .catch((err) => {
     console.error('Query Error [Order Helper - Get Order Items]', err.stack);
@@ -273,6 +273,7 @@ module.exports = {
         const categoryItem = {};
         // eslint-disable-next-line no-await-in-loop
         const resMenuItem = await getMenuItems(restaurantId, res.rows[r].categoryid);
+        categoryItem.categoryId = res.rows[r].categoryid;
         categoryItem.categoryName = res.rows[r].categoryname;
         categoryItem.description = res.rows[r].categorydescription;
         categoryItem.parentCategoryId = res.rows[r].parentcategoryid;

@@ -91,6 +91,14 @@ router.post('/', (req, res) => {
         restaurantController.getRestaurantCategories(req.body, res);
         break;
       }
+      case 'addMenuCategory': {
+        restaurantAdminController.addMenuCategory(req.body, res);
+        break;
+      }
+      case 'addMenuItem': {
+        restaurantAdminController.addMenuItem(req.body, res);
+        break;
+      }
       case 'listAdminRestaurants': {
         restaurantAdminController.getRestaurantList(req.body, res);
         break;
@@ -105,6 +113,10 @@ router.post('/', (req, res) => {
       }
       case 'checkout': {
         restaurantController.checkOut(req.body, res);
+        break;
+      }
+      case 'callWaiter': {
+        restaurantController.callWaiter(req.body, res);
         break;
       }
       case 'restaurantMenu': {

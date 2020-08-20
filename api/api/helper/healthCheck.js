@@ -11,9 +11,21 @@ module.exports = {
     serviceStatus.ManagementWebApp = {};
     serviceStatus.UserWebApp = {};
 
-    // API has to be online to send this
-    serviceStatus.API.status = 200;
-    serviceStatus.API.detail = 'API is online';
+    // API self-test
+    await axios.get('https://api.swiftapp.ml')
+      .then((ares) => {
+        if (ares.status === 200) {
+          serviceStatus.API.status = 200;
+          serviceStatus.API.detail = 'API is online';
+        } else {
+          serviceStatus.API.status = 503;
+          serviceStatus.API.detail = 'API is offline';
+        }
+      })
+      .catch(() => {
+        serviceStatus.API.status = 503;
+        serviceStatus.API.detail = 'API is offline';
+      });
 
     // Check DB availability
     if (db != null && db.options.database === 'swift') {

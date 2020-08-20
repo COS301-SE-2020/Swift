@@ -20,12 +20,17 @@ module.exports = {
     const userToken = validateToken(reqBody.token);
 
     if (userToken.state === tokenState.VALID) {
-      return db.query(
-        'SELECT restaurantid, restaurantname, location, coverimageurl FROM public.restaurant;'
-      )
-        .then((res) => {
+      return (async () => {
+        const client = await db.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+
+          const res = await client.query(
+            'SELECT restaurantid, restaurantname, location, coverimageurl FROM public.restaurant'
+          );
+
           const restaurantResponse = {};
-          const restaurantPromises = [];
           restaurantResponse.restaurants = [];
           for (let r = 0; r < res.rows.length; r++) {
             restaurantResponse.restaurants[r] = {};
@@ -33,32 +38,32 @@ module.exports = {
             restaurantResponse.restaurants[r].name = res.rows[r].restaurantname;
             restaurantResponse.restaurants[r].location = res.rows[r].location;
             restaurantResponse.restaurants[r].image = res.rows[r].coverimageurl;
-            restaurantPromises.push(db.query(
+            // eslint-disable-next-line no-await-in-loop
+            const ratingRes = await client.query(
               'SELECT AVG(ratingscore) AS "rating" FROM public.review'
               + ' WHERE restaurantid = $1::integer AND ratingscore IS NOT NULL;',
               [res.rows[r].restaurantid]
-            )
-              .then((ratingRes) => {
-                if (ratingRes.rows[0].rating != null) {
-                  restaurantResponse.restaurants[r].rating = ratingRes.rows[0].rating;
-                } else {
-                  // no rating available
-                  restaurantResponse.restaurants[r].rating = 0.0;
-                }
-              })
-              .catch((err) => {
-                console.error('Query Error [Restaurant - Get Restaurant Rating]', err.stack);
-                // zero rating on error
-                restaurantResponse.restaurants[r].rating = 0.0;
-              }));
+            );
+
+            if (ratingRes.rows[0].rating != null) {
+              restaurantResponse.restaurants[r].rating = ratingRes.rows[0].rating;
+            } else {
+              // no rating available
+              restaurantResponse.restaurants[r].rating = 0.0;
+            }
           }
 
-          Promise.all(restaurantPromises).then(() => response.status(200).send(restaurantResponse))
-            .catch((err) => {
-              console.error('Restaurant Promise Error', err.stack);
-              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
-            });
-        }).catch((err) => {
+          await client.query('COMMIT');
+          return response.status(200).send(restaurantResponse);
+        } catch (err) {
+          // rollback any changes
+          await client.query('ROLLBACK');
+          throw err;
+        } finally {
+          client.release();
+        }
+      })()
+        .catch((err) => {
           console.error('Query Error [Restaurant - Get Restaurant List]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
@@ -245,6 +250,70 @@ module.exports = {
         .then(() => response.status(200).send({ status: 200, reason: 'Checked Out' }))
         .catch((err) => {
           console.error('Query Error [Restaurant - Checkout User]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  callWaiter: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || Object.keys(reqBody).length !== 2) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    const userToken = validateToken(reqBody.token, true);
+
+    if (userToken.state === tokenState.VALID) {
+      return (async () => {
+        const client = await db.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+
+          // check if user checked in exists
+          const cRes = await client.query(
+            'SELECT restauranttable.restaurantid,restauranttable.tableid,restauranttable.tablenumber'
+            + ' FROM public.person'
+            + ' INNER JOIN public.restauranttable ON person.checkedin = restauranttable.qrcode'
+            + ' WHERE person.userid = $1::integer',
+            [userToken.data.userId]
+          );
+
+          if (cRes.rows.length === 0) {
+            // restaurant does not exist
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          // ------------------------------------ //
+          // ------------------------------------ //
+          // TODO: Send notification
+          // restaurant id = cRes.rows[0].restaurantid
+          // table id = cRes.rows[0].tableid
+          // table number = cRes.rows[0].tablenumber
+          // ------------------------------------ //
+          // ------------------------------------ //
+
+          // commit changes and end transaction
+          await client.query('COMMIT');
+
+          // send response
+          return response.status(200).send();
+        } catch (err) {
+          await client.query('ROLLBACK');
+          throw err;
+        } finally {
+          client.release();
+        }
+      })()
+        .catch((err) => {
+          console.error('Query Error [Restaurant - Add Menu Category]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }
@@ -527,8 +596,8 @@ module.exports = {
             + ' restauranttable.tableid, restauranttable.tablenumber,'
             + ' person.userid AS "employeeid", restaurantemployee.employeenumber,'
             + ' person.name AS "ename", person.surname AS "esurname",'
-            + ' customerorder.orderdatetime, customerorder.ordercompletiontime'
-            + ' FROM public.customerorder'
+            + ' customerorder.orderdatetime, customerorder.ordercompletiontime, customerorder.ordertotal,'
+            + ' customerorder.progress FROM public.customerorder'
             + ' INNER JOIN public.restauranttable ON customerorder.tableid = restauranttable.tableid'
             + ' INNER JOIN public.person ON customerorder.employeeid = person.userid'
             + ' INNER JOIN public.restaurantemployee ON restaurantemployee.userid = person.userid'
@@ -549,6 +618,8 @@ module.exports = {
                 orderDetails.orderStatus = orderItem.orderstatus;
                 orderDetails.orderDateTime = orderItem.orderdatetime;
                 orderDetails.orderCompletionTime = orderItem.ordercompletiontime;
+                orderDetails.orderTotal = orderItem.ordertotal;
+                orderDetails.orderProgress = orderItem.progress;
                 orderDetails.tableId = orderItem.tableid;
                 orderDetails.tableNumber = orderItem.tablenumber;
                 orderDetails.employeeId = orderItem.employeeid;
