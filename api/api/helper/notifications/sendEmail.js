@@ -39,16 +39,17 @@ module.exports.registrationEmail = (req, res) => {
 // eslint-disable-next-line no-unused-vars
 module.exports.paymentEmail = (req, res) => {
   const { orderId } = req;
-  // const order= req.details;
+  const resName = req.restaurantName;
+  const MenuItemName = req.menuitemname;
   const tip = req.waiterTip;
   const tax = req.orderTax;
-  const total = req.orderTotal;
   const { name } = req;
   const amount = req.amountPaid;
   const { paymentMethod } = req;
+  const total = amount + tip + tax;
 
   ejs.renderFile(`${__dirname}/PaymentEmail.ejs`, {
-    orderId, name, tip, tax, total, amount, paymentMethod
+    orderId, name, tip, tax, total, amount, paymentMethod, resName, MenuItemName
   }, (err, data) => {
     const mailOptions = {
       from: process.env.MG_EMAIL_FROM || config.emailFrom,
