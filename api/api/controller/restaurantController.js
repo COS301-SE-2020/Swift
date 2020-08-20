@@ -369,7 +369,7 @@ module.exports = {
       if (!Object.prototype.hasOwnProperty.call(orderInfo, 'restaurantId')
         || !Object.prototype.hasOwnProperty.call(orderInfo, 'tableId')
         || !Object.prototype.hasOwnProperty.call(orderInfo, 'orderItems')) {
-        return response.status(400).send({ status: 400, reason: 'Bad Request' });
+        return response.status(400).send({ status: 400, reason: '**Bad Request' });
       }
 
       // Check if at least one item has been ordered
@@ -658,12 +658,13 @@ module.exports = {
       || !Object.prototype.hasOwnProperty.call(reqBody, 'orderId')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'paymentMethod')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'amountPaid')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'restaurantName')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'menuitemname')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'name')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'email')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'waiterTip')
-      || !Object.prototype.hasOwnProperty.call(reqBody, 'orderTotal')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'orderTax')
-      || Object.keys(reqBody).length !== 10
+      || Object.keys(reqBody).length !== 11
       || reqBody.amountPaid < 0.0) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
@@ -691,16 +692,16 @@ module.exports = {
           }
 
           // for payment email data
-          const newUserData = {};
-          newUserData.orderId = reqBody.orderId;
-          newUserData.name = reqBody.name;
-          newUserData.email = reqBody.email;
-          newUserData.amountPaid = reqBody.amountPaid; // under items ordered
-          newUserData.orderName = reqBody.orderName;
-          newUserData.paymentMethod = reqBody.paymentMethod;
-          newUserData.waiterTip = reqBody.waiterTip;
-          newUserData.orderTax = reqBody.orderTax;
-          newUserData.orderTotal = reqBody.orderTotal;
+          const paymentData = {};
+          paymentData.orderId = reqBody.orderId;
+          paymentData.name = reqBody.name;
+          paymentData.email = reqBody.email;
+          paymentData.amountPaid = reqBody.amountPaid; // under items ordered
+          paymentData.menuitemname = reqBody.menuitemname;
+          paymentData.paymentMethod = reqBody.paymentMethod;
+          paymentData.waiterTip = reqBody.waiterTip;
+          paymentData.orderTax = reqBody.orderTax;
+          paymentData.restaurantName = reqBody.restaurantName;
           // pay for order
           const newOrderStatus = 'Paid';
 
@@ -714,8 +715,8 @@ module.exports = {
               [newOrderStatus, reqBody.orderId]
             )
               .then(() => {
-                paymentEmail.paymentEmail(newUserData); // send payment email
-                return response.status(200).send();
+                paymentEmail.paymentEmail(paymentData); // send payment email
+                return response.status(200).send('Payment successful');
               })
               .catch((err) => {
                 console.error('Query Error [Order Payment - Update Order Status]', err.stack);
