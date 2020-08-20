@@ -39,6 +39,21 @@ module.exports = {
             restaurantResponse.restaurants[r].location = res.rows[r].location;
             restaurantResponse.restaurants[r].branch = res.rows[r].branch;
             restaurantResponse.restaurants[r].image = res.rows[r].coverimageurl;
+            restaurantResponse.restaurants[r].categories = [];
+            restaurantResponse.restaurants[r].phrases = [];
+            // eslint-disable-next-line no-await-in-loop
+            const resCat = await client.query(
+              'SELECT categoryid FROM public.restaurantcategory'
+              + ' WHERE restaurantid = $1::integer',
+              [res.rows[r].restaurantid]
+            );
+
+            resCat.rows.forEach((categoryId) => {
+              restaurantResponse.restaurants[r].categories.push(categoryId.categoryid);
+            });
+
+            // TODO: get top 2 rating phrases
+
             // eslint-disable-next-line no-await-in-loop
             const ratingRes = await client.query(
               'SELECT AVG(ratingscore) AS "rating" FROM public.review'
