@@ -56,9 +56,21 @@ const getMenuItems = (restaurantId = 0, categoryId = 0) => {
         menuItem.menuItemDescription = resMenuItem.menuitemdescription;
         menuItem.price = resMenuItem.price;
         menuItem.estimatedWaitingTime = resMenuItem.estimatedwaitingtime;
+        menuItem.images = [];
         menuItem.attributes = resMenuItem.attributes;
         menuItem.arAsset = resMenuItem.arasset;
         menuItem.availability = resMenuItem.availability;
+
+        // menu item images
+        // eslint-disable-next-line no-await-in-loop
+        const menuItemImages = await client.query(
+          'SELECT imageurl FROM public.menuitemimages WHERE menuitemid = $1::integer',
+          [resMenuItem.menuitemid]
+        );
+
+        menuItemImages.rows.forEach((menuImg) => {
+          menuItem.images.push(menuImg);
+        });
 
         // get menu item rating
         // eslint-disable-next-line no-await-in-loop
