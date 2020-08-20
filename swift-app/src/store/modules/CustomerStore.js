@@ -73,6 +73,7 @@ const actions = {
   },
 
   login({commit}, data) {
+    console.log("LOGGED IN")
     return axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "login",
@@ -80,6 +81,8 @@ const actions = {
         "password": data.password
       }
     ).then(result => {
+      console.log("heya")
+      console.log(result.data)
       commit('SAVE_TOKEN', result.data.token);
       sessionStorage.setItem('authToken', result.data.token);
       commit('SET_CHECKED_IN_CODE', result.data.checkedIn);
@@ -109,15 +112,18 @@ const actions = {
         "requestType": "register",
         "name": data.name,
         "surname": data.surname,
-        "username": data.username,
         "email": data.email,
         "password": data.password
       }
     ).then(result => {
-      commit('SAVE_CUSTOMER', result.data);
+      console.log("Register")
+      console.log(result.data)
+      console.log(data)
+      this.dispatch('CustomerStore/login', data);
     }).catch(({ response }) => {
     });
   },
+  
 
   googleRegister({commit}) {
     return axios.post('https://api.swiftapp.ml', 
@@ -170,6 +176,21 @@ const actions = {
   reset({ commit }) {
     commit('RESET');
   },
+
+  resetPassword({commit}, data) {
+    console.log(data.email)
+    return axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "reset",
+      "email": data.email
+    }).then(result => {
+      // console.log(result.data)
+      return result.data
+    }).catch(({ response }) => {
+      // console.log(response)
+      return response
+    });
+  }
 }
 
 // Mutations

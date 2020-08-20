@@ -28,13 +28,18 @@
                 <v-text-field v-model="email" :error-messages="emailErrors" label="Email" required @blur="$v.email.$touch()"></v-text-field>
               </v-col>
             </v-row>
+            <v-row justify="center" class="mt-4 mb-6">
+              <v-col cols="10" class="d-flex justify-center">
+                <v-progress-circular v-show=isLoading indeterminate color="primary"></v-progress-circular>
+                <div style="color: red; font-size: 14px; text-align: center" v-if="emailErrorMssg != '' && !isLoading">{{emailErrorMssg}}</div>
+              </v-col>
+            </v-row>
           </v-card>
         </v-card>
         <v-row class="mt-6 mb-4" justify="center">
           <v-col cols="11" class="pt-0 mb-10" width="100%" style="position: absolute; bottom: 0;">
            <div class="row d-flex flex-column align-center mx-8">
               <v-btn @click="resetPass" block rounded class="py-5 body-2 font-weight-light" color="primary" style="font-size: 17px !important">Reset Password</v-btn>
-              <v-progress-circular v-show=isLoading indeterminate color="primary"></v-progress-circular>
            </div>
           </v-col>
         </v-row>
@@ -156,6 +161,7 @@ export default {
   data() {
     return {
      email: '',
+     emailErrorMssg: '',
      enteredEmail: 'peterjames@gmail.com',
      showPassword: false,
      step: 1,
@@ -171,19 +177,32 @@ export default {
       else 
         this.step = this.step - 1;
     },
-    resetPass () {
+    async resetPass () {
       this.isLoading = true
       if (this.emailErrors.length > 0  || this.email.length == 0) {
         this.$v.$touch()
         this.isLoading = false
       } else {
-        this.isLoading = false
-        // let data = {
-        //   email: this.email,
-        //   password: this.password,
-        // }
         
-        this.step = this.step + 1;
+        let data = {
+          "email": this.email
+        }
+
+        // console.log()
+        await this.validateEmail(data).then(result => {
+          if (typeof result == 'string') {
+            this.emailErrorMssg = ''
+            this.step = this.step + 1;
+          } else {
+            this.emailErrorMssg = result.data.reason
+          }
+          
+          this.isLoading = false
+
+        })
+        // console.log("user")
+        // console.log(user)
+        // this.step = this.step + 1;
       }
 
       
@@ -207,6 +226,9 @@ export default {
     ...mapGetters({
       isAuthenticated: 'isAuthenticated',
       errors: 'getErrors',
+    }),
+    ...mapActions({
+      validateEmail: 'CustomerStore/resetPassword',
     }),
 
   },
