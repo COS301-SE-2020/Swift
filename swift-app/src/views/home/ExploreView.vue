@@ -270,7 +270,7 @@ export default {
     let checkedInVal = this.checkedInQRCode;
     // Check-in customer again if system crashes 
     if (checkedInVal != null && this.checkedInRestaurantId == null) {
-      this.checkInCustomer(checkedInVal)
+      // this.checkInCustomer(checkedInVal)
     }
     
     var length = await this.allRestaurants.length;

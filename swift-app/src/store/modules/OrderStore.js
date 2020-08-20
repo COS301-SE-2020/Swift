@@ -135,7 +135,7 @@ const actions = {
     ).then(result => {
       var data = {
         "orderId": orderId,
-        "orderStatus": result.data.orderStatus 
+        "orderProgress": result.data.orderProgress 
       }
       commit('UPDATE_ORDER_STATUS', data);
     }).catch(({ response }) => {
@@ -202,7 +202,7 @@ const mutations = {
   },
   
   UPDATE_ORDER_STATUS(state, data) {
-    var orderHistory = this.getters['OrderStore/getOrderHistory'];
+    var orderHistory = this.getters['CustomerStore/getCustomerOrderHistory'];
 
     var item = orderHistory.find(orderItem => 
       orderItem.orderId == data.orderId
