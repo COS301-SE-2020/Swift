@@ -591,7 +591,7 @@ module.exports = {
             + ' restauranttable.tableid, restauranttable.tablenumber,'
             + ' person.userid AS "employeeid", restaurantemployee.employeenumber,'
             + ' person.name AS "ename", person.surname AS "esurname",'
-            + ' customerorder.orderdatetime, customerorder.ordercompletiontime'
+            + ' customerorder.orderdatetime, customerorder.ordercompletiontime, customerorder.ordertotal'
             + ' FROM public.customerorder'
             + ' INNER JOIN public.restauranttable ON customerorder.tableid = restauranttable.tableid'
             + ' INNER JOIN public.person ON customerorder.employeeid = person.userid'
@@ -613,6 +613,7 @@ module.exports = {
                 orderDetails.orderStatus = orderItem.orderstatus;
                 orderDetails.orderDateTime = orderItem.orderdatetime;
                 orderDetails.orderCompletionTime = orderItem.ordercompletiontime;
+                orderDetails.orderTotal = orderItem.ordertotal;
                 orderDetails.tableId = orderItem.tableid;
                 orderDetails.tableNumber = orderItem.tablenumber;
                 orderDetails.employeeId = orderItem.employeeid;
