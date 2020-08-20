@@ -90,7 +90,7 @@
 
     </v-container>
     <!-- <v-snackbar :v-if=checkedIn id="notification" :timeout="2000" centered color="primary" elevation="24" v-model="snackbar">You have been checked-in to {{menu.name}}</v-snackbar> -->
-    <NavBar></NavBar>
+    <!-- <NavBar></NavBar> -->
   </div>
 </template>
 

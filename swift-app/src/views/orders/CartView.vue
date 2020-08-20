@@ -14,7 +14,7 @@
         </v-row>
       </v-container>
     </v-toolbar>
-    <v-container v-if="orderInfo().length == 0" py-0>
+    <v-container v-if="Object.keys(orderInfo()).length === 0" py-0 fill-height>
       <div class="row d-flex flex-column align-stretch align-self-stretch">
         <v-container fluid fill-height class="pa-0">
           <div class="row d-flex flex-column align-self-center align-center">
@@ -22,7 +22,8 @@
               <v-icon size="65px" class="font-weight-light" color="white">mdi-cart-outline</v-icon>
             </v-avatar>
             <div class="headline mb-3 mt-12 secondary--text">Order Empty</div>
-            <div class="subtitle-1 secondary--text">Order some food or drinks here:</div>
+            <div class="subtitle-1 secondary--text">Order some food or drinks here</div>
+            <v-btn @click="goToRestaurantMenu" class="mt-6" height="45px" width="130px" large color="primary" style="border-radius: 10px">Menu</v-btn>
           </div>
         </v-container>
       </div>
@@ -148,7 +149,7 @@
       </v-alert>
     </v-overlay>
 
-    <NavBar></NavBar>
+    <!-- <NavBar></NavBar> -->
   </v-container>
 </template>
 
@@ -214,6 +215,10 @@ export default {
         return false;
       }
     },
+    goToRestaurantMenu() {
+      console.log(this.checkedInRestaurantId)
+      this.$router.push("/menu/" + this.checkedInRestaurantId());
+    },
     increaseQuantity(item) {
       let singlePrice = this.subtotal/item.quantity
       item.quantity++
@@ -251,10 +256,11 @@ export default {
   mounted: function() {
     console.log("order");
     console.log(this.orderInfo());
-    
-    for (let i = 0; i < this.orderInfo().orderItems.length; i++) {
-      this.subtotal += (this.orderInfo().orderItems[i].itemTotal != null) ? parseFloat(this.orderInfo().orderItems[i].itemTotal): 0;
-      this.quantity[i] = parseFloat(this.orderInfo().orderItems[i].quantity)
+    if (Object.keys(this.orderInfo()).length != 0) {
+      for (let i = 0; i < this.orderInfo().orderItems.length; i++) {
+        this.subtotal += (this.orderInfo().orderItems[i].itemTotal != null) ? parseFloat(this.orderInfo().orderItems[i].itemTotal): 0;
+        this.quantity[i] = parseFloat(this.orderInfo().orderItems[i].quantity)
+      }
     }
   }
 }

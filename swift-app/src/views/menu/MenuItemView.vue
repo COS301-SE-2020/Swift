@@ -50,7 +50,7 @@
 
     
     <v-tabs v-if="!arActive" v-model="tab" background-color="white" grow>
-      <v-tab v-if="newMenuItem.attributes != null && checkedIn()">
+      <v-tab v-if="checkedIn()">
         Details
       </v-tab>
       <v-tab>
@@ -60,20 +60,20 @@
     
 
     <v-tabs-items v-if="!arActive" v-model="tab">
-      <v-tab-item v-if="newMenuItem.attributes != null && checkedIn()">
+      <v-tab-item v-if="checkedIn()">
         <v-card flat>
-          <v-card-title class="pb-0 pt-4">Customise Order</v-card-title>
-          <v-container class="pl-0">
-            <v-list shaped>
+          <v-card-title v-if="newMenuItem.attributes != null" class="pb-0 pt-4">Customise Order</v-card-title>
+          <v-container>
+            <v-list shaped v-if="newMenuItem.attributes != null"> 
               <v-list-group class="attributeElements" v-for="(attribute, i) in newMenuItem.attributes.attributes" :key="i" no-action value="true">
                 <template v-slot:activator>
                   <v-list-item-content>
-                    <v-list-item-title class="label pl-3" v-text="attribute.attributeName"></v-list-item-title>
+                    <v-list-item-title class="label pl-0" v-text="attribute.attributeName"></v-list-item-title>
                   </v-list-item-content>
                 </template>
-                <v-list-item-group class="pl-4" :multiple="(parseInt(attribute.max) > 1) ? true : false" :mandatory="(attribute.min == '1') ? true : false" v-model="model[i]">
+                <v-list-item-group class="pl-2" :multiple="(parseInt(attribute.max) > 1) ? true : false" :mandatory="(attribute.min == '1') ? true : false" v-model="model[i]">
                   <template v-for="(value, j) in attribute.values">
-                      <v-list-item @click="checkInput(i, j, value)" class="px-2 attributeValues" :key="`item-${j}`" :value="value.name">
+                      <v-list-item @click="checkInput(i, j, value)" ref="attributeVal" class="px-2 attributeValues" :key="`item-${j}`" :value="value.name">
                         <template v-slot:default="{ active }">
                           <v-row>
                             <v-col cols="8">
@@ -96,7 +96,7 @@
 
             
 
-            <v-row v-if="expandOrderBtn" class="d-flex justify-space-around px-2 mt-4">
+            <v-row class="d-flex justify-space-around px-2 mt-4">
               <v-col cols="4" class="d-flex justify-center px-0">
                 <div class="px-1 d-flex align-center quantityButton" height="45px">
                   <v-btn @click="detractPrice" icon class="mr-2"><v-icon size="22">mdi-minus</v-icon></v-btn>
@@ -542,8 +542,10 @@ export default {
   },
   mounted: function() {
     // console.log($(".attributeElements").find(".attributeValues").html())
-    // $(".attributeElements").find(".attributeValues").removeClass("v-item--active v-list-item--active");
+    console.log(this.$refs.attributeVal);
     this.total = this.newMenuItem.price
+    
+    // $(".attributeValues.v-item--active.v-list-item--active").find("i").addClass("mdi-radiobox-marked");
     // this.itemTotal = this.newMenuItem.price
   }
 }

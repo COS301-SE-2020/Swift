@@ -33,7 +33,7 @@
             <div v-for="status in statusList" :key="status" class="pt-2 pb-2">
               <div v-if="itemsForStatus(status).length != 0">
                 <v-subheader style="height: 20px" class="mt-3 mb-1 pl-1" v-text="status"></v-subheader>
-                <v-list v-for="(item, index) in itemsForStatus(status).slice().reverse()" :key="index" class="py-2">
+                <v-list v-for="(item, index) in itemsForStatus(status)" :key="index" class="py-2">
                   <v-card class="pt-1 pr-0 orderCard" elevation="2">
                     <v-row class="mx-0 d-flex justify-space-around" @click="viewOrder(item)">
                       <v-col cols="7" class="pb-0 pt-2">
