@@ -189,6 +189,38 @@ const actions = {
       // console.log(response)
       return response
     });
+  },
+
+  verifyCode({commit}, data) {
+    console.log(data.email)
+    return axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "verify",
+      "token": data.token,
+      "code": data.code
+    }).then(result => {
+      // console.log(result.data)
+      return result.data
+    }).catch(({ response }) => {
+      // console.log(response)
+      return response
+    });
+  },
+
+  updatePassword({commit}, data) {
+    // console.log(data.email)
+    return axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "updatePassword",
+      "email": data.email,
+      "password": data.password
+    }).then(result => {
+      // console.log(result.data)
+      return result.data
+    }).catch(({ response }) => {
+      // console.log(response)
+      return response
+    });
   }
 }
 

@@ -31,7 +31,7 @@
             <v-row justify="center" class="mt-4 mb-6">
               <v-col cols="10" class="d-flex justify-center">
                 <v-progress-circular v-show=isLoading indeterminate color="primary"></v-progress-circular>
-                <div style="color: red; font-size: 14px; text-align: center" v-if="emailErrorMssg != '' && !isLoading">{{emailErrorMssg}}</div>
+                <div style="color: red; font-size: 14px; text-align: center" v-if="errorMssg != '' && !isLoading">{{errorMssg}}</div>
               </v-col>
             </v-row>
           </v-card>
@@ -66,36 +66,27 @@
               <span  style="font-size: 25px">Verify your email</span>
             </v-row>
             <v-row justify="center" class="mt-4 mb-6">
-              <span style="font-size: 16px; text-align: center; opacity: 0.9" class="font-weight-light">Please enter the 4 digit code sent to {{enteredEmail}}</span>
+              <span style="font-size: 16px; text-align: center; opacity: 0.9" class="font-weight-light">Please enter the 4 digit code sent to {{email}}</span>
             </v-row>
             <v-row justify="center" class="mt-4 mb-6" style="text-align:center">
-              <v-col cols="2" class="pl-1 pr-1" style="text-align: center">
-                <v-textarea maxlength="1" class="centered-input text--darken-3 mt-3 digits" height="4" solo single-line outlined></v-textarea>
+              <v-col cols="2" class="pl-1 pr-1" style="text-align: center" v-for="i in codeLength" :key='i'>
+                <v-textarea v-model="digits[i-1]" maxlength="1" class="centered-input text--darken-3 mt-3 digits" height="4" solo single-line outlined></v-textarea>
+              </v-col>              
+            </v-row>
+            <v-row class="d-flex justify-center">
+              <v-col cols="10" class="d-flex justify-center">
+                <div style="color: red; font-size: 14px; text-align: center" v-if="codeErrorMssg != ''">{{codeErrorMssg}}</div>
               </v-col>
-              <v-col cols="2" class="pl-1 pr-1">
-                <v-textarea maxlength="1" class="centered-input text--darken-3 mt-3 digits" height="4" solo single-line outlined></v-textarea>
-              </v-col>
-              <v-col cols="2" class="pl-1 pr-1"> 
-                <v-textarea maxlength="1" class="centered-input text--darken-3 mt-3 digits" height="4" solo single-line outlined></v-textarea>
-              </v-col>
-              <v-col cols="2" class="pl-1 pr-1">
-                <v-textarea maxlength="1" class="centered-input text--darken-3 mt-3 digits" height="4" solo single-line outlined></v-textarea>
-              </v-col>
-
-              <!-- <input maxlength="1" class="centered-input text--darken-3 mt-3 digits" height="4" solo single-line outlined v-on:keyup="$event.target.nextElementSibling.focus()" type="text">
-              <input v-on:keyup="$event.target.nextElementSibling.focus()" type="text">
-              <input v-on:keyup="$event.target.nextElementSibling.focus()" type="text">
-              <input v-on:keyup="$event.target.nextElementSibling.focus()" type="text"> -->
             </v-row>
           </v-card>
-          <v-btn text @click="resendEmail" class="mt-0 mb-1">
+          <v-btn text @click="sendEmail" class="mt-0 mb-1">
             <div class="body-1 font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline">Resend</div>
           </v-btn>
         </v-card>
         <v-row class="mt-6 mb-4" justify="center">
           <v-col cols="11" class="pt-0 mb-10" width="100%" style="position: absolute; bottom: 0;">
            <div class="row d-flex flex-column align-center mx-8">
-              <v-btn @click="confirmEmail" block rounded class="py-5 body-2 font-weight-light" color="primary" style="font-size: 17px !important">Confirm</v-btn>
+              <v-btn @click="confirmCode" block rounded class="py-5 body-2 font-weight-light" color="primary" style="font-size: 17px !important">Confirm</v-btn>
               <v-progress-circular v-show=isLoading indeterminate color="primary"></v-progress-circular>
            </div>
           </v-col>
@@ -133,6 +124,11 @@
                 <v-text-field v-model="password" :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'" :error-messages="passwordErrors" :type="showPassword ? 'text' : 'password'" label="Password" required @blur="$v.password.$touch()" @click:append="showPassword = !showPassword"></v-text-field>
               </v-col>
             </v-row>
+            <v-row class="d-flex justify-center">
+              <v-col cols="10" class="d-flex justify-center">
+                <div style="color: red; font-size: 14px; text-align: center" v-if="passErrorMssg != ''">{{passErrorMssg}}</div>
+              </v-col>
+            </v-row>
           </v-card>
         </v-card>
         <v-row class="mt-6 mb-4" justify="center">
@@ -143,26 +139,44 @@
           </v-col>
         </v-row>
       </v-container>
+
+      <v-overlay relative opacity="0.25" :value="alert" z-index="10">
+      <v-avatar elevation="3" color="accent" class="pl-0 pr-0" absolute style="position: absolute; z-index: 12">
+        <v-icon size="33px" color="white" v-text="'mdi-check'"></v-icon>
+      </v-avatar>
+      <v-alert color="white" transition="scale-transition" class="alert" align="center" style="margin-top: 20px">
+        <div style="font-size: 22px !important; color: #343434" class="pl-8 pr-8 mt-8">Password updated</div>
+        <div class="mt-2" style="font-size: 16px !important; color: #343434">Your password was successfully updated</div>
+        <v-btn text @click="goToLogin" class="mt-6 mb-1">
+          <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline">Login</div>
+        </v-btn>
+      </v-alert>
+    </v-overlay>
   </v-container>
 </template>
 
 <script>
 import { mapActions, mapGetters, mapMutations } from "vuex";
 import { validationMixin } from 'vuelidate'
-import { required, maxLength, email } from 'vuelidate/lib/validators'
+import { required, minLength, email } from 'vuelidate/lib/validators'
 import $ from 'jquery';
 
 export default {
   mixins: [validationMixin],
   validations: {
     email: { required, email },
-    password: { required },
+    password: { required, minLength: minLength(8) },
   },
   data() {
     return {
      email: '',
-     emailErrorMssg: '',
-     enteredEmail: 'peterjames@gmail.com',
+     token: '',
+     errorMssg: '',
+     codeErrorMssg: '',
+     passErrorMssg: '',
+     alert: false,
+     digits: [],
+     codeLength: 4,
      showPassword: false,
      step: 1,
      errorMsg: '',
@@ -177,29 +191,14 @@ export default {
       else 
         this.step = this.step - 1;
     },
-    async resetPass () {
+    resetPass () {
       this.isLoading = true
       if (this.emailErrors.length > 0  || this.email.length == 0) {
         this.$v.$touch()
         this.isLoading = false
       } else {
         
-        let data = {
-          "email": this.email
-        }
-
-        // console.log()
-        await this.validateEmail(data).then(result => {
-          if (typeof result == 'string') {
-            this.emailErrorMssg = ''
-            this.step = this.step + 1;
-          } else {
-            this.emailErrorMssg = result.data.reason
-          }
-          
-          this.isLoading = false
-
-        })
+        this.sendEmail()
         // console.log("user")
         // console.log(user)
         // this.step = this.step + 1;
@@ -207,21 +206,80 @@ export default {
 
       
     },
-    confirmEmail () {
-      this.step = this.step + 1;
+    async confirmCode () {
+      this.codeErrorMssg = ''
+      let incomplete = false
+      for (let i = 0; i < this.codeLength; i++) {
+        console.log(this.digits[i])
+        if (this.digits[i] == undefined)
+          incomplete = true;
+      }
+
+      if (incomplete) {
+        this.codeErrorMssg = 'You must fill in the 4 digit code'
+      } else {
+        console.log(this.digits.join(""))
+        let data = {
+          "token": this.token,
+          "code": this.digits.join("")
+        }
+
+        await this.verifyCode(data).then(result => {
+          console.log(result)
+          if (result.status == 201) {
+            this.codeErrorMssg = ''
+            this.step = this.step + 1;
+          } else {
+            this.codeErrorMssg = result.data.reason
+          }
+        })
+      }
     },
-    submitPass () {
+    async submitPass () {
+      this.passErrorMssg = ''
       this.isLoading = true
-      if (this.passwordErrors.length > 0  || this.password.length == 0) {
+      if (this.passwordErrors.length > 0  || this.password.length < 8) {
         this.$v.$touch()
         this.isLoading = false
       } else {
         this.isLoading = false
-        this.$router.push('login')
+        let data = {
+          "email": this.email,
+          "password": this.password
+        }
+
+        await this.updatePassword(data).then(result => {
+          if (result.status == 201) {
+            this.alert = true;
+          } else {
+            this.passErrorMssg = result.data.reason
+          }
+        })
       }
     },
-    resendEmail () {
+    async sendEmail () {
       
+      let data = {
+        "email": this.email
+      }
+
+        // console.log()
+      await this.validateEmail(data).then(result => {
+        if (typeof result == 'string') {
+          this.token = result
+          this.errorMssg = ''
+          this.step = this.step + 1;
+        } else {
+          this.errorMssg = result.data.reason
+        }
+        
+        this.isLoading = false
+
+      })
+    },
+    goToLogin() {
+      this.alert = false;
+      this.$router.push('/login') 
     },
     ...mapGetters({
       isAuthenticated: 'isAuthenticated',
@@ -229,6 +287,8 @@ export default {
     }),
     ...mapActions({
       validateEmail: 'CustomerStore/resetPassword',
+      verifyCode: 'CustomerStore/verifyCode',
+      updatePassword: 'CustomerStore/updatePassword',
     }),
 
   },
@@ -244,6 +304,7 @@ export default {
       const errors = []
       if (!this.$v.password.$dirty) return errors
       !this.$v.password.required && errors.push('Password is required.')
+      !this.$v.password.minLength && errors.push('Password must be at least 8 characters long')
       return errors
     },
   },
