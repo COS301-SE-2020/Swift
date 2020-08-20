@@ -309,7 +309,7 @@ export default {
     'NavBar': NavBar
   },
   beforeMount: function() {
-    this.updateOrderStatus()
+    // this.updateOrderStatus()
   },
   
 }

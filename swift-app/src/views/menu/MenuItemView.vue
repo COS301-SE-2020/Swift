@@ -7,8 +7,11 @@
       <span class="title black--text" style=" position: absolute; z-index:11; top: 20px; left: 65px">{{newMenuItem.menuItemName}}</span>
       <iframe style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:10;" :src="(newMenuItem.arAsset != null) ? newMenuItem.arAsset : ''"  frameborder="0"></iframe>
     </div>
-    <v-carousel v-if="!arActive" height="200px" :show-arrows="false" hide-delimiter-background continuous>
+    <v-carousel v-if="!arActive && newMenuItem.images.length != 0" height="200px" :show-arrows="false" hide-delimiter-background continuous>
       <v-carousel-item v-for="(imageSrc,i) in newMenuItem.images" :key="i" :src="imageSrc"></v-carousel-item>
+    </v-carousel>
+    <v-carousel v-if="!arActive && newMenuItem.images.length == 0" height="200px" :show-arrows="false" hide-delimiter-background continuous>
+      <v-carousel-item v-for="(imageSrc,i) in newMenuItem.images" :key="i" src="../../assets/menuItemImages/item-placeholder.png"></v-carousel-item>
     </v-carousel>
     <v-btn v-if="!arActive" width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 20px; left: 15px">
       <v-icon>mdi-chevron-left</v-icon>
