@@ -137,7 +137,6 @@ const actions = {
         "orderId": orderId,
         "orderStatus": result.data.orderStatus 
       }
-      
       commit('UPDATE_ORDER_STATUS', data);
     }).catch(({ response }) => {
     });
@@ -209,7 +208,7 @@ const mutations = {
       orderItem.orderId == data.orderId
     )
 
-    item.orderStatus = data.orderStatus;
+    item.progress = data.orderProgress;
   },
 
   UPDATE_ORDER_HISTORY({commit}, orderInformation) {
