@@ -7,8 +7,8 @@
     </div>
     <vs-row vs-w="12">
       <vs-col
-        v-for="business in businesses"
-        :key="business.name"
+        v-for="business in myRestaurants"
+        :key="business.restaurantId"
         vs-type="flex"
         vs-justify="center"
         vs-align="center"
@@ -154,11 +154,13 @@ export default {
       newRestaurantDesc: "",
       newRestaurantImage: "",
       newRestaurantCategories: [],
+      newPopupCount: 0,
     };
   },
   computed: {
-    businesses() {
-      return this.$store.state.mybusinessData.businesses;
+    myRestaurants() {
+      if (this.$store.state) return this.$store.state.myRestaurants;
+      else return null;
     },
     restaurantCategoryOptions() {
       return this.$store.state.mybusinessData.restaurantCategoryOptions;
@@ -166,6 +168,8 @@ export default {
   },
   methods: {
     addFirstItemPrompt() {
+      this.newPopupCount++;
+      if(this.newPopupCount > 1) return;
       this.$vs.dialog({
         color: "primary",
         title: "Let's create your Business!",
@@ -234,12 +238,15 @@ export default {
         this.restaurantPopupActive;
       }
     },
-    listBusinesses() {
+    listMyRestaurants() {
+      this.$store.dispatch("retrieveMyRestaurants", {
+        authKey: this.getAuthToken(),
+        currentRestaurantName: this.getCurrentRestaurantName(),
+      });
+
       this.$store.dispatch("mybusinessData/retrieveRestaurantCategories", {
         authKey: this.getAuthToken(),
       });
-
-      return;
     },
   },
   created() {
@@ -249,12 +256,19 @@ export default {
         moduleDataList.isRegistered = true;
       }
 
-      if (this.businesses.length == 0) this.addFirstItemPrompt();
-      this.listBusinesses();
+      if (this.myRestaurants == null) this.$vs.loading();
+
+      this.listMyRestaurants();
     }
   },
   mounted() {
     this.isMounted = true;
+  },
+  watch: {
+    myRestaurants(newCount, oldCount) {
+      this.$vs.loading.close();
+      if (this.myRestaurants.length <= 0) this.addFirstItemPrompt();
+    },
   },
   validations: {
     newRestaurantName: {
