@@ -142,7 +142,7 @@
 
       <v-overlay relative opacity="0.25" :value="alert" z-index="10">
       <v-avatar elevation="3" color="accent" class="pl-0 pr-0" absolute style="position: absolute; z-index: 12">
-        <v-icon size="33px" color="white" v-text="'mdi-check'"></v-icon>
+        <v-icon size="33px" color="white" v-text="'mdi-lock-reset'"></v-icon>
       </v-avatar>
       <v-alert color="white" transition="scale-transition" class="alert" align="center" style="margin-top: 20px">
         <div style="font-size: 22px !important; color: #343434" class="pl-8 pr-8 mt-8">Password updated</div>

@@ -254,9 +254,10 @@ export default {
       let data = {
         "orderId": item.orderId,
         "paymentMethod": "Card",
+        "restaurantName": item.restaurantName,
+        "menuItemName": item.items[0].menuItemName,
         "amountPaid": parseFloat((item.orderTax != null) ? item.orderTax : 0) + parseFloat((item.orderTotal != null) ? item.orderTotal : 0) + parseFloat((item.waiterTip != null) ? item.waiterTip : 0),
         "waiterTip": parseFloat((item.waiterTip != null) ? item.waiterTip : 0),
-        "orderTotal": parseFloat(this.calculateTotal(item)),
         "orderTax": parseFloat(this.calculateTotal(item) * 0.14)
       }
 

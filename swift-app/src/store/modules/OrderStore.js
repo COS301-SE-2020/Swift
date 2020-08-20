@@ -71,15 +71,16 @@ const actions = {
     console.log(this.getters['CustomerStore/getCustomerProfile']);
     console.log(this.getters['OrderStore/getPaymentInfo']);
     let data = {
-      "requestType": "payment",
+        "requestType": "payment",
         "token": sessionStorage.getItem('authToken'),
         "orderId": this.getters['OrderStore/getPaymentInfo'].orderId,
         "paymentMethod": this.getters['OrderStore/getPaymentInfo'].paymentMethod,
         "amountPaid": this.getters['OrderStore/getPaymentInfo'].amountPaid,
+        "restaurantName": this.getters['OrderStore/getPaymentInfo'].restaurantName,
+        "menuItemName": this.getters['OrderStore/getPaymentInfo'].menuItemName,
         "name": this.getters['CustomerStore/getCustomerProfile'].name,
         "email": this.getters['CustomerStore/getCustomerProfile'].email,
         "waiterTip": this.getters['OrderStore/getPaymentInfo'].waiterTip,
-        "orderTotal": this.getters['OrderStore/getPaymentInfo'].orderTotal,
         "orderTax": this.getters['OrderStore/getPaymentInfo'].orderTax
     }
     console.log(data)
@@ -90,10 +91,11 @@ const actions = {
         "orderId": this.getters['OrderStore/getPaymentInfo'].orderId,
         "paymentMethod": this.getters['OrderStore/getPaymentInfo'].paymentMethod,
         "amountPaid": this.getters['OrderStore/getPaymentInfo'].amountPaid,
+        "restaurantName": this.getters['OrderStore/getPaymentInfo'].restaurantName,
+        "menuItemName": this.getters['OrderStore/getPaymentInfo'].menuItemName,
         "name": this.getters['CustomerStore/getCustomerProfile'].name,
         "email": this.getters['CustomerStore/getCustomerProfile'].email,
         "waiterTip": this.getters['OrderStore/getPaymentInfo'].waiterTip,
-        "orderTotal": this.getters['OrderStore/getPaymentInfo'].orderTotal,
         "orderTax": this.getters['OrderStore/getPaymentInfo'].orderTax
       }
     ).then(result => {
