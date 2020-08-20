@@ -69,7 +69,7 @@ const getMenuItems = (restaurantId = 0, categoryId = 0) => {
         );
 
         menuItemImages.rows.forEach((menuImg) => {
-          menuItem.images.push(menuImg);
+          menuItem.images.push(menuImg.imageurl);
         });
 
         // get menu item rating
