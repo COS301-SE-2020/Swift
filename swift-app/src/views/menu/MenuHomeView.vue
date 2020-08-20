@@ -198,17 +198,17 @@ export default {
     },
     checkedIn() {
       let checkedInVal = this.checkedInQRCode;
+      let checkedInRestaurantId = this.checkedInRestaurantId;
 
-      if (checkedInVal != null && this.$route.params.menuId == this.checkedInRestaurantId) {
-        return true;
+      if (checkedInVal != null && checkedInRestaurantId != null) {
+        if (this.$route.params.menuId == checkedInRestaurantId) {
+          return true;
+        } 
       } else {
-        return false;
+        return false
       }
     },
     sortedItems (menuItems) {
-      console.log()
-      // if (menuItems.length != undefined)
-    	  // return menuItems.sort((a, b) => a.menuItemName < b.menuItemNam ? 1 : -1)
     }
   },
   async mounted() {
@@ -217,12 +217,11 @@ export default {
       this.updateDisplayNotification(false);
     }
 
-    var obj = await this.menu;
-    var id = await this.$route.params.menuId;
+    var menuObj = await this.menu;
 
-    if (Object.keys(obj).length == 0 || Object.keys(obj).length == undefined) { 
+    if (Object.keys(menuObj).length == 0 || Object.keys(menuObj).length == undefined) { 
       this.isLoading = !this.isLoading;
-      var response = await this.$store.dispatch('MenuStore/retrieveMenu', id);
+      var response = await this.$store.dispatch('MenuStore/retrieveMenu', this.$route.params.menuId);
       if (response)
         this.isLoading = !this.isLoading;
     }

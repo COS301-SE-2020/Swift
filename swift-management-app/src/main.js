@@ -40,6 +40,33 @@ Vue.mixin({
         this.$router.push('/login');
         return null;
       }
+    },
+    getCurrentRestaurantId() {
+      if (localStorage.getItem('currentRestaurantId') != "null") {
+        return localStorage.getItem('currentRestaurantId');
+      } else {
+        //   this.$router.push('/mybusiness');
+        return null;
+      }
+    },
+    getCurrentRestaurantName() {
+      if (localStorage.getItem('currentRestaurantName') != "null") {
+        return localStorage.getItem('currentRestaurantName');
+      } else {
+        //   this.$router.push('/mybusiness');
+        return null;
+      }
+    },
+    checkNoRestaurantsCreated() {
+      if (this.getCurrentRestaurantId() == null) {
+        this.$vs.notify({
+          time: 6000,
+          title: "You need to create at least one Restaurant first",
+          text: "You'll need to create a restaurant before we can add things to it :-)",
+          color: "warning",
+        });
+        this.$router.push("/mybusiness");
+      }
     }
   }
 })

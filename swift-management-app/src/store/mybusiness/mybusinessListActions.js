@@ -1,8 +1,10 @@
 import axios from "@/axios.js"
+import state from "../state";
 
 export default {
   addNewRestaurant({
-    commit
+    commit,
+    dispatch
   }, payload) {
     var restaurant = {
       name: payload.restaurantName,
@@ -11,11 +13,13 @@ export default {
       image: payload.restaurantImage
     }
 
-    commit('ADD_RESTAURANT', restaurant);
-    
+    commit('ADD_RESTAURANT', restaurant, {
+      root: true
+    });
+
     axios({
       method: 'post',
-      url: 'https://api.swiftapp.ml',
+      url: process.env.VUE_APP_BASEURL,
       data: {
         "requestType": "createRestaurant",
         "token": payload.authKey,
@@ -27,7 +31,22 @@ export default {
         "coverImageURL": payload.restaurantImage
       }
     }).then(result => {
+
       console.log(result);
+
+      dispatch("setCurrentRestaurant", {
+        id: result.data.restaurantId,
+        name: payload.restaurantName,
+      }, {
+        root: true
+      });
+
+      dispatch("retrieveMyRestaurants", {
+        authKey: payload.authKey,
+        currentRestaurantName: payload.restaurantName,
+      }, {
+        root: true
+      });
 
     }).catch(({
       response
@@ -38,7 +57,7 @@ export default {
   retrieveRestaurantCategories({
     commit
   }, payload) {
-    axios.post('https://api.swiftapp.ml', {
+    axios.post(process.env.VUE_APP_BASEURL, {
       "requestType": "allRestaurantCategories",
       "token": payload.authKey,
     }).then(result => {
@@ -50,5 +69,5 @@ export default {
     }) => {
       console.log(response)
     });
-  },
+  }
 }

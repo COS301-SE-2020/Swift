@@ -5,16 +5,14 @@ export default {
   listOrders({
     commit
   }, payload) {
-    axios.post('https://api.swiftapp.ml', {
+    axios.post(process.env.VUE_APP_BASEURL, {
       "requestType": "listOrders",
       "token": payload.authKey,
-      "restaurantId": 43,
+      "restaurantId": payload.currentRestaurantId,
       "getAllOrders": false
     }).then(response => {
-      console.log(response);
-      if (response.data.orders.length == 0) {
-        commit('SET_ORDERS_OBJECT', []);
-      } else commit('SET_ORDERS_OBJECT', response.orders);
+      console.log("ORDERS", response);
+      commit('SET_ORDERS_OBJECT', response.data.orders);
     }).catch(({
       response
     }) => {});
@@ -23,10 +21,11 @@ export default {
     commit
   }, payload) {
     //update API here
-    axios.post('https://api.swiftapp.ml', {
+    axios.post(process.env.VUE_APP_BASEURL, {
       "requestType": "orderStatusUpdate",
       "token": payload.authKey,
       "orderId": payload.orderId,
+      "menuItemId": payload.menuItemId,
       "percentage": Math.ceil(payload.percentage)
     }).then(result => {
       console.log(result);
@@ -36,7 +35,5 @@ export default {
       console.log(response);
     });
 
-    //TODO: Update Individual Menu Item either create API endpoint or store locally
-    // commit('INC_MENU_ITEM_PERC', orderId, itemId, percentage);
   }
 }

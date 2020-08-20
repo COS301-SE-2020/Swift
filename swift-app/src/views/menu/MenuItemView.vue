@@ -484,8 +484,9 @@ export default {
     }),
     checkedIn() {
       let checkedInVal = this.checkedInQRCode;
+      let checkedInRestaurantId = this.checkedInRestaurantId;
 
-      if (checkedInVal != null) {
+      if (checkedInVal != null && checkedInRestaurantId != null) {
         return true;
       } else {
         return false;

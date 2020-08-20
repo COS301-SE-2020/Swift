@@ -71,6 +71,10 @@ export default {
               text: "Let's get cracking!",
               color: "success",
             });
+            this.$store.dispatch("retrieveMyRestaurants", {
+              authKey: this.getAuthToken(),
+              currentRestaurantName: this.getCurrentRestaurantName(),
+            });
             this.$router.push("/mybusiness");
           }
         })

@@ -7,7 +7,7 @@ export default {
     dispatch
   }, data) {
     return new Promise((resolve, reject) => {
-      axios.post('https://api.swiftapp.ml', {
+      axios.post(process.env.VUE_APP_BASEURL, {
         "requestType": "login",
         "email": data.userDetails.email,
         "password": data.userDetails.password
@@ -16,11 +16,19 @@ export default {
         commit('SAVE_USER', result.data);
         commit('SET_AUTHENTICATION', true);
 
-        //    this.$store.dispatch("updateUserInfo", {
-        //     displayName: result.data.name + ' ' + result.data.surname
-        //  });
-        //   this.$store.dispatch("updateTheme", "dark");
-        //    this.$store.dispatch("updateUserInfo", {photoURL: });
+        dispatch("updateUserInfo", {
+          displayName: result.data.name + ' ' + result.data.surname
+        }, {
+          root: true
+        });
+        dispatch("updateTheme", "light", {
+          root: true
+        });
+        dispatch("updateUserInfo", {
+          photoURL: null
+        }, {
+          root: true
+        });
 
         console.log(result);
         resolve(result);
@@ -36,7 +44,7 @@ export default {
     commit
   }, data) {
     return new Promise((resolve, reject) => {
-      axios.post('https://api.swiftapp.ml', {
+      axios.post(process.env.VUE_APP_BASEURL, {
         "requestType": "register",
         "name": data.userDetails.name,
         "surname": data.userDetails.surname,
