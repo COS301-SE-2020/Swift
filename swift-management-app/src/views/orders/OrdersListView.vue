@@ -6,7 +6,7 @@
       </div>
     </div>
     <vs-row v-if="orderCount <= 0" vs-type="flex" vs-justify="center" vs-align="center" vs-w="12">
-      <vs-col class="mt-20"  vs-sm="12"  vs-lg="6">
+      <vs-col class="mt-20" vs-sm="12" vs-lg="6">
         <vx-card>
           <h5 class="mb-1 text-center">No Orders Yet</h5>
         </vx-card>
@@ -97,6 +97,7 @@ export default {
     listOrders() {
       this.$store.dispatch("orderList/listOrders", {
         authKey: this.getAuthToken(),
+        currentRestaurantId: this.getCurrentRestaurantId(),
       });
     },
     closeCardAnimationDemo(card) {
@@ -168,6 +169,7 @@ export default {
   },
   created() {
     if (this.getAuthToken() != null) {
+      this.checkNoRestaurantsCreated();
       if (!moduleDataList.isRegistered) {
         this.$store.registerModule("orderList", moduleDataList);
         moduleDataList.isRegistered = true;

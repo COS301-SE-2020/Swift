@@ -11,7 +11,7 @@ export default {
       "requestType": "getTableStatus",
       "includeProfileImage": false,
       "token": payload.authKey,
-      "restaurantId": 37,
+      "restaurantId": payload.currentRestaurantId,
     }).then(response => {
       console.log(response);
       if (response.data.result.length == 0) {
@@ -28,12 +28,10 @@ export default {
       axios.post(process.env.VUE_APP_BASEURL, {
         "requestType": "createTable",
         "token": payload.authKey,
-        "restaurantId": 37,
+        "restaurantId": payload.currentRestaurantId,
         "tableNumber": payload.tableNum,
         "seatCount": payload.tableSeats
       }).then(result => {
-        //TODO: Add notification for successful table add
-        //TODO: Check that same table doesn't exist
         console.log(result);
         resolve(result);
       }).catch(({

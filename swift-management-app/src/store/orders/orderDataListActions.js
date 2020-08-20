@@ -8,7 +8,7 @@ export default {
     axios.post(process.env.VUE_APP_BASEURL, {
       "requestType": "listOrders",
       "token": payload.authKey,
-      "restaurantId": 43,
+      "restaurantId": payload.currentRestaurantId,
       "getAllOrders": false
     }).then(response => {
       console.log(response);

@@ -120,7 +120,7 @@ export default {
     },
     addFirstItemPrompt() {
       this.popUpCount++;
-      if(this.popUpCount > 1) return;
+      if (this.popUpCount > 1) return;
       this.$vs.dialog({
         color: "primary",
         title: "Let's create your first table!",
@@ -130,12 +130,13 @@ export default {
         acceptText: "Add Table",
       });
     },
-    addFirstItem(){
+    addFirstItem() {
       this.addTablePopupActive = true;
     },
     listTables() {
       this.$store.dispatch("tableList/listTables", {
         authKey: this.getAuthToken(),
+        currentRestaurantId: this.getCurrentRestaurantId(),
       });
     },
     closeCardAnimationDemo(card) {
@@ -147,6 +148,7 @@ export default {
           tableNum: this.newTableNumber,
           tableSeats: this.newTableSeats,
           authKey: this.getAuthToken(),
+          currentRestaurantId: this.getCurrentRestaurantId(),
         })
         .then((res) => {
           //TODO: update table seat count
@@ -189,6 +191,8 @@ export default {
   },
   created() {
     if (this.getAuthToken() != null) {
+      //TODO: replace with global helper function
+      this.checkNoRestaurantsCreated();
       if (!moduleDataList.isRegistered) {
         this.$store.registerModule("tableList", moduleDataList);
         moduleDataList.isRegistered = true;
@@ -198,7 +202,7 @@ export default {
       this.listTables();
 
       setInterval(() => {
-       //   this.listTables();
+        //   this.listTables();
       }, 4000);
     }
   },
