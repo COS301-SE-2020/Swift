@@ -3,13 +3,13 @@ import baseConfig from "@/../baseConfig.js"
 import colors from "@/../baseConfig.js"
 
 //User Profile
-const userDefaults = {
-  uid         : 0,          // From Auth
-  displayName : "Giovanni Joubert", // From Auth
-  about       : "I am a driven entrepreneur & third year student at the University or Pretoria studying BSc Information and Knowledge Systems.",
-  photoURL    : require("@/assets/images/portrait/small/avatar-s-11.jpg"), // From Auth
-  status      : "online",
-  userRole    : "admin"
+var userDefaults = {
+  uid: 0, // From Auth
+  displayName: JSON.parse(localStorage.getItem("userInfo")).displayName, // From Auth
+  about: "I am a driven entrepreneur & third year student at the University or Pretoria studying BSc Information and Knowledge Systems.",
+  photoURL: require("@/assets/images/portrait/small/avatar-s-10.jpg"), // From Auth
+  status: "online",
+  userRole: "admin"
 }
 
 // /////////////////////////////////////////////
@@ -17,22 +17,24 @@ const userDefaults = {
 // /////////////////////////////////////////////
 
 const state = {
-    AppActiveUser           : userDefaults,
-    bodyOverlay             : false,
-    isVerticalNavMenuActive : true,
-    mainLayoutType          : baseConfig.mainLayoutType || "vertical",
-    navbarSearchAndPinList  : navbarSearchAndPinList,
-    reduceButton            : baseConfig.sidebarCollapsed,
-    verticalNavMenuWidth    : "default",
-    verticalNavMenuItemsMin : false,
-    scrollY                 : 0,
-    starredPages            : navbarSearchAndPinList["pages"].data.filter((page) => page.is_bookmarked),
-    theme                   : baseConfig.theme || "light",
-    themePrimaryColor       : colors.primary,
+  AppActiveUser: userDefaults,
+  bodyOverlay: false,
+  isVerticalNavMenuActive: true,
+  mainLayoutType: baseConfig.mainLayoutType || "vertical",
+  navbarSearchAndPinList: navbarSearchAndPinList,
+  reduceButton: baseConfig.sidebarCollapsed,
+  verticalNavMenuWidth: "default",
+  verticalNavMenuItemsMin: false,
+  scrollY: 0,
+  starredPages: navbarSearchAndPinList["pages"].data.filter((page) => page.is_bookmarked),
+  theme: baseConfig.theme || "light",
+  themePrimaryColor: colors.primary,
 
-    // Can be used to get current window with
-    // Note: Above breakpoint state is for internal use of sidebar & navbar component
-    windowWidth: null,
+  // Can be used to get current window with
+  // Note: Above breakpoint state is for internal use of sidebar & navbar component
+  windowWidth: null,
+  myRestaurants: null,
+  currentRestaurant: null,
 }
 
 export default state

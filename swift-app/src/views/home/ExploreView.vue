@@ -1,6 +1,9 @@
 <template>
   <v-container class="px-0">
-    <v-container py-0>
+    <div v-show="isLoading" style="display: flex; align-items: center; justify-content: center;">
+      <v-progress-circular style="height: 400px" indeterminate color="primary"></v-progress-circular>
+    </div>
+    <v-container v-show="!isLoading" py-0>
       <v-card flat tile>
         <v-row class="d-flex justify-space-between">
           <v-col cols="8">
@@ -11,18 +14,18 @@
             <v-btn class="mr-4" elevation="2" width="35px" height="35px" @click="callWaiter" :key="activeCall.icon" :color="activeCall.color" small fab>
               <v-icon size="23px" :style="called ? { 'transform': 'rotate(45deg)' } : { 'transform': 'rotate(0deg)' }">{{ activeCall.icon }}</v-icon>
             </v-btn>
-            <v-btn @click="goToCart" elevation="2" width="35px" height="35px" small fab>
+            <v-btn v-if="checkedIn()" @click="goToCart" elevation="2" width="35px" height="35px" small fab>
               <v-icon size="23px">mdi-cart-outline</v-icon>
             </v-btn>
           </v-col>
         </v-row>
 
-        <v-card v-show="checkedIn" color="accent" height="80px" flat tile style="border-radius: 13px !important" class="mt-2 mb-5">
+        <v-card v-show="checkedIn()" @click="goToRestaurant(checkedInRestaurantId)" color="accent" height="80px" flat tile style="border-radius: 13px !important" class="mt-2 mb-5">
           <v-row class="d-flex justify-space-between specialsInfo">
             <v-col cols="10" class="d-flex justify-center px-0">
               <div style="text-align: center" class="checkedInBannerText">
                 <div class="specialsText font-weight-light">You are checked-in to</div>
-                <div class="specialsText checkedRestaurant font-weight-light">{{restaurant}}</div>
+                <div class="specialsText checkedRestaurant font-weight-light">{{getCheckedInRestaurantName(checkedInRestaurantId)}}</div>
               </div>
             </v-col>
             <v-col cols="2" class="d-flex align-center px-0">
@@ -45,26 +48,27 @@
         </v-row>
       </v-card>
     </v-container>
-    <v-container class="px-0 py-0" v-if="search == ''">
+    <v-container v-show="!isLoading" class="px-0 py-0" v-if="search == ''">
       <v-container py-0>
-        <v-carousel v-model="carouselIndex" class="promotionalMaterial" :continuous="false" :cycle="cycle" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="210px">
+        <v-carousel v-model="carouselIndex" class="promotionalMaterial" :continuous="true" :cycle="cycle" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="210px">
           <v-carousel-item v-for="(promotion, i) in promotions" :key="i">
             <v-sheet color="secondary" height="190px" flat tile style="border-radius: 13px !important" class="mt-5">
               <v-row class="d-flex justify-space-between specialsInfo">
                 <v-col cols="6" class="pr-0 py-1 mb-5">
                   <v-layout column justify-space-around align-center fill-height>
                     <div class="px-3">
-                      <span class="specialsText font-weight-light">30%</span> <span class="specialsText discount font-weight-light">discount</span> <span class="specialsText font-weight-light">on all pizza slices</span>
-                      <div class="mt-1 specialsDate">Monday-Friday 12:00-18:00</div>
+                      <!-- <span class="specialsText font-weight-light">30%</span> <span class="specialsText discount font-weight-light">discount</span> <span class="specialsText font-weight-light">on all pizza slices</span> -->
+                      <span class="specialsText font-weight-light">{{ promotion.promotionalMessage }}</span>
+                      <div class="mt-1 specialsDate">{{ promotion.period }}</div>
                     </div>
                     <div class="browseButton">
-                      <v-btn @click="goToRestaurant(1)" color="accent" height="35px" class="browseMenu">Browse Menu</v-btn>
+                      <v-btn @click="goToRestaurant(promotion.restaurantId)" color="accent" height="35px" class="browseMenu">Browse Menu</v-btn>
                     </div>
                   </v-layout>
                 </v-col>
                 <v-col cols="6" class="py-0">
                   <v-layout column fill-height>
-                    <v-img src="../../assets/exploreImages/colcacchio.jpg" class="specialsImage">Col'Cacchio</v-img>
+                    <v-img :src="promotion.promotionalImage" class="specialsImage">{{ promotion.restaurant }}</v-img>
                   </v-layout>
                 </v-col>
               </v-row>
@@ -73,7 +77,7 @@
         </v-carousel>
       </v-container>
 
-      <v-container py-0 transition="slide-x-transition">
+      <v-container v-show="!isLoading" py-0 transition="slide-x-transition">
         <v-row style="max-width: 400px" class="overflow-y-auto">
           <v-col cols="12">
             <div class="categoryTitle">Categories</div>
@@ -81,12 +85,12 @@
         </v-row>
         <v-sheet class="mx-auto" max-width="700">
           <v-slide-group multiple>
-            <v-slide-item v-for="(category, index) in categories" :key="index">
+            <v-slide-item v-for="(category, index) in exploreCategories" :key="index">
               <div class="mr-3" align="center">
                 <v-btn width="50px" height="50px" min-width="50px">
-                  <v-img height="50px" width="50px" :src="require('../../assets/exploreImages/' + category.imageURL)"></v-img>
+                  <v-img height="50px" width="50px" :src="category.categoryImage"></v-img>
                 </v-btn>
-                <div class="mt-1 caption">{{category.name}}</div>
+                <div class="mt-1 caption">{{category.categoryName}}</div>
               </div>
             </v-slide-item>
           </v-slide-group>
@@ -95,7 +99,7 @@
 
         <v-row style="max-width: 400px" class="overflow-y-auto">
           <v-col cols="12">
-            <div class="categoryTitle">Nearby</div>
+            <div class="categoryTitle">Most Popular</div>
           </v-col>
         </v-row>
         <v-sheet class="mx-auto" max-width="700">
@@ -122,8 +126,8 @@
         </v-sheet>
       </v-container>
 
-      <v-container pt-0>
-        <v-card @click="goToRestaurant(1)" color="primary" height="140px" flat tile style="border-radius: 13px !important" class="mt-5">
+      <v-container v-show="!isLoading" pt-0>
+        <v-card color="primary" height="140px" flat tile style="border-radius: 13px !important" class="mt-5">
           <v-row class="px-0 py-0 specialsInfo">
             <v-col cols="6" class="pl-7 py-3 pr-0">
               <v-layout column justify-space-between fill-height>
@@ -131,7 +135,7 @@
                 <div>
                   <div class="promotionalText">Only</div>
                   <div class="priceText">R60.00</div>
-                  <div class="promotionalText">2 Pizzas [Wed-Fri]</div>
+                  <div class="promotionalText">2 Pizzas (Wed-Fri)</div>
                 </div>
               </v-layout>
             </v-col>
@@ -143,13 +147,13 @@
           </v-row>
         </v-card>
 
-        <v-btn height="50px" width="50px" class="checkInBtn" @click=goToCheckin app color="primary" fab style="position: fixed; bottom: 65px; right: 13px">
+        <v-btn v-if="!checkedIn()" height="50px" width="50px" class="checkInBtn" @click=goToCheckin app color="primary" fab style="position: fixed; bottom: 65px; right: 13px">
           <v-icon size="30">mdi-table-furniture</v-icon>
         </v-btn>
       </v-container>
     </v-container>
       
-    <v-container v-else class="mt-3">
+    <v-container v-show="!isLoading" v-else class="mt-3">
       <div v-if="filteredList.length != 0">
         <v-card @click="goToRestaurant(card.restaurantId)" elevation="2" v-for="(card, index) in filteredList" :key="index">
           <v-row class="mx-0">
@@ -189,7 +193,7 @@
 import NavBar from '@/components/layout/NavBar';
 import RestaurantSearchToolBar from '@/components/layout/RestaurantSearchToolBar';
 import store from '@/store/store.js';
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default {
   components: {
@@ -199,9 +203,9 @@ export default {
   data: () => ({
     search: '',
     promotions: [
-      {restaurant: "Col'Cacchio", promotionalMessage: "30% discount on all pizza slices", period: "Monday-Friday 12:00-18:00", promotionalImage: ""},
-      {restaurant: "Col'Cacchio", promotionalMessage: "30% discount on all pizza slices", period: "Monday-Friday 12:00-18:00", promotionalImage: ""},
-      {restaurant: "Col'Cacchio", promotionalMessage: "30% discount on all pizza slices", period: "Monday-Friday 12:00-18:00", promotionalImage: ""}
+      {restaurantId: 1, restaurant: "Col'Cacchio", promotionalMessage: "30% discount on all pizza's ordered", period: "Monday 18:00-22:00", promotionalImage: "https://source.unsplash.com/MQUqbmszGGM/800x800"},
+      {restaurantId: 2, restaurant: "Aroma", promotionalMessage: "Free ice cream for each cappuccino bought", period: "Thursday 12:00-18:00", promotionalImage: "https://source.unsplash.com/VZ9zJ9wk2AE/800x800"},
+      {restaurantId: 3, restaurant: "Burger Bistro", promotionalMessage: "Burger competition", period: "31 July - 08 August", promotionalImage: "https://source.unsplash.com/sc5sTPMrVfk/800x800"}
     ],
     categories: [
       { imageURL: 'drinks.jpg', name: 'Drinks' },
@@ -217,49 +221,17 @@ export default {
     ],
     category: ["Western Cuisine", "Fast Food", "Breakfast"],
     descriptors: ["Fast Service", "Presentation"],
-    // popularFood: [
-    //   {
-    //     title: "Mugg & Bean",
-    //     rating: 4,
-    //     src: "https://source.unsplash.com/800x800/?coffee",
-    //     location: "Brooklyn",
-    //     category: ["Western Cuisine", "Fast Food", "Breakfast"],
-    //     descriptors: ["Fast Service", "Presentation"]
-    //   },
-    //   {
-    //     title: "Col'Cacchio",
-    //     rating: 5,
-    //     src: "https://source.unsplash.com/800x800/?pizzaria",
-    //     location: "Brooklyn",
-    //     category: ["Pizza", "Drinks", "Breakfast"],
-    //     descriptors: ["Fast Service", "Presentation"]
-    //   },
-    //   {
-    //     title: "Cappuccinos",
-    //     rating: 4,
-    //     src: "https://source.unsplash.com/800x800/?pasta",
-    //     location: "Brooklyn",
-    //     category: ["Pizza", "Cafe", "Breakfast"],
-    //     descriptors: ["Fast Service", "Presentation"]
-    //   },
-    //   {
-    //     title: "Ocean Basket",
-    //     rating: 3,
-    //     src: "https://source.unsplash.com/800x800/?seafood",
-    //     location: "Brooklyn",
-    //     category: ["Seafood", "Drinks", "Desserts"],
-    //     descriptors: ["Fast Service", "Presentation"]
-    //   }
-    // ],
     favourited: false,
     called: false,
-    checkedIn: false,
+    // checkedIn: false,
     restaurant: "Mugg & Bean",
-    cycle: false,
+    cycle: true,
+    isLoading: false,
     carouselIndex: 0
   }),
   methods: {
-    goToRestaurant (id) {
+    async goToRestaurant (id) {
+      await this.clearMenu;
       this.$store.dispatch('RestaurantsStore/retrieveRestaurantMenu', id);
       this.$router.push("/menu/" + id);
     },
@@ -274,13 +246,56 @@ export default {
     },
     goToCart() {
       this.$router.push('/cart')
+    },
+    getCheckedInRestaurantName(id) {
+      if (this.allRestaurants != undefined && id != null) {
+        let item = this.allRestaurants.find(
+          restaurant => restaurant.restaurantId === id
+        )
+        return item.name;
+      }
+    },
+    checkedIn() {
+      let checkedInVal = this.checkedInQRCode;
+      let checkedInRestaurantId = this.checkedInRestaurantId;
+
+      if (checkedInVal != null && checkedInRestaurantId != null) {
+        return true;
+      } else {
+        return false;
+      }
     }
   },
-  computed: {
+  ...mapActions({
+    checkInCustomer: 'CustomerStore/checkInCustomer',
+  }),
+  async mounted() {
+    let checkedInVal = await this.checkedInQRCode;
+    // Check-in customer again if system crashes 
+    if (checkedInVal != null && this.checkedInRestaurantId == null) {
+      this.isLoading = true;
+      var data = {
+        "qrcode": checkedInVal
+      }
+
+      await this.$store.dispatch('CustomerStore/checkInCustomer', data);
+    } 
+
+    var length = await this.allRestaurants.length;
+    var categoryLength = await this.exploreCategories.length;
+
+    if (length == undefined && categoryLength == undefined) {
+      this.isLoading = true;
+      var retrievedAllRestaurants = await this.fetchAllRestaurants;
+      var retrievedExploreCategories = await this.retrieveExploreCategories;
+      
+      if (retrievedAllRestaurants && retrievedExploreCategories)
+        this.isLoading = false;
+    }
     
-    // ...mapActions({
-    //   // retrieveRestaurantMenu: ('RestaurantsStore/retrieveRestaurantMenu'),
-    // }),
+    
+  },
+  computed: {
     activeCall() {
       if (!this.called) {
         return { color: "secondary", icon: "mdi-bell-outline" };
@@ -295,15 +310,23 @@ export default {
         })
     },
     carouselTab () {
-      // if (!this.carouselIndex == ind) {
-        // return'mdi-ellipse';
-      // } else {
-        return 'mdi-checkbox-blank-circle';
-      // }
+      return 'mdi-checkbox-blank-circle';
     },
+    ...mapActions({
+      fetchAllRestaurants: 'RestaurantsStore/allRestaurants',
+      checkInCustomer: 'CustomerStore/checkInCustomer',
+      retrieveExploreCategories: 'RestaurantsStore/retrieveExploreCategories',
+    }),
+    ...mapMutations({
+      clearMenu: 'MenuStore/CLEAR_MENU',
+    }),
     ...mapGetters({
       allRestaurants: 'RestaurantsStore/getAllRestaurants',
+      exploreCategories: 'RestaurantsStore/getExploreCategories',
       customerInfo: 'CustomerStore/getCustomerProfile',
+      // checkedInStatus: 'CustomerStore/getCheckedInStatus',
+      checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
+      checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
     }),
   },
 }

@@ -2,7 +2,9 @@ import axios from 'axios'
 
 // State object
 const initialState = () => ({
-  orderInfo: [],
+  orderInfo: {},
+  itemToEdit: {},
+  paymentInfo: {},
   orderHistory: {},
   orderTotal: 0,
   orderFlag: false
@@ -31,20 +33,73 @@ const getters = {
   getOrderFlag(state) {
     return state.orderFlag;
   },
+
+  getPaymentInfo(state) {
+    return state.paymentInfo;
+  },
+
+  getItemToEdit(state) {
+    return state.itemToEdit;
+  }
 }
 
 // Actions 
 const actions = {
   submitOrder({commit}) {
-    // console.log(this.orderInfo);
+    console.log("ORDER DETAILS")
+    console.log(this.getters['OrderStore/getOrderInfo'])
+    let data = {
+      "requestType": "addOrder",
+      "token": sessionStorage.getItem('authToken'),
+      "orderInfo": this.getters['OrderStore/getOrderInfo']
+    }
+    console.log(data)
     axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "addOrder",
-        "token": this.getters['CustomerStore/getToken'],
-        "orderInfo": this.getters['OrderStore/getOrderInfo'].orderInfo
+        "token": sessionStorage.getItem('authToken'),
+        "orderInfo": this.getters['OrderStore/getOrderInfo']
       }
     ).then(result => {
       commit('UPDATE_ORDER_HISTORY', result.data.orderHistory);
+    }).catch(({ response }) => {
+    });
+  },
+
+  submitPayment({commit}) {
+    console.log("PAYMENT INFO:")
+    console.log(this.getters['CustomerStore/getCustomerProfile']);
+    console.log(this.getters['OrderStore/getPaymentInfo']);
+    let data = {
+        "requestType": "payment",
+        "token": sessionStorage.getItem('authToken'),
+        "orderId": this.getters['OrderStore/getPaymentInfo'].orderId,
+        "paymentMethod": this.getters['OrderStore/getPaymentInfo'].paymentMethod,
+        "amountPaid": this.getters['OrderStore/getPaymentInfo'].amountPaid,
+        "restaurantName": this.getters['OrderStore/getPaymentInfo'].restaurantName,
+        "menuItemName": this.getters['OrderStore/getPaymentInfo'].menuItemName,
+        "name": this.getters['CustomerStore/getCustomerProfile'].name,
+        "email": this.getters['CustomerStore/getCustomerProfile'].email,
+        "waiterTip": this.getters['OrderStore/getPaymentInfo'].waiterTip,
+        "orderTax": this.getters['OrderStore/getPaymentInfo'].orderTax
+    }
+    console.log(data)
+    axios.post('https://api.swiftapp.ml', 
+      {
+        "requestType": "payment",
+        "token": sessionStorage.getItem('authToken'),
+        "orderId": this.getters['OrderStore/getPaymentInfo'].orderId,
+        "paymentMethod": this.getters['OrderStore/getPaymentInfo'].paymentMethod,
+        "amountPaid": this.getters['OrderStore/getPaymentInfo'].amountPaid,
+        "restaurantName": this.getters['OrderStore/getPaymentInfo'].restaurantName,
+        "menuItemName": this.getters['OrderStore/getPaymentInfo'].menuItemName,
+        "name": this.getters['CustomerStore/getCustomerProfile'].name,
+        "email": this.getters['CustomerStore/getCustomerProfile'].email,
+        "waiterTip": this.getters['OrderStore/getPaymentInfo'].waiterTip,
+        "orderTax": this.getters['OrderStore/getPaymentInfo'].orderTax
+      }
+    ).then(result => {
+      // commit('UPDATE_ORDER_HISTORY', result.data.orderHistory);
     }).catch(({ response }) => {
     });
   },
@@ -58,22 +113,32 @@ const actions = {
     commit('ADD_ITEM_TO_ORDER', orderItemInfo);
   },
 
+  addItemToEdit({commit,}, itemInfo) {
+    commit('ADD_ITEM_TO_EDIT', itemInfo);
+  },
+
+  clearOrder({commit,}) {
+    commit('CLEAR_ORDER');
+  },
+
+  addPaymentInfo({commit,}, orderPaymentinfo) {
+    commit('ADD_PAYMENT', orderPaymentinfo);
+  },
+
   retrieveOrderStatus({commit}, data) {
-    var token = this.getters['CustomerStore/getToken'];
     var orderId = data.orderId;
     // console.log(orderId)
     axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "orderStatus",
         "orderId": orderId,
-        "token": token
+        "token": sessionStorage.getItem('authToken')
       }
     ).then(result => {
       var data = {
         "orderId": orderId,
-        "orderStatus": result.data.orderStatus 
+        "orderProgress": result.data.orderProgress 
       }
-      
       commit('UPDATE_ORDER_STATUS', data);
     }).catch(({ response }) => {
     });
@@ -84,7 +149,11 @@ const actions = {
   },
 
   updateOrderFlag({commit}, orderFlag) {
-    commit('updateOrderFlag', orderFlag);
+    commit('UPDATE_ORDER_FLAG', orderFlag);
+  },
+
+  updateOrder({commit}) {
+    commit('UPDATE_ORDER');
   }
 }
 
@@ -98,18 +167,50 @@ const mutations = {
     state.orderHistory = orderHistory;
   },
 
+  CLEAR_ORDER(state) {
+    state.orderInfo = {}
+    // console.log("now empty")
+  },
+
+  UPDATE_ORDER(state) {
+    
+  },
+
   ADD_ITEM_TO_ORDER(state, orderItemInfo) {
-    state.orderInfo.push(orderItemInfo);
+    console.log("CHECKS:")
+    let empty = Object.keys(state.orderInfo).length === 0 && state.orderInfo.constructor === Object
+    console.log(orderItemInfo)
+    console.log(state.orderInfo)
+    console.log("check if null: "  + empty)
+    if (!empty) {
+      console.log(state.orderInfo.orderItems)
+      for (let i = 0; i < orderItemInfo.orderInfo.orderItems.length; i++)
+        state.orderInfo.orderItems.push(orderItemInfo.orderInfo.orderItems[i])
+    }else
+      state.orderInfo = orderItemInfo.orderInfo;
+    console.log(state.orderInfo)
+  },
+
+  ADD_PAYMENT(state, orderPaymentinfo) {
+    state.paymentInfo = orderPaymentinfo;
+    console.log("payment added")
+    console.log(state.paymentInfo)
+  },
+
+  ADD_ITEM_TO_EDIT(state, itemInfo) {
+    state.itemToEdit = itemInfo;
+    console.log("item to edit added")
+    console.log(state.itemToEdit)
   },
   
   UPDATE_ORDER_STATUS(state, data) {
-    var orderHistory = this.getters['OrderStore/getOrderHistory'];
+    var orderHistory = this.getters['CustomerStore/getCustomerOrderHistory'];
 
     var item = orderHistory.find(orderItem => 
       orderItem.orderId == data.orderId
     )
 
-    item.orderStatus = data.orderStatus;
+    item.progress = data.orderProgress;
   },
 
   UPDATE_ORDER_HISTORY({commit}, orderInformation) {
@@ -128,7 +229,8 @@ const mutations = {
     state.orderTotal = data;
   },
 
-  updateOrderFlag(state, orderFlag) {
+  UPDATE_ORDER_FLAG(state, orderFlag) {
+    console.log("flag: " + orderFlag)
     state.orderFlag = orderFlag;
   }
 }

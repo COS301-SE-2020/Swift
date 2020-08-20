@@ -5,15 +5,18 @@
       <div class="title">Contactless Dining</div>
     </div>
     <div class="row d-flex flex-column align-center">
-      <v-col cols="10" >
-        <v-text-field v-model="username" :error-messages="usernameErrors" label="Username" required @blur="$v.username.$touch()"></v-text-field>
+      <v-col cols="10" class="pb-0">
+        <v-text-field v-model="name" :error-messages="nameErrors" label="Name" required @blur="$v.name.$touch()"></v-text-field>
       </v-col>
-      <v-col cols="10" >
+      <v-col cols="10" class="pb-0">
+        <v-text-field v-model="surname" :error-messages="surnameErrors" label="Surname" required @blur="$v.surname.$touch()"></v-text-field>
+      </v-col>
+      <v-col cols="10" class="pb-0">
         <v-text-field v-model="email" :error-messages="emailErrors" label="Email" required @blur="$v.email.$touch()"></v-text-field>
       </v-col>
-      <v-col cols="10" >
+      <v-col cols="10" class="pb-0">
         <v-text-field v-model="password" :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'" :error-messages="passwordErrors" :type="showPassword ? 'text' : 'password'" label="Password" required @blur="$v.password.$touch()" @click:append="showPassword = !showPassword"></v-text-field>
-        <p class="body-2 float-right" color="secondary"><u>Forgot Password?</u></p>
+        <!-- <p class="body-2 float-right" color="secondary"><u>Forgot Password?</u></p> -->
       </v-col>
     </div>
     <div class="row d-flex flex-column align-center mx-8">
@@ -48,7 +51,8 @@ import { required, minLength, maxLength, email } from 'vuelidate/lib/validators'
 export default {
   mixins: [validationMixin],
   validations: {
-    username: { required, maxLength: maxLength(16) },
+    name: { required, maxLength: maxLength(16) },
+    surname: { required, maxLength: maxLength(16) },
     email: { required, email },
     password: { required, minLength: minLength(8) },
   },
@@ -56,7 +60,8 @@ export default {
     return {
       showPassword: false,
       showPlaceholder: false,
-      username: '',
+      name: '',
+      surname: '',
       email: '',
       password: '',
       isLoading: false,
@@ -71,27 +76,34 @@ export default {
     goToLogin () {
       this.$router.push('login')
     },
-    registerCustomer () {
+    async registerCustomer () {
       this.isLoading = true
-      if (this.usernameErrors.length > 0 && this.emailErrors > 0 && this.passwordErrors > 0|| this.username.length == 0 || this.email.length == 0 || this.password.length == 0) {
+      if (this.nameErrors.length > 0 || this.surnameErrors.length > 0 || this.emailErrors > 0 || this.passwordErrors > 0 || this.password.length < 8) {
         this.$v.$touch()
         this.isLoading = false
       } else {
-        this.isLoading = false
+        
         let data = {
-          username: this.username,
+          name: this.name,
+          surname: this.surname,
           email: this.email,
           password: this.password,
         }
         
-        this.register(data)
-        this.$router.push('/')
+        var hasRegistered = await this.register(data)
+
+        if (hasRegistered) {
+          this.isLoading = false
+          this.$router.push('/location')
+        }
       }
+
+      
     },
     async registerWithGoogle () {
       let url = await this.googleRegister();
       window.location.href = url;
-      this.$router.push('/');
+      this.$router.push('/location');
     },
     ...mapActions({
       register: 'CustomerStore/register',
@@ -99,11 +111,18 @@ export default {
     }),
   },
   computed: {
-    usernameErrors () {
+    nameErrors () {
       const errors = []
-      if (!this.$v.username.$dirty) return errors
-      !this.$v.username.maxLength && errors.push('Username can be at most 16 characters long')
-      !this.$v.username.required && errors.push('Username is required.')
+      if (!this.$v.name.$dirty) return errors
+      !this.$v.name.maxLength && errors.push('Name can be at most 16 characters long')
+      !this.$v.name.required && errors.push('Name is required.')
+      return errors
+    },
+    surnameErrors () {
+      const errors = []
+      if (!this.$v.surname.$dirty) return errors
+      !this.$v.surname.maxLength && errors.push('Surname can be at most 16 characters long')
+      !this.$v.surname.required && errors.push('Surname is required.')
       return errors
     },
     emailErrors () {

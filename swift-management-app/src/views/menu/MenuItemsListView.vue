@@ -26,7 +26,7 @@
       <vs-button @click="addMenuItem()" type="filled" class="mb-4 mr-4">
         <span class="flex items-center">
           <feather-icon icon="PlusIcon" svgClasses="h-4 w-4 mr-1" />
-          <span>Add menu Item</span>
+          <span>Add Menu Item</span>
         </span>
       </vs-button>
     </div>
@@ -94,8 +94,8 @@
       </div>
 
       <template slot="thead">
+        <vs-th sort-key="menuItemId">SKU</vs-th>
         <vs-th sort-key="name">Name</vs-th>
-        <vs-th sort-key="subCategory">Sub-Category</vs-th>
         <vs-th sort-key="popularity">Popularity</vs-th>
         <vs-th sort-key="estimatedWaitingTime">Prep Time</vs-th>
         <vs-th sort-key="price">Price</vs-th>
@@ -106,17 +106,18 @@
         <tbody>
           <vs-tr :data="tr" :key="indextr" v-for="(tr, indextr) in data">
             <vs-td>
-              <p class="product-name font-medium truncate">{{ tr.name }}</p>
+              <p class="product-name font-medium truncate">#{{ tr.menuItemId }}</p>
             </vs-td>
 
             <vs-td>
-              <p class="product-category">{{ tr.category}}</p>
+              <p class="product-name font-medium truncate">{{ tr.menuItemName }}</p>
+              <p class="product-name product-desc">{{ tr.menuItemDescription }}</p>
             </vs-td>
 
             <vs-td>
               <vs-progress
-                :percent="Number(tr.popularity)"
-                :color="getPopularityColor(Number(tr.popularity))"
+                :percent="Number(getPopularity())"
+                :color="getPopularityColor(100)"
                 class="shadow-md"
               />
             </vs-td>
@@ -142,7 +143,7 @@
                 icon="TrashIcon"
                 svgClasses="w-5 h-5 hover:text-danger stroke-current"
                 class="ml-2"
-                @click.stop="deleteData(tr.id)"
+                @click.stop="deleteData(tr.menuItemId)"
               />
             </vs-td>
           </vs-tr>
@@ -168,7 +169,9 @@ export default {
   },
   computed: {
     restaurantObject() {
-      return this.$store.state.menuList.restaurantObject;
+      if (this.$store.state.menuList)
+        return this.$store.state.menuList.restaurantObject;
+      else return null;
     },
     currentPage() {
       if (this.isMounted) {
@@ -176,16 +179,19 @@ export default {
       }
       return 0;
     },
-    menuItems() {
-      return this.$store.state.menuList.menuItems.filter(
-        (i) => i.category === this.currentMenu
-      );
-
-    },
-    menuItemsCount() {
-      if (this.$store.state.menuList)
-        return this.$store.state.menuList.menuItems.length;
+    menu() {
+      if (this.restaurantObject.categories)
+        return this.restaurantObject.categories.filter(
+          (i) => i.categoryName === this.currentMenu
+        );
       else return null;
+    },
+    menuItems() {
+      if (this.menu) {
+        console.log(this.menu);
+        console.log(this.menu[0].menuItems);
+        return this.menu[0].menuItems;
+      } else return [];
     },
     queriedItems() {
       return this.$refs.table
@@ -201,11 +207,21 @@ export default {
     },
   },
   methods: {
+    getPopularity() {
+      return Math.floor(Math.random() * 100) + 15;
+    },
+    addFirstItemPrompt() {
+      this.$vs.dialog({
+        color: "primary",
+        title: "Let's create your first item!",
+        text:
+          "It looks like the current restaurant doesn't have any items yet. Let's create your first menu item.",
+        accept: this.addMenuItem,
+        acceptText: "Add Menu Item",
+      });
+    },
     addMenuItem() {
       this.$router.push("/add-menu-item");
-    },
-    addNewMenuItem() {
-      alert("yo");
     },
     editData(tr) {
       console.log(tr);
@@ -229,52 +245,58 @@ export default {
       return "primary";
     },
     listMenuItems() {
-      this.$store.dispatch("menuList/listMenuItems");
+      this.$store.dispatch("menuList/listMenuItems", {
+        authKey: this.getAuthToken(),
+        currentRestaurantId: this.getCurrentRestaurantId(),
+      });
     },
     restaurantLoaded() {
       if (Object.keys(this.restaurantObject).length === 0) return false;
       else return true;
     },
-    changeMenu(categoryName){
+    changeMenu(categoryName) {
       this.currentMenu = categoryName;
     },
-    loadInitialMenu(){
+    loadInitialMenu() {
       //TODO: Store current menu in cross page persistent store
-      if(this.currentMenu != "" || !this.restaurantLoaded())
-        return;
-        
-      if(this.primaryCategories.length <= 0)
-        //TODO: Handle newly created restaurant with no menu items or categories yet
-        this.$router.push("/add-menu-item")
-      else
-        this.changeMenu(this.primaryCategories[0].categoryName);
-    }
+      if (this.currentMenu != "" || !this.restaurantLoaded()) return;
+
+      if (this.primaryCategories.length > 0)
+        this.currentMenu = this.primaryCategories[0].categoryName;
+      //set the current menu filter
+    },
   },
   created() {
-    if (!modulemenuList.isRegistered) {
-      this.$store.registerModule("menuList", modulemenuList);
-      modulemenuList.isRegistered = true;
-    }
-    if (!this.restaurantLoaded() ) 
-      this.$vs.loading();
-    else
-      this.loadInitialMenu();
+    if (this.getAuthToken() != null) {
+      this.checkNoRestaurantsCreated();
+      if (!modulemenuList.isRegistered) {
+        this.$store.registerModule("menuList", modulemenuList);
+        modulemenuList.isRegistered = true;
+      }
+      if (!this.restaurantLoaded()) this.$vs.loading();
+      else this.loadInitialMenu();
 
-    this.listMenuItems();
+      this.listMenuItems();
+    }
   },
   mounted() {
     this.isMounted = true;
   },
   watch: {
-    menuItemsCount(newCount, oldCount) {
+    restaurantObject(newCount, oldCount) {
       this.$vs.loading.close();
       this.loadInitialMenu();
+      if (this.primaryCategories)
+        if (this.primaryCategories.length <= 0) this.addFirstItemPrompt();
     },
   },
 };
 </script>
 
 <style lang="scss">
+.product-desc {
+  font-size: 12px;
+}
 .menuTitle {
   color: #636363;
 }

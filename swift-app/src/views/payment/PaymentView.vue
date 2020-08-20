@@ -25,7 +25,7 @@ export default {
         payfast:{
             //url gets concatinated with payment amount
             //should possibly move to computed section
-            urlPart1: "http://sandbox.payfast.co.za/eng/process?cmd=_paynow&receiver=10009935&item_name=Swift%20Order&amount=",
+            urlPart1: "https://sandbox.payfast.co.za/eng/process?cmd=_paynow&receiver=10009935&item_name=Swift%20Order&amount=",
             urlPart2: "&return_url=https%3A%2F%2Fswiftapp.ml%2F&cancel_url=https%3A%2F%2Fswiftapp.ml%2F"
         }
     }
@@ -41,9 +41,9 @@ export default {
         if(this.loadCount == 3)
           this.goToHome();
     },
-    goToHome () {
-      this.updateOrderFlag(true);
-      this.$router.go('/paymentInformation')
+    async goToHome () {
+      await this.updateOrderFlag(true);
+      this.$router.push('/paymentInformation')
     },
     ...mapActions({
       updateOrderFlag: 'OrderStore/updateOrderFlag',

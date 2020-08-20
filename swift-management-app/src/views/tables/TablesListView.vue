@@ -9,18 +9,45 @@
       <div
         v-for="table in tables"
         :key="table.tableId"
-        class="vx-col w-full lg:w-1/6 sm:w-1/6 w-full mb-base"
+        class="vx-col w-full lg:w-1/6 sm:w-1/1 w-full mb-base"
       >
         <vx-card
           :title="'Table ' + table.tableNumber"
-          :subtitle="'Status: ' + table.status"
+          :subtitle="'Status: ' + getTableStatus(table.checkedIn)"
           collapse-action
         >
           <vs-chip color="primary">Seats: {{table.numSeats}}</vs-chip>
-          <vs-chip color="primary">Checked In:  {{getCheckInCount(table.status)}}</vs-chip>
+          <vs-chip color="primary">Checked In: {{ getLength(table.checkedIn) }}</vs-chip>
           <vs-divider border-style="solid" color="white"></vs-divider>
-		  <qrcode-vue class="tableQR" :value="table.qrcode" :size="qrSize" level="H"></qrcode-vue>
-          <vs-button :disabled="table.status === 'Vacant'" color="primary" @click="goToOrder(table.tableId)" type="filled">View order</vs-button>
+          <span class="vs-input--label mb-4" v-if="getLength(table.checkedIn) != 0">Customers</span>
+          <div
+            v-for="customer in table.checkedIn"
+            :key="customer.name+customer.surname+customer.profileImageURL"
+          >
+            <vs-avatar
+              v-if="!customer.profileImageURL"
+              :text="customer.name + ' ' + customer.surname"
+            />
+            <vs-avatar v-if="customer.profileImageURL" src="customer.profileImageURL" />
+            <span class="customerName">{{ customer.name +" " + customer.surname }}</span>
+          </div>
+          <qrcode-vue
+            class="tableQR"
+            :id="'qrCodeDisplay'+table.tableId"
+            :value="table.qrcode"
+            :size="qrSize"
+            level="H"
+          ></qrcode-vue>
+          <vs-button
+            @click="downloadQrCode($event, table.tableId)"
+            size="small"
+            type="line"
+            class="mb-2 mr-4"
+            icon-pack="feather"
+            icon="icon-save"
+          >
+            <a href :download="'QRCode-Table'+table.tableNumber+'.png'">Download Table QRCode</a>
+          </vs-button>
         </vx-card>
       </div>
 
@@ -57,20 +84,21 @@
 
 <script>
 import moduleDataList from "@/store/tables/tablesDataList.js";
-import QrcodeVue from 'qrcode.vue'
+import QrcodeVue from "qrcode.vue";
 
 export default {
-	 components: {
-      QrcodeVue,
-    },
+  components: {
+    QrcodeVue,
+  },
   data() {
     return {
-    qrSize: 120,
+      qrSize: 250,
       viewUpdateNum: 1,
       isMounted: false,
       addTablePopupActive: false,
       newTableNumber: 1,
-      newTableSeats: 1
+      newTableSeats: 1,
+      popUpCount: 0,
     };
   },
   computed: {
@@ -80,73 +108,140 @@ export default {
       else return null;
     },
     tableCount() {
-      if (this.$store.state.tableList)
+      if (this.$store.state.tableList.tables)
         return this.$store.state.tableList.tables.length;
       else return null;
-    }
+    },
   },
   methods: {
+    getLength(array) {
+      if (!array) return 0;
+      else return array.length;
+    },
+    addFirstItemPrompt() {
+      this.popUpCount++;
+      if (this.popUpCount > 1) return;
+      this.$vs.dialog({
+        color: "primary",
+        title: "Let's create your first table!",
+        text:
+          "It looks like the current restaurant doesn't have any tables yet. Let's create your first table and get those customers checked in.",
+        accept: this.addFirstItem,
+        acceptText: "Add Table",
+      });
+    },
+    addFirstItem() {
+      this.addTablePopupActive = true;
+    },
     listTables() {
-      this.$store.dispatch("tableList/listTables");
+      this.$store.dispatch("tableList/listTables", {
+        authKey: this.getAuthToken(),
+        currentRestaurantId: this.getCurrentRestaurantId(),
+      });
     },
     closeCardAnimationDemo(card) {
       card.removeRefreshAnimation(3000);
     },
     addTable() {
-      this.$store.dispatch("tableList/addTable", {
-        tableNum: this.newTableNumber,
-        tableSeats: this.newTableSeats
-      });
+      this.$store
+        .dispatch("tableList/addTable", {
+          tableNum: this.newTableNumber,
+          tableSeats: this.newTableSeats,
+          authKey: this.getAuthToken(),
+          currentRestaurantId: this.getCurrentRestaurantId(),
+        })
+        .then((res) => {
+          //TODO: update table seat count
+          if (res.status == 409) {
+            this.$vs.notify({
+              title: "Table number already exists",
+              text: "You cannot create two tables with the same Table Number.",
+              color: "danger",
+            });
+          } else if (res.status == 201) {
+            this.listTables();
+            this.$vs.notify({
+              title: "Table successfully created!",
+              text: "Wohoo!",
+              color: "success",
+            });
+          }
+        });
       this.addTablePopupActive = false;
       this.rowUpdateNum = this.rowUpdateNum + 1;
-	},
-	getCheckInCount(status){
-		if(status == "Vacant")
-			return 0
-		else 
-			return status.split(" ")[0];
-  },
-  goToOrder(tableId){
-    this.$router.push('/orders');
-  }
+    },
+    goToOrder(tableId) {
+      this.$router.push("/orders");
+    },
+    downloadQrCode(event, tableId) {
+      var QRCode = document.querySelector(
+        "#qrCodeDisplay" + tableId + " canvas"
+      );
+      var image = QRCode.toDataURL("image/png").replace(
+        /^data:image\/[^;]+/,
+        "data:application/octet-stream"
+      );
+      event.target.href = image;
+    },
+    getTableStatus(checkedIn) {
+      if (checkedIn)
+        if (checkedIn.length == 0) return "Vacant";
+        else return "Ordering";
+    },
   },
   created() {
-    if (!moduleDataList.isRegistered) {
-      this.$store.registerModule("tableList", moduleDataList);
-      moduleDataList.isRegistered = true;
-    }
-    if (!this.tableCount > 0) this.$vs.loading();
+    if (this.getAuthToken() != null) {
+      //TODO: replace with global helper function
+      this.checkNoRestaurantsCreated();
+      if (!moduleDataList.isRegistered) {
+        this.$store.registerModule("tableList", moduleDataList);
+        moduleDataList.isRegistered = true;
+      }
+      if (this.tables == null) this.$vs.loading();
 
-    this.listTables();
+      this.listTables();
+
+      setInterval(() => {
+        //   this.listTables();
+      }, 4000);
+    }
   },
   mounted() {
     this.isMounted = true;
   },
   watch: {
-    tableCount(newCount, oldCount) {
+    tables(newCount, oldCount) {
       this.$vs.loading.close();
-    }
-  }
+      if (this.tableCount <= 0) this.addFirstItemPrompt();
+    },
+  },
 };
 </script>
 
 <style scoped>
+.customerName {
+  position: absolute;
+  margin-top: 10px;
+}
+.tableQR >>> canvas {
+  display: none !important;
+}
 .vs-button-primary {
   width: 100%;
 }
-.addTablePopup .vs-popup {
+.addTablePopup >>> .vs-popup {
   max-width: 300px;
 }
 .popupTitles {
   text-align: center;
   margin: 10px;
 }
-.tableQR >>> canvas{
-	padding-left: 0;
-    padding-right: 0;
-    margin-left: auto;
-    margin-right: auto;
-	margin-bottom: 20px;
-    display: block;
+.tableQR >>> canvas {
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 20px;
+  display: block;
 }
 </style>

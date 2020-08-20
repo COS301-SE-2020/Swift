@@ -1,4 +1,4 @@
 export default {
   menuItems: [],
-  restaurantObject: {}
+  restaurantObject: {},
 }
