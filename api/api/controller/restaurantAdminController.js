@@ -718,7 +718,7 @@ module.exports = {
           // commit changes and end transaction
           await client.query('COMMIT');
 
-          // return newly created category id
+          // return newly created menu item id
           return response.status(201).send({ menuItemId: menuItemRes.rows[0].menuitemid });
         } catch (err) {
           await client.query('ROLLBACK');

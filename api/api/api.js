@@ -115,6 +115,10 @@ router.post('/', (req, res) => {
         restaurantController.checkOut(req.body, res);
         break;
       }
+      case 'callWaiter': {
+        restaurantController.callWaiter(req.body, res);
+        break;
+      }
       case 'restaurantMenu': {
         restaurantController.getMenu(req.body, res);
         break;

@@ -273,6 +273,7 @@ module.exports = {
         const categoryItem = {};
         // eslint-disable-next-line no-await-in-loop
         const resMenuItem = await getMenuItems(restaurantId, res.rows[r].categoryid);
+        categoryItem.categoryId = res.rows[r].categoryid;
         categoryItem.categoryName = res.rows[r].categoryname;
         categoryItem.description = res.rows[r].categorydescription;
         categoryItem.parentCategoryId = res.rows[r].parentcategoryid;
