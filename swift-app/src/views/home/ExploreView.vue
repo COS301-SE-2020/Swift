@@ -112,9 +112,9 @@
                 <div class="pl-1 pt-1 resaturantTitle font-weight-light">{{card.name}}</div>
                 <v-row class="ml-0">
                   <v-icon size="13px">mdi-map-marker</v-icon>
-                  <div class="pl-0 pt-0 restaurantLocation font-weight-light">{{card.location}}</div>
+                  <div class="pl-0 pt-0 restaurantLocation font-weight-light">{{card.branch}}</div>
                 </v-row>
-                <div class="ml-1 pt-0 restaurantCategory">{{(category).join(', ')}}</div>
+                <div class="ml-1 pt-0 restaurantCategory">{{getCategoryNames(card.categories)}}</div>
                 <v-row class="pl-3 mt-1">
                   <v-col v-for="(tag, i) in descriptors" :key="i" class="pl-0 pr-3 pt-0">
                     <div class="restaurantDescriptor">{{tag}}</div>
@@ -164,7 +164,7 @@
               <v-row class="py-0">
                 <v-col cols="8" class="pt-0 pl-2 pb-1">
                   <div class="pl-1 pt-1 resaturantTitle font-weight-light">{{card.name}}</div>
-                  <div class="ml-1 pt-0 restaurantCategory">{{(category).join(', ')}}</div>
+                  <div class="ml-1 pt-0 restaurantCategory">{{getCategoryNames(card.categories)}}</div>
                 </v-col>
                 <v-col cols="4" class="pt-0 px-2 pb-1">
                   <v-rating background-color="secondary" readonly size="11" dense color="yellow darken-3" :value="parseInt(card.rating)"></v-rating>
@@ -219,7 +219,7 @@ export default {
       { imageURL: 'breakfast.jpg', name: 'Breakfast' },
       { imageURL: 'cafe.jpg', name: 'Cafe' },
     ],
-    category: ["Western Cuisine", "Fast Food", "Breakfast"],
+    // category: ["Western Cuisine", "Fast Food", "Breakfast"],
     descriptors: ["Fast Service", "Presentation"],
     favourited: false,
     called: false,
@@ -253,6 +253,18 @@ export default {
           restaurant => restaurant.restaurantId === id
         )
         return item.name;
+      }
+    },
+    getCategoryNames(categories) {
+      if (categories.length != 0 ) {
+        var list = [];
+        for (let i = 0; i < categories.length; i++) { 
+          list.push(this.exploreCategories.find((category) => {
+            return category.categoryId === categories[i]
+          }).categoryName)
+        }
+
+        return list.join(', ')
       }
     },
     checkedIn() {
