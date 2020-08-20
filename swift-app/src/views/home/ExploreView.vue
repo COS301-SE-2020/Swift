@@ -266,24 +266,33 @@ export default {
       }
     }
   },
+  ...mapActions({
+    checkInCustomer: 'CustomerStore/checkInCustomer',
+  }),
   async mounted() {
-    let checkedInVal = this.checkedInQRCode;
+    let checkedInVal = await this.checkedInQRCode;
     // Check-in customer again if system crashes 
     if (checkedInVal != null && this.checkedInRestaurantId == null) {
-      // this.checkInCustomer(checkedInVal)
-    }
-    
+      this.isLoading = true;
+      var data = {
+        "qrcode": checkedInVal
+      }
+
+      await this.$store.dispatch('CustomerStore/checkInCustomer', data);
+    } 
+
     var length = await this.allRestaurants.length;
     var categoryLength = await this.exploreCategories.length;
 
     if (length == undefined && categoryLength == undefined) {
-      this.isLoading = !this.isLoading;
-      var response = await this.fetchAllRestaurants;
-      var response2 = await this.retrieveExploreCategories;
+      this.isLoading = true;
+      var retrievedAllRestaurants = await this.fetchAllRestaurants;
+      var retrievedExploreCategories = await this.retrieveExploreCategories;
       
-      if (response && response2)
-        this.isLoading = !this.isLoading;
+      if (retrievedAllRestaurants && retrievedExploreCategories)
+        this.isLoading = false;
     }
+    
     
   },
   computed: {

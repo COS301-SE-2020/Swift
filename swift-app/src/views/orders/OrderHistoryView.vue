@@ -1,6 +1,9 @@
 <template>
   <v-container class="orders" py-0 px-0>
-    <v-container py-0 px-0>
+    <div v-show="isLoadingCartItem" style="display: flex; align-items: center; justify-content: center;">
+      <v-progress-circular style="height: 400px" indeterminate color="primary"></v-progress-circular>
+    </div>
+    <v-container v-show="!isLoadingCartItem" py-0 px-0>
       <v-card flat>
         <v-tabs v-model="tab" background-color="white" grow class="orderTabs">
           <v-tab>
@@ -13,7 +16,7 @@
       </v-card>
     </v-container>
 
-    <v-container py-0 px-0>
+    <v-container v-show="!isLoadingCartItem" py-0 px-0>
       <v-tabs-items v-model="tab">
         <v-tab-item>
           <div class="orderSearchBar mx-0 px-0 d-flex align-center  justify-center">
@@ -154,6 +157,7 @@ export default {
       filter: {},
       ptr: this,
       isLoading: false,
+      isLoadingCartItem: false,
     }
   },
   async mounted() {
@@ -168,9 +172,6 @@ export default {
   methods: {
     goToMenu () {
       this.$router.push('/menu')
-    },
-    goToCart () {
-      this.$router.push('/cart')
     },
     goToRating () {
       this.$router.push('/rating')
@@ -234,12 +235,16 @@ export default {
 
       return data;
     },
-    addOrder(item) {
-      
+    async addOrder(item) {
       let data = this.createOrderObject(item);
-      // console.log("hello")
-      console.log(data)
       this.addItemToOrder(data)
+      this.isLoadingCartItem = true;
+      var menuRetrieved = await this.$store.dispatch('MenuStore/retrieveMenu', item.restaurantId);
+
+      if (menuRetrieved) {
+        this.isLoadingCartItem = false;
+      }
+
       this.$router.push("/cart");
     },
     payForOrder(item) {
@@ -249,9 +254,10 @@ export default {
       let data = {
         "orderId": item.orderId,
         "paymentMethod": "Card",
+        "restaurantName": item.restaurantName,
+        "menuItemName": item.items[0].menuItemName,
         "amountPaid": parseFloat((item.orderTax != null) ? item.orderTax : 0) + parseFloat((item.orderTotal != null) ? item.orderTotal : 0) + parseFloat((item.waiterTip != null) ? item.waiterTip : 0),
         "waiterTip": parseFloat((item.waiterTip != null) ? item.waiterTip : 0),
-        "orderTotal": parseFloat(this.calculateTotal(item)),
         "orderTax": parseFloat(this.calculateTotal(item) * 0.14)
       }
 
