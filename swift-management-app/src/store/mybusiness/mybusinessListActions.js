@@ -4,6 +4,15 @@ export default {
   addNewRestaurant({
     commit
   }, payload) {
+    var restaurant = {
+      name: payload.restaurantName,
+      branch: payload.restaurantBranch,
+      description: payload.restaurantDesc,
+      image: payload.restaurantImage
+    }
+
+    commit('ADD_RESTAURANT', restaurant);
+    
     axios({
       method: 'post',
       url: 'https://api.swiftapp.ml',

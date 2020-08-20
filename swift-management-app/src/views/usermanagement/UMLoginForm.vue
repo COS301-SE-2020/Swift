@@ -71,7 +71,7 @@ export default {
               text: "Let's get cracking!",
               color: "success",
             });
-            this.$router.push("/");
+            this.$router.push("/mybusiness");
           }
         })
         .catch((error) => {

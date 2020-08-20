@@ -98,6 +98,7 @@ export default {
       addTablePopupActive: false,
       newTableNumber: 1,
       newTableSeats: 1,
+      popUpCount: 0,
     };
   },
   computed: {
@@ -118,9 +119,11 @@ export default {
       else return array.length;
     },
     addFirstItemPrompt() {
+      this.popUpCount++;
+      if(this.popUpCount > 1) return;
       this.$vs.dialog({
         color: "primary",
-        title: "Let's create your table!",
+        title: "Let's create your first table!",
         text:
           "It looks like the current restaurant doesn't have any tables yet. Let's create your first table and get those customers checked in.",
         accept: this.addFirstItem,
@@ -195,8 +198,8 @@ export default {
       this.listTables();
 
       setInterval(() => {
-        //  this.listTables();
-      }, 5000);
+       //   this.listTables();
+      }, 4000);
     }
   },
   mounted() {

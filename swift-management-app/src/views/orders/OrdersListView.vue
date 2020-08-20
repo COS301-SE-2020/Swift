@@ -5,6 +5,13 @@
         <h2 class="mb-1">Orders</h2>
       </div>
     </div>
+    <vs-row v-if="orderCount <= 0" vs-type="flex" vs-justify="center" vs-align="center" vs-w="12">
+      <vs-col class="mt-20"  vs-sm="12"  vs-lg="6">
+        <vx-card>
+          <h5 class="mb-1 text-center">No Orders Yet</h5>
+        </vx-card>
+      </vs-col>
+    </vs-row>
     <div class="vx-row">
       <div
         v-for="order in orders"
@@ -72,9 +79,11 @@ export default {
       else return null;
     },
     orderCount() {
-      if (this.$store.state.orderList)
-        return this.$store.state.orderList.orders.length;
-      else return null;
+      if (this.$store.state.orderList) {
+        if (this.$store.state.orderList.orders)
+          return this.$store.state.orderList.orders.length;
+        else return 0;
+      } else return 0;
     },
   },
   methods: {
@@ -163,7 +172,7 @@ export default {
         this.$store.registerModule("orderList", moduleDataList);
         moduleDataList.isRegistered = true;
       }
-      if (!this.orderCount > 0) this.$vs.loading();
+      if (this.orders == null) this.$vs.loading();
 
       this.listOrders();
     }
@@ -172,7 +181,7 @@ export default {
     this.isMounted = true;
   },
   watch: {
-    orderCount(newCount, oldCount) {
+    orders(newCount, oldCount) {
       this.$vs.loading.close();
     },
   },

@@ -5,9 +5,9 @@ import colors from "@/../baseConfig.js"
 //User Profile
 var userDefaults = {
   uid         : 0,          // From Auth
-  displayName : "Giovanni Joubert", // From Auth
+  displayName : "Stacey Barror", // From Auth
   about       : "I am a driven entrepreneur & third year student at the University or Pretoria studying BSc Information and Knowledge Systems.",
-  photoURL    : require("@/assets/images/portrait/small/avatar-s-11.jpg"), // From Auth
+  photoURL    : require("@/assets/images/portrait/small/avatar-s-10.jpg"), // From Auth
   status      : "online",
   userRole    : "admin"
 }

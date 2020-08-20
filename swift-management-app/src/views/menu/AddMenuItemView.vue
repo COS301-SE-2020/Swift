@@ -244,7 +244,7 @@
     >
       <label class="vs-input--label">Category type</label>
       <br />
-      <vs-radio v-model="newCategoryType" vs-value="primary" class="mt-2 mr-4">Primary</vs-radio>
+      <vs-radio v-model="newCategoryType" vs-value="primary" class="mt-2 mr-4">Primary (menu)</vs-radio>
       <vs-radio
         v-if="primaryCategories.length != 0"
         v-model="newCategoryType"
@@ -292,9 +292,9 @@ export default {
       newCategoryName: "",
       newCategoryParent: "",
       addCategoryPopupActive: false,
-      itemName: "Moroccan Butternut",
+      itemName: "",
       itemDescription:
-        "Roasted butternut, spiced chickpeas, candied walnuts, cherry tomatoes, feta & spring onions tossed with mixed lettuce.",
+        "",
       itemPrice: 20.5,
       itemPrepTime: 10,
       itemCategory: "",
@@ -303,27 +303,15 @@ export default {
         {
           //TODO: Update itemAddon ids
           id: Math.random(),
-          attributeName: "Preperation of Eggs",
+          attributeName: "",
           min: 0,
           max: 10,
           values: [
             {
               id: Math.random(),
-              name: "fried",
-              price: 10,
+              name: "",
+              price: 0,
               selectedByDefault: true,
-            },
-            {
-              id: Math.random(),
-              name: "scrambled",
-              price: 20,
-              selectedByDefault: false,
-            },
-            {
-              id: Math.random(),
-              name: "poached",
-              price: 30,
-              selectedByDefault: false,
             },
           ],
         },
@@ -336,15 +324,15 @@ export default {
     },
     itemCategoryTitle() {
       if (this.itemCategory) return this.itemCategory;
-      else return "Item Category";
+      else return "Item Menu";
     },
     newItemCategoryTitle() {
       if (this.newCategoryParent) return this.newCategoryParent;
-      else return "Item Category";
+      else return "Item Menu";
     },
     itemSubCategoryTitle() {
       if (this.itemSubCategory) return this.itemSubCategory;
-      else return "Sub-Category";
+      else return "Item Sub-Category";
     },
     primaryCategories() {
       if (this.restaurantLoaded())
@@ -362,6 +350,13 @@ export default {
     },
   },
   methods: {
+    addMenuItem() {
+      this.$vs.notify({
+        title: "Success",
+        text: "Your menu item: <b>" + this.itemName + "</b> has been added." ,
+        color: "success",
+      });
+    },
     successUpload() {
       this.$vs.notify({
         color: "success",

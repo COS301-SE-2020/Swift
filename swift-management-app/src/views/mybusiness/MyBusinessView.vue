@@ -6,25 +6,30 @@
       </div>
     </div>
     <vs-row vs-w="12">
-      <vs-col vs-type="flex" vs-justify="center" vs-align="center" vs-w="12">
+      <vs-col
+        v-for="business in businesses"
+        :key="business.name"
+        vs-type="flex"
+        vs-justify="center"
+        vs-align="center"
+        vs-w="12"
+      >
         <vx-card class="mb-4">
           <vs-row vs-w="12">
             <vs-col vs-type="flex" vs-justify="center" vs-align="center" vs-lg="6" vs-sm="12">
               <div
-                style="background-image: url('https://images.unsplash.com/photo-1519155031214-e8d583928bf2?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1350&q=80')"
+                :style="'background-image: url('+business.image+')'"
                 class="restaurantCover rounded-lg"
               ></div>
             </vs-col>
             <vs-col style="margin: auto;" class="text-center" vs-lg="6" vs-sm="12">
-              <h2 class="mb-4">O'Galito</h2>
+              <h2 class="mb-4">{{ business.name }}</h2>
               <vs-chip
                 style="float: none; max-width: 200px; margin: auto"
                 class="mb-4"
                 color="primary"
-              >Branch: Centurion Mall</vs-chip>
-              <div
-                class="newRestaurantDescription mb-4"
-              >O’Galito is an upmarket restaurant specialising in preparing exceptionally fine Portuguese dishes, complimented with world class service.</div>
+              >Branch: {{ business.branch }}</vs-chip>
+              <div class="newRestaurantDescription mb-4">{{ business.description }}</div>
 
               <vs-button @click="editRestaurant()" type="border">
                 <span class="flex items-center">
@@ -152,11 +157,24 @@ export default {
     };
   },
   computed: {
+    businesses() {
+      return this.$store.state.mybusinessData.businesses;
+    },
     restaurantCategoryOptions() {
       return this.$store.state.mybusinessData.restaurantCategoryOptions;
     },
   },
   methods: {
+    addFirstItemPrompt() {
+      this.$vs.dialog({
+        color: "primary",
+        title: "Let's create your Business!",
+        text:
+          "To get those customers coming, they'll need to know a little bit about your restaurant. Let's set it up now.",
+        accept: this.addRestaurant,
+        acceptText: "Add Restaurant",
+      });
+    },
     selectCategory(event, id) {
       var cardElement = event.target;
       var index = this.newRestaurantCategories.indexOf(id);
@@ -230,6 +248,8 @@ export default {
         this.$store.registerModule("mybusinessData", moduleDataList);
         moduleDataList.isRegistered = true;
       }
+
+      if (this.businesses.length == 0) this.addFirstItemPrompt();
       this.listBusinesses();
     }
   },

@@ -8,37 +8,13 @@ export default {
     axios.post('https://api.swiftapp.ml', {
       "requestType": "listOrders",
       "token": payload.authKey,
-      "restaurantId": 1,
+      "restaurantId": 43,
       "getAllOrders": false
-    }).then(result => {
-
-      result.data.orders.forEach(function (order) {
-        var date = new Date(order.orderDateTime);
-        var orderItem = {
-          orderId: order.orderId,
-          tableNumber: order.tableNumber,
-          timePlaced: date.toLocaleTimeString(),
-          employeeAssigned: order.employeeName + " " + order.employeeSurname,
-          orderProgress: order.orderStatus,
-          orderTotal: order.orderDetails.orderTotal.toFixed(2),
-          items: []
-        }
-        let menuItemsAdded = false;
-        order.orderDetails.items.forEach(function (menuItem) {
-          menuItemsAdded = true;
-          orderItem.items.push({
-            menuItemId: menuItem.menuItemId,
-            menuItemName: menuItem.menuItemName,
-            menuItemDescription: menuItem.menuItemDescription,
-            menuItemPrice: menuItem.price,
-            menuItemQty: menuItem.quantity,
-            menuItemProgress: 0
-          });
-        });
-        // console.log(orderItem)
-        if (menuItemsAdded)
-          commit('ADD_ITEM', orderItem);
-      });
+    }).then(response => {
+      console.log(response);
+      if (response.data.orders.length == 0) {
+        commit('SET_ORDERS_OBJECT', []);
+      } else commit('SET_ORDERS_OBJECT', response.orders);
     }).catch(({
       response
     }) => {});

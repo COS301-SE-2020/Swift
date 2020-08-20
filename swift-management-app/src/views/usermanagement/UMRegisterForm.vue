@@ -79,7 +79,21 @@ export default {
           password: this.password,
         },
       };
-      this.$store.dispatch("authData/register", payload);
+      this.$store.dispatch("authData/register", payload).then((res) => {
+        if (res.status == 201) {
+          this.$vs.notify({
+            title: "Successful registration",
+            text: "Automatically logging you in...",
+            color: "success",
+          });
+          this.$store.dispatch("authData/login", payload).then((res) => {
+            this.$vs.loading.close();
+            if (res.status == 200) {
+              this.$router.push("/mybusiness");
+            }
+          });
+        }
+      });
     },
   },
   created() {
