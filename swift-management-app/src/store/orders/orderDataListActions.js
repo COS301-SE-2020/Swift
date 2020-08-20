@@ -5,7 +5,7 @@ export default {
   listOrders({
     commit
   }, payload) {
-    axios.post('https://api.swiftapp.ml', {
+    axios.post(process.env.VUE_APP_BASEURL, {
       "requestType": "listOrders",
       "token": payload.authKey,
       "restaurantId": 43,
@@ -23,7 +23,7 @@ export default {
     commit
   }, payload) {
     //update API here
-    axios.post('https://api.swiftapp.ml', {
+    axios.post(process.env.VUE_APP_BASEURL, {
       "requestType": "orderStatusUpdate",
       "token": payload.authKey,
       "orderId": payload.orderId,

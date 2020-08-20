@@ -7,7 +7,7 @@ export default {
   listTables({
     commit
   }, payload) {
-    axios.post('https://api.swiftapp.ml', {
+    axios.post(process.env.VUE_APP_BASEURL, {
       "requestType": "getTableStatus",
       "includeProfileImage": false,
       "token": payload.authKey,
@@ -25,7 +25,7 @@ export default {
     commit
   }, payload) {
     return new Promise((resolve, reject) => {
-      axios.post('https://api.swiftapp.ml', {
+      axios.post(process.env.VUE_APP_BASEURL, {
         "requestType": "createTable",
         "token": payload.authKey,
         "restaurantId": 37,

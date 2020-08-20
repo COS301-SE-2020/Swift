@@ -15,7 +15,7 @@ export default {
     
     axios({
       method: 'post',
-      url: 'https://api.swiftapp.ml',
+      url: process.env.VUE_APP_BASEURL,
       data: {
         "requestType": "createRestaurant",
         "token": payload.authKey,
@@ -38,7 +38,7 @@ export default {
   retrieveRestaurantCategories({
     commit
   }, payload) {
-    axios.post('https://api.swiftapp.ml', {
+    axios.post(process.env.VUE_APP_BASEURL, {
       "requestType": "allRestaurantCategories",
       "token": payload.authKey,
     }).then(result => {

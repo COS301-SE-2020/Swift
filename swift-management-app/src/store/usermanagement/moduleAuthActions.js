@@ -4,10 +4,9 @@ import router from "../../router"
 export default {
   login({
     commit,
-    dispatch
   }, data) {
     return new Promise((resolve, reject) => {
-      axios.post('https://api.swiftapp.ml', {
+      axios.post(process.env.VUE_APP_BASEURL, {
         "requestType": "login",
         "email": data.userDetails.email,
         "password": data.userDetails.password
@@ -36,7 +35,7 @@ export default {
     commit
   }, data) {
     return new Promise((resolve, reject) => {
-      axios.post('https://api.swiftapp.ml', {
+      axios.post(process.env.VUE_APP_BASEURL, {
         "requestType": "register",
         "name": data.userDetails.name,
         "surname": data.userDetails.surname,

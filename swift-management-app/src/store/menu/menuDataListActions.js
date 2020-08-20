@@ -4,7 +4,7 @@ export default {
   listMenuItems({
     commit
   }, payload) {
-    axios.post('https://api.swiftapp.ml', {
+    axios.post(process.env.VUE_APP_BASEURL, {
       "requestType": "restaurantMenu",
       "restaurantId": "1",
       "disableFields": ["image", "ratingPhrases", "reviews"],
