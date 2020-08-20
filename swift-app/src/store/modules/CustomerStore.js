@@ -81,8 +81,7 @@ const actions = {
         "password": data.password
       }
     ).then(result => {
-      console.log("heya")
-      console.log(result.data)
+      console.log(result.data.checkedIn)
       commit('SAVE_TOKEN', result.data.token);
       sessionStorage.setItem('authToken', result.data.token);
       commit('SET_CHECKED_IN_CODE', result.data.checkedIn);
