@@ -465,8 +465,8 @@ module.exports = {
           await client.query('BEGIN');
           const res = await client.query(
             'SELECT restaurant.restaurantid, restaurant.restaurantname, restaurant.branch,'
-            + ' restaurant.location, restaurant.coverimageurl, restaurantemployee.employeerole'
-            + ' FROM public.restaurantemployee'
+            + ' restaurant.location, restaurant.coverimageurl, restaurantemployee.employeerole,'
+            + ' restaurant.restaurantdescription FROM public.restaurantemployee'
             + ' INNER JOIN public.restaurant ON restaurant.restaurantid = restaurantemployee.restaurantid'
             + ' WHERE restaurantemployee.userid = $1::integer',
             [userToken.data.userId]
@@ -479,6 +479,7 @@ module.exports = {
             restaurantResponse.restaurants[r] = {};
             restaurantResponse.restaurants[r].restaurantId = res.rows[r].restaurantid;
             restaurantResponse.restaurants[r].name = res.rows[r].restaurantname;
+            restaurantResponse.restaurants[r].description = res.rows[r].restaurantdescription;
             restaurantResponse.restaurants[r].yourRole = res.rows[r].employeerole;
             restaurantResponse.restaurants[r].branch = res.rows[r].branch;
             restaurantResponse.restaurants[r].location = res.rows[r].location;
