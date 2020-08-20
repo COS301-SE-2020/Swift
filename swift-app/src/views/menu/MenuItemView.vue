@@ -267,26 +267,6 @@ export default {
       muesliSelected: true,
       honeySelected: false,
       arActive: false,
-      // menuItemSelections: [
-      //   {
-      //     title: 'Choose fruit:',
-      //     active: false,
-      //     items: [
-      //       { title: '- Strawberry', icon: 'mdi-check-box-outline', toggleIcon: '', extra: '', selected: true },
-      //       { title: '- Mango', icon: 'mdi-check-box-outline', extra: '+ R2.00', selected: true },
-      //       { title: '- Berry', icon: 'mdi-checkbox-blank-outline', extra: '', selected: false },
-      //     ],
-      //   },
-      //   {
-      //     title: 'Choose Yogurt type:',
-      //     active: false,
-      //     items: [
-      //       { title: '- Greek', icon: 'mdi-radiobox-marked', extra: '', selected: true },
-      //       { title: '- Low Fat', icon: 'mdi-radiobox-blank', extra: '', selected: false },
-      //       { title: '- Strawberry', icon: 'mdi-radiobox-blank', extra: '+ R4.50', selected: false },
-      //     ],
-      //   },
-      // ],
       selected: ['John'],
       text: 'small',
       selection: 0,

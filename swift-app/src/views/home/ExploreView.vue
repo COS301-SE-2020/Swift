@@ -38,7 +38,7 @@
 
         <v-row no-gutters d-flex flex-row >
           <v-col cols="11">
-            <v-text-field class="searchBarBg" background-color="red" v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search by name or category"></v-text-field>
+            <v-text-field class="searchBarBg" background-color="red" v-model="search" rounded solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search by name or category"></v-text-field>
           </v-col>
           <v-col cols="1" class="d-flex align-center px-0">
             <v-btn small icon color="primary">
@@ -116,7 +116,7 @@
                 </v-row>
                 <div class="ml-1 pt-0 restaurantCategory">{{getCategoryNames(card.categories)}}</div>
                 <v-row class="pl-3 mt-1">
-                  <v-col v-for="(tag, i) in descriptors" :key="i" class="pl-0 pr-3 pt-0">
+                  <v-col cols="6" v-for="(tag, i) in card.phrases" :key="i" class="pl-0 pr-3 pt-0">
                     <div class="restaurantDescriptor">{{tag}}</div>
                   </v-col>
                 </v-row>
@@ -155,12 +155,12 @@
       
     <v-container v-show="!isLoading" v-else class="mt-3">
       <div v-if="filteredList.length != 0">
-        <v-card @click="goToRestaurant(card.restaurantId)" elevation="2" v-for="(card, index) in filteredList" :key="index">
+        <v-card class="mb-2" @click="goToRestaurant(card.restaurantId)" elevation="2" v-for="(card, index) in filteredList" :key="index">
           <v-row class="mx-0">
-            <v-col cols="3" class="py-2 px-1 pl-2">
+            <v-col cols="3" class="py-0 px-1 pl-2">
               <v-img width="75px" height="70px" style="background-size: contain" :src="card.image" class="align-center mt-3"></v-img>
             </v-col>
-            <v-col cols="9" class="py-2">
+            <v-col cols="9" class="pt-2 py-0">
               <v-row class="py-0">
                 <v-col cols="8" class="pt-0 pl-2 pb-1">
                   <div class="pl-1 pt-1 resaturantTitle font-weight-light">{{card.name}}</div>
@@ -172,11 +172,11 @@
               </v-row>
               <v-row class="px-2">
                 <v-col cols="8" class="px-1 pt-0">
-                  <div class="px-1 mr-2 pt-0 restaurantDescriptor" v-for="(tag, i) in descriptors" :key="i" style="display: inline">{{tag}}</div>
+                  <div class="px-1 mr-2 pt-0 restaurantDescriptor" v-for="(tag, i) in card.phrases" :key="i" style="display: inline">{{tag}}</div>
                 </v-col>
                 <v-col cols="4" class="px-0 pt-0" style="text-align: right">
                   <v-icon size="13px">mdi-map-marker</v-icon>
-                  <div class="pl-1 py-0 restaurantLocation font-weight-light" style="display: inline">Brooklyn</div>
+                  <div class="pl-1 py-0 restaurantLocation font-weight-light" style="display: inline">{{card.branch}}</div>
                 </v-col>
               </v-row>
             </v-col>
@@ -453,7 +453,6 @@ export default {
 
   .restaurantCategory {
     font-size: 12px;
-    height: 36px;
   }
 
   .restaurantDescriptor {

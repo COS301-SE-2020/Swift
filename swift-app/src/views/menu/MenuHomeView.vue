@@ -40,27 +40,7 @@
           <div class="title pl-3">Categories</div>
         </v-col>
       </v-row>
-      <!-- <div id="categories" class="pl-3">
-        <v-sheet class="mx-auto" max-width="700">
-          <v-slide-group multiple>
-            <v-slide-item v-for="(category, index) in menu.categories" :key="index">
-              <div class="ml-0" align="center" style="margin-top: 10px;">
-                <v-btn dark width="50px" height="50px" min-width="50px" class="mx-2">
-                  <v-avatar color="grey darken-4" size="35px">
-                    <img @click="goToMenuItem(1)" src="https://source.unsplash.com/800x800/?fruit" alt />
-                  </v-avatar>
-                </v-btn>
-                <div class="mt-1 caption">{{category.categoryName}}</div>
-              </div>
-            </v-slide-item>
-          </v-slide-group>
-        </v-sheet>
-        <v-divider class="mt-2"></v-divider>
-      </div> -->
-
-
-      <!-- =========================================================================================================== -->
-
+      
         <v-tabs  v-model="secondaryCategoryTab" background-color="secondary" color="primary" dark>
           <v-tab v-for="(category, index) in filteredList" :key="index">
             {{ category.categoryName }}
