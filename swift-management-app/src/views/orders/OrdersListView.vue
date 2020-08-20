@@ -20,39 +20,61 @@
       >
         <vx-card
           :title="'Order: Table ' + order.tableNumber"
-          :subtitle="'Placed: ' + order.timePlaced"
+          :subtitle="'Placed: ' + orderTimePlaced(order.orderDateTime)"
           @refresh="closeCardAnimationDemo"
           collapse-action
-          :data-item-count="order.items.length"
-          :data-progress="order.orderProgress"
+          :data-item-count="orderCount"
+          :data-progress="0"
           :id="'OrderCard'+order.orderId"
         >
-          <vs-chip class="employeeName" color="success">Waiter: {{order.employeeAssigned}}</vs-chip>
+          <vs-chip class="employeeName" color="success">Status: {{order.orderStatus}}</vs-chip>
+          <vs-chip
+            class="employeeName"
+            color="primary"
+          >Waiter: {{order.employeeName}} {{order.employeeSurname}}</vs-chip>
+
           <vs-divider border-style="solid" color="white"></vs-divider>
           <p>Order Progress:</p>
-          <vs-progress
-            :height="8"
-            :percent="parseInt(order.orderProgress)"
-            :color="getStatusColor(order.orderProgress)"
-          ></vs-progress>
+          <vs-progress :height="8" :percent="parseInt(0)" :color="getStatusColor(0)"></vs-progress>
           <vs-list>
-            <vs-list-header :title="'Order Total: R'+order.orderTotal"></vs-list-header>
+            <vs-list-header :title="'Order Total: R'+order.orderDetails.orderTotal"></vs-list-header>
             <div
-              v-for="menuItem in order.items"
+              v-for="menuItem in order.orderDetails.items"
               :key="menuItem.menuItemName"
               class="singleMenuItem"
             >
-              <vs-chip color="primary">R{{menuItem.menuItemPrice}}</vs-chip>
-              <vs-chip color="success">Qty: {{menuItem.menuItemQty}}</vs-chip>
-              <vs-list-item :title="menuItem.menuItemName" :subtitle="menuItem.menuItemDescription">
-                <vs-button
-                  :id="'ItemProgressOrderID'+order.orderId+'ItemID'+menuItem.menuItemId"
-                  :data-progress="menuItem.menuItemProgress"
-                  size="small"
-                  :color="getStatusColor(menuItem.menuItemProgress)"
-                  @click.stop="updateMenuItemProgress(order.orderId,menuItem.menuItemId)"
-                >{{getMenuItemStatus(menuItem.menuItemProgress)}}</vs-button>
-              </vs-list-item>
+              <vs-row>
+                <vs-chip color="primary">R{{menuItem.itemTotal.toFixed(2)}}</vs-chip>
+                <vs-chip color="success">Qty: {{menuItem.quantity}}</vs-chip>
+
+                <vs-list-item
+                  :title="menuItem.menuItemName"
+                  :subtitle="menuItem.menuItemDescription"
+                >
+                  <vs-button
+                    class="ml-4"
+                    :id="'ItemProgressOrderID'+order.orderId+'ItemID'+menuItem.menuItemId"
+                    :data-progress="menuItem.progress"
+                    size="small"
+                    :color="getStatusColor(menuItem.progress)"
+                    @click.stop="updateMenuItemProgress(order.orderId,menuItem.menuItemId)"
+                  >{{getMenuItemStatus(menuItem.progress)}}</vs-button>
+                </vs-list-item>
+              </vs-row>
+              <vs-collapse
+                v-if="menuItem.orderselections.selections.length > 0"
+                type="margin"
+                class="pt-0"
+              >
+                <vs-collapse-item class="addonsSection">
+                  <div slot="header">Add-ons</div>
+                  <vs-list-item
+                    v-for="selection in menuItem.orderselections.selections"
+                    :key="selection.name"
+                    :title="selection.name"
+                  >{{ selection.values }}</vs-list-item>
+                </vs-collapse-item>
+              </vs-collapse>
             </div>
           </vs-list>
         </vx-card>
@@ -79,17 +101,18 @@ export default {
       else return null;
     },
     orderCount() {
-      if (this.$store.state.orderList) {
-        if (this.$store.state.orderList.orders)
-          return this.$store.state.orderList.orders.length;
-        else return 0;
-      } else return 0;
+      if (this.orders) return this.orders.length;
+      else return 0;
     },
   },
   methods: {
-    increaseItemPercentage(orderId, percentage) {
+    orderTimePlaced(time) {
+      return new Date(time).toLocaleTimeString();
+    },
+    increaseItemPercentage(orderId, itemId, percentage) {
       this.$store.dispatch("orderList/increaseItemPercentage", {
         orderId: orderId,
+        menuItemId: itemId,
         percentage: percentage,
         authKey: this.getAuthToken(),
       });
@@ -134,6 +157,8 @@ export default {
           "),1)!important;"
       );
       //TODO:Change hover color as well
+
+      //replace with API call
       $(
         "#ItemProgressOrderID" +
           orderId +
@@ -163,7 +188,7 @@ export default {
             "%"
         );
 
-        this.increaseItemPercentage(orderId, totalOrderProgress);
+        this.increaseItemPercentage(orderId, itemId, progress);
       }
     },
   },
@@ -184,6 +209,7 @@ export default {
   },
   watch: {
     orders(newCount, oldCount) {
+      console.log(this.orders);
       this.$vs.loading.close();
     },
   },
@@ -191,6 +217,11 @@ export default {
 </script>
 
 <style scoped>
+.addonsSection >>> .vs-collapse-item--header {
+  padding: 10px !important;
+  font-size: 14px;
+  font-weight: 500;
+}
 .con-vs-chip {
   margin-top: 17px;
 }

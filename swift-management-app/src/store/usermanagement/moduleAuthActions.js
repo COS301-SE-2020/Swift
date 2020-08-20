@@ -4,6 +4,7 @@ import router from "../../router"
 export default {
   login({
     commit,
+    dispatch
   }, data) {
     return new Promise((resolve, reject) => {
       axios.post(process.env.VUE_APP_BASEURL, {
@@ -15,11 +16,19 @@ export default {
         commit('SAVE_USER', result.data);
         commit('SET_AUTHENTICATION', true);
 
-        //    this.$store.dispatch("updateUserInfo", {
-        //     displayName: result.data.name + ' ' + result.data.surname
-        //  });
-        //   this.$store.dispatch("updateTheme", "dark");
-        //    this.$store.dispatch("updateUserInfo", {photoURL: });
+        dispatch("updateUserInfo", {
+          displayName: result.data.name + ' ' + result.data.surname
+        }, {
+          root: true
+        });
+        dispatch("updateTheme", "light", {
+          root: true
+        });
+        dispatch("updateUserInfo", {
+          photoURL: null
+        }, {
+          root: true
+        });
 
         console.log(result);
         resolve(result);
