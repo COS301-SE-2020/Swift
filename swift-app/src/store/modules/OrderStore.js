@@ -168,7 +168,7 @@ const actions = {
         "paymentMethod": this.getters['OrderStore/getPaymentInfo'].paymentMethod,
         "amountPaid": this.getters['OrderStore/getPaymentInfo'].amountPaid,
         "restaurantName": this.getters['OrderStore/getPaymentInfo'].restaurantName,
-        "menuItemName": this.getters['OrderStore/getPaymentInfo'].menuItemName,
+        "menuitemname": this.getters['OrderStore/getPaymentInfo'].menuItemName,
         "name": this.getters['CustomerStore/getCustomerProfile'].name,
         "email": this.getters['CustomerStore/getCustomerProfile'].email,
         "waiterTip": this.getters['OrderStore/getPaymentInfo'].waiterTip,
@@ -216,8 +216,8 @@ const actions = {
         "orderProgress": result.data.orderProgress,
         "itemProgress": result.data.itemProgress
       }
-      console.log("herethis")
-      console.log(result.data.itemProgress)
+      // console.log("herethis")
+      // console.log(result.data.itemProgress)
       commit('UPDATE_ORDER_STATUS', data);
     }).catch(({ response }) => {
     });
@@ -287,8 +287,8 @@ const mutations = {
     item.progress = data.orderProgress;
 
     for (let i = 0; i < data.itemProgress.length; i++) {
-      var obj = item.items.find(item => 
-        item.menuitemid == data.itemProgress[i].menuItemId
+      var obj = item.items.find(mItem => 
+        mItem.menuitemid == data.itemProgress[i].menuItemId
       )
       obj.progress = data.itemProgress[i].progress
     }
@@ -297,14 +297,14 @@ const mutations = {
   },
 
   UPDATE_ORDER_HISTORY(state, orderInformation) {
-    console.log("hello")
+    // console.log("hello")
     let empty = Object.keys(state.orderedItems).length === 0 && state.orderedItems.constructor === Object
     if (!empty) {
-      console.log("blah")
+      // console.log("blah")
       for (let i = 0; i < state.orderInfo.orderItems.length; i++)
         state.orderedItems.orderItems.push(state.orderInfo.orderItems[i])
     } else {
-      console.log("two")
+      // console.log("two")
       state.orderedItems = state.orderInfo;
     }
     state.orderInfo = {}
