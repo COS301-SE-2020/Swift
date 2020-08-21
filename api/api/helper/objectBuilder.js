@@ -3,27 +3,28 @@ const db = require('../db');
 // helper to get individual order items
 const getOrderItems = async (oid = 0) => db.query(
   'SELECT menuitem.menuitemid, menuitem.menuitemname, menuitem.menuitemdescription,'
-    + ' menuitem.price, itemordered.quantity, itemordered.orderselections'
-    + ' FROM public.itemordered'
+    + ' itemordered.itemtotal, itemordered.quantity, itemordered.orderselections,'
+    + ' itemordered.progress FROM public.itemordered'
     + ' INNER JOIN public.menuitem ON menuitem.menuitemid = itemordered.menuitemid'
     + ' WHERE itemordered.orderid = $1::integer;',
   [oid]
 )
   .then((orderItems) => {
     const orderHistoryItems = [];
-    let orderTotal = 0.0;
+    // let orderTotal = 0.0;
     orderItems.rows.forEach((ordItem) => {
       const orderItem = {};
       orderItem.menuItemId = ordItem.menuitemid;
       orderItem.menuItemName = ordItem.menuitemname;
       orderItem.menuItemDescription = ordItem.menuitemdescription;
-      orderItem.price = ordItem.price;
+      orderItem.itemTotal = ordItem.itemtotal;
       orderItem.quantity = ordItem.quantity;
+      orderItem.progress = ordItem.progress;
       orderItem.orderselections = ordItem.orderselections;
-      orderTotal += (orderItem.price * ordItem.quantity);
+      // orderTotal += ordItem.itemtotal;
       orderHistoryItems.push(orderItem);
     });
-    return { orderTotal, items: orderHistoryItems };
+    return { items: orderHistoryItems };
   })
   .catch((err) => {
     console.error('Query Error [Order Helper - Get Order Items]', err.stack);
@@ -31,123 +32,173 @@ const getOrderItems = async (oid = 0) => db.query(
   });
 
 // helper to get individual menu items
-const getMenuItems = (restaurantId = 0, categoryId = 0) => db.query(
-  'SELECT menuitemid, menuitemname, menuitemdescription, price, estimatedwaitingtime,'
-  + ' menuitem.attributes, arasset, availability FROM public.menuitem'
-  + ' WHERE restaurantid = $1::integer AND categoryid = $2::integer;',
-  [restaurantId, categoryId]
-)
-  .then(async (menuItems) => {
-    const menuItemsArr = [];
-    await Promise.all(menuItems.rows.map(async (resMenuItem) => {
-      const menuItem = {};
-      menuItem.menuItemId = resMenuItem.menuitemid;
-      menuItem.menuItemName = resMenuItem.menuitemname;
-      menuItem.menuItemDescription = resMenuItem.menuitemdescription;
-      menuItem.price = resMenuItem.price;
-      menuItem.estimatedWaitingTime = resMenuItem.estimatedwaitingtime;
+// eslint-disable-next-line arrow-body-style
+const getMenuItems = (restaurantId = 0, categoryId = 0) => {
+  return (async () => {
+    const client = await db.connect();
+    try {
+    // begin transaction
+      await client.query('BEGIN');
 
-      // get menu item rating
-      menuItem.rating = await db.query(
-        'SELECT AVG(ratingscore) AS "rating" FROM public.review'
-        + ' WHERE menuitemid = $1::integer AND ratingscore IS NOT NULL;',
-        [resMenuItem.menuitemid]
-      )
-        .then((rtRes) => {
-          if (rtRes.rows.length === 0) {
-            return 0.0;
-          }
+      const menuItems = await client.query(
+        'SELECT menuitemid, menuitemname, menuitemdescription, price, estimatedwaitingtime,'
+        + ' menuitem.attributes, arasset, availability FROM public.menuitem'
+        + ' WHERE restaurantid = $1::integer AND categoryid = $2::integer;',
+        [restaurantId, categoryId]
+      );
 
-          return parseFloat(rtRes.rows[0].rating);
-        })
-        .catch((err) => {
-          console.error('Query Error [Reviews - Get Menu Item Reviews]', err.stack);
-          return 0;
+      const menuItemsArr = [];
+      for (let mi = 0; mi < menuItems.rows.length; mi++) {
+        const menuItem = {};
+        const resMenuItem = menuItems.rows[mi];
+        menuItem.menuItemId = resMenuItem.menuitemid;
+        menuItem.menuItemName = resMenuItem.menuitemname;
+        menuItem.menuItemDescription = resMenuItem.menuitemdescription;
+        menuItem.price = resMenuItem.price;
+        menuItem.estimatedWaitingTime = resMenuItem.estimatedwaitingtime;
+        menuItem.images = [];
+        menuItem.attributes = resMenuItem.attributes;
+        menuItem.arAsset = resMenuItem.arasset;
+        menuItem.availability = resMenuItem.availability;
+
+        // menu item images
+        // eslint-disable-next-line no-await-in-loop
+        const menuItemImages = await client.query(
+          'SELECT imageurl FROM public.menuitemimages WHERE menuitemid = $1::integer',
+          [resMenuItem.menuitemid]
+        );
+
+        menuItemImages.rows.forEach((menuImg) => {
+          menuItem.images.push(menuImg.imageurl);
         });
 
-      // get menu item reviews
-      menuItem.reviews = await db.query(
-        'SELECT review.comment, review.reviewdatetime, review.public, review.adminid, review.response'
+        // get menu item rating
+        // eslint-disable-next-line no-await-in-loop
+        const rtRes = await client.query(
+          'SELECT AVG(ratingscore) AS "rating" FROM public.review'
+          + ' WHERE menuitemid = $1::integer AND ratingscore IS NOT NULL;',
+          [resMenuItem.menuitemid]
+        );
+
+        if (rtRes.rows.length === 0) {
+          menuItem.rating = 0.0;
+        } else {
+          menuItem.rating = parseFloat(rtRes.rows[0].rating);
+        }
+
+        // get menu item reviews
+        menuItem.reviews = [];
+        // eslint-disable-next-line no-await-in-loop
+        const revRes = await client.query(
+          'SELECT review.comment, review.reviewdatetime, review.public, review.adminid, review.response'
           + ' FROM public.review WHERE review.menuitemid = $1::integer AND review.comment IS NOT NULL;',
-        [resMenuItem.menuitemid]
-      )
-        .then((res) => {
-          const reviewsArr = [];
-          res.rows.forEach((review) => {
-            const reviewItem = {};
-            reviewItem.comment = review.comment;
-            reviewItem.reviewDateTime = review.reviewdatetime;
-            reviewItem.public = review.public;
-            reviewItem.adminId = review.adminid;
-            reviewItem.response = review.response;
-            reviewsArr.push(reviewItem);
-          });
-          return reviewsArr;
-        })
-        .catch((err) => {
-          console.error('Query Error [Reviews - Get Menu Item Reviews]', err.stack);
-          return [];
+          [resMenuItem.menuitemid]
+        );
+
+        revRes.rows.forEach((review) => {
+          const reviewItem = {};
+          reviewItem.comment = review.comment;
+          reviewItem.reviewDateTime = review.reviewdatetime;
+          reviewItem.public = review.public;
+          reviewItem.adminId = review.adminid;
+          reviewItem.response = review.response;
+          menuItem.reviews.push(reviewItem);
         });
 
-      // get rating phrases
-      menuItem.ratingPhrases = await db.query(
-        'SELECT ratingphrase.phrasedescription, AVG(customerphraserating.ratingscore) AS "rating"'
-        + ' FROM public.customerphraserating'
-        + ' INNER JOIN public.ratingphrase ON ratingphrase.phraseid = customerphraserating.phraseid'
-        + ' INNER JOIN public.review ON customerphraserating.reviewid = review.reviewid'
-        + " WHERE review.menuitemid = $1::integer AND LOWER(ratingphrase.type) = 'item'"
-        + ' GROUP BY ratingphrase.phrasedescription;',
-        [resMenuItem.menuitemid]
-      )
-        .then((rpRes) => {
-          const ratingPhrassesArr = [];
-          rpRes.rows.forEach((ratePhrase) => {
-            const ratingphraseItem = {};
-            ratingphraseItem.phrase = ratePhrase.phrasedescription;
-            ratingphraseItem.rating = ratePhrase.rating;
-            ratingPhrassesArr.push(ratingphraseItem);
-          });
-          return ratingPhrassesArr;
-        })
-        .catch((err) => {
-          console.error('Query Error [Rating Phrases - Get Restaurant Ratings]', err.stack);
-          return [];
+        // get rating phrases
+        menuItem.ratingPhrases = [];
+        // eslint-disable-next-line no-await-in-loop
+        const rpRes = await client.query(
+          'SELECT ratingphrase.phrasedescription, AVG(customerphraserating.ratingscore) AS "rating"'
+          + ' FROM public.customerphraserating'
+          + ' INNER JOIN public.ratingphrase ON ratingphrase.phraseid = customerphraserating.phraseid'
+          + ' INNER JOIN public.review ON customerphraserating.reviewid = review.reviewid'
+          + " WHERE review.menuitemid = $1::integer AND LOWER(ratingphrase.type) = 'item'"
+          + ' GROUP BY ratingphrase.phrasedescription;',
+          [resMenuItem.menuitemid]
+        );
+
+        rpRes.rows.forEach((ratePhrase) => {
+          const ratingphraseItem = {};
+          ratingphraseItem.phrase = ratePhrase.phrasedescription;
+          ratingphraseItem.rating = ratePhrase.rating;
+          menuItem.ratingPhrases.push(ratingphraseItem);
         });
 
-      menuItem.attributes = resMenuItem.attributes;
-      menuItem.arAsset = resMenuItem.arasset;
-      menuItem.availability = resMenuItem.availability;
-      menuItemsArr.push(menuItem);
-    }));
-    return { menuItemsArr };
-  })
-  .catch((err) => {
-    console.error('Query Error [Menu Helper - Get Menu Items]', err.stack);
-    return [];
-  });
+        // add to menu items array
+        menuItemsArr.push(menuItem);
+      }
+
+      // commit change
+      await client.query('COMMIT');
+
+      // return menu items
+      return { menuItemsArr };
+    } catch (err) {
+    // rollback changes
+      await client.query('ROLLBACK');
+
+      // throw error for async catch
+      throw err;
+    } finally {
+      client.release();
+    }
+  })()
+    .catch((err) => {
+      console.error('Query Error [Menu Helper - Get Menu Items]', err.stack);
+      return [];
+    });
+};
 
 module.exports = {
-  getFavourites: (userId = 0) => db.query(
-    'SELECT menuitem.menuitemid, menuitem.menuitemname, menuitem.menuitemdescription,'
-    + ' restaurant.restaurantid, restaurant.restaurantname FROM public.menuitem'
-    + ' INNER JOIN public.restaurant ON menuitem.restaurantid = restaurant.restaurantid'
-    + ' INNER JOIN public.favourite ON menuitem.menuitemid = favourite.menuitemid'
-    + ' WHERE favourite.customerid = $1::integer;',
-    [userId]
-  )
-    .then((res) => {
+  getFavourites: (userId = 0) => (async () => {
+    const client = await db.connect();
+    try {
+      // begin transaction
+      await client.query('BEGIN');
+      const res = await client.query(
+        'SELECT menuitem.menuitemid, menuitem.menuitemname, menuitem.menuitemdescription,'
+          + ' restaurant.restaurantid, restaurant.restaurantname FROM public.menuitem'
+          + ' INNER JOIN public.restaurant ON menuitem.restaurantid = restaurant.restaurantid'
+          + ' INNER JOIN public.favourite ON menuitem.menuitemid = favourite.menuitemid'
+          + ' WHERE favourite.userid = $1::integer;',
+        [userId]
+      );
+
       const favouritesArr = [];
-      res.rows.forEach((fav) => {
+      for (let f = 0; f < res.rows.length; f++) {
         const favItem = {};
-        favItem.restaurantId = fav.restaurantid;
-        favItem.restaurantName = fav.restaurantname;
-        favItem.menuItemId = fav.menuitemid;
-        favItem.menuItemName = fav.menuitemname;
-        favItem.menuItemDescription = fav.menuitemdescription;
+        favItem.restaurantId = res.rows[f].restaurantid;
+        favItem.restaurantName = res.rows[f].restaurantname;
+        favItem.menuItemId = res.rows[f].menuitemid;
+        favItem.menuItemName = res.rows[f].menuitemname;
+        favItem.menuItemDescription = res.rows[f].menuitemdescription;
+        favItem.images = [];
+
+        // menu item images
+        // eslint-disable-next-line no-await-in-loop
+        const menuItemImages = await client.query(
+          'SELECT imageurl FROM public.menuitemimages WHERE menuitemid = $1::integer',
+          [res.rows[f].menuitemid]
+        );
+
+        menuItemImages.rows.forEach((menuImg) => {
+          favItem.images.push(menuImg.imageurl);
+        });
+
         favouritesArr.push(favItem);
-      });
+      }
+
+      // commit and return favourites array
+      await client.query('COMMIT');
       return favouritesArr;
-    })
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+  })()
     .catch((err) => {
       console.error('Query Error [Favourites - Get User Favourites]', err.stack);
       return [];
@@ -156,11 +207,12 @@ module.exports = {
   getOrderHistory: (userId = 0) => db.query(
     'SELECT customerorder.orderid, restaurant.restaurantid, restaurant.restaurantname,'
     + ' restaurant.location, customerorder.orderdatetime, customerorder.ordercompletiontime,'
-    + ' customerorder.orderstatus, employee.name AS "ename", employee.surname AS "esurname"'
+    + ' customerorder.orderstatus, customerorder.progress, customerorder.waitertip, customerorder.ordertotal,'
+    + ' customerorder.ordernumber, person.name AS "ename", person.surname AS "esurname"'
     + ' FROM public.customerorder'
     + ' INNER JOIN public.restauranttable ON customerorder.tableid = restauranttable.tableid'
     + ' INNER JOIN public.restaurant ON restauranttable.restaurantid = restaurant.restaurantid'
-    + ' INNER JOIN public.employee ON customerorder.employeeid = employee.userid'
+    + ' INNER JOIN public.person ON customerorder.employeeid = person.userid'
     + ' WHERE customerorder.customerid = $1::integer;',
     [userId]
   )
@@ -171,13 +223,17 @@ module.exports = {
           .then((orderItems) => {
             const historyItem = {};
             historyItem.orderId = hist.orderid;
+            historyItem.orderNumber = hist.ordernumber;
             historyItem.restaurantId = hist.restaurantid;
             historyItem.restaurantName = hist.restaurantname;
             historyItem.restaurantLocation = hist.location;
             historyItem.orderDateTime = hist.orderdatetime;
             historyItem.orderCompletionTime = hist.ordercompletiontime;
             historyItem.orderStatus = hist.orderstatus;
-            historyItem.total = orderItems.orderTotal;
+            historyItem.progress = hist.progress;
+            // historyItem.total = orderItems.orderTotal;
+            historyItem.waiterTip = hist.waitertip;
+            historyItem.total = hist.ordertotal;
             historyItem.orderEmployeeName = hist.ename;
             historyItem.orderEmployeeSurname = hist.esurname;
             historyItem.items = orderItems.items;
@@ -212,13 +268,13 @@ module.exports = {
       console.error('Query Error [Reviews - Get Restaurant Reviews]', err.stack);
       return [];
     }),
-  getRatingPhrases: (restaurantId = 0) => db.query(
+  getRatingPhrasesObj: (restaurantId = 0) => db.query(
     'SELECT ratingphrase.phrasedescription, AVG(customerphraserating.ratingscore) AS "rating"'
     + ' FROM public.customerphraserating'
     + ' INNER JOIN public.ratingphrase ON ratingphrase.phraseid = customerphraserating.phraseid'
     + ' INNER JOIN public.review ON customerphraserating.reviewid = review.reviewid'
     + " WHERE review.restaurantid = $1::integer AND (LOWER(ratingphrase.type) = 'restaurant'"
-    + " OR LOWER(ratingphrase.type) = 'waiter' OR LOWER(ratingphrase.type) = 'waitess')"
+    + " OR LOWER(ratingphrase.type) = 'waiter' OR LOWER(ratingphrase.type) = 'waitress')"
     + ' GROUP BY ratingphrase.phrasedescription;',
     [restaurantId]
   )
@@ -236,33 +292,48 @@ module.exports = {
       console.error('Query Error [Rating Phrases - Get Restaurant Ratings]', err.stack);
       return [];
     }),
-  getMenuCategories: (restaurantId = 0) => db.query(
-    'SELECT categoryid, categoryname, categorydescription, parentcategoryid, categorytype'
-    + ' FROM public.category'
-    + ' WHERE restaurantid = $1::integer;',
-    [restaurantId]
-  )
-    .then((res) => {
-      const menuItemPromises = [];
-      res.rows.forEach((menuCategory) => {
-        menuItemPromises.push(getMenuItems(restaurantId, menuCategory.categoryid)
-          .then((resMenuItem) => {
-            const categoryItem = {};
-            categoryItem.categoryName = menuCategory.categoryname;
-            categoryItem.description = menuCategory.categorydescription;
-            categoryItem.parentCategoryId = menuCategory.parentcategoryid;
-            categoryItem.type = menuCategory.categorytype;
-            categoryItem.menuItems = resMenuItem.menuItemsArr;
-            return categoryItem;
-          })
-          .catch((err) => {
-            console.error('Query Error [Restaurant Helper - Get Restaurant Menu Item]', err.stack);
-            // empty on error
-            return [];
-          }));
-      });
-      return menuItemPromises;
-    })
+  getMenuCategories: (restaurantId = 0) => (async () => {
+    const client = await db.connect();
+    try {
+      // begin transaction
+      await client.query('BEGIN');
+
+      // get menu categories
+      const res = await client.query(
+        'SELECT categoryid, categoryname, categorydescription, parentcategoryid, categorytype'
+          + ' FROM public.menucategory'
+          + ' WHERE restaurantid = $1::integer;',
+        [restaurantId]
+      );
+
+      const categoriesRes = [];
+
+      for (let r = 0; r < res.rows.length; r++) {
+        const categoryItem = {};
+        // eslint-disable-next-line no-await-in-loop
+        const resMenuItem = await getMenuItems(restaurantId, res.rows[r].categoryid);
+        categoryItem.categoryId = res.rows[r].categoryid;
+        categoryItem.categoryName = res.rows[r].categoryname;
+        categoryItem.description = res.rows[r].categorydescription;
+        categoryItem.parentCategoryId = res.rows[r].parentcategoryid;
+        categoryItem.type = res.rows[r].categorytype;
+        categoryItem.menuItems = resMenuItem.menuItemsArr;
+        categoriesRes.push(categoryItem);
+      }
+
+      // commit cahnges
+      await client.query('COMMIT');
+      return categoriesRes;
+    } catch (err) {
+      // rollback changes
+      await client.query('ROLLBACK');
+
+      // throw error for async catch
+      throw err;
+    } finally {
+      client.release();
+    }
+  })()
     .catch((err) => {
       console.error('Query Error [Categories - Get Restaurant Menu Categories]', err.stack);
       return [];
