@@ -3,9 +3,10 @@ import axios from 'axios'
 // State object
 const initialState = () => ({
   allRestaurants: {},
-  tableNumber: "Checked in manually",
+  tableNumber: "",
   checkedIn: false,
   displayNotification: false,
+  exploreCategories: {}
 });
 
 const state = initialState();
@@ -24,25 +25,41 @@ const getters = {
   getDisplayNotification(state) {
     return state.displayNotification;
   },
+  getExploreCategories(state) {
+    return state.exploreCategories;
+  },
 }
 
 // Actions 
 const actions = {
   allRestaurants({commit}, data) {
-    var token = this.getters['CustomerStore/getToken']
-    axios.post('https://api.swiftapp.ml', 
+    return axios.post('https://api.swiftapp.ml', 
     {
       "requestType": "allRestaurants",
-      "token": token,
+      "token": sessionStorage.getItem('authToken'),
     }
     ).then(result => {
       commit('SAVE_ALL_RESTAURANTS', result.data.restaurants);
+      return true;
     }).catch(({ response }) => {
     });
   },
 
   retrieveRestaurantMenu({commit, dispatch}, restaurantId) {
     this.dispatch('MenuStore/retrieveMenu', restaurantId);
+  },
+
+  retrieveExploreCategories({commit}, data) {
+    return axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "allRestaurantCategories",
+      "token": sessionStorage.getItem('authToken'),
+    }
+    ).then(result => {
+      commit('SAVE_ALL_EXPLORE_CATEGORIES', result.data.categories);
+      return true;
+    }).catch(({ response }) => {
+    });
   },
 
   // Used to reset the store
@@ -75,6 +92,10 @@ const mutations = {
 
   setTableNumber(state, data) {
     state.tableNumber = data;
+  },
+
+  SAVE_ALL_EXPLORE_CATEGORIES(state, categories) {
+    state.exploreCategories = categories;
   },
 
   updateCheckInFlag(state, data) {

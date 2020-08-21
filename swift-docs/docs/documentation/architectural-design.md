@@ -4,7 +4,7 @@
 
 ### Architectural Design Diagram
 
-![architectural-design](~@assets/swift-architectural-design.png)
+![architectural-design](../../assets/swift-architectural-design.svg)
 
 ### Discussion
 
@@ -18,3 +18,4 @@ There are a number of architectural patterns used for the different components o
 2. **Management and Customer Applications Services:** The data interface layer is responsible for ensuring the scalability of adding different servicesrequired for the management and customer applications.  A microservices architecture has beenemployed to allow for adding new services without interrupting other parts of the system.  Thisallows for thorough testing of each services before deploying them.
 
 3. **Payment Service Pipe and Filter:** To ensure that the customer’s credit card information is securely stored, the system will utilise a pipe and filter architecture dedicated to filter the different steps needed to access and establisha connection with a third party service that specialises in storing secure credit card information.Once the connection is established, payments can be made by the customer.
+

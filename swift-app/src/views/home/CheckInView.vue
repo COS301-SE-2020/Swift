@@ -6,17 +6,16 @@
       <div class="subtitle-2">Scanning will start automatically</div>
     </div>
     <div class="row d-flex flex-column align-center w-50">
-      <qrcode-stream class="w-50" @decode="onQRDecode" @init="onQRInit"></qrcode-stream>
+      <qrcode-stream class="w-50" @decode="onQRDecode"></qrcode-stream>
     </div>
     <div class="row d-flex flex-column align-center">
       <v-row class="justify-space-around">
-        <v-col cols="6">
+        <v-col cols="12">
           <v-btn large @click="goToHome" rounded>Cancel</v-btn>
         </v-col>
-        <v-col cols="6">
-          <!-- TODO: Manual Table input popup -->
-          <v-btn large rounded @click="goToRestaurant" color="primary">Enter Manually</v-btn>
-        </v-col>
+        <!-- <v-col cols="6">
+          <v-btn large rounded @click="goToRestaurant" color="primary">Check-in</v-btn>
+        </v-col> -->
       </v-row>
     </div>
   </v-container>
@@ -27,24 +26,25 @@ import { mapActions, mapGetters, mapMutations } from "vuex";
 
 export default {
   methods: {
-    goToRestaurant() {
-      this.updateDisplayNotification(true);
-      this.updateCheckInFlag(true);
-      this.$router.push("/menu")
-    },
     goToHome() {
       this.$router.push("/")
     },
-    onQRDecode(result) {
-      this.setTable(result);
-      this.goToRestaurant();
+    async onQRDecode(result) {
+      var data = {
+        "qrcode": result
+      }
+      var response = await this.checkInCustomer(data);
+      console.log(response.restaurantId)
+      this.$router.push("/menu/" + response.restaurantId);
     },
     ...mapMutations({
       setTable : 'RestaurantStore/setTableNumber',
+      setCheckedInStatus : 'CustomerStore/SET_CHECKED_IN_STATUS',
+      setCheckedInQRCode : 'CustomerStore/SET_CHECKED_IN_CODE',
+      updateCheckInFlag : 'CustomerStore/UPDATE_CHECKED_IN',
     }),
     ...mapActions({
-      updateCheckInFlag: 'RestaurantStore/updateCheckInFlag',
-      updateDisplayNotification: 'RestaurantStore/updateDisplayNotification',
+      checkInCustomer: 'CustomerStore/checkInCustomer',
     }),
   },
 };
