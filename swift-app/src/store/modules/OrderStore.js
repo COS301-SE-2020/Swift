@@ -12,7 +12,8 @@ const initialState = () => ({
   
   orderHistory: {},
   orderTotal: 0,
-  orderFlag: false
+  orderFlag: false,
+  ratingPhrases: {}
 });
 
 const state = initialState();
@@ -39,8 +40,6 @@ const getters = {
     return state.itemToRate;
   },
 
-
-
   getItemsInCart(state) {
     return state.itemsInCart;
   },
@@ -55,6 +54,10 @@ const getters = {
 
   getOrderHistory(state) {
     return state.orderHistory;
+  },
+
+  getRatingPhrases(state) {
+    return state.ratingPhrases;
   }
 
   
@@ -112,6 +115,8 @@ const actions = {
           "token": sessionStorage.getItem('authToken')
         }
       ).then(result => {
+        commit('SET_RATING_PHRASES', result.data);
+        console.log(result.data)
         return result.data
       }).catch(({ response }) => {
       });
@@ -141,6 +146,19 @@ const actions = {
   },
 
   submitPayment({commit}) {
+    let data = {
+      "requestType": "payment",
+        "token": sessionStorage.getItem('authToken'),
+        "orderId": this.getters['OrderStore/getPaymentInfo'].orderId,
+        "paymentMethod": this.getters['OrderStore/getPaymentInfo'].paymentMethod,
+        "amountPaid": this.getters['OrderStore/getPaymentInfo'].amountPaid,
+        "restaurantName": this.getters['OrderStore/getPaymentInfo'].restaurantName,
+        "menuItemName": this.getters['OrderStore/getPaymentInfo'].menuItemName,
+        "name": this.getters['CustomerStore/getCustomerProfile'].name,
+        "email": this.getters['CustomerStore/getCustomerProfile'].email,
+        "waiterTip": this.getters['OrderStore/getPaymentInfo'].waiterTip,
+        "orderTax": this.getters['OrderStore/getPaymentInfo'].orderTax
+    }
     console.log(data)
     axios.post('https://api.swiftapp.ml', 
       {
@@ -246,6 +264,11 @@ const mutations = {
   CLEAR_ITEMS(state) {
     state.orderInfo = {}
     state.orderedItems = {}
+  },
+
+  SET_RATING_PHRASES(state, ratingPhrases) {
+    console.log("herrrrrrr")
+    state.ratingPhrases = ratingPhrases
   },
 
   ADD_ITEM_TO_RATE(state, itemInfo) {
