@@ -1,8 +1,13 @@
 # User Manual
 
-Here is a link to the user manual that gives an overview of the Swift system and the different components related to the system:
+Here is a link to the user manual versions that gives an overview of the Swift system and the different components related to the system:
 
+Version 1:
 <usermanual/>
+
+Version 2: 
+<usermanual2/>
+
 
 The user manual gives a walkthrough of how to use the customer application components such as:
 * Registration & Login
