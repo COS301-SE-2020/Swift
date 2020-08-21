@@ -68,7 +68,7 @@
                         </v-btn>
                       </v-col>
                       <v-col cols="3" class="pb-2 px-1 orderButtons">
-                        <v-btn v-if="item.orderStatus == 'Paid'" text class="pa-0 button">
+                        <v-btn v-if="item.orderStatus == 'Paid'" text class="pa-0 button" @click="rateOrder(item)">
                           <v-icon size="17px">mdi-comment-edit</v-icon> 
                           <span class="pl-1 orderOptions">Rate</span>
                         </v-btn>
@@ -179,7 +179,7 @@ export default {
       this.$router.push('/rating')
     },
     viewOrder (item) {
-      this.addOrder(item)
+      // this.addOrder(item)
     },
     calculateFullTotal(item) {
       let total = parseFloat(this.calculateTotal(item));
@@ -236,6 +236,56 @@ export default {
 
       return data;
     },
+    async rateOrder(item) {
+      console.log(item)
+      this.isLoadingCartItem = true;
+
+      let objectsToRate = [];
+
+      let restaurantData = {
+        "type": 'Restaurant',
+        "info": {
+          "name": item.restaurantName,
+          "img": await this.findRestaurantImage(item.restaurantId).image,
+          "itemId": item.restaurantId,
+        },
+        "ratingPhrases": await this.filterPhrases("Restaurant"),
+      }
+
+      let orderedItems = []
+      for (let i = 0; i < item.items.length; i++) {
+        let obj = {
+          "name": item.items[i].menuItemName,
+          "img": await this.findItemImage(item.items[i].menuItemId, item.restaurantId),
+          "itemId": item.items[i].menuItemId
+        }
+        orderedItems.push(obj)
+      }
+
+      let itemData = {
+        "type": 'Items',
+        "info": orderedItems,
+        "ratingPhrases": await this.filterPhrases("Item")
+      }
+
+      objectsToRate.push(restaurantData)
+      objectsToRate.push(itemData)
+
+      let data = {
+        "rating": objectsToRate,
+        "orderId": item.orderId
+      }
+
+      console.log(data)
+
+      // if (menuRetrieved) {
+      this.addItemToRate(data)
+      this.$router.push("/rating");
+      // }
+
+      this.isLoadingCartItem = false;
+      
+    },
     async addOrder(item) {
       let data = this.createOrderObject(item);
       this.addItemToOrder(data)
@@ -248,23 +298,17 @@ export default {
 
       this.$router.push("/cart");
     },
-    // calculateTotal(item) {
-    //   let total = 0;
-    //   if (Object.keys(item).length != 0) {
-        
-    //     for (let i = 0; i < item.items.length; i++) {
-    //       total += (item.items[i].itemTotal != null) ? parseFloat(item.items[i].itemTotal): 0;
-    //     }
-        
-    //     // total += parseFloat(total * 0.14);
-    //     // total += parseFloat(item.waiterTip);
-    //   }
-    //   return total;
-    // },
+
+    async filterPhrases(type) {
+      let phrases = await this.ratingPhrasesRestaurant()
+      console.log(phrases)
+      return phrases.phrases.filter(phrase => {
+        return phrase.phraseType == type
+      })
+    },
+
     payForOrder(item) {
 
-      // console.log(item)
-      // if ()
       let data = {
         "orderId": item.orderId,
         "paymentMethod": "Card",
@@ -276,7 +320,6 @@ export default {
       }
 
       this.addPaymentInfo(data);
-      // console.log(item)
       console.log("payment")
       console.log(data)
       this.$router.push("/paymentinformation");
@@ -290,6 +333,26 @@ export default {
     },
     displayOrderTime() {
       return this.getOrderStatusItem().orderDateTime.slice(11, 16) + ', ' + moment(String(this.getOrderStatusItem().orderDateTime.slice(0, 10))).format('DD MMMM YYYY')
+    },
+    findRestaurantImage(id) {
+      return (this.allRestaurants.find(restaurant => {
+        return restaurant.restaurantId == parseInt(id)
+      }))
+    },
+    async findItemImage(id, restaurantId) {
+      var menuRetrieved = await this.$store.dispatch('MenuStore/retrieveMenu', restaurantId);
+
+      if (menuRetrieved.categories != undefined) {
+        let category = menuRetrieved.categories.find(
+          category => {if (category != undefined && category.menuItems != undefined) return category.menuItems.find(menuItem => menuItem.menuItemId === id )}
+        )
+
+        let item = category.menuItems.find(menuItem => menuItem.menuItemId === id )
+      
+
+        return (item.images.length != 0) ? item.images[0] : ''
+      }
+      return ''
     },
     updateOrderStatus() {
       let self = this;
@@ -306,8 +369,10 @@ export default {
     ...mapActions({
       addItemToOrder: "OrderStore/addItemToOrder",
       addPaymentInfo: "OrderStore/addPaymentInfo",
+      addItemToRate: "OrderStore/addItemToRate",
       clearOrder: "OrderStore/clearOrder",
       orderStatus: 'OrderStore/retrieveOrderStatus',
+      ratingPhrasesRestaurant: 'OrderStore/ratingPhrasesRestaurant',
     }),
   },
   computed: {
@@ -319,6 +384,7 @@ export default {
     ...mapGetters({
       orderHistory: 'CustomerStore/getCustomerOrderHistory',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
+      allRestaurants: 'RestaurantsStore/getAllRestaurants',
     }),
     
   },
@@ -326,7 +392,6 @@ export default {
     'NavBar': NavBar
   },
   beforeMount: function() {
-    // this.updateOrderStatus()
   },
   
 }

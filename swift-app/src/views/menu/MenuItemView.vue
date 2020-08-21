@@ -531,7 +531,7 @@ export default {
     ...mapGetters({
       menu: "MenuStore/getMenu",
       customer: "CustomerStore/getCustomerProfile",
-      itemToEdit: "OrderStore/getItemToEdit",
+      // itemToEdit: "OrderStore/getItemToEdit",
       checkedInTableId: "CustomerStore/getCheckedInTableId",
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',

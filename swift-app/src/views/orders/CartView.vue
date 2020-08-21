@@ -235,8 +235,8 @@ export default {
     },
     editItem(item) {
       // console.log(item)
-      this.addItemToEdit(item)
-      this.$router.push("/menuItem/" + item.menuItemId);
+      // this.addItemToEdit(item)
+      // this.$router.push("/menuItem/" + item.menuItemId);
     },
     checkedIn() {
       let checkedInVal = this.checkedInQRCode;
@@ -262,7 +262,7 @@ export default {
     },
     ...mapActions({
       updateOrderFlag: 'OrderStore/updateOrderFlag',
-      addItemToEdit: 'OrderStore/addItemToEdit',
+      // addItemToEdit: 'OrderStore/addItemToEdit',
       submitOrder: 'OrderStore/submitOrder',
     }),
     ...mapGetters({

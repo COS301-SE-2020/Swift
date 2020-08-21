@@ -5,7 +5,7 @@ const initialState = () => ({
   
   orderInfo: {},
   orderedItems: {},
-  itemToView: {},
+  itemToRate: {},
   paymentInfo: {},
   currentId: -1,
   
@@ -33,8 +33,10 @@ const getters = {
     return state.paymentInfo;
   },
 
-  getItemToView(state) {
-    return state.itemToView;
+  getItemToRate(state) {
+    console.log("FETCH DATA")
+    console.log(state.itemToRate)
+    return state.itemToRate;
   },
 
 
@@ -103,6 +105,18 @@ const actions = {
     }
   },
 
+  ratingPhrasesRestaurant({commit}) {
+    return axios.post('https://api.swiftapp.ml', 
+        {
+          "requestType": "ratingPhrases",
+          "token": sessionStorage.getItem('authToken')
+        }
+      ).then(result => {
+        return result.data
+      }).catch(({ response }) => {
+      });
+  },
+
   submitPayment({commit}) {
     console.log(data)
     axios.post('https://api.swiftapp.ml', 
@@ -134,8 +148,8 @@ const actions = {
     commit('ADD_ITEM_TO_ORDER', orderItemInfo);
   },
 
-  addItemToEdit({commit,}, itemInfo) {
-    commit('ADD_ITEM_TO_EDIT', itemInfo);
+  addItemToRate({commit,}, itemInfo) {
+    commit('ADD_ITEM_TO_RATE', itemInfo);
   },
 
   clearOrder({commit,}) {
@@ -210,8 +224,8 @@ const mutations = {
     state.orderedItems = {}
   },
 
-  ADD_ITEM_TO_EDIT(state, itemInfo) {
-    state.itemToView = itemInfo;
+  ADD_ITEM_TO_RATE(state, itemInfo) {
+    state.itemToRate = itemInfo;
   },
   
   UPDATE_ORDER_STATUS(state, data) {
