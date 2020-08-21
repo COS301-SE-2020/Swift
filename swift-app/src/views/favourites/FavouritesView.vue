@@ -14,7 +14,8 @@
         <v-list v-for="item in filteredList(restaurantName)" :key="item.menuItemName" class="py-0">
           <v-list-item class="py-1 pr-0">
             <v-list-item-avatar @click="goToMenuItem(item.menuItemId)" tile  style="border-radius: 4px" size="45" >
-              <v-img src="https://source.unsplash.com/hrlvr2ZlUNk/800x800/"></v-img>
+              <v-img v-if="item.images.length !=  0" :src="item.images[0]"/>
+              <v-img v-else src="../../assets/menuItemImages/item-placeholder.png"/>
             </v-list-item-avatar>
             <v-list-item-content ripple @click="goToMenuItem(item.menuItemId)">
               <v-list-item-title v-html="item.menuItemName"></v-list-item-title>
@@ -84,7 +85,6 @@ export default {
       removeFavourite: 'CustomerStore/removeFavourite',
     }),
     filteredList(restaurantName) {
-      console.log(restaurantName)
       var list =  this.customerInfo.favourites.filter(favourite => {
         return favourite.restaurantName === restaurantName && favourite.menuItemName.toLowerCase().includes(this.search.toLowerCase())
       })
@@ -107,8 +107,6 @@ export default {
       $.each(list, function(i, el){
         if($.inArray(el, uniqueRestaurants) === -1) uniqueRestaurants.push(el);
       });
-
-      console.log(uniqueRestaurants)
 
       return uniqueRestaurants
     },
