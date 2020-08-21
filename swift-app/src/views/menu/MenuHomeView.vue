@@ -14,7 +14,7 @@
                     <div v-if="checkedIn()" class="white--text display-1">Welcome to<br/> {{menu.name}}</div>
                     <div v-if="!checkedIn()" class="white--text display-1">{{menu.name}}</div>
                     <v-col cols="9" class="mt-3">
-                      <v-text-field background-color="white" class="menuItemSearchbar"  v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search by name or category"></v-text-field>
+                      <v-text-field background-color="white" class="menuItemSearchbar"  v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search..."></v-text-field>
                     </v-col>
                     <v-col cols="1" class="d-flex align-center px-0 mt-3">
                       <v-btn small icon color="white">
@@ -78,9 +78,12 @@
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title v-html="menuItem.menuItemName"></v-list-item-title>
-                  <v-list-item-subtitle v-html="menuItem.menuItemDescription"></v-list-item-subtitle>
+                  <v-list-item-subtitle class="mt-2" v-html="menuItem.menuItemDescription"></v-list-item-subtitle>
                 </v-list-item-content>
-                <v-list-item-action-text class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</v-list-item-action-text>
+                <div class="d-flex flex-column">
+                  <v-list-item-action-text class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</v-list-item-action-text>
+                  <v-rating readonly size="14" dense color="yellow darken-3" background-color="secondary" :value="parseInt(menuItem.rating)"></v-rating>
+                </div>                
               </v-list-item>
               <v-divider divider class="ml-3" width="93%"></v-divider>
             </v-list>
@@ -233,20 +236,25 @@ export default {
       } else {
         return false
       }
-    },
-    sortedItems (menuItems) {
-    },
-    
+    },    
     secondaryCategoryList(id) {
       if (this.menu.categories != undefined) {
         var list =  this.menu.categories.filter(category => {
-          return category.type == "secondary" && category.parentCategoryId == id
+          return category.type == "secondary" && category.parentCategoryId == id /* && this.searchForItem(category.menuItems) */
         })
 
-        console.log(list)
         return list
       }
     },
+    searchForItem(items) {
+      if (items != undefined) {
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].menuItemName.toLowerCase().includes(this.search.toLowerCase()))
+            return true
+        }
+        return false
+      }
+    }
   },
   async mounted() {
     if (this.displayNotification) {
@@ -299,12 +307,13 @@ export default {
     primaryCategoryList() {
       if (this.menu.categories != undefined) {
         var list = this.menu.categories.filter(category => {
-          return category.type == "primary"
+          return category.type == "primary"/*  && this.searchForItem(category.menuItems) */
         })
 
         return list;
       }
     },
+    
   }
 };
 </script>
