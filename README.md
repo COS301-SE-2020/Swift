@@ -29,6 +29,11 @@ Swift aims to create a convenient, flexible, and scalable interface suitable for
 * :open_book: [User Manual](https://drive.google.com/file/d/126JpUB3yG6GSfKJJ3Hnvljq6qBqULci_/view?usp=sharing)
 * :computer: [Coding Standards](https://github.com/COS301-SE-2020/Swift/blob/master/CODING.md#coding-standards)
 
+## Demo 3
+
+* :tv: [Demo Video](https://drive.google.com/u/1/uc?id=1-gz_Y7nOxgl6pUy-QDV3eO_uaAv0DUFp&export=download)
+* :open_book: [Documentation Website](https://docs.swiftapp.ml/)
+
 ## Project Management Tools
 
 * :open_book: [Clickup](https://app.clickup.com/2546114/v/l/s/2693763)

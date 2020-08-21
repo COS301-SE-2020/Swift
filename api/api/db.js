@@ -9,7 +9,10 @@ if (pool == null) {
     host: process.env.DB_HOST || configDB.host,
     database: process.env.DB_NAME || configDB.database,
     password: process.env.DB_PASS || configDB.password,
-    port: process.env.DB_PORT || configDB.port
+    port: process.env.DB_PORT || configDB.port,
+    connectionTimeoutMillis: 5000,
+    idleTimeoutMillis: 10000,
+    max: 16
   });
 }
 

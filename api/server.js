@@ -7,7 +7,7 @@ const DEFAULT_PORT = 3264;
 const SERVER_PORT = process.env.PORT || DEFAULT_PORT;
 
 // Parse JSON bodies
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '8192kb' })); // 8192 kb (8mb) max header size
 
 // Enable CORS
 app.use(cors());
@@ -45,6 +45,14 @@ if (typeof process.env.NODE_ENV !== 'undefined' && process.env.NODE_ENV.trim() =
     return next();
   });
 }
+
+// Check for valid tokens before going any further
+// eslint-disable-next-line arrow-body-style
+app.use((req, res, next) => {
+  // TODO: Check tokens in req.body
+  // GitHub issue #40
+  return next();
+});
 
 // API handle requests
 app.delete('/', require('./api/api'));

@@ -117,6 +117,29 @@ const actions = {
       });
   },
 
+  submitRating({commit}, ratingObject) {
+    console.log(ratingObject.ratings)
+    for (let i = 0; i < ratingObject.ratings.length; i++) {
+      axios.post('https://api.swiftapp.ml', 
+          {
+            "requestType": "addReview",
+            "token": sessionStorage.getItem('authToken'),
+            "type": ratingObject.ratings[i].type,
+            "itemId": ratingObject.ratings[i].itemId,
+            "orderId": ratingObject.ratings[i].orderId,
+            "ratingScore": ratingObject.ratings[i].ratingScore,
+            "comment": ratingObject.ratings[i].comment,
+            "public": ratingObject.ratings[i].public,
+            "phrases": ratingObject.ratings[i].phrases,
+          }
+        ).then(result => {
+          // return result.data
+          console.log(yay)
+        }).catch(({ response }) => {
+        });
+    }
+  },
+
   submitPayment({commit}) {
     axios.post('https://api.swiftapp.ml', 
       {
