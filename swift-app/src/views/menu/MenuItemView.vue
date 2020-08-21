@@ -5,7 +5,7 @@
         <v-icon>mdi-close</v-icon>
       </v-btn>
       <span class="title black--text" style=" position: absolute; z-index:11; top: 20px; left: 65px">{{newMenuItem.menuItemName}}</span>
-      <iframe style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:10;" :src="(newMenuItem.arAsset != null) ? newMenuItem.arAsset : ''"  frameborder="0"></iframe>
+      <iframe style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:10;" :src="(newMenuItem.arAsset != '') ? newMenuItem.arAsset : ''"  frameborder="0"></iframe>
     </div>
     <v-carousel v-if="!arActive && newMenuItem.images.length != 0" height="200px" :show-arrows="false" hide-delimiter-background continuous>
       <v-carousel-item v-for="(imageSrc,i) in newMenuItem.images" :key="i" :src="imageSrc"></v-carousel-item>
@@ -16,7 +16,7 @@
     <v-btn v-if="!arActive" width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 20px; left: 15px">
       <v-icon>mdi-chevron-left</v-icon>
     </v-btn>
-    <v-btn v-if="!arActive && newMenuItem.arAsset != null" @click="openARScanner" color="secondary" absolute small fab style="top: 175px; right: 65px;">
+    <v-btn v-if="!arActive && (newMenuItem.arAsset != '')" @click="openARScanner" color="secondary" absolute small fab style="top: 175px; right: 65px;">
       <v-icon>mdi-cube-scan</v-icon>
     </v-btn>
     <v-fab-transition v-if="!arActive">
@@ -455,8 +455,6 @@ export default {
           ]
         }
       }
-
-      console.log(data);
       
       this.addItemToOrder(data)
       this.$router.push("/cart");
@@ -476,7 +474,9 @@ export default {
       let checkedInVal = this.checkedInQRCode;
       let checkedInRestaurantId = this.checkedInRestaurantId;
 
-      if (checkedInVal != null && checkedInRestaurantId != null) {
+      var checkedInRestaurant = this.filterRestaurants
+
+      if (checkedInVal != null && checkedInRestaurant) {
         return true;
       } else {
         return false;
@@ -501,14 +501,10 @@ export default {
       )
     },
     isFavourite() {
-      // console.log(this.customer.favourites)
       if (this.customer.favourites.length != 0)
         return this.customer.favourites.some(favourite => favourite.menuItemId === parseInt(this.menuItemId))
       return false
     },
-    // removeActive() {
-    //   $(".attributeValues").removeClass("v-item--active v-list-item--active");
-    // },
     newMenuItem() {
       return this.findCategory.menuItems.find(menuItem => menuItem.menuItemId === parseInt(this.menuItemId) )
     },
@@ -519,15 +515,25 @@ export default {
         return { color: 'primary', icon: 'mdi-heart' }
       }
     },
+    filterRestaurants() {
+      var list = this.allRestaurants.filter(restaurant => {
+        return (restaurant.name == this.menu.name) && (restaurant.restaurantId === this.checkedInRestaurantId);
+      })
+
+      if (list.length > 0) {
+        return true
+      } else { 
+        return false
+      }
+    },
     ...mapGetters({
       menu: "MenuStore/getMenu",
       customer: "CustomerStore/getCustomerProfile",
       itemToEdit: "OrderStore/getItemToEdit",
       checkedInTableId: "CustomerStore/getCheckedInTableId",
-      
-      // checkedInStatus: 'CustomerStore/getCheckedInStatus',
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
+      allRestaurants: 'RestaurantsStore/getAllRestaurants',
     }),
   },
   mounted: function() {

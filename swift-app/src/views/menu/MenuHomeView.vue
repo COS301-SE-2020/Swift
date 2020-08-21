@@ -80,7 +80,7 @@
                   <v-list-item-title v-html="menuItem.menuItemName"></v-list-item-title>
                   <v-list-item-subtitle class="mt-2" v-html="menuItem.menuItemDescription"></v-list-item-subtitle>
                 </v-list-item-content>
-                <div class="d-flex flex-column">
+                <div class="d-flex flex-column justify-content-end">
                   <v-list-item-action-text class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</v-list-item-action-text>
                   <v-rating readonly size="14" dense color="yellow darken-3" background-color="secondary" :value="parseInt(menuItem.rating)"></v-rating>
                 </div>                
@@ -90,31 +90,6 @@
           </div>
         </v-tab-item>
       </v-tabs-items>
-      
-      <!-- <v-tabs  v-model="secondaryCategoryTab" background-color="secondary" color="primary" dark>
-        <v-tab v-for="(category, index) in filteredList" :key="index">
-          {{ category.categoryName }}
-        </v-tab>
-      </v-tabs>
-
-      <v-tabs-items v-model="secondaryCategoryTab">
-        <v-tab-item v-for="(category, index) in menu.categories" :key="index">
-          <v-list v-for="(menuItem, i) in category.menuItems" :key="i" class="py-0">
-            <v-list-item @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1 ">
-              <v-list-item-avatar tile  style="border-radius: 4px" size="45" >
-                <img v-if="menuItem.images.length != 0" :src="menuItem.images[0]">
-                <img v-else src="../../assets/menuItemImages/item-placeholder.png">
-              </v-list-item-avatar>
-              <v-list-item-content>
-                <v-list-item-title v-html="menuItem.menuItemName"></v-list-item-title>
-                <v-list-item-subtitle v-html="menuItem.menuItemDescription"></v-list-item-subtitle>
-              </v-list-item-content>
-              <v-list-item-action-text class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</v-list-item-action-text>
-            </v-list-item>
-            <v-divider divider class="ml-3" width="93%"></v-divider>
-          </v-list>
-        </v-tab-item>
-      </v-tabs-items> -->
 
     </v-container>
     <!-- <v-snackbar :v-if=checkedIn id="notification" :timeout="2000" centered color="primary" elevation="24" v-model="snackbar">You have been checked-in to {{menu.name}}</v-snackbar> -->
@@ -132,7 +107,6 @@ import store from '@/store/store.js';
 $(window).scroll(function(){
   $(".backgroundImage").css("opacity", 1 - $(window).scrollTop() / 250);
 });
-
 
 
 export default {
