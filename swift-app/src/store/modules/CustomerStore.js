@@ -104,7 +104,7 @@ const actions = {
   },
 
   register({commit}, data) {
-    axios.post('https://api.swiftapp.ml', 
+    return axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "register",
         "name": data.name,

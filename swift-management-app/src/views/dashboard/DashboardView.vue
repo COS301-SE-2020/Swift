@@ -4,7 +4,7 @@
 <script>
 export default {
 	created() {
-		this.getAuthKey();
+		//this.getAuthToken();
 	}
 }
 </script>

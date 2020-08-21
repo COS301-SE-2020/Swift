@@ -97,8 +97,6 @@ export default {
           this.$router.push('/location')
         }
       }
-
-      
     },
     async registerWithGoogle () {
       let url = await this.googleRegister();

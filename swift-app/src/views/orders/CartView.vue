@@ -14,7 +14,7 @@
         </v-row>
       </v-container>
     </v-toolbar>
-    <v-container v-if="orderInfo().length == 0" py-0>
+    <v-container v-if="Object.keys(orderInfo()).length === 0 && Object.keys(orderedItems()).length === 0" py-0 fill-height>
       <div class="row d-flex flex-column align-stretch align-self-stretch">
         <v-container fluid fill-height class="pa-0">
           <div class="row d-flex flex-column align-self-center align-center">
@@ -22,17 +22,49 @@
               <v-icon size="65px" class="font-weight-light" color="white">mdi-cart-outline</v-icon>
             </v-avatar>
             <div class="headline mb-3 mt-12 secondary--text">Order Empty</div>
-            <div class="subtitle-1 secondary--text">Order some food or drinks here:</div>
+            <div class="subtitle-1 secondary--text">Order some food or drinks here</div>
+            <v-btn @click="goToRestaurantMenu" class="mt-6" height="45px" width="130px" large color="primary" style="border-radius: 10px">Menu</v-btn>
           </div>
         </v-container>
       </div>
     </v-container>
     <v-container v-else class="orderDetailsCart d-flex align-content-space-between flex-wrap">
       <!-- <template> -->
-        <div>
+        <div style="width: 100%">
           <!-- <v-card v-for="(item,i) in orderInfo()" :key="i" flat> -->
-            <v-list v-for="(orderMenuItem,j) in orderInfo().orderItems" :key="j" class="py-2">
-              <v-card  @click="editItem(orderMenuItem)">
+            <v-list v-for="(orderMenuItem,j) in orderedItems().orderItems" :key="j" class="py-2">
+              <v-card disabled >
+                <v-list-item class="pt-1">
+                  <v-list-item-content>
+                    <v-row>
+                      <v-col cols="9">
+                        <v-list-item-title>{{ getItemName(orderMenuItem.menuItemId) }}</v-list-item-title>
+                      </v-col>
+                      <v-col cols="3 d-flex justify-end">
+                        <div>
+                          <v-list-item-title><span style="color: #f75564; font-size: 14px" class="pr-1">{{orderMenuItem.quantity}}x</span> R{{((orderMenuItem.itemTotal != null) ? orderMenuItem.itemTotal : (0)).toFixed(2)}}</v-list-item-title>
+                        </div>
+                      </v-col>
+                    </v-row>
+                    <v-row >
+                      <v-col cols="8" class="py-0">
+                        <div v-if="(orderMenuItem.orderSelections != undefined)">
+                          <div v-for="(orderItem, index) in orderMenuItem.orderSelections.selections" :key="index">
+                            <v-list-item-subtitle v-if="!Array.isArray(orderItem.values)">- {{orderItem.name}}: {{orderItem.values}}</v-list-item-subtitle>
+                            <v-list-item-subtitle v-else>- {{orderItem.name}}: {{(orderItem.values).join(', ')}}</v-list-item-subtitle>
+                          </div>
+                        </div>
+                      </v-col>
+                    </v-row>
+                  </v-list-item-content>
+                  
+                </v-list-item>
+              </v-card>
+            </v-list>
+
+
+            <v-list v-for="(orderMenuItem,j) in orderInfo().orderItems" :key="j" class="py-2" width="100%">
+              <v-card  @click="editItem(orderMenuItem)" width="100%">
                 <v-list-item class="pt-1">
                   <v-list-item-content>
                     <v-row>
@@ -148,7 +180,7 @@
       </v-alert>
     </v-overlay>
 
-    <NavBar></NavBar>
+    <!-- <NavBar></NavBar> -->
   </v-container>
 </template>
 
@@ -179,7 +211,11 @@ export default {
     },
     goToOrder () {
       this.updateOrderFlag(true);
-      this.submitOrder();
+      console.log("ADD ITEM")
+      let data = {
+        "tip": this.subtotal * 0.1
+      }
+      this.submitOrder(data);
       this.$router.push('/orders')
     },
     toggleAlert() {
@@ -198,9 +234,9 @@ export default {
       }
     },
     editItem(item) {
-      console.log(item)
-      this.addItemToEdit(item)
-      this.$router.push("/menuItem/" + item.menuItemId);
+      // console.log(item)
+      // this.addItemToEdit(item)
+      // this.$router.push("/menuItem/" + item.menuItemId);
     },
     checkedIn() {
       let checkedInVal = this.checkedInQRCode;
@@ -214,6 +250,10 @@ export default {
         return false;
       }
     },
+    goToRestaurantMenu() {
+      console.log(this.checkedInRestaurantId)
+      this.$router.push("/menu/" + this.checkedInRestaurantId());
+    },
     increaseQuantity(item) {
       let singlePrice = this.subtotal/item.quantity
       item.quantity++
@@ -222,12 +262,13 @@ export default {
     },
     ...mapActions({
       updateOrderFlag: 'OrderStore/updateOrderFlag',
-      addItemToEdit: 'OrderStore/addItemToEdit',
+      // addItemToEdit: 'OrderStore/addItemToEdit',
       submitOrder: 'OrderStore/submitOrder',
     }),
     ...mapGetters({
       menu: "MenuStore/getMenu",
       orderInfo: "OrderStore/getOrderInfo",
+      orderedItems: "OrderStore/getOrderedItems",
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
     }),
@@ -237,8 +278,8 @@ export default {
       return (parseFloat(this.subtotal) + parseFloat(tax) + parseFloat(tip)).toFixed(2);
     },
     getItemName(id) {
-      console.log("here")
-      console.log(this.menu())
+      // console.log("here")
+      // console.log(this.menu())
       
       let category = this.menu().categories.find(
         category => {if (category != undefined && category.menuItems != undefined) return category.menuItems.find(menuItem => menuItem.menuItemId === id )}
@@ -249,12 +290,13 @@ export default {
     },
   },
   mounted: function() {
-    console.log("order");
-    console.log(this.orderInfo());
-    
-    for (let i = 0; i < this.orderInfo().orderItems.length; i++) {
-      this.subtotal += (this.orderInfo().orderItems[i].itemTotal != null) ? parseFloat(this.orderInfo().orderItems[i].itemTotal): 0;
-      this.quantity[i] = parseFloat(this.orderInfo().orderItems[i].quantity)
+    // console.log("order");
+    // console.log(this.orderInfo());
+    if (Object.keys(this.orderInfo()).length != 0) {
+      for (let i = 0; i < this.orderInfo().orderItems.length; i++) {
+        this.subtotal += (this.orderInfo().orderItems[i].itemTotal != null) ? parseFloat(this.orderInfo().orderItems[i].itemTotal): 0;
+        this.quantity[i] = parseFloat(this.orderInfo().orderItems[i].quantity)
+      }
     }
   }
 }
