@@ -75,7 +75,8 @@
                   </v-list-item-action>
                 </template>
 
-                <v-list-item-group  class="pl-2" :multiple="(parseInt(attribute.max) > 1) ? true : false" :mandatory="(attribute.min == '1') ? true : false" v-model="model[i]">
+                <!-- <v-list-item-group  class="pl-2" :multiple="(parseInt(attribute.max) > 1) ? true : false" :mandatory="(attribute.min == '1') ? true : false" v-model="model[i]"> -->
+                <v-list-item-group  class="pl-2" :multiple="(parseInt(attribute.max) > 1) ? true : false"  v-model="model[i]">
                   <template v-for="(value, j) in attribute.values">
                     <v-list-item @click="checkInput(i, j, value)" ref="attributeVal" class="px-2 attributeValues" :key="`item-${j}`" :value="value.name">
                       <template v-slot:default="{ active }">
