@@ -62,7 +62,7 @@
                       <div class="mt-1 specialsDate">{{ promotion.period }}</div>
                     </div>
                     <div class="browseButton">
-                      <v-btn @click="goToRestaurant(promotion.restaurantId)" color="accent" height="35px" class="browseMenu">Browse Menu</v-btn>
+                      <v-btn @click="goToRestaurant(promotion.restaurantId)" color="accent" height="33px" class="browseMenu px-2">Browse Menu</v-btn>
                     </div>
                   </v-layout>
                 </v-col>
@@ -87,8 +87,8 @@
           <v-slide-group multiple>
             <v-slide-item v-for="(category, index) in exploreCategories" :key="index">
               <div class="mr-3" align="center">
-                <v-btn width="50px" height="50px" min-width="50px">
-                  <v-img height="50px" width="50px" :src="category.categoryImage"></v-img>
+                <v-btn width="60px" height="60px" min-width="60px"  @click="toggleCategoryActive(index)">
+                  <v-img height="60px" width="60px" class="categoryButtons" :src="category.categoryImage"></v-img>
                 </v-btn>
                 <div class="mt-1 caption">{{category.categoryName}}</div>
               </div>
@@ -105,18 +105,18 @@
         <v-sheet class="mx-auto" max-width="700">
           <v-slide-group multiple>
             <v-slide-item v-for="(card, index) in filteredList" :key="index">
-              <v-card ripple flat width="140px" class="mr-4">
-                <v-img :src="card.image" @click="goToRestaurant(card.restaurantId)" class="white--text align-center restaurantImage" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="90px" >
-                  <v-rating background-color="white" readonly size="10" dense color="yellow darken-3" :value="parseInt(card.rating)" style="bottom: 3px; right: 3px; position: absolute"></v-rating>
+              <v-card ripple flat width="200px" class="mr-4">
+                <v-img :src="card.image" @click="goToRestaurant(card.restaurantId)" class="white--text align-center restaurantImage" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="125px" >
+                  <v-rating background-color="white" readonly size="14" dense color="yellow darken-3" :value="parseInt(card.rating)" style="bottom: 3px; right: 3px; position: absolute"></v-rating>
                 </v-img>
-                <div class="pl-1 pt-1 resaturantTitle font-weight-light">{{card.name}}</div>
+                <div class="pl-1 pt-1 resaturantTitle cardFormat font-weight-light">{{card.name}}</div>
                 <v-row class="ml-0">
                   <v-icon size="13px">mdi-map-marker</v-icon>
                   <div class="pl-0 pt-0 restaurantLocation font-weight-light">{{card.branch}}</div>
                 </v-row>
                 <div class="ml-1 pt-0 restaurantCategory">{{getCategoryNames(card.categories)}}</div>
                 <v-row class="pl-3 mt-1">
-                  <v-col cols="6" v-for="(tag, i) in card.phrases" :key="i" class="pl-0 pr-3 pt-0">
+                  <v-col cols="auto" v-for="(tag, i) in card.phrases" :key="i" class="pl-0 pr-3 pt-0">
                     <div class="restaurantDescriptor">{{tag}}</div>
                   </v-col>
                 </v-row>
@@ -194,6 +194,7 @@ import NavBar from '@/components/layout/NavBar';
 import RestaurantSearchToolBar from '@/components/layout/RestaurantSearchToolBar';
 import store from '@/store/store.js';
 import { mapActions, mapGetters, mapMutations } from 'vuex'
+import $ from 'jquery';
 
 export default {
   components: {
@@ -223,6 +224,7 @@ export default {
     descriptors: ["Fast Service", "Presentation"],
     favourited: false,
     called: false,
+    selectedCategories: [],
     // checkedIn: false,
     restaurant: "Mugg & Bean",
     cycle: true,
@@ -244,6 +246,18 @@ export default {
     callWaiter() {
       this.called = !this.called;
     },
+    toggleCategoryActive(i) {
+      $(".categoryButtons").eq(i).toggleClass('activeButtonClass')
+      if ($(".categoryButtons").eq(i).hasClass('activeButtonClass'))
+        this.selectedCategories.push(this.exploreCategories[i].categoryId)
+      else {
+        const index = this.selectedCategories.indexOf(this.exploreCategories[i].categoryId);
+        if (index > -1) {
+          this.selectedCategories.splice(index, 1);
+        }
+      }
+    },
+    
     goToCart() {
       this.$router.push('/cart')
     },
@@ -276,7 +290,12 @@ export default {
       } else {
         return false;
       }
-    }
+    },
+    containsCategories(arr1, arr2){
+      if (arr2 != undefined)
+        return arr2.every(el => arr1.includes(el));
+      return true;
+    },
   },
   ...mapActions({
     checkInCustomer: 'CustomerStore/checkInCustomer',
@@ -315,10 +334,11 @@ export default {
         return { color: "primary", icon: "mdi-bell-outline" };
       }
     },
+    
     filteredList() {
       if (this.allRestaurants.length != undefined)
         return this.allRestaurants.filter(restaurant => {
-          return restaurant.name.toLowerCase().includes(this.search.toLowerCase())
+          return restaurant.name.toLowerCase().includes(this.search.toLowerCase()) && this.containsCategories(restaurant.categories, this.selectedCategories)
         })
     },
     carouselTab () {
@@ -424,6 +444,10 @@ export default {
     line-height: 180px;
   }
 
+  .activeButtonClass {
+    border: 2px rgba(247, 85, 100, 0.7) solid;
+  }
+
   .bannerImage {
     line-height: 140px;
     font-size: 22px;
@@ -435,7 +459,7 @@ export default {
   }
 
   .categoryTitle {
-    font-size: 16px;
+    font-size: 16.5px;
     font-weight: 500;
   }
 
@@ -448,20 +472,23 @@ export default {
   }
 
   .restaurantLocation {
-    font-size: 11px;
-  }
-
-  .restaurantCategory {
     font-size: 12px;
   }
 
+  .restaurantCategory {
+    font-size: 13px;
+  }
+
   .restaurantDescriptor {
-    border-radius: 12px;
-    background-color: lightgray;
-    opacity: 0.6;
-    font-weight: 500;
-    font-size: 10px;
+    border-radius: 7px;
+    background-color: rgba(211,211,211, 0.5);
+    font-weight: 400;
+    font-size: 10.5px;
     text-align: center;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 8px;
+    padding-right: 8px;
   }
 
   .headingText{
