@@ -64,33 +64,38 @@
         <v-card flat>
           <v-card-title v-if="newMenuItem.attributes != null" class="pb-0 pt-4">Customise Order</v-card-title>
           <v-container>
-            <v-list shaped v-if="newMenuItem.attributes != null"> 
-              <v-list-group class="attributeElements" v-for="(attribute, i) in newMenuItem.attributes.attributes" :key="i" no-action value="true">
+            <v-list  v-if="newMenuItem.attributes != null"> 
+              <v-list-group sub-group  class="attributeElements" v-for="(attribute, i) in newMenuItem.attributes.attributes" :key="i"  no-action value="true">
                 <template v-slot:activator>
-                  <v-list-item-content>
+                  <v-list-item-content @click="rotateIcon(i)">
                     <v-list-item-title class="label pl-0" v-text="attribute.attributeName"></v-list-item-title>
                   </v-list-item-content>
+                  <v-list-item-action @click="rotateIcon(i)">
+                    <v-icon class="chevron-icon mx-1">mdi-chevron-up</v-icon>
+                  </v-list-item-action>
                 </template>
-                <v-list-item-group class="pl-2" :multiple="(parseInt(attribute.max) > 1) ? true : false" :mandatory="(attribute.min == '1') ? true : false" v-model="model[i]">
+
+                <v-list-item-group  class="pl-2" :multiple="(parseInt(attribute.max) > 1) ? true : false" :mandatory="(attribute.min == '1') ? true : false" v-model="model[i]">
                   <template v-for="(value, j) in attribute.values">
-                      <v-list-item @click="checkInput(i, j, value)" ref="attributeVal" class="px-2 attributeValues" :key="`item-${j}`" :value="value.name">
-                        <template v-slot:default="{ active }">
-                          <v-row>
-                            <v-col cols="8">
-                              <v-list-item-title v-text="value.name"></v-list-item-title>
-                            </v-col>
-                            <v-col>
-                              <v-list-item-title v-if="value.price != 0" v-text="`+ R${(value.price).toFixed(2)}`"></v-list-item-title>
-                            </v-col>
-                          </v-row>
-                          <v-list-item-action>
-                            <v-radio :id="`${i}${j}${(value.name).replace(/\s+/g, '')}`" checked v-if="attribute.max == '1' && attribute.min == '1'" :input-value="active" ></v-radio>
-                            <v-checkbox v-else :input-value="active"></v-checkbox>
-                          </v-list-item-action>
-                        </template>
-                      </v-list-item>
-                    </template>
+                    <v-list-item @click="checkInput(i, j, value)" ref="attributeVal" class="px-2 attributeValues" :key="`item-${j}`" :value="value.name">
+                      <template v-slot:default="{ active }">
+                        <v-row>
+                          <v-col cols="8">
+                            <v-list-item-title v-text="value.name"></v-list-item-title>
+                          </v-col>
+                          <v-col>
+                            <v-list-item-title v-if="value.price != 0" v-text="`+ R${(value.price).toFixed(2)}`"></v-list-item-title>
+                          </v-col>
+                        </v-row>
+                        <v-list-item-action>
+                          <v-radio :id="`${i}${j}${(value.name).replace(/\s+/g, '')}`" checked v-if="attribute.max == '1' && attribute.min == '1'" :input-value="active" ></v-radio>
+                          <v-checkbox v-else :input-value="active"></v-checkbox>
+                        </v-list-item-action>
+                      </template>
+                    </v-list-item>
+                  </template>
                 </v-list-item-group>
+
               </v-list-group>
             </v-list>
 
@@ -230,9 +235,17 @@
     display: none;
   }
 
-  /* .attributeElements > .v-list-item--active.v-list-item--link {
-    background-color: rgba(247, 85, 100, 0.1) !important;
-  } */
+  .v-application--is-ltr .v-list-group--sub-group .v-list-group__header {
+    padding-left: 5px !important;
+  }
+
+  .attributeElements .v-list-item__icon.v-list-group__header__prepend-icon {
+    display: none !important;
+  }
+
+  .rotate {
+    transform: rotateX(180deg);
+  }
 
 </style>
 
@@ -256,12 +269,6 @@ export default {
       activeComments: [],
       menuItemId: this.$route.params.itemid,
       expandOrderBtn: true,
-      items: [
-        { img: 'https://source.unsplash.com/kZeUekYF9Jw/800x800/' },
-        { img: 'https://source.unsplash.com/hrlvr2ZlUNk/800x800/' },
-        { img: 'https://source.unsplash.com/8manzosDSGM/800x800/' },
-        { img: 'https://source.unsplash.com/nTZOILVZuOg/800x800/' },
-      ],
       tab: null,
       favourited: false,
       muesliSelected: true,
@@ -474,6 +481,9 @@ export default {
       } else {
         return false;
       }
+    },
+    rotateIcon(index) {
+      $('.chevron-icon').eq(index).toggleClass('rotate')
     }
   },
   computed: {
