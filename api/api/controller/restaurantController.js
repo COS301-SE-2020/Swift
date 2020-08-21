@@ -847,24 +847,50 @@ module.exports = {
     // Check token
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
-      return db.query(
-        'SELECT orderstatus, progress FROM public.customerorder WHERE orderid = $1::integer;',
-        [reqBody.orderId]
-      )
-        .then((res) => {
+      return (async () => {
+        const client = await db.connect();
+        try {
+          await client.query('BEGIN');
+          const res = await client.query(
+            'SELECT orderstatus, progress FROM public.customerorder WHERE orderid = $1::integer;',
+            [reqBody.orderId]
+          );
+
           if (res.rows.length === 0) {
             // order does not exist
             return response.status(404).send({ status: 404, reason: 'Not Found' });
           }
 
-          // return order status
-          return response.status(200).send({
-            orderStatus: res.rows[0].orderstatus,
-            orderProgress: res.rows[0].progress
-          });
-        })
+          const orderStatusResponse = {};
+          orderStatusResponse.orderStatus = res.rows[0].orderstatus;
+          orderStatusResponse.orderProgress = res.rows[0].progress;
+          orderStatusResponse.itemProgress = [];
+
+          const itemProg = await client.query(
+            'SELECT menuitemid, progress FROM public.itemordered'
+            + ' WHERE orderid = $1::integer',
+            [reqBody.orderId]
+          );
+
+          for (let i = 0; i < itemProg.rows.length; i++) {
+            const singleItem = {};
+            singleItem.menuItemId = itemProg.rows[i].menuitemid;
+            singleItem.progress = itemProg.rows[i].progress;
+            orderStatusResponse.itemProgress.push(singleItem);
+          }
+
+          // commit and return order status
+          await client.query('COMMIT');
+          return response.status(200).send(orderStatusResponse);
+        } catch (err) {
+          await client.query('ROLLBACK');
+          throw err;
+        } finally {
+          client.release();
+        }
+      })()
         .catch((err) => {
-          console.error('Query Error [Update Order Status - Check Order Existence]', err.stack);
+          console.error('Query Error [Restaurant - Get Order Status]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }
