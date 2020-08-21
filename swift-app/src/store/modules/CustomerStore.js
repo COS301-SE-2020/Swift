@@ -85,6 +85,7 @@ const actions = {
       commit('SET_CHECKED_IN_CODE', result.data.checkedIn);
       commit('SAVE_CUSTOMER', result.data);
       this.dispatch('OrderStore/initOrderHistory');
+      this.dispatch('OrderStore/ratingPhrasesRestaurant');
       return "Success";
     }).catch(({ response }) => {
       return "Fail";
