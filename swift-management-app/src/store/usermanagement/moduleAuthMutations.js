@@ -1,5 +1,6 @@
 export default {
   SAVE_TOKEN(state, token) {
+    localStorage.setItem('authToken', token);
     state.token = token;
   },
 

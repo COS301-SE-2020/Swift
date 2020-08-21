@@ -3,11 +3,9 @@
 ## Customer Sub-System
 
 ### Use Case Diagram - Customer Sub-System
-
-![Use Case Diagram - Customer Sub-System](~@assets/Swift_UCD.png)
+![Use Case Diagram - Customer Sub-System](../../assets/Swift_UCD.png)
 
 ### Customer Sub-System
-
 For Customers, the main value of the application will be derived through the ease of access to
 information on the varying available restaurants and their menus as well as the promise of an
 amplified restaurant experience that will guarantee them reduced waiting times. To permit for a
@@ -25,17 +23,14 @@ Throughout, a Customer will have the opportunity to **request assistance** which
 inform the restaurant employees of the table which needs to be tended to.
 
 ### Use Case Diagram - Management and Admin Sub-System
-
-![Use Case Diagram - Management and Admin Sub-System](~@assets/Swift_UCD2.png)
+![Use Case Diagram - Management and Admin Sub-System](../../assets/Swift_UCD2.png)
 
 ## Management and Admin Sub-Systems
 
 ### Management Sub-System
-
 On the Management side, Restaurant employees will make use of the system to **confirm a customer's check-in** and will **browse** and process the orders that are sent through, **updating their status** as the food items move through the different processing stages.
 
 ### Admin Sub-System
-
 There will be one or many admin users associated with each restaurant. As an admin, a user will be
 able to **register new employees** at a restaurant, **manage** their information, **add new tables** to a
 restaurant and subsequently **assign** these tables to waiters. Furthermore, admin users will be able

@@ -1,5 +1,20 @@
 const mutations = {
 
+  SET_MY_RESTAURANTS(state, restaurantsObject) {
+    state.myRestaurants = restaurantsObject;
+  },
+  ADD_RESTAURANT(state, restaurant) {
+    state.myRestaurants.unshift(restaurant);
+  },
+  SET_CURRENT_RESTAURANT(state, payload) {
+    localStorage.setItem("currentRestaurantId", payload.id);
+    localStorage.setItem("currentRestaurantName", payload.name);
+    state.currentRestaurant = {
+      name: payload.name,
+      id: payload.id
+    }
+  },
+
   // Vertical NavMenu
 
   TOGGLE_IS_VERTICAL_NAV_MENU_ACTIVE(state, value) {
@@ -32,8 +47,7 @@ const mutations = {
     // if val is true add it to starred else remove
     if (payload.val) {
       state.starredPages.push(state.navbarSearchAndPinList["pages"].data[index])
-    }
-    else {
+    } else {
       // find item index from starred pages
       const index = state.starredPages.findIndex((item) => item.url == payload.url)
 
@@ -46,13 +60,13 @@ const mutations = {
 
   ARRANGE_STARRED_PAGES_LIMITED(state, list) {
     const starredPagesMore = state.starredPages.slice(10)
-    state.starredPages     = list.concat(starredPagesMore)
+    state.starredPages = list.concat(starredPagesMore)
   },
   ARRANGE_STARRED_PAGES_MORE(state, list) {
-    let downToUp                 = false
+    let downToUp = false
     let lastItemInStarredLimited = state.starredPages[10]
-    const starredPagesLimited    = state.starredPages.slice(0, 10)
-    state.starredPages           = starredPagesLimited.concat(list)
+    const starredPagesLimited = state.starredPages.slice(0, 10)
+    state.starredPages = starredPagesLimited.concat(list)
 
     state.starredPages.slice(0, 10).map((i) => {
       if (list.indexOf(i) > -1) downToUp = true
@@ -63,11 +77,21 @@ const mutations = {
     }
   },
 
-  TOGGLE_CONTENT_OVERLAY(state, val) { state.bodyOverlay       = val },
-  UPDATE_PRIMARY_COLOR(state, val)   { state.themePrimaryColor = val },
-  UPDATE_THEME(state, val)           { state.theme             = val },
-  UPDATE_WINDOW_WIDTH(state, width)  { state.windowWidth       = width },
-  UPDATE_WINDOW_SCROLL_Y(state, val) { state.scrollY = val },
+  TOGGLE_CONTENT_OVERLAY(state, val) {
+    state.bodyOverlay = val
+  },
+  UPDATE_PRIMARY_COLOR(state, val) {
+    state.themePrimaryColor = val
+  },
+  UPDATE_THEME(state, val) {
+    state.theme = val
+  },
+  UPDATE_WINDOW_WIDTH(state, width) {
+    state.windowWidth = width
+  },
+  UPDATE_WINDOW_SCROLL_Y(state, val) {
+    state.scrollY = val
+  },
 
   // Updates user info in state and localstorage
   UPDATE_USER_INFO(state, payload) {
@@ -93,4 +117,3 @@ const mutations = {
 }
 
 export default mutations
-

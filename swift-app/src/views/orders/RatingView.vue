@@ -1,6 +1,6 @@
 <template>
   <v-container fluid>
-    <v-row v-for="(ratingType, index) in rating" :key="index">
+    <v-row v-for="(ratingType, index) in itemToRate().rating" :key="index">
       <v-container v-show="currentIndex == index">
         <v-card class="mx-auto" flat>
           <v-row class="mt-3">
@@ -27,65 +27,71 @@
                     <img v-else :src="item.img" alt />
                   </v-avatar>
                 </v-row>
-                <v-row class="mt-8" justify="center">
-                  <span  style="font-size: 25px">{{item.name}}</span>
+                <v-row class="mt-6 d-flex justify-center" style="text-align: center">
+                  <div style="font-size: 22px">{{item.name}}</div>
                 </v-row>
-                <v-row justify="center" class="mt-3">
-                  <v-rating size="30" @input="changeFeedback(ind)" dense color="yellow darken-3" v-model="itemRating[ind]" background-color="secondary" :value=0></v-rating>
+                <v-row justify="center" class="mt-2">
+                  <v-rating size="30" @input="changeFeedback(ind, Array.isArray(ratingType.info))" v-model="ratingValueMenuItem[ind]" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
                 </v-row>
-                <v-row justify="center" class="mt-3 mb-6">
-                  <span  style="font-size: 17px; opacity: 0.7" class="font-weight-light">{{ratingFeedback}}</span>
+                <v-row justify="center" class="mt-2 mb-5">
+                  <div style="font-size: 17px; opacity: 0.7" class="font-weight-light">{{ratingFeedbackMenuItem[ind]}}</div>
                 </v-row>
                 <v-divider></v-divider>
               </v-card>
-              <v-card class="mx-auto mt-6" flat>
-                <v-row v-for="(rating, i) in ratingType.ratingPhrases" :key="i" justify="center">
-                  <v-col cols="11" class="pt-1">
-                    <v-card class="mx-auto mt-0 rounded-card" flat width="100%" height="50px" color="#F5F5F5">
-                      <v-row>
-                        <v-col cols="7" align="left" class="pl-8">
-                          <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">{{rating}}</span>
-                        </v-col>
-                        <v-col cols="5" class="pr-6">
-                          <v-rating size="18" v-model="itemPhraseRatings[i]" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
-                        </v-col>
-                      </v-row>
-                    </v-card>
-                  </v-col>
-                </v-row>
-                <v-row justify="center" class="mt-4">
-                  <v-col cols="11" class="pt-1 pb-2" width="100%">
-                    <span class="subtitle-1 " style="font-size: 17px !important;">Share your feedback</span>
-                  </v-col>
-                </v-row>
-                <v-row justify="center">
-                  <v-col cols="11" class="pt-0 pb-0">
-                    <v-textarea v-model="comment" class="commentSection" label="Tell us what you liked..." outlined single-line auto-grow rows="5" row-height="20"></v-textarea>
-                  </v-col>
-                </v-row>
-                <v-row class="mt-1" justify="center" v-if="currentIndex != (rating.length - 1)">
-                  <v-col cols="11" class="pt-0" width="100%">
-                    <v-checkbox class="pt-0" v-model="share[ind]" label="Share with public"></v-checkbox>
-                    <!-- <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">Share with public</span> -->
-                  </v-col>
-                </v-row>
-                <v-row class="mt-6 mb-4" justify="center">
-                  <v-col cols="11" class="pt-0" width="100%">
-                    <v-row class="d-flex justify-space-around">
-                      <v-col cols="5" class="pa-0" align="center">
-                        <v-btn v-show="currentIndex != 0" rounded color="#F5F5F5" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showPrevious">Previous</v-btn>
-                      </v-col>
-                      <v-col cols="5" class="pa-0" align="center">
-                        <v-btn v-show="currentIndex != (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showNext">Next</v-btn>
-                        <v-btn v-show="currentIndex == (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="submitRating">Submit</v-btn>
-                      </v-col>
-                    </v-row>
-                  </v-col>
-                </v-row>
-              </v-card>
+              <v-list-item-group v-model="phraseRatingMenuItem[ind]" multiple class="mt-6">
+                <template v-for="(rating, i) in ratingType.ratingPhrases">
+                  <v-list-item class="px-2 attributeValues" :key="`item-${i}`" :value="i">
+                    <template>
+                      <v-card class="mx-auto mt-2 rounded-card" flat width="100%" height="50px" color="#F5F5F5" style="border-radius: 30px">
+                        <v-row class="px-4">
+                          <v-col cols="7">
+                            <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">{{rating.phraseDescription}}</span>
+                          </v-col>
+                          <v-col cols="5">
+                            <v-list-item-action class="my-0 mx-0">
+                              <v-rating size="18" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
+                            </v-list-item-action>
+                          </v-col>
+                        </v-row>
+                      </v-card>
+                    </template>
+                  </v-list-item>
+                </template>
+              </v-list-item-group>
+
+              <v-row justify="center" class="mt-5">
+                <v-col cols="11" class="pt-1 pb-2" width="100%">
+                  <span class="subtitle-1 " style="font-size: 17px !important;">Share your feedback</span>
+                </v-col>
+              </v-row>
+              <v-row justify="center">
+                <v-col cols="11" class="pt-0 pb-0">
+                  <v-textarea class="commentSection" v-model="commentMenuItem[ind]" label="Tell us what you liked..." outlined single-line auto-grow rows="5" row-height="20"></v-textarea>
+                </v-col>
+              </v-row>
+              <v-row class="mt-1" justify="center">
+                <v-col cols="11" class="pt-0" width="100%">
+                  <v-checkbox v-model="publicValueMenuItem[ind]" class="pt-0" label="Share with public"></v-checkbox>
+                </v-col>
+              </v-row>
+                  
+              <v-row class="mt-6 mb-4" justify="center">
+                <v-col cols="11" class="pt-0" width="100%">
+                  <v-row class="d-flex justify-space-around">
+                    <v-col cols="5" class="pa-0" align="center">
+                      <v-btn v-show="currentIndex != 0" rounded color="#F5F5F5" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showPrevious">Previous</v-btn>
+                    </v-col>
+                    <v-col cols="5" class="pa-0" align="center">
+                      <v-btn v-show="currentIndex != (itemToRate().rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showNext">Next</v-btn>
+                      <v-btn v-show="currentIndex == (itemToRate().rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="submitRating">Submit</v-btn>
+                    </v-col>
+                  </v-row>
+                </v-col>
+              </v-row>
             </v-card>
           </v-tab-item>
         </v-tabs>
+
         <v-card v-else flat tile>
           <v-card class="mx-auto" flat>
             <v-row justify="center" class="mt-2">
@@ -94,65 +100,67 @@
                 <img v-else :src="ratingType.info.img" alt />
               </v-avatar>
             </v-row>
-            <v-row class="mt-8" justify="center">
-              <span  style="font-size: 25px">{{ratingType.info.name}}</span>
+            <v-row class="mt-6 d-flex justify-center" style="text-align: center">
+              <div style="font-size: 22px">{{ratingType.info.name}}</div>
             </v-row>
-            <v-row justify="center" class="mt-3">
-              <v-rating size="30" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
+            <v-row justify="center" class="mt-2">
+              <v-rating size="30" @input="changeFeedback(index, Array.isArray(ratingType.info))" dense color="yellow darken-3" v-model="ratingValue[index]" background-color="secondary" :value=0></v-rating>
             </v-row>
-            <v-row justify="center" class="mt-3 mb-6">
-              <span  style="font-size: 17px; opacity: 0.7" class="font-weight-light">{{ratingFeedback}}</span>
+            <v-row justify="center" class="mt-2 mb-5">
+              <div style="font-size: 17px; opacity: 0.7" class="font-weight-light">{{ratingFeedback[index]}}</div>
             </v-row>
             <v-divider></v-divider>
           </v-card>
-          <v-card class="mx-auto mt-6" flat>
-            <v-row v-for="(rating, i) in ratingType.ratingPhrases" :key="i" justify="center">
-              <v-col cols="11" class="pt-1">
-                <v-card class="mx-auto mt-0 rounded-card" flat width="100%" height="50px" color="#F5F5F5">
-                  <v-row>
-                    <v-col cols="7" align="left" class="pl-8">
-                      <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">{{rating}}</span>
-                    </v-col>
-                    <v-col cols="5" class="pr-6">
-                      <v-rating size="18" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
-                    </v-col>
-                  </v-row>
-                </v-card>
-              </v-col>
-            </v-row>
-            <v-row justify="center" class="mt-4">
-              <v-col cols="11" class="pt-1 pb-2" width="100%">
-                <span class="subtitle-1 " style="font-size: 17px !important;">Share your feedback</span>
-              </v-col>
-            </v-row>
-            <v-row justify="center">
-              <v-col cols="11" class="pt-0 pb-0">
-                <v-textarea class="commentSection" label="Tell us what you liked..." outlined single-line auto-grow  rows="5" row-height="20"></v-textarea>
-              </v-col>
-            </v-row>
-            <v-row class="mt-1" justify="center" v-if="currentIndex != (rating.length - 1)">
-              <v-col cols="11" class="pt-0" width="100%">
-                <v-checkbox class="pt-0" v-model="share[ind]" label="Share with public"></v-checkbox>
-                <!-- <v-btn icon @click="togglePublicRestaurant">
-                  <v-icon color="secondary" v-text="(selectedRestaurant ? 'mdi-check-box-outline' : 'mdi-checkbox-blank-outline')"></v-icon>
-                </v-btn>
-                <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">Share with public</span> -->
-              </v-col>
-            </v-row>
-            <v-row class="mt-6 mb-4" justify="center">
-              <v-col cols="11" class="pt-0" width="100%">
-                <v-row class="d-flex justify-space-around">
-                  <v-col cols="5" class="pa-0" align="center">
-                    <v-btn v-show="currentIndex != 0" rounded color="#F5F5F5" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showPrevious">Previous</v-btn>
-                  </v-col>
-                  <v-col cols="5" class="pa-0" align="center">
-                    <v-btn v-show="currentIndex != (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showNext">Next</v-btn>
-                    <v-btn v-show="currentIndex == (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="submitRating">Submit</v-btn>
-                  </v-col>
-                </v-row>
-              </v-col>
-            </v-row>
-          </v-card>
+          <v-list-item-group v-model="phraseRating[index]" multiple class="mt-6">
+            <template v-for="(rating, i) in ratingType.ratingPhrases">
+              <v-list-item class="px-2 attributeValues" :key="`item-${i}`" :value="i">
+                <template>
+                  <v-card class="mx-auto mt-2 rounded-card" flat width="100%" height="50px" color="#F5F5F5" style="border-radius: 30px">
+                    <v-row class="px-4">
+                      <v-col cols="7">
+                        <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">{{rating.phraseDescription}}</span>
+                      </v-col>
+                      <v-col cols="5">
+                        <v-list-item-action class="my-0 mx-0">
+                          <v-rating size="18" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
+                        </v-list-item-action>
+                      </v-col>
+                    </v-row>
+                  </v-card>
+                </template>
+              </v-list-item>
+            </template>
+          </v-list-item-group>
+
+          <v-row justify="center" class="mt-5">
+            <v-col cols="11" class="pt-1 pb-2" width="100%">
+              <span class="subtitle-1 " style="font-size: 17px !important;">Share your feedback</span>
+            </v-col>
+          </v-row>
+          <v-row justify="center">
+            <v-col cols="11" class="pt-0 pb-0">
+              <v-textarea class="commentSection" v-model="comment[index]" label="Tell us what you liked..." outlined single-line auto-grow rows="5" row-height="20"></v-textarea>
+            </v-col>
+          </v-row>
+          <v-row class="mt-1" justify="center">
+            <v-col cols="11" class="pt-0" width="100%">
+              <v-checkbox v-model="publicValue[index]" class="pt-0" label="Share with public"></v-checkbox>
+            </v-col>
+          </v-row>
+
+          <v-row class="mt-6 mb-4" justify="center">
+            <v-col cols="11" class="pt-0" width="100%">
+              <v-row class="d-flex justify-space-around">
+                <v-col cols="5" class="pa-0" align="center">
+                  <v-btn v-show="currentIndex != 0" rounded color="#F5F5F5" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showPrevious">Previous</v-btn>
+                </v-col>
+                <v-col cols="5" class="pa-0" align="center">
+                  <v-btn v-show="currentIndex != (itemToRate().rating.length.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showNext">Next</v-btn>
+                  <v-btn v-show="currentIndex == (itemToRate().rating.length.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="submitRating">Submit</v-btn>
+                </v-col>
+              </v-row>
+            </v-col>
+          </v-row>
         </v-card>
 
         <v-overlay relative opacity="0.25" :value="submitted" z-index="10">
@@ -179,13 +187,23 @@ export default {
     data() {
     return {
       tab: null,
-      comment: "",
-      ratingFeedback: "",
-      share: [],
-      itemPhraseRatings: [],
-      itemRating: [],
-      selectedRestaurant: false,
-      selectedItemPublic: [],
+
+      // attributes:{
+      //   type:Array
+      // },
+
+      ratingFeedback: [],
+      ratingFeedbackMenuItem: [],
+
+      ratingValue: [],
+      ratingValueMenuItem: [],
+      phraseRating: [],
+      phraseRatingMenuItem: [],
+      comment: [],
+      commentMenuItem: [],
+      publicValue: [],
+      publicValueMenuItem: [],
+
       submitted: false,
       icons: ['mdi-silverware-fork-knife', 'mdi-pasta', 'mdi-account',],
       currentIndex: 0,
@@ -206,7 +224,11 @@ export default {
           info: [{
             name: 'Avo on Toast',
             img: '',
-          },],
+          },
+          {
+            name: 'Classic Breakfast',
+            img: '',
+          }],
           ratingPhrases: [
             'Taste', 'Presentation', 'Value'
           ],
@@ -236,18 +258,25 @@ export default {
         this.currentIndex--;
     },
     showNext () {
-      if (this.currentIndex != this.rating.length - 1)
+      if (this.currentIndex != this.itemToRate().rating.length - 1)
         this.currentIndex++;
     },
     changeTab: function(index) {
       currentTab = index;
     },
     submitRating () {
-      // console.log(this.comment);
-      // console.log(this.share);
-      // console.log(this.itemPhraseRatings[1]);
-      // console.log(this.itemRating);
-      this.submitted = !this.submitted;
+      console.log(this.ratingValue);
+      console.log(this.ratingValueMenuItem);
+
+      console.log(this.phraseRating);
+      console.log(this.phraseRatingMenuItem);
+
+      console.log(this.comment);
+      console.log(this.commentMenuItem);
+
+      console.log(this.publicValue);
+      console.log(this.publicValueMenuItem);
+
     },
     hideAlert () {
       this.$router.push('/')
@@ -255,17 +284,33 @@ export default {
     backNavigation () {
       this.$router.go(-1)
     },
-    changeFeedback(i) {
-      // console.log("entered")
-      if (this.itemRating[i] <= 3)
-        this.ratingFeedback = "Poor"
-      else if (this.itemRating[i] == 4)
-        this.ratingFeedback = "Good"
+    changeFeedback(i, isArray) {
+      let updatedFeedback = "";
+      let itemRating = [];
+
+      if (isArray)
+       itemRating = this.ratingValueMenuItem;
+      else 
+        itemRating = this.ratingValue;
+
+      if (itemRating[i] <= 2)
+        updatedFeedback = "Poor"
+      else if (itemRating[i] == 3)
+        updatedFeedback = "Average"
+      else if (itemRating[i] == 4)
+        updatedFeedback = "Good"
       else
-        this.ratingFeedback = "Excellent"
+        updatedFeedback = "Excellent"
+
+        if (isArray)
+          this.ratingFeedbackMenuItem[i] = updatedFeedback;
+        else
+          this.ratingFeedback[i] = updatedFeedback;
+
     },
     ...mapGetters({
       orderHistory: 'OrderStore/getOrderHistory',
+      itemToRate: 'OrderStore/getItemToRate',
     }),
   },
   computed: {
@@ -284,8 +329,8 @@ export default {
     
   },
   mounted: function () {
-    this.rating[0].info.name = this.filteredList(16).restaurantName
-    this.rating[2].info.name = this.filteredList(16).orderEmployeeName + ' ' + this.filteredList(16).orderEmployeeSurname
+    // this.rating[0].info.name = this.filteredList(16).restaurantName
+    // this.rating[2].info.name = this.filteredList(16).orderEmployeeName + ' ' + this.filteredList(16).orderEmployeeSurname
   }
 };
 </script>

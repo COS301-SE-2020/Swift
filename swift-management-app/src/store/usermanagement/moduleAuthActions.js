@@ -2,43 +2,68 @@ import axios from "@/axios.js"
 import router from "../../router"
 
 export default {
-    login({commit, dispatch}, data) {
-        axios.post('https://api.swiftapp.ml', 
-          {
-            "requestType": "loginAdmin",
-            "email": data.userDetails.email,
-            "password": data.userDetails.password
-          }
-        ).then(result => {
-          commit('SAVE_TOKEN', result.data.token);
-          commit('SAVE_USER', result.data);
-          commit('SET_AUTHENTICATION', true);
-          router.push('/') 
-          //TODO: Load dashboard stats
-          //     this.dispatch('/');
-        }).catch(({ response }) => 
-        {
-          console.log(response);
+  login({
+    commit,
+    dispatch
+  }, data) {
+    return new Promise((resolve, reject) => {
+      axios.post(process.env.VUE_APP_BASEURL, {
+        "requestType": "login",
+        "email": data.userDetails.email,
+        "password": data.userDetails.password
+      }).then(result => {
+        commit('SAVE_TOKEN', result.data.token);
+        commit('SAVE_USER', result.data);
+        commit('SET_AUTHENTICATION', true);
+
+        dispatch("updateUserInfo", {
+          displayName: result.data.name + ' ' + result.data.surname
+        }, {
+          root: true
         });
-    },
-    register({commit}, data) {
-        axios.post('https://api.swiftapp.ml', 
-          {
-            "requestType": "registerAdmin",
-            "name": data.userDetails.name,
-            "surname": data.userDetails.surname,
-            "username": data.userDetails.username,
-            "email": data.userDetails.email,
-            "password": data.userDetails.password
-          }
-        ).then(result => {
-          console.log(result);
-          commit('SAVE_CUSTOMER', result.data);
-        }).catch(({ response }) => {
-          console.log(response);
+        dispatch("updateTheme", "light", {
+          root: true
         });
-      },
-      reset({ commit }) {
-        commit('RESET');
-      },
+        dispatch("updateUserInfo", {
+          photoURL: null
+        }, {
+          root: true
+        });
+
+        console.log(result);
+        resolve(result);
+      }).catch(({
+        response
+      }) => {
+        resolve(response);
+        console.log(response);
+      });
+    });
+  },
+  register({
+    commit
+  }, data) {
+    return new Promise((resolve, reject) => {
+      axios.post(process.env.VUE_APP_BASEURL, {
+        "requestType": "register",
+        "name": data.userDetails.name,
+        "surname": data.userDetails.surname,
+        "email": data.userDetails.email,
+        "password": data.userDetails.password
+      }).then(result => {
+        console.log(result);
+        resolve(result);
+        commit('SAVE_USER', result.data);
+      }).catch(({
+        response
+      }) => {
+        console.log(response);
+      });
+    });
+  },
+  reset({
+    commit
+  }) {
+    commit('RESET');
+  },
 }
