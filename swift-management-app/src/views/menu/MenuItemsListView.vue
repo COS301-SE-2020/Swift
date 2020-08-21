@@ -180,17 +180,27 @@ export default {
       return 0;
     },
     menu() {
-      if (this.restaurantObject.categories)
-        return this.restaurantObject.categories.filter(
-          (i) => i.categoryName === this.currentMenu
-        );
-      else return null;
+      if (this.restaurantObject.categories) {
+        var myMenu = [];
+        this.restaurantObject.categories.forEach((category) => {
+          if (category.categoryName === this.currentMenu) {
+            category.menuItems.forEach((item) => {
+              myMenu.push(item);
+            });
+            this.restaurantObject.categories.forEach((subcategory) => {
+              if (subcategory.parentCategoryId === category.categoryId)
+                subcategory.menuItems.forEach((item) => {
+                  myMenu.push(item);
+                });
+            });
+          }
+        });
+        return myMenu;
+      } else return null;
     },
     menuItems() {
       if (this.menu) {
-        console.log(this.menu);
-        console.log(this.menu[0].menuItems);
-        return this.menu[0].menuItems;
+        return this.menu;
       } else return [];
     },
     queriedItems() {

@@ -26,7 +26,7 @@
           @refresh="closeCardAnimationDemo"
           collapse-action
           :data-item-count="orderCount"
-          :data-progress="0"
+          :data-progress="order.orderProgress"
           :id="'OrderCard'+order.orderId"
         >
           <vs-chip class="employeeName" color="success">Status: {{order.orderStatus}}</vs-chip>
@@ -37,7 +37,7 @@
 
           <vs-divider border-style="solid" color="white"></vs-divider>
           <p>Order Progress:</p>
-          <vs-progress :height="8" :percent="parseInt(0)" :color="getStatusColor(0)"></vs-progress>
+          <vs-progress :height="8" :percent="parseInt(order.orderProgress)" :color="getStatusColor(order.orderProgress)"></vs-progress>
           <vs-list>
             <vs-list-header :title="'Order Total: R'+order.orderTotal"></vs-list-header>
             <div
@@ -178,26 +178,6 @@ export default {
       ).text(this.getMenuItemStatus(progress));
 
       if (currentProgress < 100) {
-        let totalOrderProgress = parseInt(
-          $("#OrderCard" + orderId).attr("data-progress")
-        );
-        let OrderMenuItemCount = parseInt(
-          $("#OrderCard" + orderId).attr("data-item-count")
-        );
-
-        totalOrderProgress += (100 / 3) * (1 / OrderMenuItemCount);
-        if (totalOrderProgress > 95) totalOrderProgress = 100;
-
-        $("#OrderCard" + orderId).attr("data-progress", totalOrderProgress);
-        $("#OrderCard" + orderId + " .vs-progress--foreground").attr(
-          "style",
-          "background: rgba(var(--vs-" +
-            this.getStatusColor(totalOrderProgress) +
-            "),1)!important;width: " +
-            totalOrderProgress +
-            "%"
-        );
-
         this.increaseItemPercentage(orderId, itemId, progress);
       }
     },

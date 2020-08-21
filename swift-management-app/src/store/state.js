@@ -2,10 +2,12 @@ import navbarSearchAndPinList from "@/layouts/components/navbar/navbarSearchAndP
 import baseConfig from "@/../baseConfig.js"
 import colors from "@/../baseConfig.js"
 
+
+
 //User Profile
 var userDefaults = {
   uid: 0, // From Auth
-  displayName: JSON.parse(localStorage.getItem("userInfo")).displayName, // From Auth
+  displayName: "", // From Auth
   about: "I am a driven entrepreneur & third year student at the University or Pretoria studying BSc Information and Knowledge Systems.",
   photoURL: require("@/assets/images/portrait/small/avatar-s-10.jpg"), // From Auth
   status: "online",

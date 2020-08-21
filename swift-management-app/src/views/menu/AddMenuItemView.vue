@@ -4,6 +4,8 @@
       <div class="content-area__heading pr-4">
         <h2 class="mb-1">Add Menu Item</h2>
       </div>
+      <label class="mr-4">Bulk add mode</label>
+      <vs-switch color="success" v-model="bulkAddMode" />
       <vs-divider></vs-divider>
       <vs-button @click="$router.push('/menu')" type="filled" class="mb-4 mr-4">
         <span class="flex items-center">
@@ -309,6 +311,7 @@ import modulemenuList from "@/store/menu/menuDataList.js";
 export default {
   data() {
     return {
+      bulkAddMode: true,
       newCategoryParentName: "",
       newCategoryDescription: "",
       newCategoryType: "primary",
@@ -390,11 +393,14 @@ export default {
       this.$refs.uploadImageInputRef.click();
     },
     updateItemImage() {
+      var file = document.getElementById("uploadImageInput").files[0];
       var reader = new FileReader();
-      reader.readAsDataURL(
-        document.getElementById("uploadImageInput").files[0]
-      );
-      reader.onload = () => {
+
+      if (file && file.type.match("image.*")) {
+        reader.readAsDataURL(file);
+      }
+
+      reader.onloadend = () => {
         this.setItemImagePreview(reader.result);
       };
       reader.onerror = function (error) {
@@ -456,6 +462,9 @@ export default {
               "Your menu item: <b>" + this.itemName + "</b> has been added.",
             color: "success",
           });
+          if (!this.bulkAddMode) {
+            this.$router.push("/menu");
+          }
         });
     },
     restaurantLoaded() {
