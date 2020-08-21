@@ -197,6 +197,8 @@ const actions = {
         "orderProgress": result.data.orderProgress,
         "itemProgress": result.data.itemProgress
       }
+      console.log("herethis")
+      console.log(result.data.itemProgress)
       commit('UPDATE_ORDER_STATUS', data);
     }).catch(({ response }) => {
     });
@@ -259,6 +261,15 @@ const mutations = {
     )
 
     item.progress = data.orderProgress;
+
+    for (let i = 0; i < data.itemProgress.length; i++) {
+      var obj = item.items.find(item => 
+        item.menuitemid == data.itemProgress[i].menuItemId
+      )
+      obj.progress = data.itemProgress[i].progress
+    }
+
+    
   },
 
   UPDATE_ORDER_HISTORY(state, orderInformation) {

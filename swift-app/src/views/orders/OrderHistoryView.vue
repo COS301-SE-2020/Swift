@@ -213,7 +213,7 @@ export default {
       var orderItem = (this.orderHistory.find(orderItem => {
         return parseInt(orderItem.progress) < 100 || orderItem.orderStatus == "Received"
       }))
-
+      // console.log(orderItem.progress)
       return orderItem;
     },
     createOrderObject(item) {
@@ -371,7 +371,7 @@ export default {
           }
           self.orderStatus(data)
         }
-      }, 3000);  
+      }, 5000);  
     },
     ...mapActions({
       addItemToOrder: "OrderStore/addItemToOrder",
@@ -410,7 +410,7 @@ export default {
     'NavBar': NavBar
   },
   beforeMount: function() {
-    // this.updateOrderStatus();
+    this.updateOrderStatus();
   },
   
 }
