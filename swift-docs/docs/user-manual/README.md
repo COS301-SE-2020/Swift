@@ -1,7 +1,5 @@
 # User Manual
 
-![user-manual](../../assets/user-manual-front.png)
-
 Here is a link to the user manual versions that gives an overview of the Swift system and the different components related to the system:
 
 Version 1:
