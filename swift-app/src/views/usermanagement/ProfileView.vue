@@ -69,7 +69,9 @@
         </v-card>
       </v-tab-item>
     </v-tabs-items>
-
+    <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
+      <v-icon>mdi-cart-outline</v-icon>
+    </v-btn>
     <NavBar></NavBar>
   </v-card>
   <!-- <div class="profile">
@@ -127,10 +129,25 @@ export default {
       setCheckedInRestaurantId : 'CustomerStore/SET_CHECKED_IN_RESTAURANT_ID',
       setCheckedInTableId : 'CustomerStore/SET_CHECKED_IN_TABLE_ID',
     }),
+    checkedIn() {
+      let checkedInVal = this.checkedInQRCode;
+      let checkedInRestaurantId = this.checkedInRestaurantId;
+
+      if (checkedInVal != null && checkedInRestaurantId != null) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    goToCart() {
+      this.$router.push('/cart')
+    },
   },
   computed: {
     ...mapGetters({
       customerInfo: 'CustomerStore/getCustomerProfile',
+      checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
+      checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
     }),
     ...mapActions({
       loadCustomer: 'CustomerStore/loadCustomer',

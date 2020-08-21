@@ -118,7 +118,6 @@ const actions = {
   },
 
   submitPayment({commit}) {
-    console.log(data)
     axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "payment",
@@ -172,7 +171,7 @@ const actions = {
     ).then(result => {
       var data = {
         "orderId": orderId,
-        "orderProgress": result.data.orderProgress ,
+        "orderProgress": result.data.orderProgress,
         "itemProgress": result.data.itemProgress
       }
       commit('UPDATE_ORDER_STATUS', data);

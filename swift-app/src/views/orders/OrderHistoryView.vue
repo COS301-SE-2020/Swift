@@ -138,6 +138,9 @@
         </v-tab-item>
       </v-tabs-items>
     </v-container>
+    <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
+      <v-icon>mdi-cart-outline</v-icon>
+    </v-btn>
     <NavBar></NavBar>
   </v-container>
 </template>
@@ -206,9 +209,12 @@ export default {
       })
     },
     getOrderStatusItem() {
-      return (this.orderHistory.find(orderItem => {
+      
+      var orderItem = (this.orderHistory.find(orderItem => {
         return parseInt(orderItem.progress) < 100 || orderItem.orderStatus == "Received"
       }))
+
+      return orderItem;
     },
     createOrderObject(item) {
       let itemsOrdered = [];
@@ -237,7 +243,6 @@ export default {
       return data;
     },
     async rateOrder(item) {
-      console.log(item)
       this.isLoadingCartItem = true;
 
       let objectsToRate = [];
@@ -276,7 +281,6 @@ export default {
         "orderId": item.orderId
       }
 
-      console.log(data)
 
       // if (menuRetrieved) {
       this.addItemToRate(data)
@@ -297,6 +301,9 @@ export default {
       }
 
       this.$router.push("/cart");
+    },
+    goToCart() {
+      this.$router.push('/cart')
     },
 
     async filterPhrases(type) {
@@ -374,6 +381,16 @@ export default {
       orderStatus: 'OrderStore/retrieveOrderStatus',
       ratingPhrasesRestaurant: 'OrderStore/ratingPhrasesRestaurant',
     }),
+    checkedIn() {
+      let checkedInVal = this.checkedInQRCode;
+      let checkedInRestaurantId = this.checkedInRestaurantId;
+
+      if (checkedInVal != null && checkedInRestaurantId != null) {
+        return true;
+      } else {
+        return false;
+      }
+    },
   },
   computed: {
     filteredList() {
@@ -385,6 +402,7 @@ export default {
       orderHistory: 'CustomerStore/getCustomerOrderHistory',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
       allRestaurants: 'RestaurantsStore/getAllRestaurants',
+      checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
     }),
     
   },
@@ -392,6 +410,7 @@ export default {
     'NavBar': NavBar
   },
   beforeMount: function() {
+    // this.updateOrderStatus();
   },
   
 }
