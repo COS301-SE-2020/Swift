@@ -151,27 +151,54 @@ const getMenuItems = (restaurantId = 0, categoryId = 0) => {
 };
 
 module.exports = {
-  getFavourites: (userId = 0) => db.query(
-    'SELECT menuitem.menuitemid, menuitem.menuitemname, menuitem.menuitemdescription,'
-    + ' restaurant.restaurantid, restaurant.restaurantname FROM public.menuitem'
-    + ' INNER JOIN public.restaurant ON menuitem.restaurantid = restaurant.restaurantid'
-    + ' INNER JOIN public.favourite ON menuitem.menuitemid = favourite.menuitemid'
-    + ' WHERE favourite.userid = $1::integer;',
-    [userId]
-  )
-    .then((res) => {
+  getFavourites: (userId = 0) => (async () => {
+    const client = await db.connect();
+    try {
+      // begin transaction
+      await client.query('BEGIN');
+      const res = await client.query(
+        'SELECT menuitem.menuitemid, menuitem.menuitemname, menuitem.menuitemdescription,'
+          + ' restaurant.restaurantid, restaurant.restaurantname FROM public.menuitem'
+          + ' INNER JOIN public.restaurant ON menuitem.restaurantid = restaurant.restaurantid'
+          + ' INNER JOIN public.favourite ON menuitem.menuitemid = favourite.menuitemid'
+          + ' WHERE favourite.userid = $1::integer;',
+        [userId]
+      );
+
       const favouritesArr = [];
-      res.rows.forEach((fav) => {
+      for (let f = 0; f < res.rows.length; f++) {
         const favItem = {};
-        favItem.restaurantId = fav.restaurantid;
-        favItem.restaurantName = fav.restaurantname;
-        favItem.menuItemId = fav.menuitemid;
-        favItem.menuItemName = fav.menuitemname;
-        favItem.menuItemDescription = fav.menuitemdescription;
+        favItem.restaurantId = res.rows[f].restaurantid;
+        favItem.restaurantName = res.rows[f].restaurantname;
+        favItem.menuItemId = res.rows[f].menuitemid;
+        favItem.menuItemName = res.rows[f].menuitemname;
+        favItem.menuItemDescription = res.rows[f].menuitemdescription;
+        favItem.images = [];
+
+        // menu item images
+        // eslint-disable-next-line no-await-in-loop
+        const menuItemImages = await client.query(
+          'SELECT imageurl FROM public.menuitemimages WHERE menuitemid = $1::integer',
+          [res.rows[f].menuitemid]
+        );
+
+        menuItemImages.rows.forEach((menuImg) => {
+          favItem.images.push(menuImg.imageurl);
+        });
+
         favouritesArr.push(favItem);
-      });
+      }
+
+      // commit and return favourites array
+      await client.query('COMMIT');
       return favouritesArr;
-    })
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+  })()
     .catch((err) => {
       console.error('Query Error [Favourites - Get User Favourites]', err.stack);
       return [];
