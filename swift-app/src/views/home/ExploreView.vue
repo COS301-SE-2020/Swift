@@ -14,9 +14,9 @@
             <v-btn class="mr-4" elevation="2" width="35px" height="35px" @click="callWaiter" :key="activeCall.icon" :color="activeCall.color" small fab>
               <v-icon size="23px" :style="called ? { 'transform': 'rotate(45deg)' } : { 'transform': 'rotate(0deg)' }">{{ activeCall.icon }}</v-icon>
             </v-btn>
-            <v-btn v-if="checkedIn()" @click="goToCart" elevation="2" width="35px" height="35px" small fab>
+            <!-- <v-btn v-if="checkedIn()" @click="goToCart" elevation="2" width="35px" height="35px" small fab>
               <v-icon size="23px">mdi-cart-outline</v-icon>
-            </v-btn>
+            </v-btn> -->
           </v-col>
         </v-row>
 
@@ -185,6 +185,9 @@
       </div>
       <div v-else class="pl-1 py-0 restaurantLocation font-weight-light" style="display: inline; font-size: 15px">No search results...</div>
     </v-container>  
+    <v-btn v-if="checkedIn" @click="goToCart" fixed app color="primary" width="52px" height="52px" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
+      <v-icon>mdi-cart-outline</v-icon>
+    </v-btn>
     <NavBar></NavBar>
   </v-container>
 </template>
@@ -356,7 +359,6 @@ export default {
       allRestaurants: 'RestaurantsStore/getAllRestaurants',
       exploreCategories: 'RestaurantsStore/getExploreCategories',
       customerInfo: 'CustomerStore/getCustomerProfile',
-      // checkedInStatus: 'CustomerStore/getCheckedInStatus',
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
     }),
