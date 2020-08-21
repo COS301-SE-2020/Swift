@@ -38,7 +38,7 @@
 
         <v-row no-gutters d-flex flex-row >
           <v-col cols="11">
-            <v-text-field class="searchBarBg" background-color="red" v-model="search" rounded solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search by name or category"></v-text-field>
+            <v-text-field class="searchBarBg" background-color="red" v-model="search" rounded solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search for a restaurant..."></v-text-field>
           </v-col>
           <v-col cols="1" class="d-flex align-center px-0">
             <v-btn small icon color="primary">
