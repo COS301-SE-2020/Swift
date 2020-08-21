@@ -44,6 +44,24 @@
             </v-list-item-action>
           </v-list-item>
         </v-list>
+        <!-- Test check out -->
+        <v-list subheader>
+          <v-list-item @click=checkOut()  v-ripple>
+            <v-list-item-avatar>
+              <v-icon>mdi-logout</v-icon>
+            </v-list-item-avatar>
+            <v-list-item-content>
+              <v-list-item-title >Check out</v-list-item-title>
+            </v-list-item-content>
+
+            <v-list-item-action>
+              <v-btn icon>
+                <v-icon color="secondary">mdi-chevron-right</v-icon>
+              </v-btn>
+            </v-list-item-action>
+          </v-list-item>
+        </v-list>
+
       </v-tab-item>
       <v-tab-item>
         <v-card flat>
@@ -69,7 +87,7 @@
 <script>
 import NavBar from '@/components/layout/NavBar';
 import store from '@/store/store.js';
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions, mapGetters, mapMutations } from 'vuex'
 
 export default {
   data: () => ({
@@ -97,6 +115,18 @@ export default {
     },
     editProfile () {
     },
+    async checkOut() {
+      await this.checkout
+      await this.setCheckedInQRCode (null)
+      await this.setCheckedInRestaurantId (null)
+      await this.setCheckedInTableId (null)
+      this.$router.push('/')
+    },
+    ...mapMutations({
+      setCheckedInQRCode : 'CustomerStore/SET_CHECKED_IN_CODE',
+      setCheckedInRestaurantId : 'CustomerStore/SET_CHECKED_IN_RESTAURANT_ID',
+      setCheckedInTableId : 'CustomerStore/SET_CHECKED_IN_TABLE_ID',
+    }),
   },
   computed: {
     ...mapGetters({
@@ -104,8 +134,9 @@ export default {
     }),
     ...mapActions({
       loadCustomer: 'CustomerStore/loadCustomer',
-      reset: 'CustomerStore/reset', 
-    })
+      checkout: 'CustomerStore/checkOutCustomer', 
+    }),
+    
   }
 }
 </script>

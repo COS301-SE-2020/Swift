@@ -21,10 +21,8 @@ const Oauth2Client = new google.auth.OAuth2(
 
 // TODO: Check if account is active
 const loginUser = (userEmail, userName, response) => db.query(
-  'SELECT person.userid, person.name, person.surname, person.email,'
-    + ' customer.theme FROM public.person'
-    + ' INNER JOIN public.customer ON customer.userid = person.userid'
-    + ' WHERE person.email = $1::text',
+  'SELECT userid, name, surname, email, password, theme, checkedin'
+  + ' FROM public.person WHERE person.email = $1::text',
   [userEmail]
 )
 // eslint-disable-next-line consistent-return

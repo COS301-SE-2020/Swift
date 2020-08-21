@@ -1,5 +1,8 @@
 <template>
   <v-container fill-height>
+    <!-- <div v-if="googleAuthActive" fill-height fill-width>
+      <iframe style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:10;" :src="googleAuthUrl"  frameborder="0"></iframe>
+    </div> -->
     <div class="row d-flex flex-column align-center">
       <div class="display-2 mb-2">Swift</div>
       <div class="title">Contactless Dining</div>
@@ -14,13 +17,11 @@
           <p class="body-2 float-right" color="secondary"><u>Forgot Password?</u></p>
         </v-btn>
       </v-col>
-      <!-- <v-col cols="10" class="py-0 mb-0 d-flex flex-column align-center">
-        <p class="body-2 py-0 mb-0" style="color: red">Username or password incorrect</p>
-      </v-col> -->
     </div>
     <div class="row d-flex flex-column align-center mx-8">
       <v-btn @click="loginCustomer" v-show=!isLoading block rounded class="py-5" color="primary">Sign in</v-btn>
       <v-progress-circular v-show="isLoading" indeterminate color="primary"></v-progress-circular>
+      <v-input class="mt-2" v-show=loginFailed :error-messages=errorMsg error disabled></v-input>
     </div>
     <div class="row d-flex flex-col align-center justify-center">
       <v-col cols="2">
@@ -60,7 +61,10 @@ export default {
       password: 'john123',
       email: 'john@doe.com',
       isLoading: false,
-      errorMsg: '',
+      errorMsg: '*Login Failed',
+      loginFailed: false,
+      // googleAuthUrl: '',
+      // googleAuthActive: false
     }
   },
   methods: {
@@ -83,14 +87,44 @@ export default {
         
         let user = await this.login(data);
         this.isLoading = !this.isLoading;
+        this.loginFailed = false
         if (user == "Success") 
           this.$router.push('/');
+        else 
+          this.loginFailed = true
+
       }
     },
+    /* loginWithGoogle () {
+      this.$gAuth
+      .signIn()
+      .then(GoogleUser => {
+        // on success do something
+        console.log('GoogleUser', GoogleUser)
+        console.log('getId', GoogleUser.getId())
+        console.log('getBasicProfile', GoogleUser.getBasicProfile())
+        console.log('getAuthResponse', GoogleUser.getAuthResponse())
+        var userInfo = {
+          loginType: 'google',
+          google: GoogleUser.getAuthResponse(),
+        }
+        // this.$store.commit('setLoginUser', userInfo)
+        this.googleLogin(userInfo);
+        this.$router.push('/');
+      })
+      .catch(error => {
+        console.log('error', error)
+      })
+    }, */
     async loginWithGoogle () {
+      this.googleAuthActive = true;
       let url = await this.googleLogin();
-      window.location.href = url;
-      this.$router.push('/');
+      // this.googleAuthUrl = url;
+      // window.location.href = url;
+      console.log(new URL(url).searchParams.get('code'))
+
+
+      // this.$router.push('/');
     },
     ...mapGetters({
       isAuthenticated: 'isAuthenticated',

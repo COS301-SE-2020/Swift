@@ -5,49 +5,22 @@
         <div class="backgroundImage" style="margin-top: 0px">
           <v-row style="margin-top: -12px; margin-bottom: 10px"> 
             <v-col cols="12" class="pt-0 px-0 pb-0">
-              <!-- <v-btn width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 20px; left: 10px;">
-                <v-icon>mdi-chevron-left</v-icon>
-              </v-btn> -->
               <v-carousel height="200px" :show-arrows="false" hide-delimiter cycle hide-delimiters continuous>
                 <v-carousel-item gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.4)" :src="menu.image">
-                    <v-row  align="center" justify="center" class="mt-6">
-                      <div class="white--text display-1">Welcome to<br/> {{menu.name}}</div>
-                    </v-row>
-                    <v-row no-gutters d-flex flex-row align="center" justify="center" class="fill-height">
-                      <v-col cols="10" style="z-index: 11">
-                        <v-autocomplete style="bottom: 50px;" rounded background-color="white" color="secondary" :items="items" :search-input.sync="search" chips clearable hide-details hide-selected item-text="name" item-value="symbol" label="What would you like to order?" prepend-inner-icon="mdi-magnify" solo>
-                          <template v-slot:no-data>
-                            <v-list-item>
-                              <v-list-item-title>
-                                Search for
-                                <strong>food or drinks</strong>
-                              </v-list-item-title>
-                            </v-list-item>
-                          </template>
-                          <template v-slot:selection="{ item }">
-                              <v-icon left>mdi-coin</v-icon>
-                              <span class="black--text" v-text="item.name"></span>
-                          </template>
-                          <template v-slot:item="{ item }">
-                            <v-list-item-avatar color="grey darken-4" size="35px">
-                              <img src="https://source.unsplash.com/800x800/?cake" alt="" >
-                            </v-list-item-avatar>
-                            <v-list-item-content>
-                              <v-list-item-title v-text="item.name"></v-list-item-title>
-                              <v-list-item-subtitle v-text="item.symbol"></v-list-item-subtitle>
-                            </v-list-item-content>
-                            <v-list-item-action>
-                              <v-icon>mdi-coin</v-icon>
-                            </v-list-item-action>
-                          </template>
-                        </v-autocomplete>
-                        
-                      </v-col>
-                    </v-row>
-                    
+                  <v-row  align="center" justify="center" class="mt-6">
+                    <div class="white--text display-1">Welcome to<br/> {{menu.name}}</div>
+                    <v-col cols="10" class="mt-3">
+                      <v-text-field background-color="white" class="menuItemSearchbar"  v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search by name or category"></v-text-field>
+                    </v-col>
+                    <v-col cols="1" class="d-flex align-center px-0 mt-3">
+                      <v-btn small icon color="white">
+                        <v-icon size="24px">mdi-filter-variant</v-icon> 
+                      </v-btn>
+                    </v-col>
+                  </v-row>
                 </v-carousel-item>
               </v-carousel>
-              <v-btn width="30px" height="30px" @click="callWaiter" :key="activeCall.icon" :color="activeCall.color" absolute small fab style="top: 20px; right: 10px;">
+              <v-btn width="30px" height="30px" @click="callWaiterPressed" :key="activeCall.icon" :color="activeCall.color" absolute small fab style="top: 20px; right: 10px;">
                 <v-icon :style="called ? { 'transform': 'rotate(45deg)' } : { 'transform': 'rotate(0deg)' }">{{ activeCall.icon }}</v-icon>
               </v-btn>
             </v-col>
@@ -77,21 +50,17 @@ export default {
     called: false
   }),
   methods: {
-    showFilters () {
-      this.toolbarExpanded = !this.toolbarExpanded   
-      this.expand = !this.expand
-      
-      if (!this.toolbarExpanded) {
-        this.toolbarHeight = '140px';
-      } else {
-        this.toolbarHeight = '200px';
-      }
-    },
     backNavigation () {
       this.$router.push("/");
     },
-    callWaiter() {
-      this.called = !this.called;
+    callWaiterPressed() {
+      var tableId = localStorage.getItem('checkedInTableId');
+      this.callWaiter(tableId)
+      this.called = !this.called; 
+      
+      setTimeout(function() { 
+        this.called = !this.called;
+      }, 5000);
     }
   },
   watch: {
@@ -116,6 +85,9 @@ export default {
     },
   },
   computed: {
+    ...mapActions({
+      callWaiter: 'CustomerStore/callWaiter',
+    }),
     ...mapGetters({
       menu: "MenuStore/getMenu"
     }),
@@ -143,9 +115,10 @@ label {
 .v-text-field--rounded > .v-input__control > .v-input__slot {
   padding-left: 18px;
 }
-.searchBarBg .v-input__slot {
+.menuItemSearchbar {
   background: rgba(0, 0, 0, 0.06) !important;
   caret-color: #343434 !important;
   color: #343434 !important;
 }
+
 </style>

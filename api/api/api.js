@@ -2,6 +2,7 @@ const express = require('express');
 const adminController = require('./controller/adminController');
 const authController = require('./controller/authController');
 const restaurantController = require('./controller/restaurantController');
+const restaurantAdminController = require('./controller/restaurantAdminController');
 const userController = require('./controller/userController');
 const healthCheck = require('./helper/healthCheck');
 
@@ -42,12 +43,20 @@ router.post('/', (req, res) => {
         userController.registerUser(req.body, res);
         break;
       }
-      case 'registerAdmin': {
-        adminController.registerAdmin(req.body, res);
-        break;
-      }
       case 'login': {
         userController.loginUser(req.body, res);
+        break;
+      }
+      case 'reset': { //  for the reset password
+        userController.resetPassword(req.body, res);
+        break;
+      }
+      case 'verify': {
+        userController.verifyToken(req.body, res);
+        break;
+      }
+      case 'updatePassword': {
+        userController.updatePassword(req.body, res);
         break;
       }
       case 'loginAdmin': {
@@ -78,12 +87,36 @@ router.post('/', (req, res) => {
         restaurantController.getRestaurantList(req.body, res);
         break;
       }
+      case 'allRestaurantCategories': {
+        restaurantController.getRestaurantCategories(req.body, res);
+        break;
+      }
+      case 'addMenuCategory': {
+        restaurantAdminController.addMenuCategory(req.body, res);
+        break;
+      }
+      case 'addMenuItem': {
+        restaurantAdminController.addMenuItem(req.body, res);
+        break;
+      }
+      case 'listAdminRestaurants': {
+        restaurantAdminController.getRestaurantList(req.body, res);
+        break;
+      }
       case 'createRestaurant': {
-        restaurantController.createRestaurant(req.body, res);
+        restaurantAdminController.createRestaurant(req.body, res);
         break;
       }
       case 'checkin': {
         restaurantController.checkIn(req.body, res);
+        break;
+      }
+      case 'checkout': {
+        restaurantController.checkOut(req.body, res);
+        break;
+      }
+      case 'callWaiter': {
+        restaurantController.callWaiter(req.body, res);
         break;
       }
       case 'restaurantMenu': {
@@ -91,7 +124,7 @@ router.post('/', (req, res) => {
         break;
       }
       case 'createTable': {
-        restaurantController.createTable(req.body, res);
+        restaurantAdminController.createTable(req.body, res);
         break;
       }
       case 'getTableQR': {
@@ -99,7 +132,7 @@ router.post('/', (req, res) => {
         break;
       }
       case 'getTableStatus': {
-        restaurantController.getTableStatus(req.body, res);
+        restaurantAdminController.getTableStatus(req.body, res);
         break;
       }
       case 'addOrder': {
@@ -110,8 +143,12 @@ router.post('/', (req, res) => {
         restaurantController.listOrders(req.body, res);
         break;
       }
+      case 'updateOrder': {
+        restaurantController.updateOrder(req.body, res);
+        break;
+      }
       case 'orderStatusUpdate': {
-        restaurantController.updateOrderStatus(req.body, res);
+        restaurantAdminController.updateOrderStatus(req.body, res);
         break;
       }
       case 'orderStatus': {
@@ -120,6 +157,14 @@ router.post('/', (req, res) => {
       }
       case 'payment': {
         restaurantController.orderPayment(req.body, res);
+        break;
+      }
+      case 'addReview': {
+        restaurantController.addReview(req.body, res);
+        break;
+      }
+      case 'ratingPhrases': {
+        restaurantController.getRatingPhrases(req.body, res);
         break;
       }
       default: {

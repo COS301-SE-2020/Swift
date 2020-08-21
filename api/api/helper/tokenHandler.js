@@ -19,10 +19,9 @@ const tokenState = {
 
 module.exports = {
   tokenState,
-  generateToken: (userId, isAdmin = false) => {
+  generateToken: (userId) => {
     const payload = {
       userId,
-      isAdmin,
       refreshToken: b62.encode(Buffer.from(uuidv4(), 'utf8'))
     };
 
