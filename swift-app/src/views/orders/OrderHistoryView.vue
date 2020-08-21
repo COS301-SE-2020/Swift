@@ -177,7 +177,6 @@ export default {
       this.$router.push('/rating')
     },
     viewOrder (item) {
-      this.clearOrder()
       this.addOrder(item)
     },
     calculateFullTotal(item) {
@@ -247,21 +246,37 @@ export default {
 
       this.$router.push("/cart");
     },
+    // calculateTotal(item) {
+    //   let total = 0;
+    //   if (Object.keys(item).length != 0) {
+        
+    //     for (let i = 0; i < item.items.length; i++) {
+    //       total += (item.items[i].itemTotal != null) ? parseFloat(item.items[i].itemTotal): 0;
+    //     }
+        
+    //     // total += parseFloat(total * 0.14);
+    //     // total += parseFloat(item.waiterTip);
+    //   }
+    //   return total;
+    // },
     payForOrder(item) {
 
-      console.log(this.paymentInfo)
+      // console.log(item)
       // if ()
       let data = {
         "orderId": item.orderId,
         "paymentMethod": "Card",
         "restaurantName": item.restaurantName,
         "menuItemName": item.items[0].menuItemName,
-        "amountPaid": parseFloat((item.orderTax != null) ? item.orderTax : 0) + parseFloat((item.orderTotal != null) ? item.orderTotal : 0) + parseFloat((item.waiterTip != null) ? item.waiterTip : 0),
+        "amountPaid": parseFloat(this.calculateTotal(item)) + parseFloat((item.waiterTip != null) ? item.waiterTip : 0) + parseFloat(this.calculateTotal(item) * 0.14),
         "waiterTip": parseFloat((item.waiterTip != null) ? item.waiterTip : 0),
         "orderTax": parseFloat(this.calculateTotal(item) * 0.14)
       }
 
       this.addPaymentInfo(data);
+      // console.log(item)
+      console.log("payment")
+      console.log(data)
       this.$router.push("/paymentinformation");
 
     },

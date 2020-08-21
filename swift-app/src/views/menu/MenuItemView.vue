@@ -429,12 +429,14 @@ export default {
     },
     addToOrder() {;
       let selectionValues = [];
-      for (let i = 0; i < this.newMenuItem.attributes.attributes.length; i++) {
-        let data = {
-          "name": $('.label').eq(i).text(),
-          "values": this.model[i]
-        };
-        selectionValues[i] = data;
+      if(this.newMenuItem.attributes != null) {
+        for (let i = 0; i < this.newMenuItem.attributes.attributes.length; i++) {
+          let data = {
+            "name": $('.label').eq(i).text(),
+            "values": this.model[i]
+          };
+          selectionValues[i] = data;
+        }
       }
 
       let data = {
