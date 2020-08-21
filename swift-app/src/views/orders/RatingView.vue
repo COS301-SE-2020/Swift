@@ -1,6 +1,6 @@
 <template>
   <v-container fluid>
-    <v-row v-for="(ratingType, index) in rating" :key="index">
+    <v-row v-for="(ratingType, index) in itemToRate().rating" :key="index">
       <v-container v-show="currentIndex == index">
         <v-card class="mx-auto" flat>
           <v-row class="mt-3">
@@ -27,8 +27,8 @@
                     <img v-else :src="item.img" alt />
                   </v-avatar>
                 </v-row>
-                <v-row class="mt-6" justify="center">
-                  <div style="font-size: 25px">{{item.name}}</div>
+                <v-row class="mt-6 d-flex justify-center" style="text-align: center">
+                  <div style="font-size: 22px">{{item.name}}</div>
                 </v-row>
                 <v-row justify="center" class="mt-2">
                   <v-rating size="30" @input="changeFeedback(ind, Array.isArray(ratingType.info))" v-model="ratingValueMenuItem[ind]" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
@@ -45,7 +45,7 @@
                       <v-card class="mx-auto mt-2 rounded-card" flat width="100%" height="50px" color="#F5F5F5" style="border-radius: 30px">
                         <v-row class="px-4">
                           <v-col cols="7">
-                            <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">{{rating}}</span>
+                            <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">{{rating.phraseDescription}}</span>
                           </v-col>
                           <v-col cols="5">
                             <v-list-item-action class="my-0 mx-0">
@@ -69,7 +69,7 @@
                   <v-textarea class="commentSection" v-model="commentMenuItem[ind]" label="Tell us what you liked..." outlined single-line auto-grow rows="5" row-height="20"></v-textarea>
                 </v-col>
               </v-row>
-              <v-row class="mt-1" justify="center" v-if="currentIndex != (rating.length - 1)">
+              <v-row class="mt-1" justify="center">
                 <v-col cols="11" class="pt-0" width="100%">
                   <v-checkbox v-model="publicValueMenuItem[ind]" class="pt-0" label="Share with public"></v-checkbox>
                 </v-col>
@@ -82,8 +82,8 @@
                       <v-btn v-show="currentIndex != 0" rounded color="#F5F5F5" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showPrevious">Previous</v-btn>
                     </v-col>
                     <v-col cols="5" class="pa-0" align="center">
-                      <v-btn v-show="currentIndex != (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showNext">Next</v-btn>
-                      <v-btn v-show="currentIndex == (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="submitRating">Submit</v-btn>
+                      <v-btn v-show="currentIndex != (itemToRate().rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showNext">Next</v-btn>
+                      <v-btn v-show="currentIndex == (itemToRate().rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="submitRating">Submit</v-btn>
                     </v-col>
                   </v-row>
                 </v-col>
@@ -100,8 +100,8 @@
                 <img v-else :src="ratingType.info.img" alt />
               </v-avatar>
             </v-row>
-            <v-row class="mt-6" justify="center">
-              <div style="font-size: 25px">{{ratingType.info.name}}</div>
+            <v-row class="mt-6 d-flex justify-center" style="text-align: center">
+              <div style="font-size: 22px">{{ratingType.info.name}}</div>
             </v-row>
             <v-row justify="center" class="mt-2">
               <v-rating size="30" @input="changeFeedback(index, Array.isArray(ratingType.info))" dense color="yellow darken-3" v-model="ratingValue[index]" background-color="secondary" :value=0></v-rating>
@@ -118,7 +118,7 @@
                   <v-card class="mx-auto mt-2 rounded-card" flat width="100%" height="50px" color="#F5F5F5" style="border-radius: 30px">
                     <v-row class="px-4">
                       <v-col cols="7">
-                        <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">{{rating}}</span>
+                        <span class="subtitle-1 font-weight-light" style="font-size: 17px !important;">{{rating.phraseDescription}}</span>
                       </v-col>
                       <v-col cols="5">
                         <v-list-item-action class="my-0 mx-0">
@@ -142,7 +142,7 @@
               <v-textarea class="commentSection" v-model="comment[index]" label="Tell us what you liked..." outlined single-line auto-grow rows="5" row-height="20"></v-textarea>
             </v-col>
           </v-row>
-          <v-row class="mt-1" justify="center" v-if="currentIndex != (rating.length - 1)">
+          <v-row class="mt-1" justify="center">
             <v-col cols="11" class="pt-0" width="100%">
               <v-checkbox v-model="publicValue[index]" class="pt-0" label="Share with public"></v-checkbox>
             </v-col>
@@ -155,8 +155,8 @@
                   <v-btn v-show="currentIndex != 0" rounded color="#F5F5F5" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showPrevious">Previous</v-btn>
                 </v-col>
                 <v-col cols="5" class="pa-0" align="center">
-                  <v-btn v-show="currentIndex != (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showNext">Next</v-btn>
-                  <v-btn v-show="currentIndex == (rating.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="submitRating">Submit</v-btn>
+                  <v-btn v-show="currentIndex != (itemToRate().rating.length.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="showNext">Next</v-btn>
+                  <v-btn v-show="currentIndex == (itemToRate().rating.length.length - 1)" rounded color="primary" elevation="2" class="mr-2 body-2" width="90%" height="41px" @click="submitRating">Submit</v-btn>
                 </v-col>
               </v-row>
             </v-col>
@@ -258,7 +258,7 @@ export default {
         this.currentIndex--;
     },
     showNext () {
-      if (this.currentIndex != this.rating.length - 1)
+      if (this.currentIndex != this.itemToRate().rating.length - 1)
         this.currentIndex++;
     },
     changeTab: function(index) {
@@ -310,6 +310,7 @@ export default {
     },
     ...mapGetters({
       orderHistory: 'OrderStore/getOrderHistory',
+      itemToRate: 'OrderStore/getItemToRate',
     }),
   },
   computed: {

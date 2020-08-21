@@ -54,7 +54,6 @@ const actions = {
         "token": sessionStorage.getItem('authToken'),
       }
     ).then(result => {
-      // commit('SET_CHECKED_IN_STATUS', true);
       commit('SET_CHECKED_IN_CODE', data.qrcode);
       commit('SET_CHECKED_IN_RESTAURANT_ID', result.data.restaurantId);
       commit('SET_CHECKED_IN_TABLE_ID', result.data.tableId);
@@ -81,7 +80,6 @@ const actions = {
         "password": data.password
       }
     ).then(result => {
-      console.log(result.data.checkedIn)
       commit('SAVE_TOKEN', result.data.token);
       sessionStorage.setItem('authToken', result.data.token);
       commit('SET_CHECKED_IN_CODE', result.data.checkedIn);
@@ -99,14 +97,14 @@ const actions = {
       "requestType": "loginGoogle"
     } 
     ).then(result => {
-      return response.data.url
+      return result.data.url
     }).catch(({ response }) => {
       return response.data.url
     });
   },
 
   register({commit}, data) {
-    axios.post('https://api.swiftapp.ml', 
+    return axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "register",
         "name": data.name,
@@ -115,12 +113,10 @@ const actions = {
         "password": data.password
       }
     ).then(result => {
-      console.log("Register")
-      console.log(result.data)
-      console.log(data)
       this.dispatch('CustomerStore/login', data);
-    }).catch(({ response }) => {
-    });
+    }).then(result => {
+      return true;
+    })
   },
   
 

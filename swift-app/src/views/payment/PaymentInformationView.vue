@@ -224,7 +224,7 @@ export default {
     },
     calculateTotal() {
       // console.log(this.paymentInfo().waiterTip)
-      return (parseFloat((this.paymentInfo().orderTax != null) ? this.paymentInfo().orderTax : 0) + parseFloat((this.paymentInfo().orderTotal != null) ? this.paymentInfo().orderTotal : 0) + parseFloat((this.paymentInfo().waiterTip != null) ? this.paymentInfo().waiterTip : 0)).toFixed(2)
+      return (parseFloat((this.paymentInfo().amountPaid != null) ? this.paymentInfo().amountPaid : 0)).toFixed(2)
     },
     showPopUp() {
       console.log("in here2")

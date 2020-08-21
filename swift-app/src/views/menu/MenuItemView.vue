@@ -5,15 +5,18 @@
         <v-icon>mdi-close</v-icon>
       </v-btn>
       <span class="title black--text" style=" position: absolute; z-index:11; top: 20px; left: 65px">{{newMenuItem.menuItemName}}</span>
-      <iframe style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:10;" :src="(newMenuItem.arAsset != null) ? newMenuItem.arAsset : ''"  frameborder="0"></iframe>
+      <iframe style="position:fixed; top:0; left:0; bottom:0; right:0; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:10;" :src="(newMenuItem.arAsset != '') ? newMenuItem.arAsset : ''"  frameborder="0"></iframe>
     </div>
-    <v-carousel v-if="!arActive" height="200px" :show-arrows="false" hide-delimiter-background continuous>
-      <v-carousel-item v-for="(item,i) in items" :key="i" :src="item.img"></v-carousel-item>
+    <v-carousel v-if="!arActive && newMenuItem.images.length != 0" height="200px" :show-arrows="false" hide-delimiter-background continuous>
+      <v-carousel-item v-for="(imageSrc,i) in newMenuItem.images" :key="i" :src="imageSrc"></v-carousel-item>
+    </v-carousel>
+    <v-carousel v-if="!arActive && newMenuItem.images.length == 0" height="200px" :show-arrows="false" hide-delimiter-background continuous>
+      <v-carousel-item v-for="(imageSrc,i) in newMenuItem.images" :key="i" src="../../assets/menuItemImages/item-placeholder.png"></v-carousel-item>
     </v-carousel>
     <v-btn v-if="!arActive" width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 20px; left: 15px">
       <v-icon>mdi-chevron-left</v-icon>
     </v-btn>
-    <v-btn v-if="!arActive && newMenuItem.arAsset != null" @click="openARScanner" color="secondary" absolute small fab style="top: 175px; right: 65px;">
+    <v-btn v-if="!arActive && (newMenuItem.arAsset != '')" @click="openARScanner" color="secondary" absolute small fab style="top: 175px; right: 65px;">
       <v-icon>mdi-cube-scan</v-icon>
     </v-btn>
     <v-fab-transition v-if="!arActive">
@@ -47,7 +50,7 @@
 
     
     <v-tabs v-if="!arActive" v-model="tab" background-color="white" grow>
-      <v-tab v-if="newMenuItem.attributes != null && checkedIn()">
+      <v-tab v-if="checkedIn()">
         Details
       </v-tab>
       <v-tab>
@@ -57,43 +60,48 @@
     
 
     <v-tabs-items v-if="!arActive" v-model="tab">
-      <v-tab-item v-if="newMenuItem.attributes != null && checkedIn()">
+      <v-tab-item v-if="checkedIn()">
         <v-card flat>
-          <v-card-title class="pb-0 pt-4">Customise Order</v-card-title>
-          <v-container class="pl-0">
-            <v-list shaped>
-              <v-list-group class="attributeElements" v-for="(attribute, i) in newMenuItem.attributes.attributes" :key="i" no-action value="true">
+          <v-card-title v-if="newMenuItem.attributes != null" class="pb-0 pt-4">Customise Order</v-card-title>
+          <v-container>
+            <v-list  v-if="newMenuItem.attributes != null"> 
+              <v-list-group sub-group  class="attributeElements" v-for="(attribute, i) in newMenuItem.attributes.attributes" :key="i"  no-action value="true">
                 <template v-slot:activator>
-                  <v-list-item-content>
-                    <v-list-item-title class="label pl-3" v-text="attribute.name"></v-list-item-title>
+                  <v-list-item-content @click="rotateIcon(i)">
+                    <v-list-item-title class="label pl-0" v-text="attribute.attributeName"></v-list-item-title>
                   </v-list-item-content>
+                  <v-list-item-action @click="rotateIcon(i)">
+                    <v-icon class="chevron-icon mx-1">mdi-chevron-up</v-icon>
+                  </v-list-item-action>
                 </template>
-                <v-list-item-group class="pl-4" :multiple="(parseInt(attribute.field.max) > 1) ? true : false" :mandatory="(attribute.field.min == '1') ? true : false" v-model="model[i]">
+
+                <v-list-item-group  class="pl-2" :multiple="(parseInt(attribute.max) > 1) ? true : false" :mandatory="(attribute.min == '1') ? true : false" v-model="model[i]">
                   <template v-for="(value, j) in attribute.values">
-                      <v-list-item @click="checkInput(i, j, value)" class="px-2 attributeValues" :key="`item-${j}`" :value="value.name">
-                        <template v-slot:default="{ active }">
-                          <v-row>
-                            <v-col cols="8">
-                              <v-list-item-title v-text="value.name"></v-list-item-title>
-                            </v-col>
-                            <v-col>
-                              <v-list-item-title v-if="'fee' in value" v-text="`+ R${(value.fee).toFixed(2)}`"></v-list-item-title>
-                            </v-col>
-                          </v-row>
-                          <v-list-item-action>
-                            <v-radio :id="`${i}${j}${(value.name).replace(/\s+/g, '')}`" checked v-if="attribute.field.max == '1' && attribute.field.min == '1'" :input-value="active" ></v-radio>
-                            <v-checkbox v-else :input-value="active"></v-checkbox>
-                          </v-list-item-action>
-                        </template>
-                      </v-list-item>
-                    </template>
+                    <v-list-item @click="checkInput(i, j, value)" ref="attributeVal" class="px-2 attributeValues" :key="`item-${j}`" :value="value.name">
+                      <template v-slot:default="{ active }">
+                        <v-row>
+                          <v-col cols="8">
+                            <v-list-item-title v-text="value.name"></v-list-item-title>
+                          </v-col>
+                          <v-col>
+                            <v-list-item-title v-if="value.price != 0" v-text="`+ R${(value.price).toFixed(2)}`"></v-list-item-title>
+                          </v-col>
+                        </v-row>
+                        <v-list-item-action>
+                          <v-radio :id="`${i}${j}${(value.name).replace(/\s+/g, '')}`" checked v-if="attribute.max == '1' && attribute.min == '1'" :input-value="active" ></v-radio>
+                          <v-checkbox v-else :input-value="active"></v-checkbox>
+                        </v-list-item-action>
+                      </template>
+                    </v-list-item>
+                  </template>
                 </v-list-item-group>
+
               </v-list-group>
             </v-list>
 
             
 
-            <v-row v-if="expandOrderBtn" class="d-flex justify-space-around px-2 mt-4">
+            <v-row class="d-flex justify-space-around px-2 mt-4">
               <v-col cols="4" class="d-flex justify-center px-0">
                 <div class="px-1 d-flex align-center quantityButton" height="45px">
                   <v-btn @click="detractPrice" icon class="mr-2"><v-icon size="22">mdi-minus</v-icon></v-btn>
@@ -227,9 +235,17 @@
     display: none;
   }
 
-  /* .attributeElements > .v-list-item--active.v-list-item--link {
-    background-color: rgba(247, 85, 100, 0.1) !important;
-  } */
+  .v-application--is-ltr .v-list-group--sub-group .v-list-group__header {
+    padding-left: 5px !important;
+  }
+
+  .attributeElements .v-list-item__icon.v-list-group__header__prepend-icon {
+    display: none !important;
+  }
+
+  .rotate {
+    transform: rotateX(180deg);
+  }
 
 </style>
 
@@ -253,37 +269,11 @@ export default {
       activeComments: [],
       menuItemId: this.$route.params.itemid,
       expandOrderBtn: true,
-      items: [
-        { img: 'https://source.unsplash.com/kZeUekYF9Jw/800x800/' },
-        { img: 'https://source.unsplash.com/hrlvr2ZlUNk/800x800/' },
-        { img: 'https://source.unsplash.com/8manzosDSGM/800x800/' },
-        { img: 'https://source.unsplash.com/nTZOILVZuOg/800x800/' },
-      ],
       tab: null,
       favourited: false,
       muesliSelected: true,
       honeySelected: false,
       arActive: false,
-      // menuItemSelections: [
-      //   {
-      //     title: 'Choose fruit:',
-      //     active: false,
-      //     items: [
-      //       { title: '- Strawberry', icon: 'mdi-check-box-outline', toggleIcon: '', extra: '', selected: true },
-      //       { title: '- Mango', icon: 'mdi-check-box-outline', extra: '+ R2.00', selected: true },
-      //       { title: '- Berry', icon: 'mdi-checkbox-blank-outline', extra: '', selected: false },
-      //     ],
-      //   },
-      //   {
-      //     title: 'Choose Yogurt type:',
-      //     active: false,
-      //     items: [
-      //       { title: '- Greek', icon: 'mdi-radiobox-marked', extra: '', selected: true },
-      //       { title: '- Low Fat', icon: 'mdi-radiobox-blank', extra: '', selected: false },
-      //       { title: '- Strawberry', icon: 'mdi-radiobox-blank', extra: '+ R4.50', selected: false },
-      //     ],
-      //   },
-      // ],
       selected: ['John'],
       text: 'small',
       selection: 0,
@@ -300,7 +290,7 @@ export default {
           likes: '11',
           adminName: 'Mugg and Bean',
           adminProfileImage: 'https://source.unsplash.com/800x800/?restaurant',
-          response: 'Thank you for your feedback! We appreciate your help.',
+          response: 'Thank you for your pricedback! We appreciate your help.',
           responseDate: '09:30 June 25, 2020'
         },
         {
@@ -386,10 +376,10 @@ export default {
 
       let checked = $(".attributeElements").eq(i).find(".attributeValues").eq(j).hasClass("v-item--active v-list-item--active");
 
-      if ('fee' in value && checked) {
-        this.addOns -= value.fee
-      } else if ('fee' in value && !checked) {
-        this.addOns += value.fee
+      if ('price' in value && checked) {
+        this.addOns -= value.price
+      } else if ('price' in value && !checked) {
+        this.addOns += value.price
       }
       this.changeTotal;
     },
@@ -439,12 +429,14 @@ export default {
     },
     addToOrder() {;
       let selectionValues = [];
-      for (let i = 0; i < this.newMenuItem.attributes.attributes.length; i++) {
-        let data = {
-          "name": $('.label').eq(i).text(),
-          "values": this.model[i]
-        };
-        selectionValues[i] = data;
+      if(this.newMenuItem.attributes != null) {
+        for (let i = 0; i < this.newMenuItem.attributes.attributes.length; i++) {
+          let data = {
+            "name": $('.label').eq(i).text(),
+            "values": this.model[i]
+          };
+          selectionValues[i] = data;
+        }
       }
 
       let data = {
@@ -465,8 +457,6 @@ export default {
           ]
         }
       }
-
-      console.log(data);
       
       this.addItemToOrder(data)
       this.$router.push("/cart");
@@ -486,11 +476,16 @@ export default {
       let checkedInVal = this.checkedInQRCode;
       let checkedInRestaurantId = this.checkedInRestaurantId;
 
-      if (checkedInVal != null && checkedInRestaurantId != null) {
+      var checkedInRestaurant = this.filterRestaurants
+
+      if (checkedInVal != null && checkedInRestaurant) {
         return true;
       } else {
         return false;
       }
+    },
+    rotateIcon(index) {
+      $('.chevron-icon').eq(index).toggleClass('rotate')
     }
   },
   computed: {
@@ -508,14 +503,10 @@ export default {
       )
     },
     isFavourite() {
-      // console.log(this.customer.favourites)
       if (this.customer.favourites.length != 0)
         return this.customer.favourites.some(favourite => favourite.menuItemId === parseInt(this.menuItemId))
       return false
     },
-    // removeActive() {
-    //   $(".attributeValues").removeClass("v-item--active v-list-item--active");
-    // },
     newMenuItem() {
       return this.findCategory.menuItems.find(menuItem => menuItem.menuItemId === parseInt(this.menuItemId) )
     },
@@ -526,21 +517,33 @@ export default {
         return { color: 'primary', icon: 'mdi-heart' }
       }
     },
+    filterRestaurants() {
+      var list = this.allRestaurants.filter(restaurant => {
+        return (restaurant.name == this.menu.name) && (restaurant.restaurantId === this.checkedInRestaurantId);
+      })
+
+      if (list.length > 0) {
+        return true
+      } else { 
+        return false
+      }
+    },
     ...mapGetters({
       menu: "MenuStore/getMenu",
       customer: "CustomerStore/getCustomerProfile",
-      itemToEdit: "OrderStore/getItemToEdit",
+      // itemToEdit: "OrderStore/getItemToEdit",
       checkedInTableId: "CustomerStore/getCheckedInTableId",
-      
-      // checkedInStatus: 'CustomerStore/getCheckedInStatus',
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
+      allRestaurants: 'RestaurantsStore/getAllRestaurants',
     }),
   },
   mounted: function() {
     // console.log($(".attributeElements").find(".attributeValues").html())
-    // $(".attributeElements").find(".attributeValues").removeClass("v-item--active v-list-item--active");
+    console.log(this.$refs.attributeVal);
     this.total = this.newMenuItem.price
+    
+    // $(".attributeValues.v-item--active.v-list-item--active").find("i").addClass("mdi-radiobox-marked");
     // this.itemTotal = this.newMenuItem.price
   }
 }

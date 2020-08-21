@@ -38,7 +38,7 @@
 
         <v-row no-gutters d-flex flex-row >
           <v-col cols="11">
-            <v-text-field class="searchBarBg" background-color="red" v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search by name or category"></v-text-field>
+            <v-text-field class="searchBarBg" background-color="red" v-model="search" rounded solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search for a restaurant..."></v-text-field>
           </v-col>
           <v-col cols="1" class="d-flex align-center px-0">
             <v-btn small icon color="primary">
@@ -62,7 +62,7 @@
                       <div class="mt-1 specialsDate">{{ promotion.period }}</div>
                     </div>
                     <div class="browseButton">
-                      <v-btn @click="goToRestaurant(promotion.restaurantId)" color="accent" height="35px" class="browseMenu">Browse Menu</v-btn>
+                      <v-btn @click="goToRestaurant(promotion.restaurantId)" color="accent" height="33px" class="browseMenu px-2">Browse Menu</v-btn>
                     </div>
                   </v-layout>
                 </v-col>
@@ -87,8 +87,8 @@
           <v-slide-group multiple>
             <v-slide-item v-for="(category, index) in exploreCategories" :key="index">
               <div class="mr-3" align="center">
-                <v-btn width="50px" height="50px" min-width="50px">
-                  <v-img height="50px" width="50px" :src="category.categoryImage"></v-img>
+                <v-btn width="60px" height="60px" min-width="60px"  @click="toggleCategoryActive(index)">
+                  <v-img height="60px" width="60px" class="categoryButtons" :src="category.categoryImage"></v-img>
                 </v-btn>
                 <div class="mt-1 caption">{{category.categoryName}}</div>
               </div>
@@ -105,18 +105,18 @@
         <v-sheet class="mx-auto" max-width="700">
           <v-slide-group multiple>
             <v-slide-item v-for="(card, index) in filteredList" :key="index">
-              <v-card ripple flat width="140px" class="mr-4">
-                <v-img :src="card.image" @click="goToRestaurant(card.restaurantId)" class="white--text align-center restaurantImage" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="90px" >
-                  <v-rating background-color="white" readonly size="10" dense color="yellow darken-3" :value="parseInt(card.rating)" style="bottom: 3px; right: 3px; position: absolute"></v-rating>
+              <v-card ripple flat width="200px" class="mr-4">
+                <v-img :src="card.image" @click="goToRestaurant(card.restaurantId)" class="white--text align-center restaurantImage" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="125px" >
+                  <v-rating background-color="white" readonly size="14" dense color="yellow darken-3" :value="parseInt(card.rating)" style="bottom: 3px; right: 3px; position: absolute"></v-rating>
                 </v-img>
-                <div class="pl-1 pt-1 resaturantTitle font-weight-light">{{card.name}}</div>
+                <div class="pl-1 pt-1 resaturantTitle cardFormat font-weight-light">{{card.name}}</div>
                 <v-row class="ml-0">
                   <v-icon size="13px">mdi-map-marker</v-icon>
-                  <div class="pl-0 pt-0 restaurantLocation font-weight-light">{{card.location}}</div>
+                  <div class="pl-0 pt-0 restaurantLocation font-weight-light">{{card.branch}}</div>
                 </v-row>
-                <div class="ml-1 pt-0 restaurantCategory">{{(category).join(', ')}}</div>
+                <div class="ml-1 pt-0 restaurantCategory">{{getCategoryNames(card.categories)}}</div>
                 <v-row class="pl-3 mt-1">
-                  <v-col v-for="(tag, i) in descriptors" :key="i" class="pl-0 pr-3 pt-0">
+                  <v-col cols="auto" v-for="(tag, i) in card.phrases" :key="i" class="pl-0 pr-3 pt-0">
                     <div class="restaurantDescriptor">{{tag}}</div>
                   </v-col>
                 </v-row>
@@ -127,7 +127,7 @@
       </v-container>
 
       <v-container v-show="!isLoading" pt-0>
-        <v-card @click="goToRestaurant(1)" color="primary" height="140px" flat tile style="border-radius: 13px !important" class="mt-5">
+        <v-card color="primary" height="140px" flat tile style="border-radius: 13px !important" class="mt-5">
           <v-row class="px-0 py-0 specialsInfo">
             <v-col cols="6" class="pl-7 py-3 pr-0">
               <v-layout column justify-space-between fill-height>
@@ -155,16 +155,16 @@
       
     <v-container v-show="!isLoading" v-else class="mt-3">
       <div v-if="filteredList.length != 0">
-        <v-card @click="goToRestaurant(card.restaurantId)" elevation="2" v-for="(card, index) in filteredList" :key="index">
+        <v-card class="mb-2" @click="goToRestaurant(card.restaurantId)" elevation="2" v-for="(card, index) in filteredList" :key="index">
           <v-row class="mx-0">
-            <v-col cols="3" class="py-2 px-1 pl-2">
+            <v-col cols="3" class="py-0 px-1 pl-2">
               <v-img width="75px" height="70px" style="background-size: contain" :src="card.image" class="align-center mt-3"></v-img>
             </v-col>
-            <v-col cols="9" class="py-2">
+            <v-col cols="9" class="pt-2 py-0">
               <v-row class="py-0">
                 <v-col cols="8" class="pt-0 pl-2 pb-1">
                   <div class="pl-1 pt-1 resaturantTitle font-weight-light">{{card.name}}</div>
-                  <div class="ml-1 pt-0 restaurantCategory">{{(category).join(', ')}}</div>
+                  <div class="ml-1 pt-0 restaurantCategory">{{getCategoryNames(card.categories)}}</div>
                 </v-col>
                 <v-col cols="4" class="pt-0 px-2 pb-1">
                   <v-rating background-color="secondary" readonly size="11" dense color="yellow darken-3" :value="parseInt(card.rating)"></v-rating>
@@ -172,11 +172,11 @@
               </v-row>
               <v-row class="px-2">
                 <v-col cols="8" class="px-1 pt-0">
-                  <div class="px-1 mr-2 pt-0 restaurantDescriptor" v-for="(tag, i) in descriptors" :key="i" style="display: inline">{{tag}}</div>
+                  <div class="px-1 mr-2 pt-0 restaurantDescriptor" v-for="(tag, i) in card.phrases" :key="i" style="display: inline">{{tag}}</div>
                 </v-col>
                 <v-col cols="4" class="px-0 pt-0" style="text-align: right">
                   <v-icon size="13px">mdi-map-marker</v-icon>
-                  <div class="pl-1 py-0 restaurantLocation font-weight-light" style="display: inline">Brooklyn</div>
+                  <div class="pl-1 py-0 restaurantLocation font-weight-light" style="display: inline">{{card.branch}}</div>
                 </v-col>
               </v-row>
             </v-col>
@@ -194,6 +194,7 @@ import NavBar from '@/components/layout/NavBar';
 import RestaurantSearchToolBar from '@/components/layout/RestaurantSearchToolBar';
 import store from '@/store/store.js';
 import { mapActions, mapGetters, mapMutations } from 'vuex'
+import $ from 'jquery';
 
 export default {
   components: {
@@ -219,10 +220,11 @@ export default {
       { imageURL: 'breakfast.jpg', name: 'Breakfast' },
       { imageURL: 'cafe.jpg', name: 'Cafe' },
     ],
-    category: ["Western Cuisine", "Fast Food", "Breakfast"],
+    // category: ["Western Cuisine", "Fast Food", "Breakfast"],
     descriptors: ["Fast Service", "Presentation"],
     favourited: false,
     called: false,
+    selectedCategories: [],
     // checkedIn: false,
     restaurant: "Mugg & Bean",
     cycle: true,
@@ -244,6 +246,18 @@ export default {
     callWaiter() {
       this.called = !this.called;
     },
+    toggleCategoryActive(i) {
+      $(".categoryButtons").eq(i).toggleClass('activeButtonClass')
+      if ($(".categoryButtons").eq(i).hasClass('activeButtonClass'))
+        this.selectedCategories.push(this.exploreCategories[i].categoryId)
+      else {
+        const index = this.selectedCategories.indexOf(this.exploreCategories[i].categoryId);
+        if (index > -1) {
+          this.selectedCategories.splice(index, 1);
+        }
+      }
+    },
+    
     goToCart() {
       this.$router.push('/cart')
     },
@@ -255,6 +269,18 @@ export default {
         return item.name;
       }
     },
+    getCategoryNames(categories) {
+      if (categories.length != 0 ) {
+        var list = [];
+        for (let i = 0; i < categories.length; i++) { 
+          list.push(this.exploreCategories.find((category) => {
+            return category.categoryId === categories[i]
+          }).categoryName)
+        }
+
+        return list.join(', ')
+      }
+    },
     checkedIn() {
       let checkedInVal = this.checkedInQRCode;
       let checkedInRestaurantId = this.checkedInRestaurantId;
@@ -264,7 +290,12 @@ export default {
       } else {
         return false;
       }
-    }
+    },
+    containsCategories(arr1, arr2){
+      if (arr2 != undefined)
+        return arr2.every(el => arr1.includes(el));
+      return true;
+    },
   },
   ...mapActions({
     checkInCustomer: 'CustomerStore/checkInCustomer',
@@ -303,10 +334,11 @@ export default {
         return { color: "primary", icon: "mdi-bell-outline" };
       }
     },
+    
     filteredList() {
       if (this.allRestaurants.length != undefined)
         return this.allRestaurants.filter(restaurant => {
-          return restaurant.name.toLowerCase().includes(this.search.toLowerCase())
+          return restaurant.name.toLowerCase().includes(this.search.toLowerCase()) && this.containsCategories(restaurant.categories, this.selectedCategories)
         })
     },
     carouselTab () {
@@ -412,6 +444,10 @@ export default {
     line-height: 180px;
   }
 
+  .activeButtonClass {
+    border: 2px rgba(247, 85, 100, 0.7) solid;
+  }
+
   .bannerImage {
     line-height: 140px;
     font-size: 22px;
@@ -423,7 +459,7 @@ export default {
   }
 
   .categoryTitle {
-    font-size: 16px;
+    font-size: 16.5px;
     font-weight: 500;
   }
 
@@ -436,21 +472,23 @@ export default {
   }
 
   .restaurantLocation {
-    font-size: 11px;
+    font-size: 12px;
   }
 
   .restaurantCategory {
-    font-size: 12px;
-    height: 36px;
+    font-size: 13px;
   }
 
   .restaurantDescriptor {
-    border-radius: 12px;
-    background-color: lightgray;
-    opacity: 0.6;
-    font-weight: 500;
-    font-size: 10px;
+    border-radius: 7px;
+    background-color: rgba(211,211,211, 0.5);
+    font-weight: 400;
+    font-size: 10.5px;
     text-align: center;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 8px;
+    padding-right: 8px;
   }
 
   .headingText{

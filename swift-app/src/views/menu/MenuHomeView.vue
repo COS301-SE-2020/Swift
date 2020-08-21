@@ -14,7 +14,7 @@
                     <div v-if="checkedIn()" class="white--text display-1">Welcome to<br/> {{menu.name}}</div>
                     <div v-if="!checkedIn()" class="white--text display-1">{{menu.name}}</div>
                     <v-col cols="9" class="mt-3">
-                      <v-text-field background-color="white" class="menuItemSearchbar"  v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search by name or category"></v-text-field>
+                      <v-text-field background-color="white" class="menuItemSearchbar"  v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search..."></v-text-field>
                     </v-col>
                     <v-col cols="1" class="d-flex align-center px-0 mt-3">
                       <v-btn small icon color="white">
@@ -40,56 +40,60 @@
           <div class="title pl-3">Categories</div>
         </v-col>
       </v-row>
-      <!-- <div id="categories" class="pl-3">
-        <v-sheet class="mx-auto" max-width="700">
-          <v-slide-group multiple>
-            <v-slide-item v-for="(category, index) in menu.categories" :key="index">
-              <div class="ml-0" align="center" style="margin-top: 10px;">
-                <v-btn dark width="50px" height="50px" min-width="50px" class="mx-2">
-                  <v-avatar color="grey darken-4" size="35px">
-                    <img @click="goToMenuItem(1)" src="https://source.unsplash.com/800x800/?fruit" alt />
-                  </v-avatar>
-                </v-btn>
-                <div class="mt-1 caption">{{category.categoryName}}</div>
-              </div>
-            </v-slide-item>
-          </v-slide-group>
-        </v-sheet>
-        <v-divider class="mt-2"></v-divider>
-      </div> -->
 
+      <v-tabs v-model="secondaryCategoryTab" background-color="secondary" color="primary" dark>
+        <v-tab v-for="(category, index) in primaryCategoryList" :key="index">
+          {{ category.categoryName }}
+        </v-tab>
+      </v-tabs>
 
-      <!-- =========================================================================================================== -->
+      <v-tabs-items v-model="secondaryCategoryTab">
+        <v-tab-item v-for="(category, index) in primaryCategoryList" :key="index">
+          <div v-if="category.menuItems.length == 0">
+            <v-list v-for="(secondary, i) in secondaryCategoryList(category.categoryId)" :key="i" class="py-0">
+              <div class="ml-2 mt-2">{{secondary.categoryName}}</div>
+              <v-list v-for="(menuItem, i) in secondary.menuItems" :key="i" class="py-0">
+                <v-list-item @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1 ">
+                  <v-list-item-avatar tile  style="border-radius: 4px" size="45" >
+                    <img v-if="menuItem.images.length != 0" :src="menuItem.images[0]">
+                    <img v-else src="../../assets/menuItemImages/item-placeholder.png">
+                  </v-list-item-avatar>
+                  <v-list-item-content>
+                    <v-list-item-title v-html="menuItem.menuItemName"></v-list-item-title>
+                    <v-list-item-subtitle v-html="menuItem.menuItemDescription"></v-list-item-subtitle>
+                  </v-list-item-content>
+                  <v-list-item-action-text class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</v-list-item-action-text>
+                </v-list-item>
+                <v-divider divider class="ml-3" width="93%"></v-divider>
+              </v-list>
+            </v-list>
+          </div>
 
-        <v-tabs  v-model="secondaryCategoryTab" background-color="secondary" color="primary" dark>
-          <v-tab v-for="(category, index) in filteredList" :key="index">
-            {{ category.categoryName }}
-          </v-tab>
-        </v-tabs>
-
-        <v-tabs-items v-model="secondaryCategoryTab">
-          <v-tab-item v-for="(category, index) in menu.categories" :key="index">
+          <div v-else>
             <v-list v-for="(menuItem, i) in category.menuItems" :key="i" class="py-0">
               <v-list-item @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1 ">
                 <v-list-item-avatar tile  style="border-radius: 4px" size="45" >
-                  <img src="https://source.unsplash.com/collection/767186/800x800">
+                  <img v-if="menuItem.images.length != 0" :src="menuItem.images[0]">
+                  <img v-else src="../../assets/menuItemImages/item-placeholder.png">
                 </v-list-item-avatar>
                 <v-list-item-content>
                   <v-list-item-title v-html="menuItem.menuItemName"></v-list-item-title>
-                  <v-list-item-subtitle v-html="menuItem.menuItemDescription"></v-list-item-subtitle>
+                  <v-list-item-subtitle class="mt-2" v-html="menuItem.menuItemDescription"></v-list-item-subtitle>
                 </v-list-item-content>
-                <v-list-item-action-text class="subtitle-1">R{{menuItem.price}}0</v-list-item-action-text>
-                
-
+                <div class="d-flex flex-column justify-content-end">
+                  <v-list-item-action-text class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</v-list-item-action-text>
+                  <v-rating readonly size="14" dense color="yellow darken-3" background-color="secondary" :value="parseInt(menuItem.rating)"></v-rating>
+                </div>                
               </v-list-item>
               <v-divider divider class="ml-3" width="93%"></v-divider>
             </v-list>
-          </v-tab-item>
-        </v-tabs-items>
+          </div>
+        </v-tab-item>
+      </v-tabs-items>
 
     </v-container>
     <!-- <v-snackbar :v-if=checkedIn id="notification" :timeout="2000" centered color="primary" elevation="24" v-model="snackbar">You have been checked-in to {{menu.name}}</v-snackbar> -->
-    <NavBar></NavBar>
+    <!-- <NavBar></NavBar> -->
   </div>
 </template>
 
@@ -103,7 +107,6 @@ import store from '@/store/store.js';
 $(window).scroll(function(){
   $(".backgroundImage").css("opacity", 1 - $(window).scrollTop() / 250);
 });
-
 
 
 export default {
@@ -207,8 +210,24 @@ export default {
       } else {
         return false
       }
+    },    
+    secondaryCategoryList(id) {
+      if (this.menu.categories != undefined) {
+        var list =  this.menu.categories.filter(category => {
+          return category.type == "secondary" && category.parentCategoryId == id /* && this.searchForItem(category.menuItems) */
+        })
+
+        return list
+      }
     },
-    sortedItems (menuItems) {
+    searchForItem(items) {
+      if (items != undefined) {
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].menuItemName.toLowerCase().includes(this.search.toLowerCase()))
+            return true
+        }
+        return false
+      }
     }
   },
   async mounted() {
@@ -259,6 +278,16 @@ export default {
         })
       }
     },
+    primaryCategoryList() {
+      if (this.menu.categories != undefined) {
+        var list = this.menu.categories.filter(category => {
+          return category.type == "primary"/*  && this.searchForItem(category.menuItems) */
+        })
+
+        return list;
+      }
+    },
+    
   }
 };
 </script>
