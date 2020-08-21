@@ -49,7 +49,7 @@
                           </v-col>
                           <v-col cols="5">
                             <v-list-item-action class="my-0 mx-0">
-                              <v-rating size="18" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
+                              <v-rating size="18" v-model="rating1I[i]" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
                             </v-list-item-action>
                           </v-col>
                         </v-row>
@@ -122,7 +122,7 @@
                       </v-col>
                       <v-col cols="5">
                         <v-list-item-action class="my-0 mx-0">
-                          <v-rating size="18" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
+                          <v-rating size="18" v-model="rating1R[i]" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
                         </v-list-item-action>
                       </v-col>
                     </v-row>
@@ -191,6 +191,14 @@ export default {
       // attributes:{
       //   type:Array
       // },
+
+      rating1R: [],
+      rating2R: [],
+      rating3R: [],
+
+      rating1I: [],
+      rating2I: [],
+      rating3I: [],
 
       ratingFeedback: [],
       ratingFeedbackMenuItem: [],
@@ -277,6 +285,50 @@ export default {
       console.log(this.publicValue);
       console.log(this.publicValueMenuItem);
 
+      let ratings = [];
+
+      for (let i = 0; i < this.itemToRate().rating.length; i++) {
+        let data = {}
+        if (!Array.isArray(this.itemToRate().rating[i].info)) {
+          data = {
+            "type": "restaurant",
+            "itemId": this.itemToRate().rating[i].info.itemId,
+            "orderId": this.itemToRate().orderId,
+            "ratingScore": (this.ratingValue[i] != undefined) ? this.ratingValue[i] : 0,
+            "comment": (this.comment[i] != undefined) ? this.comment[i] : null,
+            "public": (this.publicValue[i] != undefined) ? this.publicValue[i] : false,
+            "phrases": (this.phrase1R != undefined) ? this.phrase1R : 0
+          }
+          ratings.push(data)
+        } else {
+            for (let j = 0; j < this.itemToRate().rating[i].info.length; j++) {
+              data = {
+                "type": "menuItem",
+                "itemId": this.itemToRate().rating[i].info[j].itemId,
+                "orderId": this.itemToRate().orderId,
+                "ratingScore": (this.ratingValueMenuItem[j] != undefined) ? this.ratingValueMenuItem[j] : 0,
+                "comment": (this.commentMenuItem[j] != undefined) ? this.commentMenuItem[j] : null,
+                "public": (this.publicValueMenuItem[j] != undefined) ? this.publicValueMenuItem[j] : false,
+                "phrases": (this.phrase1I != undefined) ? this.phrase1R : 0
+              }
+              ratings.push(data)
+            }
+        }
+
+        
+      }
+      let rate = {
+        "ratings": ratings
+      }
+
+      // console.log("restaurant")
+      // console.log(ratings)
+      // console.log("item")
+      // console.log(this.rating1I)
+
+      this.submitRatingVals(rate)
+      // this.$router.push("/orders");
+
     },
     hideAlert () {
       this.$router.push('/')
@@ -308,6 +360,9 @@ export default {
           this.ratingFeedback[i] = updatedFeedback;
 
     },
+    ...mapActions({
+      submitRatingVals: "OrderStore/submitRating",
+    }),
     ...mapGetters({
       orderHistory: 'OrderStore/getOrderHistory',
       itemToRate: 'OrderStore/getItemToRate',
