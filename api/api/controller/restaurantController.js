@@ -598,7 +598,7 @@ module.exports = {
     // Invalid token
     return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
   },
-  listOrders: async (reqBody, response) => {
+  listOrders: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')
@@ -610,16 +610,24 @@ module.exports = {
     // Check token
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
-      return db.query(
-        'SELECT restaurantname FROM public.restaurant WHERE restaurant.restaurantid = $1::integer',
-        [reqBody.restaurantId]
-      )
-        .then((resCheck) => {
+      return (async () => {
+        const client = await db.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+
+          // check if restaurant exits
+          const resCheck = await client.query(
+            'SELECT restaurantname FROM public.restaurant WHERE restaurant.restaurantid = $1::integer',
+            [reqBody.restaurantId]
+          );
+
           if (resCheck.rows.length === 0) {
             // restaurant does not exist
             return response.status(404).send({ status: 404, reason: 'Not Found' });
           }
 
+          // get orders
           let oQuery = 'SELECT customerorder.orderid, customerorder.orderstatus,'
             + ' restauranttable.tableid, restauranttable.tablenumber,'
             + ' person.userid AS "employeeid", restaurantemployee.employeenumber,'
@@ -636,36 +644,42 @@ module.exports = {
             oQuery += " AND NOT (LOWER(orderstatus) = 'paid' OR LOWER(orderstatus) = 'rated')";
           }
 
-          return db.query(oQuery, [reqBody.restaurantId])
-            .then(async (res) => {
-              const orderResponse = {};
-              orderResponse.orders = [];
-              await Promise.all(res.rows.map(async (orderItem) => {
-                const orderDetails = {};
-                orderDetails.orderId = orderItem.orderid;
-                orderDetails.orderStatus = orderItem.orderstatus;
-                orderDetails.orderDateTime = orderItem.orderdatetime;
-                orderDetails.orderCompletionTime = orderItem.ordercompletiontime;
-                orderDetails.orderTotal = orderItem.ordertotal;
-                orderDetails.orderProgress = orderItem.progress;
-                orderDetails.tableId = orderItem.tableid;
-                orderDetails.tableNumber = orderItem.tablenumber;
-                orderDetails.employeeId = orderItem.employeeid;
-                orderDetails.employeeNumber = orderItem.employeenumber;
-                orderDetails.employeeName = orderItem.ename;
-                orderDetails.employeeSurname = orderItem.esurname;
-                orderDetails.orderDetails = await getOrderItems(orderItem.orderid);
-                orderResponse.orders.push(orderDetails);
-              }));
-              return response.status(200).send(orderResponse);
-            })
-            .catch((err) => {
-              console.error('Query Error [List Orders - Get Orders]', err.stack);
-              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
-            });
-        })
+          // get order details
+          const res = await client.query(oQuery, [reqBody.restaurantId]);
+          const orderResponse = {};
+          orderResponse.orders = [];
+          for (let ord = 0; ord < res.rows.length; ord++) {
+            const orderDetails = {};
+            orderDetails.orderId = res.rows[ord].orderid;
+            orderDetails.orderStatus = res.rows[ord].orderstatus;
+            orderDetails.orderDateTime = res.rows[ord].orderdatetime;
+            orderDetails.orderCompletionTime = res.rows[ord].ordercompletiontime;
+            orderDetails.orderTotal = res.rows[ord].ordertotal;
+            orderDetails.orderProgress = res.rows[ord].progress;
+            orderDetails.tableId = res.rows[ord].tableid;
+            orderDetails.tableNumber = res.rows[ord].tablenumber;
+            orderDetails.employeeId = res.rows[ord].employeeid;
+            orderDetails.employeeNumber = res.rows[ord].employeenumber;
+            orderDetails.employeeName = res.rows[ord].ename;
+            orderDetails.employeeSurname = res.rows[ord].esurname;
+            // eslint-disable-next-line no-await-in-loop
+            orderDetails.orderDetails = await getOrderItems(res.rows[ord].orderid);
+            orderResponse.orders.push(orderDetails);
+          }
+
+          // commit and return response
+          await client.query('COMMIT');
+          return response.status(200).send(orderResponse);
+        } catch (err) {
+          // roll back changes
+          await client.query('ROLLBACK');
+          throw err;
+        } finally {
+          client.release();
+        }
+      })()
         .catch((err) => {
-          console.error('Query Error [List Orders - Check Restaurant Existence]', err.stack);
+          console.error('Query Error [List Orders - Get Orders]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }
