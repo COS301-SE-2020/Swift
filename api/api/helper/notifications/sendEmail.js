@@ -73,7 +73,7 @@ module.exports.paymentEmail = (req, res) => {
 /** *****Password reset Email ******** */
 // eslint-disable-next-line no-unused-vars
 module.exports.passResetEmail = (req, res) => {
-  ejs.renderFile(`${__dirname}/PasswordResetTemp.ejs`, { token: req.ShortToken }, (err, data) => {
+  ejs.renderFile(`${__dirname}/PasswordResetTemp.ejs`, { token: req.val }, (err, data) => {
     const mailOptions = {
       from: process.env.MG_EMAIL_FROM || config.emailFrom,
       to: req.email,

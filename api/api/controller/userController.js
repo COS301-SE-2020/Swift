@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const validator = require('email-validator');
 const db = require('../db');
 const { registrationEmail, passResetEmail } = require('../helper/notifications/sendEmail');
+const { getCode, validateCode } = require('../helper/notifications/resetHandler');
 const { generateToken, validateToken, tokenState } = require('../helper/tokenHandler');
 const { getFavourites, getOrderHistory } = require('../helper/objectBuilder');
 const phImg = require('../helper/assets/placeholderImage.json');
@@ -99,7 +100,6 @@ module.exports = {
       });
   },
   resetPassword: (reqBody, response) => {
-    // Check all keys are in place - no need to check request type at this point
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'email')
     || Object.keys(reqBody).length !== 2) { //  request type
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
@@ -123,18 +123,15 @@ module.exports = {
         }
         if (res.rows.length > 0) {
           // get a token
-          const newTokenPair = generateToken(res.rows[0].userid);
-          const LongToken = newTokenPair.token;
-          const value = LongToken.substring(8, 12); // get first 4 digits
-          value.trim();
+          const Code = getCode();
+          const val = Code.code;
           const sendData = {
-            ShortToken: value,
+            val,
             email
           };
-
-          if (sendData.ShortToken.length !== 0) { // Check if short token was received
+          if (sendData.val.length !== 0) { // Check if code was received
             passResetEmail(sendData);
-            return response.status(200).send(LongToken);
+            return response.status(200).send({ status: 200, reason: 'Code sent' });
           }
         } else {
           return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
@@ -148,28 +145,43 @@ module.exports = {
   // eslint-disable-next-line consistent-return
   verifyToken: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
-    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
-     || !Object.prototype.hasOwnProperty.call(reqBody, 'code') // shortToken - 4 digit pin
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'code') // 4- digit pin
+     || !Object.prototype.hasOwnProperty.call(reqBody, 'email')
      || Object.keys(reqBody).length !== 3) { // request type
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
-    // check if full token is valid
-    const userToken = validateToken(reqBody.token, true);
-    if (userToken.state === tokenState.VALID) {
-      const value = reqBody.token.substring(8, 12); /// confrim this-randomize this
-      value.trim();
-
-      if (value === reqBody.code) {
-        return response.status(201).send({ status: 201, reason: 'Valid verification Token' });
-      }
-
-      return response.status(403).send({ status: 403, reason: 'Invalid verification Token ' });
+    // check if the code belongs to the correct user
+    // check if the 4-digit pin is valid
+    const { email, code } = reqBody;
+    if (!validator.validate(email)) {
+      // invalid email
+      return response.status(400).send({ status: 400, reason: 'Invalid Email' });
     }
 
-    if (userToken.state === tokenState.INVALID) {
-      // Invalid token
-      return response.status(403).send({ status: 403, reason: 'Invalid Token Pair' });
-    }
+    // Check if user exists
+    return db.query(
+      'SELECT userid, name, surname, email, password, theme, checkedin'
+      + ' FROM public.person WHERE person.email = $1::text',
+      [email]
+    )
+      // eslint-disable-next-line consistent-return
+      .then((res) => {
+        if (res.rows.length === 0) {
+          // user does not exist
+          return response.status(404).send({ status: 404, reason: 'Not Found' });
+        }
+        // check code because we know the user exists
+        const resetCode = validateCode(code);
+        if (resetCode.status === true) {
+          return response.status(201).send({ status: 201, reason: 'Valid verification Token' });
+        }
+        if (resetCode.status === false) {
+          return response.status(403).send({ status: 403, reason: 'Invalid verification Token ' });
+        }
+      }).catch((err) => {
+        console.error('Query Error [user email  - Check Account Existence]', err.stack);
+        return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+      });
   },
   updatePassword: (reqBody, response) => {
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'email')
