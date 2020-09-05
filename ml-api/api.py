@@ -3,6 +3,7 @@ from flask_restful import Resource, Api
 import controller.estimatedPrepTime as ept
 import controller.promoSuggest as ps
 import controller.menuSuggest as ms
+import controller.ratingEstimator as re
 
 app = Flask(__name__)
 api = Api(app)
@@ -25,7 +26,6 @@ def api():
         if(request.json["requestType"] == "menuSuggest"):
             return ms.suggest()
         badRequest()
-    
 
 if __name__ == '__main__':
     app.run(debug=True)
