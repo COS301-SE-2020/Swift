@@ -37,14 +37,14 @@
         </v-card>
 
         <v-row no-gutters d-flex flex-row >
-          <v-col cols="11">
+          <v-col cols="12">
             <v-text-field class="searchBarBg" background-color="red" v-model="search" rounded solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search for a restaurant..."></v-text-field>
           </v-col>
-          <v-col cols="1" class="d-flex align-center px-0">
+          <!-- <v-col cols="1" class="d-flex align-center px-0">
             <v-btn small icon color="primary">
               <v-icon size="24px">mdi-filter-variant</v-icon> 
             </v-btn>
-          </v-col>
+          </v-col> -->
         </v-row>
       </v-card>
     </v-container>
@@ -87,8 +87,9 @@
           <v-slide-group multiple>
             <v-slide-item v-for="(category, index) in exploreCategories" :key="index">
               <div class="mr-3" align="center">
-                <v-btn width="60px" height="60px" min-width="60px"  @click="toggleCategoryActive(index)">
-                  <v-img height="60px" width="60px" class="categoryButtons" :src="category.categoryImage"></v-img>
+                <v-btn color="primary" width="60px" height="60px" min-width="60px" class="categoryButtons"  @click="restCategories[index] = !restCategories[index]; toggleCategoryActive(index)">
+                  <v-img v-if="!restCategories[index]" height="60px" width="60px" :src="category.categoryImage"></v-img>
+                  <v-icon size="35px" v-else >mdi-glass-cocktail</v-icon>
                 </v-btn>
                 <div class="mt-1 caption">{{category.categoryName}}</div>
               </div>
@@ -185,7 +186,7 @@
       </div>
       <div v-else class="pl-1 py-0 restaurantLocation font-weight-light" style="display: inline; font-size: 15px">No search results...</div>
     </v-container>  
-    <v-btn v-if="checkedIn" @click="goToCart" fixed app color="primary" width="52px" height="52px" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
+    <v-btn v-if="checkedIn" @click="goToCart" fixed app color="primary" width="52px" height="52px" absolute dark bottom elevation="1" style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
       <v-icon>mdi-cart-outline</v-icon>
     </v-btn>
     <NavBar></NavBar>
@@ -229,6 +230,7 @@ export default {
     called: false,
     selectedCategories: [],
     // checkedIn: false,
+    restCategories: [],
     restaurant: "Mugg & Bean",
     cycle: true,
     isLoading: false,
@@ -250,14 +252,11 @@ export default {
       this.called = !this.called;
     },
     toggleCategoryActive(i) {
-      $(".categoryButtons").eq(i).toggleClass('activeButtonClass')
-      if ($(".categoryButtons").eq(i).hasClass('activeButtonClass'))
+      const index = this.selectedCategories.indexOf(this.exploreCategories[i].categoryId);
+      if (index > -1) {
+        this.selectedCategories.splice(index, 1);
+      } else {
         this.selectedCategories.push(this.exploreCategories[i].categoryId)
-      else {
-        const index = this.selectedCategories.indexOf(this.exploreCategories[i].categoryId);
-        if (index > -1) {
-          this.selectedCategories.splice(index, 1);
-        }
       }
     },
     
@@ -446,9 +445,9 @@ export default {
     line-height: 180px;
   }
 
-  .activeButtonClass {
+  /* .activeButtonClass {
     border: 2px rgba(247, 85, 100, 0.7) solid;
-  }
+  } */
 
   .bannerImage {
     line-height: 140px;

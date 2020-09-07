@@ -37,7 +37,7 @@
     <div v-if="isLoading" style="display: flex; align-items: center; justify-content: center; margin-top: 10px">
       <v-progress-circular indeterminate color="primary"></v-progress-circular>
     </div>
-    <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
+    <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
       <v-icon>mdi-cart-outline</v-icon>
     </v-btn>
     <NavBar></NavBar>
