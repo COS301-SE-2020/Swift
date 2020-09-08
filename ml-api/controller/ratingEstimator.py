@@ -27,7 +27,7 @@ def clearRatingsCache():
     retrieveRatingData() #slow to execute
     return {'message': 'Cache Cleared'}
 
-def filterRatingData():
+def filterRatingData(customerId):
     import pandas as pd
     from math import sqrt
     import numpy as np
@@ -41,8 +41,8 @@ def filterRatingData():
 
     #Simulate sample new input (user that added a new rating)
     #change this to the user you want to query for
-    newCustomerRating = ratings_df.loc[ratings_df['customerId'] == 137]
-    ratings_df = ratings_df.loc[ratings_df['customerId'] != 137]
+    newCustomerRating = ratings_df.loc[ratings_df['customerId'] == customerId]
+    ratings_df = ratings_df.loc[ratings_df['customerId'] != customerId]
 
     #Filtering out users that have rated the same menu items
     ratingsSubset = ratings_df[ratings_df['menuItemId'].isin(newCustomerRating['menuItemId'].tolist())]

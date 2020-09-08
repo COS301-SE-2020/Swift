@@ -24,7 +24,10 @@ def api():
         if(request.json["requestType"] == "promoSuggest"):
             return ps.suggest()
         if(request.json["requestType"] == "menuSuggest"):
-            return ms.suggest()
+            if(not 'customerId' in request.json):
+                badRequest()
+            else:
+                return ms.suggest(request.json["customerId"])
         if(request.json["requestType"] == "clearRatingsCache"):
             return re.clearRatingsCache()
         badRequest()

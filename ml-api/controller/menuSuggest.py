@@ -2,5 +2,5 @@
 import controller.ratingEstimator as re
 from flask import jsonify
 
-def suggest():
-    return { 'menuItemIds' : re.filterRatingData() } 
+def suggest(customerId):
+    return { 'menuItemIds' : re.filterRatingData(customerId) } 
