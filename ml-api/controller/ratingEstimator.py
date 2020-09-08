@@ -93,4 +93,15 @@ def filterRatingData():
     #Group all ratings by menuItemId and calculate the sum of weightedRatings
     sumTopCustomersRating = topCustomersRating.groupby('menuItemId').sum()[['similarityIndex', 'weightedRating']]
     sumTopCustomersRating.columns = ['sum_similarityIndex','sum_weightedRating']
-    print(sumTopCustomersRating)
+    
+    #calculate weighted average for each menu item
+    recommendation_df = pd.DataFrame()
+    recommendation_df['weightedRecommendationScore'] = sumTopCustomersRating['sum_weightedRating']/sumTopCustomersRating['sum_similarityIndex']
+    recommendation_df['menuItemId'] = sumTopCustomersRating.index
+
+    #sort recommendations by score
+    recommendation_df = recommendation_df.sort_values(by='weightedRecommendationScore', ascending=False)
+
+    #return top 10 recommended items
+    recommendation_df = recommendation_df[0:10]
+    return recommendation_df.menuItemId.tolist()
