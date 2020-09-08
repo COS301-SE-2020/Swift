@@ -58,7 +58,7 @@ def filterRatingData():
         Syy = sum([i**2 for i in tempGroupList]) - pow(sum(tempGroupList),2)/float(nRatings)
         Sxy = sum( i*j for i, j in zip(tempRatingList, tempGroupList)) - sum(tempRatingList)*sum(tempGroupList)/float(nRatings)
         if Sxx != 0 and Syy != 0:
-            pearsonCorrelation[name] = Sxy/sqrt(Sxx*Syy)
+            pearsonCorrelation[name] = abs(Sxy/sqrt(Sxx*Syy))
         else:
             pearsonCorrelation[name] = 0
 
@@ -69,4 +69,6 @@ def filterRatingData():
     pearsonDF.index = range(len(pearsonDF))
     #sort dataframe according to simalarity
     pearsonDF = pearsonDF.sort_values(by=['similarityIndex'], ascending=False)
-    print(pearsonDF.head())
+
+    #select the top 50 matching profiles with similarity > 0
+    topUsers = (pearsonDF.loc[pearsonDF['similarityIndex'] > 0])[0:50]
