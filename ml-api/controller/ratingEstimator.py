@@ -30,11 +30,12 @@ def filterRatingData():
     ratings_df['menuItemId'] = ratings_df['menuItemId'].astype(int)
 
     #Simulate sample new input (user that added a new rating)
-    newUserRating = ratings_df.loc[ratings_df['customerId'] == 137]
+    #change this to the user you want to query for
+    newCustomerRating = ratings_df.loc[ratings_df['customerId'] == 137]
     ratings_df = ratings_df.loc[ratings_df['customerId'] != 137]
 
     #Filtering out users that have rated the same menu items
-    ratingsSubset = ratings_df[ratings_df['menuItemId'].isin(newUserRating['menuItemId'].tolist())]
+    ratingsSubset = ratings_df[ratings_df['menuItemId'].isin(newCustomerRating['menuItemId'].tolist())]
 
     #Groupby creates several sub dataframes where they all have the same value in the column specified as the parameter
     ratingsGrouped = ratings_df.groupby('customerId')
@@ -48,9 +49,9 @@ def filterRatingData():
     pearsonCorrelation = {}
     for name, group in ratingsSubsetGroup:
         group = group.sort_values(by='menuItemId')
-        newUserRating = newUserRating.sort_values(by='menuItemId')
+        newCustomerRating = newCustomerRating.sort_values(by='menuItemId')
         nRatings = len(group)
-        temp_df = newUserRating[newUserRating['menuItemId'].isin(group['menuItemId'].tolist())]
+        temp_df = newCustomerRating[newCustomerRating['menuItemId'].isin(group['menuItemId'].tolist())]
         tempRatingList = temp_df['ratingScore'].tolist()
         tempGroupList = group['ratingScore'].tolist()
         #calculate pearson correclation coefficient
@@ -63,12 +64,23 @@ def filterRatingData():
             pearsonCorrelation[name] = 0
 
     #convert pearson calculation to dataframe
-    pearsonDF = pd.DataFrame.from_dict(pearsonCorrelation, orient='index')
-    pearsonDF.columns = ['similarityIndex']
-    pearsonDF['userId'] = pearsonDF.index
-    pearsonDF.index = range(len(pearsonDF))
+    pearson_df = pd.DataFrame.from_dict(pearsonCorrelation, orient='index')
+    pearson_df.columns = ['similarityIndex']
+    pearson_df['customerId'] = pearson_df.index
+    pearson_df.index = range(len(pearson_df))
     #sort dataframe according to simalarity
-    pearsonDF = pearsonDF.sort_values(by=['similarityIndex'], ascending=False)
+    pearson_df = pearson_df.sort_values(by=['similarityIndex'], ascending=False)
 
     #select the top 50 matching profiles with similarity > 0
-    topUsers = (pearsonDF.loc[pearsonDF['similarityIndex'] > 0])[0:50]
+    topUsers = (pearson_df.loc[pearson_df['similarityIndex'] > 0])[0:50]
+
+    #merge menuItemId & ratingScore with pearsonCorrelation
+    topCustomersRating = topUsers.merge(ratings_df, left_on='customerId', right_on='customerId', how='inner')
+
+    #Calculate weighted ratings using the similarityIndex
+    topCustomersRating['weightedRating'] = topCustomersRating['similarityIndex']*topCustomersRating['ratingScore']
+
+    #Group all ratings by menuItemId and calculate the sum of weightedRatings
+    sumTopCustomersRating = topCustomersRating.groupby('menuItemId').sum()[['similarityIndex', 'weightedRating']]
+    sumTopCustomersRating.columns = ['sum_similarityIndex','sum_weightedRating']
+    print(sumTopCustomersRating)
