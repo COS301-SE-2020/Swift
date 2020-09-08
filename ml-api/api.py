@@ -25,6 +25,8 @@ def api():
             return ps.suggest()
         if(request.json["requestType"] == "menuSuggest"):
             return ms.suggest()
+        if(request.json["requestType"] == "clearRatingsCache"):
+            return re.clearRatingsCache()
         badRequest()
 
 if __name__ == '__main__':

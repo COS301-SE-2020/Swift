@@ -2,13 +2,14 @@
 import sys
 import json
 sys.path.append('..') #import from parent directory
-
+from functools import lru_cache
 import db
+from multiprocessing import Process
 
+@lru_cache(maxsize=100)
 def retrieveRatingData():
     connection = db.connect()
     cursor = connection.cursor()
-
     cursor.execute("SELECT customerid, review.menuitemid, ratingscore FROM review" +
                     " INNER JOIN customerorder" +
                     " ON review.orderid = customerorder.orderid;")
@@ -16,6 +17,15 @@ def retrieveRatingData():
     cursor.close()
     db.close(connection)
     return records
+
+#cache record data on Server start
+retrieveRatingData()
+
+#clear and reload RatingsCache each time a new rating is added
+def clearRatingsCache():
+    retrieveRatingData.cache_clear()
+    retrieveRatingData() #slow to execute
+    return {'message': 'Cache Cleared'}
 
 def filterRatingData():
     import pandas as pd
