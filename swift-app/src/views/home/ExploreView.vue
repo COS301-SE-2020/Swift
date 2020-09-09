@@ -125,6 +125,21 @@
             </v-slide-item>
           </v-slide-group>
         </v-sheet>
+        <!-- <v-row style="max-width: 400px" class="overflow-y-auto">
+          <v-col cols="12">
+            <div class="categoryTitle">Recommended</div>
+          </v-col>
+        </v-row>
+        <v-row style="max-width: 400px" class="overflow-y-auto">
+          <v-col cols="12">
+            <div class="categoryTitle">Trending</div>
+          </v-col>
+        </v-row>
+        <v-row style="max-width: 400px" class="overflow-y-auto">
+          <v-col cols="12">
+            <div class="categoryTitle">Nearby</div>
+          </v-col>
+        </v-row> -->
       </v-container>
 
       <v-container v-show="!isLoading" pt-0>
