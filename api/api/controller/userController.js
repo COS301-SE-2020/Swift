@@ -29,7 +29,7 @@ module.exports = {
     // Check if user exists
     // TODO: Check if account is active
     return db.query(
-      'SELECT userid, name, surname, email, password, theme, checkedin'
+      'SELECT userid, name, surname, email, profileimageurl, password, theme, checkedin'
       + ' FROM public.person WHERE person.email = $1::text',
       [email]
     )
@@ -50,6 +50,7 @@ module.exports = {
           loginResponse.name = res.rows[0].name;
           loginResponse.surname = res.rows[0].surname;
           loginResponse.email = res.rows[0].email;
+          loginResponse.profileimageurl = res.rows[0].profileimageurl;
           loginResponse.checkedIn = res.rows[0].checkedin;
           loginResponse.theme = res.rows[0].theme;
 
