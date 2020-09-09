@@ -13,7 +13,7 @@
     <v-row class="mt-0 pt-0" align="center">
       <v-col cols="12" class="pt-0" align="center">
         <v-avatar height="120" width="120">
-          <img src="https://cdn.vuetifyjs.com/images/lists/ali.png" alt="John">
+          <img src="https://cdn.vuetifyjs.com/images/lists/ali.png" alt="John"/>
         </v-avatar>
       </v-col>
     </v-row>
@@ -47,8 +47,8 @@
             </v-list-item-content>
             <v-list-item-action>
               <v-btn icon >
-                <v-icon @click=changeTheme() v-if="customerInfo.theme == 'light'" color="secondary">mdi-radiobox-blank</v-icon>
-                <v-icon @click=changeTheme() v-if="customerInfo.theme == 'dark'" color="secondary">mdi-radiobox-marked</v-icon>
+                <v-switch @click=changeTheme() color="secondary" :value="darkMode" hide-details></v-switch>
+                <!-- <v-icon @click=changeTheme() v-if="customerInfo.theme == 'light'" color="secondary">mdi-radiobox-blank</v-icon> -->
               </v-btn>
             </v-list-item-action>
           </v-list-item>
@@ -144,13 +144,15 @@ export default {
     editProfile () {
     },
     changeTheme() {
-      darkMode = !darkMode;
+      console.log(this.darkMode)
+      this.darkMode = !this.darkMode;
+      // call update theme
     },
     mounted() {
       if (this.customerInfo.theme == 'light') {
-        darkMode = false
+        this.darkMode = false
       } else if (this.customerInfo.theme = 'dark') {
-        darkMode = true
+        this.darkMode = true
       }
     },
     async checkOut() {

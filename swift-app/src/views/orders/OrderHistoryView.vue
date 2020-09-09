@@ -364,7 +364,7 @@ export default {
       return 'On ' + moment(String(date.slice(0, 10))).format('DD MMM YYYY')
     },
     displayOrderTime(item) {
-      return item.orderDateTime.slice(11, 16) + ', ' + moment(String(item.orderDateTime.slice(0, 10))).format('DD MMMM YYYY')
+      return item.orderDateTime.slice(11, 16) + ', ' + moment(String(item.orderDateTime.slice(0, 10))).format('DD MMM YYYY')
     },
     findRestaurantImage(id) {
       return (this.allRestaurants.find(restaurant => {
