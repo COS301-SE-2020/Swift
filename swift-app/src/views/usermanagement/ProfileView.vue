@@ -13,7 +13,7 @@
     <v-row class="mt-0 pt-0" align="center">
       <v-col cols="12" class="pt-0" align="center">
         <v-avatar height="120" width="120">
-          <img src="https://cdn.vuetifyjs.com/images/lists/ali.png" alt="John"/>
+          <img :src="customerInfo.profileimageurl" alt="John"/>
         </v-avatar>
       </v-col>
     </v-row>
