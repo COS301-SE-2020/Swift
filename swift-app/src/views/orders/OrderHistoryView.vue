@@ -56,11 +56,11 @@
                     </v-row>
                     <v-row class="mx-0 pb-1 pr-1">
                       <v-col cols="5" class="pb-2 orderButtons ">
-                        <v-btn v-if="item.orderStatus != 'Received' && checkedInRestaurantId == item.restaurantId" @click="addOrder(item)" text class="pa-0 button">
+                        <v-btn v-if="!orderActive(item.items) && checkedInRestaurantId == item.restaurantId" @click="addOrder(item)" text class="pa-0 button">
                           <v-icon color="primary" size="20px">mdi-history</v-icon> 
                           <span class="pl-1 orderOptions repeat">Repeat Order</span>
                         </v-btn>
-                        <v-btn v-if="item.orderStatus == 'Received' && checkedInRestaurantId == item.restaurantId" text class="pa-0 button" @click="goToOrderStatus">
+                        <v-btn v-else-if="orderActive(item.items) && checkedInRestaurantId == item.restaurantId" text class="pa-0 button" @click="goToOrderStatus">
                           <v-icon color="primary" size="20px">mdi-history</v-icon> 
                           <span class="pl-1 orderOptions repeat">Order Status</span>
                         </v-btn>
@@ -193,6 +193,13 @@ export default {
     },
     viewOrder (item) {
       // this.addOrder(item)
+    },
+    orderActive(arr) {
+      for (let i = 0; i < arr.length; i++) {
+        if (parseInt(arr[i].progress) < 100)
+          return true
+      }
+      return false
     },
     calculateFullTotal(item) {
       let total = parseFloat(this.calculateTotal(item));
