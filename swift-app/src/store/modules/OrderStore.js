@@ -238,6 +238,56 @@ const actions = {
 const mutations = {
   SET_ORDER_HISTORY(state, orderHistory) {
     state.orderHistory = orderHistory;
+
+    var maxid = 0;
+    var maxobj = null;
+
+    orderHistory.map(obj => {  
+        if (obj.orderId > maxid) maxid = obj.orderId;    
+    });
+
+    orderHistory.map(obj => {   
+        if (obj.orderId == maxid) maxobj = obj;    
+    });
+
+    if (maxobj != null) {
+      console.log("SET-UP")
+      console.log(maxobj)
+
+      let itemsOrdered = [];
+      for (let i = 0; i < maxobj.items.length; i++) {
+        let data = {
+          "menuItemId": maxobj.items[i].menuItemId,
+          "itemTotal": maxobj.items[i].itemTotal,
+          "quantity": maxobj.items[i].quantity,
+          "orderSelections": {
+            "selections": maxobj.items[i].orderSelections
+          }
+        };
+        itemsOrdered[i] = data;
+      }
+
+      // console.log("table")
+      // console.log(this.getters['CustomerStore/getCheckedInTableId'])
+
+      let data = {
+        // "orderInfo": {
+          "restaurantId": maxobj.restaurantId,
+          "tableId": this.getters['CustomerStore/getCheckedInTableId'],
+          "employeeId": 6,
+          "waiterTip": 0,
+          "orderItems": itemsOrdered
+        // }
+      }
+      // console.log("NEW OLD")
+      // console.log(data.orderItems)
+
+      state.orderedItems = data;
+
+      // console.log(state.orderedItems.orderItems)
+    }
+    
+
   },
 
   CLEAR_ORDER(state) {
