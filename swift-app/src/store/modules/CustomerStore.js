@@ -193,7 +193,7 @@ const actions = {
     return axios.post('https://api.swiftapp.ml', 
     {
       "requestType": "verify",
-      "token": data.token,
+      "email": data.email,
       "code": data.code
     }).then(result => {
       // console.log(result.data)
