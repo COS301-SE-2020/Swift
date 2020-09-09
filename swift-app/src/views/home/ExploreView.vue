@@ -274,13 +274,13 @@ export default {
     getCategoryNames(categories) {
       if (categories.length != 0 ) {
         var list = [];
-        if (this.exploreCategories.length != undefined) {
+        // if (this.exploreCategories.length != undefined) {
           for (let i = 0; i < categories.length; i++) { 
             list.push(this.exploreCategories.find((category) => {
               return category.categoryId === categories[i]
             }).categoryName)
           }
-        }
+        // }
 
         return list.join(', ')
       }
