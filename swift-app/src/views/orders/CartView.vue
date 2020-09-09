@@ -180,7 +180,10 @@
       </v-alert>
     </v-overlay>
 
-    <!-- <NavBar></NavBar> -->
+    <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
+      <v-icon>mdi-cart-outline</v-icon>
+    </v-btn>
+    <NavBar></NavBar>
   </v-container>
 </template>
 
@@ -238,6 +241,9 @@ export default {
       // this.addItemToEdit(item)
       // this.$router.push("/menuItem/" + item.menuItemId);
     },
+    goToCart() {
+      // this.$router.push('/cart')
+    },
     checkedIn() {
       let checkedInVal = this.checkedInQRCode;
       let checkedInRestaurantId = this.checkedInRestaurantId;
@@ -259,6 +265,16 @@ export default {
       item.quantity++
       item.itemTotal += parseFloat(singlePrice)
       this.subtotal += parseFloat(singlePrice)
+    },
+    checkedIn() {
+      let checkedInVal = this.checkedInQRCode;
+      let checkedInRestaurantId = this.checkedInRestaurantId;
+
+      if (checkedInVal != null && checkedInRestaurantId != null) {
+        return true;
+      } else {
+        return false;
+      }
     },
     ...mapActions({
       updateOrderFlag: 'OrderStore/updateOrderFlag',
