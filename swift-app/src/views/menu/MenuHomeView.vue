@@ -17,7 +17,7 @@
                       <v-text-field background-color="white" class="menuItemSearchbar"  v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search..."></v-text-field>
                     </v-col>
                     <v-col cols="1" class="d-flex align-center px-0 mt-3">
-                      <v-btn small icon color="white">
+                      <v-btn @click="activateFilters" small icon color="white">
                         <v-icon size="24px">mdi-filter-variant</v-icon> 
                       </v-btn>
                     </v-col>
@@ -228,6 +228,9 @@ export default {
         }
         return false
       }
+    },
+    activateFilters() {
+      console.log("priunting")
     }
   },
   async mounted() {
@@ -286,8 +289,7 @@ export default {
 
         return list;
       }
-    },
-    
+    },    
   }
 };
 </script>

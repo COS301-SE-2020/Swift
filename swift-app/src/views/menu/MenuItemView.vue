@@ -129,7 +129,7 @@
       </v-tab-item>
       <v-tab-item class="overflow-x-hidden">
         <v-card flat class="mt-2 mb-5">
-          <v-row v-for="phrase in ratingPhrases" :key="phrase.phrase">
+          <v-row v-for="phrase in newMenuItem.ratingPhrases" :key="phrase.phrase">
             <v-card-text class="pb-0 pt-1 mt-0 ml-5">
               <v-row class="mx-0 pb-0 pt-1">
                 <v-col cols="8" class="pt-0 pl-0 pb-0">

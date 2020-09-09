@@ -305,16 +305,16 @@ export default {
     checkInCustomer: 'CustomerStore/checkInCustomer',
   }),
   async mounted() {
-    let checkedInVal = await this.checkedInQRCode;
-    // Check-in customer again if system crashes 
+    /* let checkedInVal = await this.checkedInQRCode;
     if (checkedInVal != null && this.checkedInRestaurantId == null) {
+      console.log("apples")
       this.isLoading = true;
       var data = {
         "qrcode": checkedInVal
       }
 
       await this.$store.dispatch('CustomerStore/checkInCustomer', data);
-    } 
+    }  */
 
     var length = await this.allRestaurants.length;
     var categoryLength = await this.exploreCategories.length;
@@ -323,6 +323,8 @@ export default {
       this.isLoading = true;
       var retrievedAllRestaurants = await this.fetchAllRestaurants;
       var retrievedExploreCategories = await this.retrieveExploreCategories;
+      // Change this to have the checked-in menu be its own object
+      await this.$store.dispatch('MenuStore/retrieveMenu', this.checkedInRestaurantId);
       
       if (retrievedAllRestaurants && retrievedExploreCategories)
         this.isLoading = false;
