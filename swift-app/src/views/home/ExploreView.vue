@@ -203,10 +203,10 @@
       </div>
       <div v-else class="pl-1 py-0 restaurantLocation font-weight-light" style="display: inline; font-size: 15px">No search results...</div>
     </v-container>  
-    <v-btn v-if="checkedIn" @click="goToCart" fixed app color="primary" width="52px" height="52px" absolute dark bottom elevation="1" style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
+    <v-btn v-show="!isLoading" v-if="checkedIn" @click="goToCart" fixed app color="primary" width="52px" height="52px" absolute dark bottom elevation="1" style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
       <v-icon>mdi-cart-outline</v-icon>
     </v-btn>
-    <NavBar></NavBar>
+    <NavBar v-show="!isLoading"></NavBar>
   </v-container>
 </template>
 
