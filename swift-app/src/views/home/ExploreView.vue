@@ -38,7 +38,7 @@
 
         <v-row no-gutters d-flex flex-row >
           <v-col cols="12">
-            <v-text-field class="searchBarBg" background-color="red" v-model="search" rounded solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search for a restaurant..."></v-text-field>
+            <v-text-field class="searchBarBg" background-color="red" v-model="search" rounded solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search for a restaurant or dish..."></v-text-field>
           </v-col>
           <!-- <v-col cols="1" class="d-flex align-center px-0">
             <v-btn small icon color="primary">
@@ -90,6 +90,8 @@
                 <v-btn color="primary" width="60px" height="60px" min-width="60px" class="categoryButtons"  @click="restCategories[index] = !restCategories[index]; toggleCategoryActive(index)">
                   <v-img v-if="!restCategories[index]" height="60px" width="60px" :src="category.categoryImage"></v-img>
                   <v-icon size="35px" v-else >mdi-glass-cocktail</v-icon>
+                  <!-- <v-icon size="35px" v-else >{{category.categoryIcon}}</v-icon> -->
+                  <!-- <v-icon size="35px" v-else >fa-pizza-slice</v-icon> -->
                 </v-btn>
                 <div class="mt-1 caption">{{category.categoryName}}</div>
               </div>
@@ -213,7 +215,8 @@ import NavBar from '@/components/layout/NavBar';
 import RestaurantSearchToolBar from '@/components/layout/RestaurantSearchToolBar';
 import store from '@/store/store.js';
 import { mapActions, mapGetters, mapMutations } from 'vuex'
-import $ from 'jquery';
+import $ from 'jquery'
+
 
 export default {
   components: {
@@ -227,26 +230,26 @@ export default {
       {restaurantId: 2, restaurant: "Aroma", promotionalMessage: "Free ice cream for each cappuccino bought", period: "Thursday 12:00-18:00", promotionalImage: "https://source.unsplash.com/VZ9zJ9wk2AE/800x800"},
       {restaurantId: 3, restaurant: "Burger Bistro", promotionalMessage: "Burger competition", period: "31 July - 08 August", promotionalImage: "https://source.unsplash.com/sc5sTPMrVfk/800x800"}
     ],
-    categories: [
-      { imageURL: 'drinks.jpg', name: 'Drinks' },
-      { imageURL: 'pizza.jpg', name: 'Pizza' },
-      { imageURL: 'burger.jpg', name: 'Burgers' },
-      { imageURL: 'fastFood.jpg', name: 'Fast Food' },
-      { imageURL: 'dessert.jpg', name: 'Desserts' },
-      { imageURL: 'seafood.jpg', name: 'Seafood' },
-      { imageURL: 'asian.jpg', name: 'Asian' },
-      { imageURL: 'healthy.jpg', name: 'Healthy' },
-      { imageURL: 'breakfast.jpg', name: 'Breakfast' },
-      { imageURL: 'cafe.jpg', name: 'Cafe' },
-    ],
+    // categories: [
+    //   { imageURL: 'drinks.jpg', name: 'Drinks' },
+    //   { imageURL: 'pizza.jpg', name: 'Pizza' },
+    //   { imageURL: 'burger.jpg', name: 'Burgers' },
+    //   { imageURL: 'fastFood.jpg', name: 'Fast Food' },
+    //   { imageURL: 'dessert.jpg', name: 'Desserts' },
+    //   { imageURL: 'seafood.jpg', name: 'Seafood' },
+    //   { imageURL: 'asian.jpg', name: 'Asian' },
+    //   { imageURL: 'healthy.jpg', name: 'Healthy' },
+    //   { imageURL: 'breakfast.jpg', name: 'Breakfast' },
+    //   { imageURL: 'cafe.jpg', name: 'Cafe' },
+    // ],
     // category: ["Western Cuisine", "Fast Food", "Breakfast"],
-    descriptors: ["Fast Service", "Presentation"],
+    // descriptors: ["Fast Service", "Presentation"],
     favourited: false,
     called: false,
     selectedCategories: [],
     // checkedIn: false,
     restCategories: [],
-    restaurant: "Mugg & Bean",
+    // restaurant: "Mugg & Bean",
     cycle: true,
     isLoading: false,
     carouselIndex: 0

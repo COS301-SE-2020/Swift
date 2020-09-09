@@ -56,7 +56,7 @@
                     </v-row>
                     <v-row class="mx-0 pb-1 pr-1">
                       <v-col cols="5" class="pb-2 orderButtons ">
-                        <v-btn v-if="item.orderStatus == 'Paid' && checkedInRestaurantId == item.restaurantId" @click="addOrder(item)" text class="pa-0 button">
+                        <v-btn v-if="item.orderStatus != 'Received' && checkedInRestaurantId == item.restaurantId" @click="addOrder(item)" text class="pa-0 button">
                           <v-icon color="primary" size="20px">mdi-history</v-icon> 
                           <span class="pl-1 orderOptions repeat">Repeat Order</span>
                         </v-btn>
@@ -354,7 +354,7 @@ export default {
       this.tab = 1;
     },
     getDate(date) {
-      return 'On ' + moment(String(date.slice(0, 10))).format('DD MMMM YYYY')
+      return 'On ' + moment(String(date.slice(0, 10))).format('DD MMM YYYY')
     },
     displayOrderTime(item) {
       return item.orderDateTime.slice(11, 16) + ', ' + moment(String(item.orderDateTime.slice(0, 10))).format('DD MMMM YYYY')
