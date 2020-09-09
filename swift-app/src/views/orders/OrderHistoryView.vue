@@ -218,12 +218,20 @@ export default {
     },
     createOrderObject(item) {
       let itemsOrdered = [];
+      console.log("REPEAT:")
+      console.log(item)
       for (let i = 0; i < item.items.length; i++) {
+        // console.log(item.items[i].menuItemId)
+        // console.log(item.items[i].itemTotal)
+        // console.log(item.items[i].quantity)
+        // console.log(item.items[i].orderSelections)
         let data = {
           "menuItemId": item.items[i].menuItemId,
           "itemTotal": item.items[i].itemTotal,
           "quantity": item.items[i].quantity,
-          "orderSelections": item.items[i].orderSelections
+          "orderSelections": {
+            "selections": item.items[i].orderSelections
+          }
         };
         itemsOrdered[i] = data;
       }
@@ -232,10 +240,9 @@ export default {
       let data = {
         "orderInfo": {
           "restaurantId": item.restaurantId,
-          "tableId": 1,
-          "employeeId": 2,
-          "orderTotal": item.total,
-          "waiterTip": item.waiterTip,
+          "tableId": this.checkedInTableId,
+          "employeeId": 6,
+          "waiterTip": 0,
           "orderItems": itemsOrdered
         }
       }
@@ -300,7 +307,7 @@ export default {
         this.isLoadingCartItem = false;
       }
 
-      this.$router.push("/cart");
+      this.goToCart()
     },
     goToCart() {
       this.$router.push('/cart')
@@ -363,15 +370,15 @@ export default {
     },
     updateOrderStatus() {
       let self = this;
-      setInterval(() => { 
-        let order = self.getOrderStatusItem();
-        if (order != undefined) {
-          let data = {
-            "orderId": order.orderId
-          }
-          self.orderStatus(data)
-        }
-      }, 5000);  
+      // setInterval(() => { 
+      //   let order = self.getOrderStatusItem();
+      //   if (order != undefined) {
+      //     let data = {
+      //       "orderId": order.orderId
+      //     }
+      //     self.orderStatus(data)
+      //   }
+      // }, 5000);  
     },
     ...mapActions({
       addItemToOrder: "OrderStore/addItemToOrder",
@@ -399,6 +406,7 @@ export default {
       })
     },
     ...mapGetters({
+      checkedInTableId: "CustomerStore/getCheckedInTableId",
       orderHistory: 'CustomerStore/getCustomerOrderHistory',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
       allRestaurants: 'RestaurantsStore/getAllRestaurants',

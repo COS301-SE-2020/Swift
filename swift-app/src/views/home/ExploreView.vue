@@ -264,7 +264,7 @@ export default {
       this.$router.push('/cart')
     },
     getCheckedInRestaurantName(id) {
-      if (this.allRestaurants != undefined && id != null) {
+      if (this.allRestaurants.length != undefined && id != null) {
         let item = this.allRestaurants.find(
           restaurant => restaurant.restaurantId === id
         )
@@ -274,10 +274,12 @@ export default {
     getCategoryNames(categories) {
       if (categories.length != 0 ) {
         var list = [];
-        for (let i = 0; i < categories.length; i++) { 
-          list.push(this.exploreCategories.find((category) => {
-            return category.categoryId === categories[i]
-          }).categoryName)
+        if (this.exploreCategories.length != undefined) {
+          for (let i = 0; i < categories.length; i++) { 
+            list.push(this.exploreCategories.find((category) => {
+              return category.categoryId === categories[i]
+            }).categoryName)
+          }
         }
 
         return list.join(', ')

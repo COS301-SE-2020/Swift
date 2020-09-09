@@ -101,7 +101,6 @@ const actions = {
           "orderItems": this.getters['OrderStore/getOrderInfo'].orderItems
         }
       ).then(result => {
-        // console.log("IN HERE NOW")
         commit('UPDATE_ORDER_HISTORY', result.data.orderHistory);
       }).catch(({ response }) => {
       });
@@ -216,7 +215,6 @@ const actions = {
         "orderProgress": result.data.orderProgress,
         "itemProgress": result.data.itemProgress
       }
-      // console.log("herethis")
       // console.log(result.data.itemProgress)
       commit('UPDATE_ORDER_STATUS', data);
     }).catch(({ response }) => {
@@ -251,6 +249,8 @@ const mutations = {
   },
 
   ADD_ITEM_TO_ORDER(state, orderItemInfo) {
+    // console.log("ITEM TO ORDER:")
+    // console.log(orderItemInfo)
     let empty = Object.keys(state.orderInfo).length === 0 && state.orderInfo.constructor === Object
     if (!empty) {
       for (let i = 0; i < orderItemInfo.orderInfo.orderItems.length; i++)
@@ -269,7 +269,6 @@ const mutations = {
   },
 
   SET_RATING_PHRASES(state, ratingPhrases) {
-    console.log("herrrrrrr")
     state.ratingPhrases = ratingPhrases
   },
 
@@ -290,6 +289,7 @@ const mutations = {
       var obj = item.items.find(mItem => 
         mItem.menuitemid == data.itemProgress[i].menuItemId
       )
+      console.log(obj)
       obj.progress = data.itemProgress[i].progress
     }
 
@@ -297,14 +297,11 @@ const mutations = {
   },
 
   UPDATE_ORDER_HISTORY(state, orderInformation) {
-    // console.log("hello")
     let empty = Object.keys(state.orderedItems).length === 0 && state.orderedItems.constructor === Object
     if (!empty) {
-      // console.log("blah")
       for (let i = 0; i < state.orderInfo.orderItems.length; i++)
         state.orderedItems.orderItems.push(state.orderInfo.orderItems[i])
     } else {
-      // console.log("two")
       state.orderedItems = state.orderInfo;
     }
     state.orderInfo = {}
