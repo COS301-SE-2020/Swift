@@ -1,0 +1,7 @@
+psycopg2_binary==2.8.5
+Flask==1.1.2
+pandas==1.1.0
+matplotlib==3.3.0
+numpy==1.18.5
+Flask_RESTful==0.3.8
+psycopg2==2.8.6
