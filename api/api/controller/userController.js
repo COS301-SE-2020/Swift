@@ -467,7 +467,7 @@ module.exports = {
     if (userToken.state === tokenState.VALID) {
       const orderHistoryPromises = [];
       const orderHistoryResponse = {};
-      let id = userToken.data.userId;
+      const id = userToken.data.userId;
 
       orderHistoryPromises.push(new Promise((resolve, reject) => {
         orderHistoryPromises.push(getOrderHistory(id).then((orderHistoryPromise) => {
@@ -491,5 +491,6 @@ module.exports = {
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }
+    return;
   }
 };
