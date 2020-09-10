@@ -471,10 +471,8 @@ module.exports = {
       orderHistoryPromises.push(new Promise((resolve, reject) => {
         orderHistoryPromises.push(getOrderHistory(userToken.data.userId).then((orderHistoryPromise) => {
           orderHistoryResponse.orderHistory = [];
-          
           Promise.all(orderHistoryPromise)
             .then((orderHistoryItem) => {
-              
               orderHistoryItem.forEach((ordHistItem) => {
                 orderHistoryResponse.orderHistory.push(ordHistItem);
               });
@@ -487,6 +485,6 @@ module.exports = {
       }));
 
       Promise.all(orderHistoryPromises).then(() => response.status(200).send(orderHistoryResponse))
-    }
+    };
   },
 };
