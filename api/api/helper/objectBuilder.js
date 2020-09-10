@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 const db = require('../db');
 
 // helper to get individual order items

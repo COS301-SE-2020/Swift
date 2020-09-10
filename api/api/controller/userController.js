@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 const bcrypt = require('bcrypt');
 const validator = require('email-validator');
 const db = require('../db');
@@ -491,6 +492,6 @@ module.exports = {
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }
-    return;
+    return true;
   }
 };

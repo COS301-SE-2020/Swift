@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 const express = require('express');
 const adminController = require('./controller/adminController');
 const authController = require('./controller/authController');
