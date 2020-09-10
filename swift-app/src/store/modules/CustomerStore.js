@@ -82,10 +82,21 @@ const actions = {
     ).then(result => {
       commit('SAVE_TOKEN', result.data.token);
       sessionStorage.setItem('authToken', result.data.token);
-      commit('SET_CHECKED_IN_CODE', result.data.checkedIn);
       commit('SAVE_CUSTOMER', result.data);
       this.dispatch('OrderStore/initOrderHistory');
       this.dispatch('OrderStore/ratingPhrasesRestaurant');
+      commit('SET_CHECKED_IN_CODE', result.data.checkedIn);
+    }).then(result => {
+      let checkedInVal = this.getters['CustomerStore/getCheckedInQRCode'];
+      if (checkedInVal != null && this.getters['CustomerStore/getCheckedInRestaurantId'] == null) {
+        this.isLoading = true;
+        var data = {
+          "qrcode": checkedInVal
+        }
+
+        this.dispatch('CustomerStore/checkInCustomer', data);
+      }
+      
       return "Success";
     }).catch(({ response }) => {
       return "Fail";

@@ -1,22 +1,32 @@
 <template>
-  <v-card flat max-width="600" class="mx-auto">
-    <v-img src="https://cdn.vuetifyjs.com/images/lists/ali.png" height="250px" >
-      <v-row class="fill-height">
-        <v-card-title>
-          <v-btn width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 10px; left: 10px;">
-            <v-icon>mdi-chevron-left</v-icon>
-          </v-btn>
-           <v-btn width="30px" height="30px" @click="editProfile" color="secondary" absolute small fab style="top: 10px; right: 10px;">
+  <v-container class="pa-0" style="overflow-x: hidden">
+    <v-row class="mt-2">
+      <v-col cols="12" class="pb-0" align="center">
+        <span style="font-size: 24px">My Profile</span>
+      </v-col>
+      <v-col cols="2">
+        <v-btn width="30px" height="30px" @click="editProfile" color="secondary" absolute small fab style="top: 20px; right: 15px;">
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
-        </v-card-title>
-        <v-card-title class="white--text pl-12 pt-12">
-          <div class="display-1 pl-12 pt-12">{{customerInfo.username}}</div>
-        </v-card-title>
-      </v-row>
-    </v-img>
+      </v-col>
+    </v-row>
+    <v-row class="mt-0 pt-0" align="center">
+      <v-col cols="12" class="pt-0" align="center">
+        <v-avatar height="120" width="120">
+          <img :src="customerInfo.profileimageurl" alt="John"/>
+        </v-avatar>
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" class="py-0" align="center">
+        <span style="font-size: 20px">{{customerInfo.name}} {{customerInfo.surname}}</span>
+      </v-col>
+      <v-col cols="12" class="py-0" align="center">
+        <span style="font-size: 16px">{{customerInfo.email}}</span>
+      </v-col>
+    </v-row>
 
-    <v-tabs height="60px" v-model="tab" background-color="white" grow>
+    <v-tabs class="mt-2" height="60px" v-model="tab" background-color="white" grow>
       <v-tab>
         Profile Info
       </v-tab>
@@ -27,22 +37,48 @@
 
     <v-tabs-items v-model="tab">
       <v-tab-item>
-        <v-list subheader>
-          <v-list-item @click=signOut(item.title) v-for="item in items" :key="item.title" v-ripple>
+        <v-list subheader class="pt-2">
+          <v-list-item  v-ripple>
             <v-list-item-avatar>
-              <v-icon :class="[item.iconClass]" v-text="item.icon"></v-icon>
+              <v-icon class="grey lighten-2 secondary--text" >mdi-theme-light-dark</v-icon>
             </v-list-item-avatar>
-
             <v-list-item-content>
-              <v-list-item-title v-text="item.title"></v-list-item-title>
+              <v-list-item-title>Dark Mode</v-list-item-title>
             </v-list-item-content>
-
+            <v-list-item-action>
+              <v-btn icon >
+                <v-switch @click=changeTheme() color="secondary" :value="darkMode" hide-details></v-switch>
+                <!-- <v-icon @click=changeTheme() v-if="customerInfo.theme == 'light'" color="secondary">mdi-radiobox-blank</v-icon> -->
+              </v-btn>
+            </v-list-item-action>
+          </v-list-item>
+          <v-list-item  v-ripple>
+            <v-list-item-avatar>
+              <v-icon class="grey lighten-2 secondary--text" >mdi-credit-card-outline</v-icon>
+            </v-list-item-avatar>
+            <v-list-item-content>
+              <v-list-item-title>Payment Information</v-list-item-title>
+            </v-list-item-content>
             <v-list-item-action>
               <v-btn icon>
                 <v-icon color="secondary">mdi-chevron-right</v-icon>
               </v-btn>
             </v-list-item-action>
           </v-list-item>
+          <v-list-item @click=signOut() v-ripple>
+            <v-list-item-avatar>
+              <v-icon class="grey lighten-2 secondary--text" >mdi-logout</v-icon>
+            </v-list-item-avatar>
+            <v-list-item-content>
+              <v-list-item-title>Logout</v-list-item-title>
+            </v-list-item-content>
+            <v-list-item-action>
+              <v-btn icon>
+                <v-icon color="secondary">mdi-chevron-right</v-icon>
+              </v-btn>
+            </v-list-item-action>
+          </v-list-item>
+          
         </v-list>
         <!-- Test check out -->
         <v-list subheader>
@@ -69,20 +105,11 @@
         </v-card>
       </v-tab-item>
     </v-tabs-items>
-    <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
+    <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
       <v-icon>mdi-cart-outline</v-icon>
     </v-btn>
     <NavBar></NavBar>
-  </v-card>
-  <!-- <div class="profile">
-    <h1>Profile</h1>
-    <p>name: {{customerProfile.name}}</p>
-    <p>username: {{customerProfile.username}}</p>
-    <p>email: {{customerProfile.email}}</p>
-    <v-btn @click=populateCustomer>Load Profile</v-btn>
-    <v-btn @click=signOut>Sign Out</v-btn>
-    <NavBar></NavBar>
-  </div> -->
+  </v-container>
 
 </template>
 
@@ -94,28 +121,39 @@ import { mapActions, mapGetters, mapMutations } from 'vuex'
 export default {
   data: () => ({
     items: [
-      { icon: 'mdi-bell', iconClass: 'grey lighten-2 secondary--text', title: 'Notifications', route: '', },
-      { icon: 'mdi-format-list-bulleted', iconClass: 'grey lighten-2 secondary--text', title: 'Order History', route: '', },
+      // { icon: 'mdi-bell', iconClass: 'grey lighten-2 secondary--text', title: 'Notifications', route: '', },
+      // { icon: 'mdi-format-list-bulleted', iconClass: 'grey lighten-2 secondary--text', title: 'Order History', route: '', },
       { icon: 'mdi-theme-light-dark', iconClass: 'grey lighten-2 secondary--text', title: 'Theme Settings', route: '', },
       { icon: 'mdi-credit-card-outline', iconClass: 'grey lighten-2 secondary--text', title: 'Payment Information', route: '', },
       { icon: 'mdi-logout', iconClass: 'grey lighten-2 secondary--text', title: 'Logout', route: '', },
     ],
     tab: null,
+    darkMode: null
   }),
   components: {
     'NavBar': NavBar
   },
   methods: {
-    signOut (title) {
-      if (title == 'Logout') {
-        this.reset
-        this.$router.push('/login')
-      }
+    signOut () {
+      this.reset
+      this.$router.push('/login')
     },
     backNavigation () {
       this.$router.back()
     },
     editProfile () {
+    },
+    changeTheme() {
+      console.log(this.darkMode)
+      this.darkMode = !this.darkMode;
+      // call update theme
+    },
+    mounted() {
+      if (this.customerInfo.theme == 'light') {
+        this.darkMode = false
+      } else if (this.customerInfo.theme = 'dark') {
+        this.darkMode = true
+      }
     },
     async checkOut() {
       await this.checkout

@@ -37,14 +37,14 @@
         </v-card>
 
         <v-row no-gutters d-flex flex-row >
-          <v-col cols="11">
+          <v-col cols="12">
             <v-text-field class="searchBarBg" background-color="red" v-model="search" rounded solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search for a restaurant..."></v-text-field>
           </v-col>
-          <v-col cols="1" class="d-flex align-center px-0">
+          <!-- <v-col cols="1" class="d-flex align-center px-0">
             <v-btn small icon color="primary">
               <v-icon size="24px">mdi-filter-variant</v-icon> 
             </v-btn>
-          </v-col>
+          </v-col> -->
         </v-row>
       </v-card>
     </v-container>
@@ -87,8 +87,11 @@
           <v-slide-group multiple>
             <v-slide-item v-for="(category, index) in exploreCategories" :key="index">
               <div class="mr-3" align="center">
-                <v-btn width="60px" height="60px" min-width="60px"  @click="toggleCategoryActive(index)">
-                  <v-img height="60px" width="60px" class="categoryButtons" :src="category.categoryImage"></v-img>
+                <v-btn color="primary" width="60px" height="60px" min-width="60px" class="categoryButtons"  @click="restCategories[index] = !restCategories[index]; toggleCategoryActive(index)">
+                  <v-img v-if="!restCategories[index]" height="60px" width="60px" :src="category.categoryImage"></v-img>
+                  <v-icon size="35px" v-else >mdi-glass-cocktail</v-icon>
+                  <!-- <v-icon size="35px" v-else >{{category.categoryIcon}}</v-icon> -->
+                  <!-- <v-icon size="35px" v-else >fa-pizza-slice</v-icon> -->
                 </v-btn>
                 <div class="mt-1 caption">{{category.categoryName}}</div>
               </div>
@@ -124,6 +127,21 @@
             </v-slide-item>
           </v-slide-group>
         </v-sheet>
+        <!-- <v-row style="max-width: 400px" class="overflow-y-auto">
+          <v-col cols="12">
+            <div class="categoryTitle">Recommended</div>
+          </v-col>
+        </v-row>
+        <v-row style="max-width: 400px" class="overflow-y-auto">
+          <v-col cols="12">
+            <div class="categoryTitle">Trending</div>
+          </v-col>
+        </v-row>
+        <v-row style="max-width: 400px" class="overflow-y-auto">
+          <v-col cols="12">
+            <div class="categoryTitle">Nearby</div>
+          </v-col>
+        </v-row> -->
       </v-container>
 
       <v-container v-show="!isLoading" pt-0>
@@ -185,10 +203,10 @@
       </div>
       <div v-else class="pl-1 py-0 restaurantLocation font-weight-light" style="display: inline; font-size: 15px">No search results...</div>
     </v-container>  
-    <v-btn v-if="checkedIn" @click="goToCart" fixed app color="primary" width="52px" height="52px" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
+    <v-btn v-show="!isLoading" v-if="checkedIn" @click="goToCart" fixed app color="primary" width="52px" height="52px" absolute dark bottom elevation="1" style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
       <v-icon>mdi-cart-outline</v-icon>
     </v-btn>
-    <NavBar></NavBar>
+    <NavBar v-show="!isLoading"></NavBar>
   </v-container>
 </template>
 
@@ -197,7 +215,8 @@ import NavBar from '@/components/layout/NavBar';
 import RestaurantSearchToolBar from '@/components/layout/RestaurantSearchToolBar';
 import store from '@/store/store.js';
 import { mapActions, mapGetters, mapMutations } from 'vuex'
-import $ from 'jquery';
+import $ from 'jquery'
+
 
 export default {
   components: {
@@ -211,25 +230,26 @@ export default {
       {restaurantId: 2, restaurant: "Aroma", promotionalMessage: "Free ice cream for each cappuccino bought", period: "Thursday 12:00-18:00", promotionalImage: "https://source.unsplash.com/VZ9zJ9wk2AE/800x800"},
       {restaurantId: 3, restaurant: "Burger Bistro", promotionalMessage: "Burger competition", period: "31 July - 08 August", promotionalImage: "https://source.unsplash.com/sc5sTPMrVfk/800x800"}
     ],
-    categories: [
-      { imageURL: 'drinks.jpg', name: 'Drinks' },
-      { imageURL: 'pizza.jpg', name: 'Pizza' },
-      { imageURL: 'burger.jpg', name: 'Burgers' },
-      { imageURL: 'fastFood.jpg', name: 'Fast Food' },
-      { imageURL: 'dessert.jpg', name: 'Desserts' },
-      { imageURL: 'seafood.jpg', name: 'Seafood' },
-      { imageURL: 'asian.jpg', name: 'Asian' },
-      { imageURL: 'healthy.jpg', name: 'Healthy' },
-      { imageURL: 'breakfast.jpg', name: 'Breakfast' },
-      { imageURL: 'cafe.jpg', name: 'Cafe' },
-    ],
+    // categories: [
+    //   { imageURL: 'drinks.jpg', name: 'Drinks' },
+    //   { imageURL: 'pizza.jpg', name: 'Pizza' },
+    //   { imageURL: 'burger.jpg', name: 'Burgers' },
+    //   { imageURL: 'fastFood.jpg', name: 'Fast Food' },
+    //   { imageURL: 'dessert.jpg', name: 'Desserts' },
+    //   { imageURL: 'seafood.jpg', name: 'Seafood' },
+    //   { imageURL: 'asian.jpg', name: 'Asian' },
+    //   { imageURL: 'healthy.jpg', name: 'Healthy' },
+    //   { imageURL: 'breakfast.jpg', name: 'Breakfast' },
+    //   { imageURL: 'cafe.jpg', name: 'Cafe' },
+    // ],
     // category: ["Western Cuisine", "Fast Food", "Breakfast"],
-    descriptors: ["Fast Service", "Presentation"],
+    // descriptors: ["Fast Service", "Presentation"],
     favourited: false,
     called: false,
     selectedCategories: [],
     // checkedIn: false,
-    restaurant: "Mugg & Bean",
+    restCategories: [],
+    // restaurant: "Mugg & Bean",
     cycle: true,
     isLoading: false,
     carouselIndex: 0
@@ -250,14 +270,11 @@ export default {
       this.called = !this.called;
     },
     toggleCategoryActive(i) {
-      $(".categoryButtons").eq(i).toggleClass('activeButtonClass')
-      if ($(".categoryButtons").eq(i).hasClass('activeButtonClass'))
+      const index = this.selectedCategories.indexOf(this.exploreCategories[i].categoryId);
+      if (index > -1) {
+        this.selectedCategories.splice(index, 1);
+      } else {
         this.selectedCategories.push(this.exploreCategories[i].categoryId)
-      else {
-        const index = this.selectedCategories.indexOf(this.exploreCategories[i].categoryId);
-        if (index > -1) {
-          this.selectedCategories.splice(index, 1);
-        }
       }
     },
     
@@ -265,7 +282,7 @@ export default {
       this.$router.push('/cart')
     },
     getCheckedInRestaurantName(id) {
-      if (this.allRestaurants != undefined && id != null) {
+      if (this.allRestaurants.length != undefined && id != null) {
         let item = this.allRestaurants.find(
           restaurant => restaurant.restaurantId === id
         )
@@ -275,11 +292,13 @@ export default {
     getCategoryNames(categories) {
       if (categories.length != 0 ) {
         var list = [];
-        for (let i = 0; i < categories.length; i++) { 
-          list.push(this.exploreCategories.find((category) => {
-            return category.categoryId === categories[i]
-          }).categoryName)
-        }
+        // if (this.exploreCategories.length != undefined) {
+          for (let i = 0; i < categories.length; i++) { 
+            list.push(this.exploreCategories.find((category) => {
+              return category.categoryId === categories[i]
+            }).categoryName)
+          }
+        // }
 
         return list.join(', ')
       }
@@ -304,16 +323,16 @@ export default {
     checkInCustomer: 'CustomerStore/checkInCustomer',
   }),
   async mounted() {
-    let checkedInVal = await this.checkedInQRCode;
-    // Check-in customer again if system crashes 
+    /* let checkedInVal = await this.checkedInQRCode;
     if (checkedInVal != null && this.checkedInRestaurantId == null) {
+      console.log("apples")
       this.isLoading = true;
       var data = {
         "qrcode": checkedInVal
       }
 
       await this.$store.dispatch('CustomerStore/checkInCustomer', data);
-    } 
+    }  */
 
     var length = await this.allRestaurants.length;
     var categoryLength = await this.exploreCategories.length;
@@ -322,6 +341,8 @@ export default {
       this.isLoading = true;
       var retrievedAllRestaurants = await this.fetchAllRestaurants;
       var retrievedExploreCategories = await this.retrieveExploreCategories;
+      // Change this to have the checked-in menu be its own object
+      await this.$store.dispatch('MenuStore/retrieveMenu', this.checkedInRestaurantId);
       
       if (retrievedAllRestaurants && retrievedExploreCategories)
         this.isLoading = false;
@@ -446,9 +467,9 @@ export default {
     line-height: 180px;
   }
 
-  .activeButtonClass {
+  /* .activeButtonClass {
     border: 2px rgba(247, 85, 100, 0.7) solid;
-  }
+  } */
 
   .bannerImage {
     line-height: 140px;
