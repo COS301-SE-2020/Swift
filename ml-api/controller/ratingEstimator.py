@@ -93,15 +93,30 @@ def filterRatingData(customerId):
     #Group all ratings by menuItemId and calculate the sum of weightedRatings
     sumTopCustomersRating = topCustomersRating.groupby('menuItemId').sum()[['similarityIndex', 'weightedRating']]
     sumTopCustomersRating.columns = ['sum_similarityIndex','sum_weightedRating']
+
+    #only select top profiles with a decent similarity score
+    sumTopCustomersRating = sumTopCustomersRating.loc[sumTopCustomersRating['sum_similarityIndex'] > 0.5]
     
     #calculate weighted average for each menu item
     recommendation_df = pd.DataFrame()
     recommendation_df['weightedRecommendationScore'] = sumTopCustomersRating['sum_weightedRating']/sumTopCustomersRating['sum_similarityIndex']
     recommendation_df['menuItemId'] = sumTopCustomersRating.index
+    recommendation_df.index.name = None
 
-    #sort recommendations by score
-    recommendation_df = recommendation_df.sort_values(by='weightedRecommendationScore', ascending=False)
+    #join recommendations with simlarity
+    joinedRecommendation_df = recommendation_df.merge(sumTopCustomersRating, left_on='menuItemId', right_on='menuItemId', how='inner')
+    del joinedRecommendation_df['sum_weightedRating']
+
+    #sort recommendations by similarity
+    joinedRecommendation_df = joinedRecommendation_df.sort_values(by='sum_similarityIndex', ascending=False)
+
+    #Selection of recommendations: select only where rating > threshold
+    selectedRecommendations = joinedRecommendation_df.loc[joinedRecommendation_df['weightedRecommendationScore'] > 3.5]
+
+    #sort recommendations by confidence
+    selectedRecommendations = selectedRecommendations.sort_values(by='sum_similarityIndex', ascending=False)
 
     #return top 10 recommended items
-    recommendation_df = recommendation_df[0:10]
-    return recommendation_df.menuItemId.tolist()
+    selectedRecommendations = selectedRecommendations[0:10]
+
+    return selectedRecommendations.menuItemId.tolist()
