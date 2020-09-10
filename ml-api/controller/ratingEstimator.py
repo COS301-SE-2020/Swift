@@ -27,7 +27,7 @@ def clearRatingsCache():
     retrieveRatingData() #slow to execute
     return {'message': 'Cache Cleared'}
 
-def filterRatingData(customerId):
+def filterRatingData(customerId, viz = False):
     import pandas as pd
     from math import sqrt
     import numpy as np
@@ -118,5 +118,9 @@ def filterRatingData(customerId):
 
     #return top 10 recommended items
     selectedRecommendations = selectedRecommendations[0:10]
+
+    #return data for visualization
+    if (viz):
+        return (joinedRecommendation_df, selectedRecommendations)
 
     return selectedRecommendations.menuItemId.tolist()

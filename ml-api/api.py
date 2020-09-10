@@ -4,9 +4,11 @@ import controller.estimatedPrepTime as ept
 import controller.promoSuggest as ps
 import controller.menuSuggest as ms
 import controller.ratingEstimator as re
+import controller.visualizeData as vd
 
 app = Flask(__name__)
 api = Api(app)
+
 
 def badRequest():
     abort(make_response(jsonify(reason="Bad Request", status=400), 400))
@@ -32,6 +34,13 @@ def api():
             return re.clearRatingsCache()
         badRequest()
 
+@app.route('/visualize', methods=["GET"])
+def viz():
+    customerId = request.args.get('customerId')
+    if not customerId:
+        return badRequest()
+    else:
+        return vd.collaborativeFiltering(customerId)
+
 if __name__ == '__main__':
     app.run(debug=True)
-
