@@ -467,7 +467,7 @@ module.exports = {
     if (userToken.state === tokenState.VALID) {
       const orderHistoryPromises = [];
       const orderHistoryResponse = {};
-      var id = userToken.data.userId;
+      let id = userToken.data.userId;
 
       orderHistoryPromises.push(new Promise((resolve, reject) => {
         orderHistoryPromises.push(getOrderHistory(id).then((orderHistoryPromise) => {
@@ -486,10 +486,10 @@ module.exports = {
       }));
 
       Promise.all(orderHistoryPromises).then(() => response.status(200).send(orderHistoryResponse))
-      .catch((err) => {
-        console.error('Login Promise Error', err.stack);
-        return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
-      });
+        .catch((err) => {
+          console.error('Login Promise Error', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
     }
   }
 };
