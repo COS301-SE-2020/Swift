@@ -455,5 +455,38 @@ module.exports = {
 
         return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
       });
-  }
+  },
+  orderHistory: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+    || Object.keys(reqBody).length !== 2) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token validity
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      const orderHistoryPromises = [];
+      const orderHistoryResponse = {};
+
+      orderHistoryPromises.push(new Promise((resolve, reject) => {
+        orderHistoryPromises.push(getOrderHistory(userToken.data.userId).then((orderHistoryPromise) => {
+          orderHistoryResponse.orderHistory = [];
+          
+          Promise.all(orderHistoryPromise)
+            .then((orderHistoryItem) => {
+              
+              orderHistoryItem.forEach((ordHistItem) => {
+                orderHistoryResponse.orderHistory.push(ordHistItem);
+              });
+              resolve();
+            })
+            .catch((err) => {
+              reject(err);
+            });
+        }))
+      }));
+
+      Promise.all(orderHistoryPromises).then(() => response.status(200).send(orderHistoryResponse))
+    }
+  },
 };
