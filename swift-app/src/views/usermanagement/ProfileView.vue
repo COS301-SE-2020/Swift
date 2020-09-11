@@ -14,28 +14,16 @@
       <v-col cols="12" class="pt-0" align="center">
         <image-input v-model="avatar">
           <div slot="activator">
-            <v-avatar height="120" width="120" v-ripple v-if="!avatar"  class="grey lighten-3 mb-3">
+            <v-avatar @click="uploadImage()" height="120" width="120" v-ripple v-if="!avatar"  class="grey lighten-3 mb-3">
               <v-img :src="customerInfo.profileimageurl" cover alt="avatar"></v-img>
             </v-avatar>
             <v-avatar height="120" width="120" v-ripple v-else class="mb-3">
-              <v-img :src="avatar.imageURL" cover alt="avatar"></v-img>
+              <v-img ref="newImage" :src="avatar.imageURL" cover alt="avatar"></v-img>
             </v-avatar>
           </div>
         </image-input>
-        <!-- <v-slide-x-transition>
-          <v-btn v-if="avatar && saved == false" width="30px" height="30px" @click="editProfile" color="secondary" absolute small fab style="top: 90px; right: 115px;">
-            <v-icon @click="uploadImage" :loading="saving">mdi-check</v-icon>
-          </v-btn>
-        </v-slide-x-transition> -->
       </v-col>
     </v-row>
-    <!-- <v-row class="mt-0 pt-0" align="center">
-      <v-col cols="12" class="pt-0" align="center">
-        <v-avatar height="120" width="120">
-          <img :src="customerInfo.profileimageurl" alt="John"/>
-        </v-avatar>
-      </v-col>
-    </v-row> -->
     <v-row>
       <v-col cols="12" class="py-0" align="center">
         <span style="font-size: 20px">{{customerInfo.name}} {{customerInfo.surname}}</span>
@@ -57,25 +45,6 @@
     <v-tabs-items v-model="tab">
       <v-tab-item>
         <v-list subheader class="pt-2">
-          <!-- <v-list-item  v-ripple>
-            <v-tooltip v-if="!$vuetify.theme.dark" bottom>
-              <template v-slot:activator="{ on }">
-                <v-btn v-on="on" color="info" small fab @click="darkMode">
-                  <v-icon class="mr-1">mdi-moon-waxing-crescent</v-icon>
-                </v-btn>
-              </template>
-              <span>Dark Mode On</span>
-            </v-tooltip>
-
-            <v-tooltip v-else bottom>
-              <template v-slot:activator="{ on }">
-                <v-btn v-on="on" color="info" small fab @click="darkMode">
-                  <v-icon color="yellow">mdi-white-balance-sunny</v-icon>
-                </v-btn>
-              </template>
-              <span>Dark Mode Off</span>
-            </v-tooltip>
-          </v-list-item> -->
           <v-list-item  v-ripple>
             <v-list-item-avatar>
               <v-icon class="grey lighten-2 secondary--text" >mdi-theme-light-dark</v-icon>
@@ -84,9 +53,8 @@
               <v-list-item-title>Dark Mode</v-list-item-title>
             </v-list-item-content>
             <v-list-item-action>
-              <v-btn icon >
-                <v-switch @click="darkMode" color="secondary" :value="darkMode" hide-details></v-switch>
-                <!-- <v-icon @click=changeTheme() v-if="customerInfo.theme == 'light'" color="secondary">mdi-radiobox-blank</v-icon> -->
+              <v-btn icon>
+                <v-switch @click="darkModeUpdate" color="secondary" :input-value="darkMode" hide-details></v-switch>
               </v-btn>
             </v-list-item-action>
           </v-list-item>
@@ -181,7 +149,8 @@ export default {
     tab: null,
     avatar: null,
     saving: false,
-    saved: false
+    saved: false,
+    darkMode: null
   }),
   components: {
     'NavBar': NavBar,
@@ -203,23 +172,46 @@ export default {
     backNavigation () {
       this.$router.back()
     },
-    uploadImage() {
+    async uploadImage(avatar) {
       this.saving = true
-      setTimeout(() => this.savedAvatar(), 1000)
-    },
-    savedAvatar() {
-      // await save image
+      // setTimeout(() => this.savedAvatar(), 1000)
+      console.log(avatar.imageURL)
+
+
+      /* var profileObj = {
+        name: this.customerInfo.name,
+        surname: this.customerInfo.name,
+        profileImage: this.customerInfo.profileimageurl,
+        theme: this.customerInfo.theme
+      }
+
+      await this.$store.dispatch('CustomerStore/editProfile', profileObj); */
       this.saving = false
       this.saved = true
     },
-    darkMode() {
-      this.$vuetify.theme.dark = !this.$vuetify.theme.dark;
-    },
-    mounted() {
-      if (this.customerInfo.theme == 'light') {
-        this.darkMode = false
-      } else if (this.customerInfo.theme = 'dark') {
-        this.darkMode = true
+    async darkModeUpdate() {
+      this.darkMode = !this.darkMode;
+      let themeSettings = ''
+      if (this.darkMode === true)
+       themeSettings = 'dark'
+      else 
+        themeSettings = 'light'
+
+      var profileObj = {
+        name: this.customerInfo.name,
+        surname: this.customerInfo.name,
+        profileImage: this.customerInfo.profileimageurl,
+        theme: themeSettings
+      }
+
+      console.log(this.$refs["newImage"])
+
+      await this.$store.dispatch('CustomerStore/editProfile', profileObj);
+
+      if (this.darkMode) {
+        this.$vuetify.theme.dark = true;
+      } else if (!this.darkMode) {
+        this.$vuetify.theme.dark = false;
       }
     },
     async checkOut() {
@@ -248,6 +240,13 @@ export default {
       this.$router.push('/cart')
     },
   },
+  mounted() {
+    if (this.customerInfo.theme === 'light') {
+      this.darkMode = false
+    } else if (this.customerInfo.theme === 'dark') {
+      this.darkMode = true
+    }
+  },
   computed: {
     ...mapGetters({
       customerInfo: 'CustomerStore/getCustomerProfile',
@@ -256,7 +255,7 @@ export default {
     }),
     ...mapActions({
       loadCustomer: 'CustomerStore/loadCustomer',
-      checkout: 'CustomerStore/checkOutCustomer', 
+      checkout: 'CustomerStore/checkOutCustomer',
     }),
     
   }

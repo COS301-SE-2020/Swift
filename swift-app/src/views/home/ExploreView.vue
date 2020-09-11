@@ -334,6 +334,12 @@ export default {
       await this.$store.dispatch('CustomerStore/checkInCustomer', data);
     }  */
 
+    if (this.customerInfo.theme === 'light') {
+      this.$vuetify.theme.dark = false;
+    } else if (this.customerInfo.theme === 'dark') {
+      this.$vuetify.theme.dark = true;
+    }
+
     var length = await this.allRestaurants.length;
     var categoryLength = await this.exploreCategories.length;
 
