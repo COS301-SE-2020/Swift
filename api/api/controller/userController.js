@@ -1,4 +1,6 @@
 /* eslint-disable linebreak-style */
+/* eslint-disable no-console */
+/* eslint-disable linebreak-style */
 const bcrypt = require('bcrypt');
 const validator = require('email-validator');
 const db = require('../db');
@@ -489,6 +491,28 @@ module.exports = {
       Promise.all(orderHistoryPromises).then(() => response.status(200).send(orderHistoryResponse))
         .catch((err) => {
           console.error('Login Promise Error', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+    return true;
+  },
+  editProfile: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+    || Object.keys(reqBody).length !== 6) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token validity
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      const id = userToken.data.userId;
+      return db.query(
+        'UPDATE public.person SET name = $1::text, surname = $2::text, profileimageurl = $3::text, theme = $4::text  WHERE userid = $5::integer;',
+        [reqBody.name, reqBody.surname, reqBody.profileImage, reqBody.theme, id]
+      )
+        .then(() => response.status(201).send({ status: 201, reason: 'Profile successfully updated' }))
+        .catch((err) => {
+          console.error('Query Error [Profile update error]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }

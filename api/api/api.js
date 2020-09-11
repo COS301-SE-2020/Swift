@@ -88,6 +88,10 @@ router.post('/', (req, res) => {
         userController.orderHistory(req.body, res);
         break;
       }
+      case 'editProfile': {
+        userController.editProfile(req.body, res);
+        break;
+      }
       case 'allRestaurants': {
         restaurantController.getRestaurantList(req.body, res);
         break;
