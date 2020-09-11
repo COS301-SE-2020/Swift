@@ -34,7 +34,7 @@ const getOrderItems = async (oid = 0) => db.query(
 
 // helper to get individual menu items
 // eslint-disable-next-line arrow-body-style
-const getMenuItems = (restaurantId = 0, categoryId = 0) => {
+const getMenuItems = (categoryId = 0) => {
   return (async () => {
     const client = await db.connect();
     try {
@@ -44,8 +44,8 @@ const getMenuItems = (restaurantId = 0, categoryId = 0) => {
       const menuItems = await client.query(
         'SELECT menuitemid, menuitemname, menuitemdescription, price, estimatedwaitingtime,'
         + ' menuitem.attributes, arasset, availability FROM public.menuitem'
-        + ' WHERE restaurantid = $1::integer AND categoryid = $2::integer;',
-        [restaurantId, categoryId]
+        + ' WHERE categoryid = $1::integer;',
+        [categoryId]
       );
 
       const menuItemsArr = [];
@@ -332,7 +332,7 @@ module.exports = {
       for (let r = 0; r < res.rows.length; r++) {
         const categoryItem = {};
         // eslint-disable-next-line no-await-in-loop
-        const resMenuItem = await getMenuItems(restaurantId, res.rows[r].categoryid);
+        const resMenuItem = await getMenuItems(res.rows[r].categoryid);
         categoryItem.categoryId = res.rows[r].categoryid;
         categoryItem.categoryName = res.rows[r].categoryname;
         categoryItem.description = res.rows[r].categorydescription;
