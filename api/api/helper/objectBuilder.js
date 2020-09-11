@@ -111,18 +111,39 @@ const getMenuItems = (categoryId = 0) => {
         menuItem.reviews = [];
         // eslint-disable-next-line no-await-in-loop
         const revRes = await client.query(
-          'SELECT review.comment, review.reviewdatetime, review.public, review.adminid, review.response'
+          'SELECT review.orderid, review.comment, review.reviewdatetime, review.public, review.adminid, review.response'
           + ' FROM public.review WHERE review.menuitemid = $1::integer AND review.comment IS NOT NULL;',
           [resMenuItem.menuitemid]
         );
 
-        revRes.rows.forEach((review) => {
+        revRes.rows.forEach(async (review) => {
           const reviewItem = {};
-          reviewItem.comment = review.comment;
-          reviewItem.reviewDateTime = review.reviewdatetime;
-          reviewItem.public = review.public;
-          reviewItem.adminId = review.adminid;
-          reviewItem.response = review.response;
+
+          const orderIdRes = await client.query(
+            'SELECT customerorder.customerid'
+            + ' FROM public.customerorder WHERE customerorder.orderid = $1::integer',
+            [review.orderid]
+          );
+
+          if (orderIdRes.rows.length !== 0) {
+            const customerInfoRes = await client.query(
+              'SELECT person.name, person.surname, person.profileimageurl'
+              + ' FROM public.person WHERE person.userid = $1::integer',
+              [orderIdRes.rows[0].customerid]
+            );
+
+            if (customerInfoRes.rows.length !== 0) {
+              reviewItem.customerName = customerInfoRes.rows[0].name;
+              reviewItem.customerSurname = customerInfoRes.rows[0].surname;
+              reviewItem.customerImage = customerInfoRes.rows[0].profileimageurl;
+            }
+
+            reviewItem.comment = review.comment;
+            reviewItem.reviewDateTime = review.reviewdatetime;
+            reviewItem.public = review.public;
+            reviewItem.adminId = review.adminid;
+            reviewItem.response = review.response;
+          }
           menuItem.reviews.push(reviewItem);
         });
 
