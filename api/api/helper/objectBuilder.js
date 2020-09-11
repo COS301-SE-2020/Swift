@@ -58,6 +58,7 @@ const getMenuItems = (restaurantId = 0, categoryId = 0) => {
         menuItem.price = resMenuItem.price;
         menuItem.estimatedWaitingTime = resMenuItem.estimatedwaitingtime;
         menuItem.images = [];
+        menuItem.dietaryLabels = [];
         menuItem.attributes = resMenuItem.attributes;
         menuItem.arAsset = resMenuItem.arasset;
         menuItem.availability = resMenuItem.availability;
@@ -71,6 +72,23 @@ const getMenuItems = (restaurantId = 0, categoryId = 0) => {
 
         menuItemImages.rows.forEach((menuImg) => {
           menuItem.images.push(menuImg.imageurl);
+        });
+
+        // menu item dietary labels
+        // eslint-disable-next-line no-await-in-loop
+        const menuItemDietaryLabels = await client.query(
+          'SELECT dietaryInformation.name'
+          + ' FROM public.menuitemdietarylabels'
+          + ' INNER JOIN public.dietaryInformation ON dietaryInformation.id = menuitemdietarylabels.dietaryinfoid'
+          + ' INNER JOIN public.menuitem ON menuitemdietarylabels.menuitemid = menuitem.menuitemid'
+          + ' WHERE menuitem.menuitemid = $1::integer',
+          [resMenuItem.menuitemid]
+        );
+
+        menuItemDietaryLabels.rows.forEach((menuLabel) => {
+          const dietaryObj = {};
+          dietaryObj.name = menuLabel.name;
+          menuItem.dietaryLabels.push(dietaryObj);
         });
 
         // get menu item rating
