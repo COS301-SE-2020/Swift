@@ -5,6 +5,7 @@ import controller.promoSuggest as ps
 import controller.menuSuggest as ms
 import controller.ratingEstimator as re
 import controller.visualizeData as vd
+import os
 
 app = Flask(__name__)
 api = Api(app)
@@ -43,4 +44,4 @@ def viz():
         return vd.collaborativeFiltering(customerId)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='127.0.0.1', port=os.getenv('PORT', 8080), debug=True)
