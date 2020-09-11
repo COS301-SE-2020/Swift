@@ -32,4 +32,4 @@ jobs:
     # Deploy App to App Engine
     - name: Deploy To Google App Engine
       run: |
-        gcloud app deploy ./ml-api/swift-ml-api.yaml dispatch.yaml --quiet --promote
+        gcloud app deploy ./ml-api/swift-ml-api.yaml ./ml-api/dispatch.yaml --quiet --promote
