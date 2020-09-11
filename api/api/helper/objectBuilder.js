@@ -77,7 +77,7 @@ const getMenuItems = (restaurantId = 0, categoryId = 0) => {
         // menu item dietary labels
         // eslint-disable-next-line no-await-in-loop
         const menuItemDietaryLabels = await client.query(
-          'SELECT dietaryInformation.name'
+          'SELECT dietaryInformation.name, dietaryInformation.abbreviation, dietaryInformation.image'
           + ' FROM public.menuitemdietarylabels'
           + ' INNER JOIN public.dietaryInformation ON dietaryInformation.id = menuitemdietarylabels.dietaryinfoid'
           + ' INNER JOIN public.menuitem ON menuitemdietarylabels.menuitemid = menuitem.menuitemid'
@@ -88,6 +88,8 @@ const getMenuItems = (restaurantId = 0, categoryId = 0) => {
         menuItemDietaryLabels.rows.forEach((menuLabel) => {
           const dietaryObj = {};
           dietaryObj.name = menuLabel.name;
+          dietaryObj.abbreviation = menuLabel.abbreviation;
+          dietaryObj.image = menuLabel.image;
           menuItem.dietaryLabels.push(dietaryObj);
         });
 
