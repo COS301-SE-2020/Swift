@@ -116,7 +116,7 @@ module.exports = {
 
     if (userToken.state === tokenState.VALID) {
       return db.query(
-        'SELECT categoryid, categoryname, categoryimage FROM public.category'
+        'SELECT categoryid, categoryname, categoryimage, categoryicon FROM public.category'
       )
         .then((res) => {
           const categoryResponse = {};
@@ -126,6 +126,7 @@ module.exports = {
             categoryResponse.categories[c].categoryId = res.rows[c].categoryid;
             categoryResponse.categories[c].categoryName = res.rows[c].categoryname;
             categoryResponse.categories[c].categoryImage = res.rows[c].categoryimage;
+            categoryResponse.categories[c].categoryicon = res.rows[c].categoryicon;
           }
 
           // return categories
