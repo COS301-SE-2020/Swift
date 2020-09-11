@@ -76,7 +76,7 @@
                 </template>
 
                 <!-- <v-list-item-group  class="pl-2" :multiple="(parseInt(attribute.max) > 1) ? true : false" :mandatory="(attribute.min == '1') ? true : false" v-model="model[i]"> -->
-                <v-list-item-group  class="pl-2" :multiple="(parseInt(attribute.max) > 1) ? true : false"  v-model="model[i]">
+                <v-list-item-group  class="pl-2" :multiple="(parseInt(attribute.max) > 1) ? true : false" :mandatory="(parseInt(attribute.min) != 0) ? true : false"  v-model="model[i]">
                   <template v-for="(value, j) in attribute.values">
                     <v-list-item @click="checkInput(i, j, attribute)" ref="attributeVal" class="px-2 attributeValues" :key="`item-${j}`" :value="value.name">
                       <template v-slot:default="{ active }">
@@ -551,6 +551,7 @@ export default {
     // console.log($(".attributeElements").find(".attributeValues").html())
     console.log(this.$refs.attributeVal);
     this.total = this.newMenuItem.price
+    // this.model[0] = 1
     
     // $(".attributeValues.v-item--active.v-list-item--active").find("i").addClass("mdi-radiobox-marked");
     // this.itemTotal = this.newMenuItem.price
