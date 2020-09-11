@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 const db = require('../db');
 const paymentEmail = require('../helper/notifications/sendEmail');
 const { validateToken, tokenState } = require('../helper/tokenHandler');
@@ -365,8 +366,12 @@ module.exports = {
     }
 
     // Check token
-    const userToken = validateToken(reqBody.token);
+    const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
+      // eslint-disable-next-line no-console
+      // console.log(userToken);
+      const customerId = userToken.data.userId;
+
       return (async () => {
         const client = await db.connect();
         try {
@@ -417,7 +422,7 @@ module.exports = {
           }
 
           // get menu categories
-          menuResponse.categories = await getMenuCategories(reqBody.restaurantId);
+          menuResponse.categories = await getMenuCategories(customerId, reqBody.restaurantId);
 
           // commit changes
           client.query('COMMIT');

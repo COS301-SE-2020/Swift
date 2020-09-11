@@ -34,7 +34,7 @@ const getOrderItems = async (oid = 0) => db.query(
 
 // helper to get individual menu items
 // eslint-disable-next-line arrow-body-style
-const getMenuItems = (categoryId = 0) => {
+const getMenuItems = (userId = 0, categoryId = 0) => {
   return (async () => {
     const client = await db.connect();
     try {
@@ -111,13 +111,14 @@ const getMenuItems = (categoryId = 0) => {
         menuItem.reviews = [];
         // eslint-disable-next-line no-await-in-loop
         const revRes = await client.query(
-          'SELECT review.orderid, review.ratingscore, review.comment, review.reviewdatetime, review.public, review.adminid, review.response'
+          'SELECT review.reviewid, review.orderid, review.ratingscore, review.comment, review.reviewdatetime, review.public, review.adminid, review.response'
           + ' FROM public.review WHERE review.menuitemid = $1::integer AND review.comment IS NOT NULL;',
           [resMenuItem.menuitemid]
         );
 
         revRes.rows.forEach(async (review) => {
           const reviewItem = {};
+          reviewItem.reviewId = review.reviewid;
 
           const orderIdRes = await client.query(
             'SELECT customerorder.customerid'
@@ -142,6 +143,28 @@ const getMenuItems = (categoryId = 0) => {
             reviewItem.comment = review.comment;
             reviewItem.reviewDateTime = review.reviewdatetime;
             reviewItem.public = review.public;
+
+            const likedRevRes = await client.query(
+              'SELECT *'
+              + ' FROM public.likedreview WHERE likedreview.userid = $1::integer AND likedreview.reviewid = $2::integer',
+              [userId, review.reviewid]
+            );
+
+            if (likedRevRes.rows.length !== 0) {
+              reviewItem.likedComment = true;
+            } else {
+              reviewItem.likedComment = false;
+            }
+
+            const numLikesRes = await client.query(
+              'SELECT COUNT(userId) as numLikes'
+              + ' FROM public.likedreview WHERE likedreview.reviewid = $1::integer',
+              [review.reviewid]
+            );
+
+            if (numLikesRes.rows.length !== 0) {
+              reviewItem.numLikes = numLikesRes.rows[0].numLikes;
+            }
 
             if (review.adminId != null) {
               const adminInfoRes = await client.query(
@@ -352,7 +375,7 @@ module.exports = {
       console.error('Query Error [Rating Phrases - Get Restaurant Ratings]', err.stack);
       return [];
     }),
-  getMenuCategories: (restaurantId = 0) => (async () => {
+  getMenuCategories: (userId = 0, restaurantId = 0) => (async () => {
     const client = await db.connect();
     try {
       // begin transaction
@@ -371,7 +394,7 @@ module.exports = {
       for (let r = 0; r < res.rows.length; r++) {
         const categoryItem = {};
         // eslint-disable-next-line no-await-in-loop
-        const resMenuItem = await getMenuItems(res.rows[r].categoryid);
+        const resMenuItem = await getMenuItems(userId, res.rows[r].categoryid);
         categoryItem.categoryId = res.rows[r].categoryid;
         categoryItem.categoryName = res.rows[r].categoryname;
         categoryItem.description = res.rows[r].categorydescription;
