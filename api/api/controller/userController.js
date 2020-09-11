@@ -510,7 +510,14 @@ module.exports = {
         'UPDATE public.person SET name = $1::text, surname = $2::text, profileimageurl = $3::text, theme = $4::text  WHERE userid = $5::integer;',
         [reqBody.name, reqBody.surname, reqBody.profileImage, reqBody.theme, id]
       )
-        .then(() => response.status(201).send({ status: 201, reason: 'Profile successfully updated' }))
+        .then(() => response.status(201).send({
+          profileInfo: {
+            name: reqBody.name,
+            surname: reqBody.surname,
+            profileImage: reqBody.profileImage,
+            theme: reqBody.theme
+          }
+        }))
         .catch((err) => {
           console.error('Query Error [Profile update error]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
