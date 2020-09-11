@@ -141,7 +141,24 @@ const getMenuItems = (categoryId = 0) => {
             reviewItem.comment = review.comment;
             reviewItem.reviewDateTime = review.reviewdatetime;
             reviewItem.public = review.public;
-            reviewItem.adminId = review.adminid;
+
+            if (review.adminId != null) {
+              const adminInfoRes = await client.query(
+                'SELECT person.name, person.surname, person.profileimageurl'
+                + ' FROM public.person WHERE person.userid = $1::integer',
+                [review.adminId]
+              );
+
+              if (adminInfoRes.rows.length !== 0) {
+                reviewItem.adminName = adminInfoRes.rows[0].name;
+                reviewItem.adminSurname = adminInfoRes.rows[0].surname;
+                reviewItem.adminImage = adminInfoRes.rows[0].profileimageurl;
+              }
+            } else {
+              reviewItem.adminName = null;
+              reviewItem.adminSurname = null;
+              reviewItem.adminImage = null;
+            }
             reviewItem.response = review.response;
           }
           menuItem.reviews.push(reviewItem);
