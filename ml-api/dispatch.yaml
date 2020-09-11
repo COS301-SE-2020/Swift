@@ -1,3 +1,0 @@
-dispatch:
-  - url: "ml.api.swiftapp.ml/*"
-    service: ml-api
