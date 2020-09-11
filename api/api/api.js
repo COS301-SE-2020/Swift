@@ -25,6 +25,12 @@ router.get('/', (req, res) => {
   res.status(200).send(jsonResponse);
 });
 
+// loader.io verification
+router.get('/loaderio-21bdd85acb704aa0a54e22ecb385713b.txt', (req, res) => {
+  const response = 'loaderio-21bdd85acb704aa0a54e22ecb385713b';
+  res.status(200).send(response);
+});
+
 // Health Check
 router.get('/status', (req, res) => healthCheck.getServiceStatus(res));
 
