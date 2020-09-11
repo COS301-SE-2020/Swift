@@ -1,0 +1,35 @@
+name: Swift ML API CI
+
+on:
+  push:
+    branches: [ master, develop, machineLearing ]
+
+jobs:
+  deploy:
+    name: Deploy ML API
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+
+    # Swap environment vars
+    - name: Get Environment Secrets
+      uses: ./.github/actions/yaml-env-secrets-ml
+      env:
+        DB_HOST: ${{ secrets.DB_HOST }}
+        DB_NAME: ${{ secrets.DB_NAME }}
+        DB_PASS: ${{ secrets.DB_PASS_RO }}
+        DB_PORT: ${{ secrets.DB_PORT }}
+        DB_USER: ${{ secrets.DB_USER_RO }}
+
+    # Setup and configure gcloud CLI
+    - name: Setup gcloud CLI
+      uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      with:
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.GAE_CREDENTIALS }}
+
+    # Deploy App to App Engine
+    - name: Deploy To Google App Engine
+      run: |
+        gcloud app deploy ./ml-api/swift-ml-api.yaml dispatch.yaml --quiet --promote
