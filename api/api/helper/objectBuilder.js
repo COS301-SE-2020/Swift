@@ -111,7 +111,7 @@ const getMenuItems = (categoryId = 0) => {
         menuItem.reviews = [];
         // eslint-disable-next-line no-await-in-loop
         const revRes = await client.query(
-          'SELECT review.orderid, review.comment, review.reviewdatetime, review.public, review.adminid, review.response'
+          'SELECT review.orderid, review.ratingscore, review.comment, review.reviewdatetime, review.public, review.adminid, review.response'
           + ' FROM public.review WHERE review.menuitemid = $1::integer AND review.comment IS NOT NULL;',
           [resMenuItem.menuitemid]
         );
@@ -138,6 +138,7 @@ const getMenuItems = (categoryId = 0) => {
               reviewItem.customerImage = customerInfoRes.rows[0].profileimageurl;
             }
 
+            reviewItem.ratingScore = review.ratingscore;
             reviewItem.comment = review.comment;
             reviewItem.reviewDateTime = review.reviewdatetime;
             reviewItem.public = review.public;
