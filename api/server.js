@@ -54,6 +54,8 @@ app.use((req, res, next) => {
   return next();
 });
 
+app.get('/loaderio-21bdd85acb704aa0a54e22ecb385713b.txt', require('./api/api'));
+
 // API handle requests
 app.delete('/', require('./api/api'));
 app.get('/', require('./api/api'));
