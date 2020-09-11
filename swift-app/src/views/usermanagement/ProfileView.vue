@@ -4,13 +4,13 @@
       <v-col cols="12" class="pb-0" align="center">
         <span style="font-size: 24px">My Profile</span>
       </v-col>
-      <v-col cols="2">
+      <!-- <v-col cols="2">
         <v-btn width="30px" height="30px" @click="editProfile" color="secondary" absolute small fab style="top: 20px; right: 15px;">
           <v-icon>mdi-pencil</v-icon>
         </v-btn>
-      </v-col>
+      </v-col> -->
     </v-row>
-    <v-row class="mt-0 pt-0" align="center">
+    <v-row class="mt-0 pt-4" align="center">
       <v-col cols="12" class="pt-0" align="center">
         <image-input v-model="avatar">
           <div slot="activator">
@@ -57,6 +57,25 @@
     <v-tabs-items v-model="tab">
       <v-tab-item>
         <v-list subheader class="pt-2">
+          <!-- <v-list-item  v-ripple>
+            <v-tooltip v-if="!$vuetify.theme.dark" bottom>
+              <template v-slot:activator="{ on }">
+                <v-btn v-on="on" color="info" small fab @click="darkMode">
+                  <v-icon class="mr-1">mdi-moon-waxing-crescent</v-icon>
+                </v-btn>
+              </template>
+              <span>Dark Mode On</span>
+            </v-tooltip>
+
+            <v-tooltip v-else bottom>
+              <template v-slot:activator="{ on }">
+                <v-btn v-on="on" color="info" small fab @click="darkMode">
+                  <v-icon color="yellow">mdi-white-balance-sunny</v-icon>
+                </v-btn>
+              </template>
+              <span>Dark Mode Off</span>
+            </v-tooltip>
+          </v-list-item> -->
           <v-list-item  v-ripple>
             <v-list-item-avatar>
               <v-icon class="grey lighten-2 secondary--text" >mdi-theme-light-dark</v-icon>
@@ -66,7 +85,7 @@
             </v-list-item-content>
             <v-list-item-action>
               <v-btn icon >
-                <v-switch @click=changeTheme() color="secondary" :value="darkMode" hide-details></v-switch>
+                <v-switch @click="darkMode" color="secondary" :value="darkMode" hide-details></v-switch>
                 <!-- <v-icon @click=changeTheme() v-if="customerInfo.theme == 'light'" color="secondary">mdi-radiobox-blank</v-icon> -->
               </v-btn>
             </v-list-item-action>
@@ -160,7 +179,6 @@ export default {
       { icon: 'mdi-logout', iconClass: 'grey lighten-2 secondary--text', title: 'Logout', route: '', },
     ],
     tab: null,
-    darkMode: null,
     avatar: null,
     saving: false,
     saved: false
@@ -185,12 +203,6 @@ export default {
     backNavigation () {
       this.$router.back()
     },
-    editProfile () {
-    },
-    changeTheme() {
-      this.darkMode = !this.darkMode;
-      // await update theme
-    },
     uploadImage() {
       this.saving = true
       setTimeout(() => this.savedAvatar(), 1000)
@@ -199,6 +211,9 @@ export default {
       // await save image
       this.saving = false
       this.saved = true
+    },
+    darkMode() {
+      this.$vuetify.theme.dark = !this.$vuetify.theme.dark;
     },
     mounted() {
       if (this.customerInfo.theme == 'light') {
