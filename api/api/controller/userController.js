@@ -524,5 +524,52 @@ module.exports = {
         });
     }
     return true;
-  }
+  },
+  addCommentLike: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+    || !Object.prototype.hasOwnProperty.call(reqBody, 'reviewId')
+    || Object.keys(reqBody).length !== 3) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token validity
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      return db.query(
+        'SELECT reviewId FROM public.review WHERE reviewId = $1::integer;',
+        [reqBody.reviewId]
+      )
+        .then((res) => {
+          if (res.rows.length === 0) {
+            // Review does not exist
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          // add review like if it has not already been added
+          return db.query(
+            'INSERT INTO public.likedreview (reviewId, userid)'
+            + ' SELECT $1::integer, $2::integer WHERE NOT EXISTS'
+            + ' (SELECT 1 FROM public.likedreview WHERE'
+            + ' reviewId = $1::integer AND userid = $2::integer);',
+            [reqBody.reviewId, userToken.data.userId]
+          )
+            .then(() => response.status(201).send({ status: 201, reason: 'Comment liked successfully' }))
+            .catch((err) => {
+              console.error('Query Error [Review - Add Review Item]', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
+        })
+        .catch((err) => {
+          console.error('Query Error [Review - Check Review]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
 };

@@ -144,6 +144,18 @@ const getMenuItems = (userId = 0, categoryId = 0) => {
             reviewItem.reviewDateTime = review.reviewdatetime;
             reviewItem.public = review.public;
 
+            const numLikesRes = await client.query(
+              'SELECT COUNT(userId) as "numLikes"'
+              + ' FROM public.likedreview WHERE likedreview.reviewid = $1::integer',
+              [review.reviewid]
+            );
+
+            if (numLikesRes.rows.length !== 0) {
+              reviewItem.totalLikes = numLikesRes.rows[0].numLikes;
+            } else {
+              reviewItem.totalLikes = 0;
+            }
+
             const likedRevRes = await client.query(
               'SELECT *'
               + ' FROM public.likedreview WHERE likedreview.userid = $1::integer AND likedreview.reviewid = $2::integer',
@@ -154,16 +166,6 @@ const getMenuItems = (userId = 0, categoryId = 0) => {
               reviewItem.likedComment = true;
             } else {
               reviewItem.likedComment = false;
-            }
-
-            const numLikesRes = await client.query(
-              'SELECT COUNT(userId) as numLikes'
-              + ' FROM public.likedreview WHERE likedreview.reviewid = $1::integer',
-              [review.reviewid]
-            );
-
-            if (numLikesRes.rows.length !== 0) {
-              reviewItem.numLikes = numLikesRes.rows[0].numLikes;
             }
 
             if (review.adminId != null) {

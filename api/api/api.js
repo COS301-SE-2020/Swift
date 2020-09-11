@@ -98,6 +98,10 @@ router.post('/', (req, res) => {
         userController.editProfile(req.body, res);
         break;
       }
+      case 'addCommentLike': {
+        userController.addCommentLike(req.body, res);
+        break;
+      }
       case 'allRestaurants': {
         restaurantController.getRestaurantList(req.body, res);
         break;
