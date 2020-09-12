@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 const { v4: uuidv4 } = require('uuid');
 const db = require('../db');
 const { validateToken, tokenState } = require('../helper/tokenHandler');
@@ -689,13 +690,12 @@ module.exports = {
 
           // add menu item
           const menuItemRes = await client.query(
-            'INSERT INTO public.menuitem (categoryid, restaurantid, menuitemname, menuitemdescription,'
+            'INSERT INTO public.menuitem (categoryid, menuitemname, menuitemdescription,'
             + 'price, estimatedwaitingtime, attributes, arasset, availability) VALUES ($1::integer,'
-            + '$2::integer,$3::text,$4::text,$5::real,$6::text,$7::json,$8::text,$9::boolean)'
+            + '$2::text,$3::text,$4::real,$5::text,$6::json,$7::text,$8::boolean)'
             + ' RETURNING menuitemid',
             [
               reqBody.categoryId,
-              reqBody.restaurantId,
               reqBody.itemName,
               reqBody.itemDescription,
               reqBody.price,
