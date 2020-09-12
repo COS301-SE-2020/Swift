@@ -89,7 +89,7 @@
               <div class="mr-3" align="center">
                 <v-btn color="primary" width="60px" height="60px" min-width="60px" class="categoryButtons"  @click="restCategories[index] = !restCategories[index]; toggleCategoryActive(index)">
                   <v-img v-if="!restCategories[index]" height="60px" width="60px" :src="category.categoryImage"></v-img>
-                  <v-icon size="35px" v-else >mdi-glass-cocktail</v-icon>
+                  <v-icon size="35px" v-else >{{category.categoryicon}}</v-icon>
                 </v-btn>
                 <div class="mt-1 caption">{{category.categoryName}}</div>
               </div>
