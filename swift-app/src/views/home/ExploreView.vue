@@ -50,25 +50,25 @@
     </v-container>
     <v-container v-show="!isLoading" class="px-0 py-0" v-if="search == ''">
       <v-container py-0>
-        <v-carousel v-model="carouselIndex" class="promotionalMaterial" :continuous="true" :cycle="cycle" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="210px">
+        <v-carousel v-model="carouselIndex" class="promotionalMaterial" :continuous="true" :cycle="cycle" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="170px">
           <v-carousel-item v-for="(promotion, i) in promotions" :key="i">
-            <v-sheet color="secondary" height="190px" flat tile style="border-radius: 13px !important" class="mt-5">
-              <v-row class="d-flex justify-space-between specialsInfo">
-                <v-col cols="6" class="pr-0 py-1 mb-5">
-                  <v-layout column justify-space-around align-center fill-height>
+            <v-sheet :color="(i == 3) ? 'primary' : 'secondary'" height="150px" flat tile style="border-radius: 10px !important" class="mt-5">
+              <v-row class="d-flex justify-space-between px-0 py-0">
+                <v-col cols="6" class="py-3 pr-0">
+                  <v-layout column justify-space-between fill-height>
                     <div class="px-3">
                       <!-- <span class="specialsText font-weight-light">30%</span> <span class="specialsText discount font-weight-light">discount</span> <span class="specialsText font-weight-light">on all pizza slices</span> -->
                       <span class="specialsText font-weight-light">{{ promotion.promotionalMessage }}</span>
                       <div class="mt-1 specialsDate">{{ promotion.period }}</div>
                     </div>
-                    <div class="browseButton">
+                    <!-- <div class="browseButton">
                       <v-btn @click="goToRestaurant(promotion.restaurantId)" color="accent" height="33px" class="browseMenu px-2">Browse Menu</v-btn>
-                    </div>
+                    </div> -->
                   </v-layout>
                 </v-col>
                 <v-col cols="6" class="py-0">
-                  <v-layout column fill-height>
-                    <v-img :src="promotion.promotionalImage" class="specialsImage">{{ promotion.restaurant }}</v-img>
+                  <v-layout column >
+                    <v-img height="155px" :src="promotion.promotionalImage" :class="(i == 3) ? 'specialsImage bannerImage pl-2' : 'specialsImage'">{{ promotion.restaurant }}</v-img>
                   </v-layout>
                 </v-col>
               </v-row>
@@ -90,8 +90,6 @@
                 <v-btn color="primary" width="60px" height="60px" min-width="60px" class="categoryButtons"  @click="restCategories[index] = !restCategories[index]; toggleCategoryActive(index)">
                   <v-img v-if="!restCategories[index]" height="60px" width="60px" :src="category.categoryImage"></v-img>
                   <v-icon size="35px" v-else >mdi-glass-cocktail</v-icon>
-                  <!-- <v-icon size="35px" v-else >{{category.categoryIcon}}</v-icon> -->
-                  <!-- <v-icon size="35px" v-else >fa-pizza-slice</v-icon> -->
                 </v-btn>
                 <div class="mt-1 caption">{{category.categoryName}}</div>
               </div>
@@ -144,8 +142,8 @@
         </v-row> -->
       </v-container>
 
-      <v-container v-show="!isLoading" pt-0>
-        <v-card color="primary" height="140px" flat tile style="border-radius: 13px !important" class="mt-5">
+      <!-- <v-container v-show="!isLoading" pt-0> -->
+        <!-- <v-card color="primary" height="140px" flat tile style="border-radius: 13px !important" class="mt-5">
           <v-row class="px-0 py-0 specialsInfo">
             <v-col cols="6" class="pl-7 py-3 pr-0">
               <v-layout column justify-space-between fill-height>
@@ -163,12 +161,12 @@
               </v-layout>
             </v-col>
           </v-row>
-        </v-card>
+        </v-card> -->
 
         <v-btn v-if="!checkedIn()" height="50px" width="50px" class="checkInBtn" @click=goToCheckin app color="primary" fab style="position: fixed; bottom: 65px; right: 13px">
           <v-icon size="30">mdi-table-furniture</v-icon>
         </v-btn>
-      </v-container>
+      <!-- </v-container> -->
     </v-container>
       
     <v-container v-show="!isLoading" v-else class="mt-3">
@@ -226,30 +224,15 @@ export default {
   data: () => ({
     search: '',
     promotions: [
-      {restaurantId: 1, restaurant: "Col'Cacchio", promotionalMessage: "30% discount on all pizza's ordered", period: "Monday 18:00-22:00", promotionalImage: "https://source.unsplash.com/MQUqbmszGGM/800x800"},
+      {restaurantId: 1, restaurant: "Col'Cacchio", promotionalMessage: "30% discount on all pizzas ordered", period: "Monday 18:00-22:00", promotionalImage: "https://source.unsplash.com/MQUqbmszGGM/800x800"},
       {restaurantId: 2, restaurant: "Aroma", promotionalMessage: "Free ice cream for each cappuccino bought", period: "Thursday 12:00-18:00", promotionalImage: "https://source.unsplash.com/VZ9zJ9wk2AE/800x800"},
-      {restaurantId: 3, restaurant: "Burger Bistro", promotionalMessage: "Burger competition", period: "31 July - 08 August", promotionalImage: "https://source.unsplash.com/sc5sTPMrVfk/800x800"}
+      {restaurantId: 3, restaurant: "Burger Bistro", promotionalMessage: "Burger competition", period: "31 July - 08 August", promotionalImage: "https://source.unsplash.com/sc5sTPMrVfk/800x800"},
+      {restaurantId: 4, restaurant: "Pizza Hut", promotionalMessage: 'Big Promotion: \n2 Pizzas only R60.00', period: "(Wed - Fri)", promotionalImage: "https://source.unsplash.com/MQUqbmszGGM/800x800"}
     ],
-    // categories: [
-    //   { imageURL: 'drinks.jpg', name: 'Drinks' },
-    //   { imageURL: 'pizza.jpg', name: 'Pizza' },
-    //   { imageURL: 'burger.jpg', name: 'Burgers' },
-    //   { imageURL: 'fastFood.jpg', name: 'Fast Food' },
-    //   { imageURL: 'dessert.jpg', name: 'Desserts' },
-    //   { imageURL: 'seafood.jpg', name: 'Seafood' },
-    //   { imageURL: 'asian.jpg', name: 'Asian' },
-    //   { imageURL: 'healthy.jpg', name: 'Healthy' },
-    //   { imageURL: 'breakfast.jpg', name: 'Breakfast' },
-    //   { imageURL: 'cafe.jpg', name: 'Cafe' },
-    // ],
-    // category: ["Western Cuisine", "Fast Food", "Breakfast"],
-    // descriptors: ["Fast Service", "Presentation"],
     favourited: false,
     called: false,
     selectedCategories: [],
-    // checkedIn: false,
     restCategories: [],
-    // restaurant: "Mugg & Bean",
     cycle: true,
     isLoading: false,
     carouselIndex: 0
@@ -440,6 +423,7 @@ export default {
   .specialsText {
     font-size: 18px;
     color: white;
+    white-space: pre-wrap;
   }
 
   .checkedRestaurant {
@@ -478,9 +462,9 @@ export default {
   } */
 
   .bannerImage {
-    line-height: 140px;
+    line-height: 150px;
     font-size: 22px;
-    border-bottom-left-radius: 130px;
+    border-bottom-left-radius: 160px;
   }
 
   .specialsInfo {
