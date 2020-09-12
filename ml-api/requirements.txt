@@ -5,3 +5,4 @@ matplotlib==3.3.0
 numpy==1.18.5
 Flask_RESTful==0.3.8
 psycopg2==2.8.6
+mlxtend==0.17.3

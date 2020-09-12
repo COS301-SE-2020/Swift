@@ -4,7 +4,6 @@ import json
 sys.path.append('..') #import from parent directory
 from functools import lru_cache
 import db
-from multiprocessing import Process
 
 @lru_cache(maxsize=100)
 def retrieveRatingData():
@@ -27,6 +26,7 @@ def clearRatingsCache():
     retrieveRatingData() #slow to execute
     return {'message': 'Cache Cleared'}
 
+#collaborative filtering algorithm
 def filterRatingData(customerId, viz = False):
     import pandas as pd
     from math import sqrt

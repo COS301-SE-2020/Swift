@@ -24,12 +24,12 @@ def api():
         if(request.json["requestType"] == "estimatedPrepTime"):
             return ept.updatePrepTime()
         if(request.json["requestType"] == "promoSuggest"):
-            return ps.suggest()
-        if(request.json["requestType"] == "menuSuggest"):
+            return jsonify(ps.getPopularItemsets())
+        if(request.json["requestType"] == "suggestFromRatings"):
             if(not 'customerId' in request.json):
                 badRequest()
             else:
-                return ms.suggest(request.json["customerId"])
+                return ms.suggestFromRatings(request.json["customerId"])
         if(request.json["requestType"] == "clearRatingsCache"):
             return re.clearRatingsCache()
         badRequest()
