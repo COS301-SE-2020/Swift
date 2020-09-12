@@ -56,12 +56,14 @@ module.exports = {
             const ratingPhraseFetchLimit = 2;
             // eslint-disable-next-line no-await-in-loop
             const ratePhraseQ = await client.query(
-              'SELECT ratingphrase.phrasedescription, customerphraserating.ratingscore'
+              'SELECT ratingphrase.phrasedescription, AVG(customerphraserating.ratingscore) as "avgScore" '
               + ' FROM public.customerphraserating'
-              + ' INNER JOIN public.review ON customerphraserating.reviewid = review.reviewid'
-              + ' INNER JOIN public.ratingphrase ON customerphraserating.phraseid = ratingphrase.phraseid'
-              + ' ORDER BY customerphraserating.ratingscore DESC LIMIT $1::integer',
-              [ratingPhraseFetchLimit]
+              + ' INNER JOIN public.ratingphrase ON customerphraserating.phraseid = ratingphrase.phraseid '
+              + ' INNER JOIN public.review ON customerphraserating.reviewid = review.reviewid '
+              + " WHERE LOWER(ratingphrase.type) = 'restaurant' AND review.restaurantId = $1::integer "
+              + ' GROUP BY ratingphrase.phrasedescription '
+              + ' ORDER BY "avgScore" DESC LIMIT $2::integer',
+              [res.rows[r].restaurantid, ratingPhraseFetchLimit]
             );
 
             ratePhraseQ.rows.forEach((ratePhrase) => {
