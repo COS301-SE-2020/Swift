@@ -986,12 +986,14 @@ module.exports = {
           // update category
           await client.query(
             'UPDATE public.menucategory'
-            + ' SET categoryname = $1::text, categorydescription = $2::text, categorytype = $3::text, parentcategoryid = $4::integer',
+            + ' SET categoryname = $1::text, categorydescription = $2::text, categorytype = $3::text, parentcategoryid = $4::integer'
+            + ' WHERE categoryId = $5::integer',
             [
               reqBody.categoryName,
               reqBody.categoryDescription,
               reqBody.categoryType,
-              (reqBody.categoryType.toLowerCase() === 'secondary') ? reqBody.parentCategoryId : null
+              (reqBody.categoryType.toLowerCase() === 'secondary') ? reqBody.parentCategoryId : null,
+              reqBody.categoryId
             ]
           );
 
