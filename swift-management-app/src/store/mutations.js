@@ -6,6 +6,9 @@ const mutations = {
   ADD_RESTAURANT(state, restaurant) {
     state.myRestaurants.unshift(restaurant);
   },
+  EDIT_RESTAURANT(state, restaurant) {
+    state.myRestaurants.unshift(restaurant);
+  },
   SET_CURRENT_RESTAURANT(state, payload) {
     localStorage.setItem("currentRestaurantId", payload.id);
     localStorage.setItem("currentRestaurantName", payload.name);

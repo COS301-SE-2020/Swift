@@ -31,7 +31,7 @@
               >Branch: {{ business.branch }}</vs-chip>
               <div class="newRestaurantDescription mb-4">{{ business.description }}</div>
 
-              <vs-button @click="editRestaurant()" type="border">
+              <vs-button @click="editRestaurant(business)" type="border">
                 <span class="flex items-center">
                   <feather-icon icon="EditIcon" svgClasses="h-4 w-4 mr-1" />
                   <span>Edit</span>
@@ -169,7 +169,7 @@ export default {
   methods: {
     addFirstItemPrompt() {
       this.newPopupCount++;
-      if(this.newPopupCount > 1) return;
+      if (this.newPopupCount > 1) return;
       this.$vs.dialog({
         color: "primary",
         title: "Let's create your Business!",
@@ -211,10 +211,18 @@ export default {
       document.getElementById("restaurantCoverUploadPreview").style.display =
         "block";
     },
-    editRestaurant() {
+    editRestaurant(business) {
       this.restaurantPopupAction = "edit";
       this.restaurantPopupTitle = "Edit Restaurant";
       this.restaurantPopupButton = "Save Restaurant";
+      //set fields to business being edited
+      this.newRestaurantName = business.name;
+      this.newRestaurantDesc = business.description;
+      this.newRestaurantBranch = business.branch;
+      this.setnewRestaurantImage(business.image);
+      this.newRestaurantCategories = business.categories;
+      console.log(business)
+      //show popup
       this.restaurantPopupActive = true;
     },
     addRestaurant() {
@@ -235,7 +243,15 @@ export default {
         });
         this.restaurantPopupActive = false;
       } else if (this.restaurantPopupAction == "edit") {
-        this.restaurantPopupActive;
+         this.$store.dispatch("mybusinessData/editRestaurant", {
+          restaurantName: this.newRestaurantName,
+          restaurantDesc: this.newRestaurantDesc,
+          restaurantBranch: this.newRestaurantBranch,
+          restaurantImage: this.newRestaurantImage,
+          restaurantCategories: JSON.stringify(this.newRestaurantCategories),
+          authKey: this.getAuthToken(),
+        });
+        this.restaurantPopupActive = false;
       }
     },
     listMyRestaurants() {
