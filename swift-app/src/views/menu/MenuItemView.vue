@@ -54,7 +54,7 @@
         Details
       </v-tab>
       <v-tab>
-        Reviews ({{ comments.length }})
+        Reviews ({{ newMenuItem.reviews.length }})
       </v-tab>
     </v-tabs>
     
@@ -144,35 +144,35 @@
         </v-card>
         <v-divider style="opacity: 0.6"></v-divider>
         <v-card flat class="mt-2 mb-5">
-          <v-row v-for="(comment, index) in comments" :key="comment.commentDate">
+          <v-row v-for="(comment, index) in newMenuItem.reviews" :key="index">
             <v-card-text class="pb-0 pt-1 mt-0">
               <v-row class="mx-0 pb-0 pt-3">
                 <v-col cols="3" class="mr-0 pb-0 pt-1">
                   <v-avatar color="grey" size="50px">
-                    <img :src=comment.profileImage alt="">
+                    <v-img :src="comment.customerImage" cover ></v-img>
                   </v-avatar>
                 </v-col>
                 <v-col cols="9" class="pl-1 pb-0 pt-1">
                   <v-row class="pt-0">
                     <v-col cols="6" class="pt-0 pl-0 pb-0">
-                      <span class="black--text" style="font-size: 15px">{{comment.name}} {{comment.surname}}</span>
+                      <span class="black--text" style="font-size: 15px">{{comment.customerName}} {{comment.customerSurname}}</span>
                     </v-col>
                     <v-col cols="6" class="pt-0 pl-0 pb-0" style="text-align: right">
-                      <span style="font-size: 12px; text-align: right">{{comment.commentDate}}</span>
+                      <span style="font-size: 12px; text-align: right">{{getDate(comment.reviewDateTime)}}</span>
                     </v-col>
                   </v-row>
                   <v-row class="pt-0">
                     <v-col cols="8" class="py-0 pt-0 pl-0 pb-0">
-                      <v-rating readonly size="18" dense color="yellow darken-3" background-color="secondary" :value="parseInt(comment.rating)"></v-rating>
+                      <v-rating readonly size="18" dense color="yellow darken-3" background-color="secondary" :value="parseInt(comment.ratingScore)"></v-rating>
                     </v-col>
-                    <v-col cols="4" class="py-0 pt-0 pl-0 pb-0" style="text-align: right">
+                    <!-- <v-col cols="4" class="py-0 pt-0 pl-0 pb-0" style="text-align: right">
                         <v-btn @click="changeFavouriteComment(comment)" :color="activateFavouriteComment(comment).color" class="pl-0 pr-1" text small min-width="0">
                           <v-icon>{{ activateFavouriteComment(comment).icon }}</v-icon>
                         </v-btn>
                         <div v-if="comment.likes != '0'" style="display: inline">
                           {{comment.likes}}
                         </div>
-                    </v-col>
+                    </v-col> -->
                   </v-row>
                   <v-row class="pt-0 pr-2 mt-3">
                     <v-col cols="12" class="py-0 pt-0 pl-0 pb-0 mr-0">
@@ -184,10 +184,13 @@
                       </v-btn>
                     </v-col>
                   </v-row>
-                  <v-row class="mt-2" v-if="comment.adminName != ''">
+                  <v-row class="mt-2" v-if="comment.response != null">
                     <v-col cols="3" class="mr-0 ml-0 pl-0 pb-0 pt-1">
-                      <v-avatar color="grey" size="50px">
-                        <img :src=comment.adminProfileImage alt="">
+                      <v-avatar v-if="comment.adminImage != null" color="grey" size="50px">
+                        <v-img :src="comment.adminImage" cover ></v-img>
+                      </v-avatar>
+                      <v-avatar v-else color="grey" size="50px">
+                        <v-img :src="menu.image" cover ></v-img>
                       </v-avatar>
                     </v-col>
                     <v-col cols="9" class="pl-1 pb-0 pt-1">
@@ -195,9 +198,9 @@
                         <v-col cols="12" class="pt-0 pl-0 pb-0">
                           <span class="black--text" style="font-size: 15px">{{comment.adminName}}</span>
                         </v-col>
-                        <v-col cols="12" class="pt-0 pl-0 pb-0">
+                        <!-- <v-col cols="12" class="pt-0 pl-0 pb-0">
                           <span style="font-size: 12px;">{{comment.responseDate}}</span>
-                        </v-col>
+                        </v-col> -->
                       </v-row>
                       <v-row class="pt-0 pr-2 mt-3">
                         <v-col cols="12" class="py-0 pt-0 pl-0 pb-0 mr-0">
@@ -210,6 +213,7 @@
               </v-row>
             </v-card-text>
           </v-row>
+
         </v-card>
       </v-tab-item>
     </v-tabs-items>
@@ -254,6 +258,7 @@
 import store from '@/store/store.js';
 import { mapActions, mapGetters, mapMutations } from "vuex";
 import $ from 'jquery';
+import moment from 'moment'
 
 $('.commentInfo').text($('.commentInfo').text().substring(0,200))
 
@@ -354,6 +359,9 @@ export default {
     addPrice() {
       this.quantity++;
       this.changeTotal;
+    },
+    getDate(date) {
+      return moment(String(date.slice(0, 10))).format('DD MMM YYYY')
     },
     
     changeFavouriteComment: function (comment) {
