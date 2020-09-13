@@ -46,6 +46,11 @@ const router = new Router({
           component: () => import('./views/menu/AddMenuItemView.vue')
         },
         {
+          path: '/promotions',
+          name: 'promotions',
+          component: () => import('./views/promotions/PromotionsView.vue')
+        },
+        {
           path: '/employees',
           name: 'employees',
           component: () => import('./views/employees/EmployeesListView.vue')
