@@ -26,6 +26,8 @@ def api():
             return ept.updatePrepTime()
         if(request.json["requestType"] == "promoSuggest"):
             return jsonify(ps.getPopularItemsets())
+        if(request.json["requestType"] == "getTrending"):
+            return jsonify(ms.suggestFromTrending())
         if(request.json["requestType"] == "suggestFromRatings"):
             if(not 'customerId' in request.json):
                 badRequest()
