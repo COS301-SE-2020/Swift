@@ -46,6 +46,18 @@
         </v-col>
       </v-row>
       <div class="justify">{{newMenuItem.menuItemDescription}}</div>
+      <!-- <v-row>
+        <v-col v-for="(dietaryLabel, i) in newMenuItem.dietaryLabels" :key="i" cols="4" class="py-0">
+          <v-chip x-small class="mt-2 pb-0">
+          {{dietaryLabel.name}}
+        </v-chip>
+        </v-col>
+      </v-row> -->
+      <div v-show="newMenuItem.dietaryLabels.length != 0" v-for="(dietaryLabel, i) in newMenuItem.dietaryLabels" :key="i" style="display: inline;">
+        <v-chip small class="mt-2 pb-0 mr-1" >
+          {{dietaryLabel.name}}
+        </v-chip>
+      </div>
     </v-card-text>
 
     
@@ -170,8 +182,8 @@
                         <v-btn @click="changeFavouriteComment(comment)" :color="activateFavouriteComment(comment).color" class="pl-0 pr-1" text small min-width="0">
                           <v-icon>{{ activateFavouriteComment(comment).icon }}</v-icon>
                         </v-btn>
-                        <div v-if="comment.likes != '0'" style="display: inline">
-                          {{comment.likes}}
+                        <div v-if="comment.totalLikes != 0" style="display: inline">
+                          {{comment.totalLikes}}
                         </div>
                     </v-col> -->
                   </v-row>
@@ -197,11 +209,12 @@
                     <v-col cols="9" class="pl-1 pb-0 pt-1">
                       <v-row class="pt-0">
                         <v-col cols="12" class="pt-0 pl-0 pb-0">
-                          <span class="black--text" style="font-size: 15px">{{comment.adminName}}</span>
+                          <span v-if="comment.adminName != null" class="black--text" style="font-size: 15px">{{comment.adminName}} {{comment.adminSurname}}</span>
+                          <span v-else class="black--text" style="font-size: 15px">{{menu.name}}</span>
                         </v-col>
-                        <!-- <v-col cols="12" class="pt-0 pl-0 pb-0">
-                          <span style="font-size: 12px;">{{comment.responseDate}}</span>
-                        </v-col> -->
+                        <v-col cols="12" class="pt-0 pl-0 pb-0">
+                          <span style="font-size: 12px;">{{getDate(comment.responseDate)}}</span>
+                        </v-col>
                       </v-row>
                       <v-row class="pt-0 pr-2 mt-3">
                         <v-col cols="12" class="py-0 pt-0 pl-0 pb-0 mr-0">
@@ -366,12 +379,12 @@ export default {
     },
     
     changeFavouriteComment: function (comment) {
-      comment.liked = !comment.liked
-      if (comment.liked)
-        comment.likes = (Number(comment.likes) + 1).toString()
+      this.liked = !this.liked
+      if (this.liked)
+        comment.totalLikes = (Number(comment.totalLikes) + 1).toString()
       else 
-        if (comment.likes != '0')
-          comment.likes = (Number(comment.likes) - 1).toString()
+        if (comment.totalLikes != null)
+          comment.totalLikes = (Number(comment.totalLikes) - 1).toString()
     },
     activateFavouriteComment: function (comment) {
       if (!comment.liked) {
