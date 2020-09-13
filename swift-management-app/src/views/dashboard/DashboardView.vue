@@ -5,7 +5,7 @@
         <h2 class="mb-1">Dashboard</h2>
       </div>
     </div>
-    <h4 class="mb-2">Realtime</h4>
+    <h4 class="mb-2">Realtime Statistics</h4>
     <div class="vx-row">
       <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base">
         <statistics-card-line
@@ -54,7 +54,7 @@
         />
       </div>
     </div>
-    <h4 class="mb-2">Recently</h4>
+    <h4 class="mb-2">Recent Insights</h4>
     <vs-dropdown class="mb-4 mr-4">
       <vs-button type="filled">
         <span class="flex items-center">
@@ -71,7 +71,7 @@
       </vs-dropdown-menu>
     </vs-dropdown>
     <div class="vx-row">
-      <div class="vx-col w-full md:w-1/4 lg:w-1/4 xl:w-1/4 mb-base">
+      <div class="vx-col w-full md:w-1/3 mb-base">
         <vx-card title="Top Menu Items">
           <div v-for="(menuItem, index) in topItems" :key="menuItem.id" :class="{'mt-4': index}">
             <div class="flex justify-between">
@@ -93,14 +93,56 @@
           </div>
         </vx-card>
       </div>
+      <div class="vx-col md:w-1/3 w-full mb-base">
+        <vx-card title="Menu Popularity">
+          <vue-apex-charts
+            type="donut"
+            height="310"
+            :options="menuDistribution.chartOptions"
+            :series="menuDistribution.series"
+          ></vue-apex-charts>
+        </vx-card>
+      </div>
 
-      <div class="vx-col w-full md:w-3/4 lg:w-3/4 xl:w-/4">
+      <div class="vx-col w-full md:w-1/3 mb-base">
+        <vx-card title="Orders Completed Goal">
+          <!-- CHART -->
+          <template slot="no-body">
+            <div class="mt-10">
+              <vue-apex-charts
+                type="radialBar"
+                height="240"
+                :options="goalOverviewRadialBar.chartOptions"
+                :series="goalOverviewRadialBar.series"
+              />
+            </div>
+          </template>
+
+          <!-- DATA -->
+          <div class="flex justify-between text-center mt-6" slot="no-body-bottom">
+            <div
+              class="w-1/2 border border-solid d-theme-border-grey-light border-r-0 border-b-0 border-l-0"
+            >
+              <p class="mt-4">Completed</p>
+              <p class="mb-4 text-3xl font-semibold">{{ goalOverviewRadialBar.analyticsData.completed }}</p>
+            </div>
+            <div class="w-1/2 border border-solid d-theme-border-grey-light border-r-0 border-b-0">
+              <p class="mt-4">Goal</p>
+              <p class="mb-4 text-3xl font-semibold">{{ goalOverviewRadialBar.analyticsData.goal }}</p>
+            </div>
+          </div>
+        </vx-card>
+      </div>
+    </div>
+
+    <div class="vx-row">
+      <div class="vx-col w-full ">
         <vx-card title="Customer Count">
           <vue-apex-charts
             type="area"
             height="295"
-            :options="CustomerCount.chartOptions"
-            :series="CustomerCount.series"
+            :options="customerCount.chartOptions"
+            :series="customerCount.series"
           ></vue-apex-charts>
         </vx-card>
       </div>
@@ -128,9 +170,19 @@ export default {
         return this.$store.state.analytics.topItems;
       else return null;
     },
-    CustomerCount() {
+    customerCount() {
       if (this.$store.state.analytics) {
-        return this.$store.state.analytics.CustomerCount;
+        return this.$store.state.analytics.customerCount;
+      } else return null;
+    },
+    menuDistribution() {
+      if (this.$store.state.analytics) {
+        return this.$store.state.analytics.menuDistribution;
+      } else return null;
+    },
+    goalOverviewRadialBar() {
+      if (this.$store.state.analytics) {
+        return this.$store.state.analytics.goalOverviewRadialBar;
       } else return null;
     },
   },
