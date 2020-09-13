@@ -52,11 +52,23 @@ module.exports = {
           // add restaurant admin
           const employeeRole = 'Admin';
           const employeeNumber = `emp${cRes.rows[0].restaurantid}${userToken.data.userId}`;
-          await client.query(
+          const empId = await client.query(
             'INSERT INTO public.restaurantemployee (userid, restaurantid, employeerole, employeenumber)'
-            + ' VALUES ($1::integer, $2::integer, $3::text, $4::text)',
+            + ' VALUES ($1::integer, $2::integer, $3::text, $4::text)'
+            + ' RETURNING employeeid',
             [userToken.data.userId, cRes.rows[0].restaurantid, employeeRole, employeeNumber]
           );
+
+          const accessRights = await client.query(
+            'SELECT permissionid FROM public.accessright'
+          );
+          accessRights.rows.forEach(async (right) => {
+            await client.query(
+              'INSERT INTO public.employeeaccessright (employeeid, permissionid)'
+              + ' VALUES ($1::integer, $2::integer)',
+              [empId.rows[0].employeeid, right.permissionid]
+            );
+          });
 
           // add categories
           for (let c = 0; c < reqBody.categories.length; c++) {
@@ -138,6 +150,18 @@ module.exports = {
         try {
           // begin transaction
           await client.query('BEGIN');
+
+          const requiredRole = 'admin';
+          const permRes = await client.query(
+            'SELECT employeerole FROM public.restaurantemployee'
+            + ' WHERE userid = $1::integer AND restaurantid = $2::integer AND LOWER(employeerole) = $3::text',
+            [userToken.data.userId, reqBody.restaurantId, requiredRole]
+          );
+
+          if (permRes.rows.length === 0) {
+            // Access denied
+            return response.status(403).send({ status: 403, reason: 'Access Denied' });
+          }
 
           // edit restaurant
           await client.query(
