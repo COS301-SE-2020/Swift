@@ -9,7 +9,8 @@ const initialState = () => ({
   checkedInStatus: null,
   checkedInQRCode: null,
   checkedInRestaurantId: null,
-  checkedInTableId: null
+  checkedInTableId: null,
+  fetchedOrderHistory: {}
 });
 
 const state = initialState();
@@ -38,6 +39,9 @@ const getters = {
   },
   getCheckedInTableId( state ) {
     return state.checkedInTableId;
+  },
+  getFetchedOrderHistory( state ) {
+    return state.fetchedOrderHistory;
   },
   isAuthenticated(state) {
     return state.isAuthenticated;
@@ -193,6 +197,19 @@ const actions = {
       "token": sessionStorage.getItem('authToken')
     })
   },
+
+  fetchOrderHistory({commit}) {
+    axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "orderHistory",
+      "token": sessionStorage.getItem('authToken'),
+    } 
+    ).then(result => {
+      console.log(result.data.orderHistory)
+      commit('SET_FETCHED_ORDER_HISTORY', result.data.orderHistory);
+    }).catch(({ response }) => {
+    });
+  },
   
   reset({ commit }) {
     commit('RESET');
@@ -292,6 +309,12 @@ const mutations = {
     state.customer.profileimageurl = profileInfo.profileImage;
     state.customer.theme = profileInfo.theme;
   },
+
+  SET_FETCHED_ORDER_HISTORY(state, orderHistory) {
+    state.fetchedOrderHistory = orderHistory;
+  },
+
+  
 
   RESET(state) {
     const newState = initialState();

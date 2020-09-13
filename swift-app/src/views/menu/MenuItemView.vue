@@ -54,7 +54,7 @@
         Details
       </v-tab>
       <v-tab>
-        Reviews ({{ newMenuItem.reviews.length }})
+        Reviews ({{ newMenuItem.reviews.length  }})
       </v-tab>
     </v-tabs>
     
@@ -146,6 +146,7 @@
         <v-card flat class="mt-2 mb-5">
           <v-row v-for="(comment, index) in newMenuItem.reviews" :key="index">
             <v-card-text class="pb-0 pt-1 mt-0">
+              <!-- <v-row v-if="comment.public == true" class="mx-0 pb-0 pt-3"> only show public reviews --> 
               <v-row class="mx-0 pb-0 pt-3">
                 <v-col cols="3" class="mr-0 pb-0 pt-1">
                   <v-avatar color="grey" size="50px">

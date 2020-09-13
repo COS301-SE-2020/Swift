@@ -176,6 +176,8 @@ export default {
     }
   },
   async mounted() {
+    // await this.$store.dispatch('CustomerStore/fetchOrderHistory');
+
     var length = await this.orderHistory.length;
     if (length == undefined) {
       this.isLoading = !this.isLoading;
@@ -429,6 +431,7 @@ export default {
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
       allRestaurants: 'RestaurantsStore/getAllRestaurants',
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
+      fetchedOrderHistory: 'CustomerStore/getFetchedOrderHistory',
     }),
     
   },
