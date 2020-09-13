@@ -126,6 +126,10 @@ router.post('/', (req, res) => {
         restaurantAdminController.createRestaurant(req.body, res);
         break;
       }
+      case 'editRestaurant': {
+        restaurantAdminController.editRestaurant(req.body, res);
+        break;
+      }
       case 'checkin': {
         restaurantController.checkIn(req.body, res);
         break;

@@ -115,6 +115,85 @@ module.exports = {
     // Invalid token
     return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
   },
+  editRestaurant: async (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'name')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'description')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'branch')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'location')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'coverImageURL')
+      || Object.keys(reqBody).length !== 8) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      return (async () => {
+        const client = await db.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+
+          // edit restaurant
+          await client.query(
+            'UPDATE public.restaurant'
+            + ' SET restaurantname = $1::text, restaurantdescription = $2::text,'
+            + ' branch = $3::text, location = $4::text,'
+            + ' coverimageurl = $5::text'
+            + ' WHERE restaurantid = $6::integer',
+            [
+              reqBody.name,
+              reqBody.description,
+              reqBody.branch,
+              reqBody.location,
+              reqBody.coverImageURL,
+              reqBody.restaurantId
+            ]
+          );
+
+          // commit changes
+          await client.query('COMMIT');
+
+          const rest = await client.query(
+            'SELECT * FROM public.restaurant'
+            + ' WHERE restaurantid = $1::integer',
+            [reqBody.restaurantId]
+          );
+
+          // send response
+          return response.status(201).send({
+            name: rest.rows[0].restaurantname,
+            description: rest.rows[0].restaurantdescription,
+            branch: rest.rows[0].branch,
+            location: rest.rows[0].location,
+            coverImageURL: rest.rows[0].coverimageurl
+          });
+        } catch (err) {
+          // rollback changes
+          await client.query('ROLLBACK');
+
+          // throw error for async catch
+          throw err;
+        } finally {
+          // close connection
+          client.release();
+        }
+      })()
+        .catch((err) => {
+          console.error('Query Error [Restaurant Admin - Edit Restaurant]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
   createTable: (reqBody, response) => {
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')
