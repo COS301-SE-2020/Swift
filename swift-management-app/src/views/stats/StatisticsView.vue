@@ -14,14 +14,14 @@
               <div class="mr-6">
                 <p class="mb-1 font-semibold">This Month</p>
                 <p class="text-3xl text-success">
-                  <sup class="text-base mr-1">$</sup>
+                  <sup class="text-base mr-1">R</sup>
                   {{ revenueData.analyticsData.thisMonth.toLocaleString() }}
                 </p>
               </div>
               <div>
                 <p class="mb-1 font-semibold">Last Month</p>
                 <p class="text-3xl">
-                  <sup class="text-base mr-1">$</sup>
+                  <sup class="text-base mr-1">R</sup>
                   {{ revenueData.analyticsData.lastMonth.toLocaleString() }}
                 </p>
               </div>
@@ -77,7 +77,6 @@
         </vx-card>
       </div>
 
-      <!-- COLUMN CHART -->
       <div class="vx-col md:w-1/2 w-full mb-base">
         <vx-card title="Income By Menu" code-toggler>
           <vue-apex-charts
