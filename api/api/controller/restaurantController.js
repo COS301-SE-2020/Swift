@@ -372,7 +372,6 @@ module.exports = {
     if (userToken.state === tokenState.VALID) {
       // eslint-disable-next-line no-console
       // console.log(userToken);
-      const customerId = userToken.data.userId;
 
       return (async () => {
         const client = await db.connect();
@@ -424,7 +423,7 @@ module.exports = {
           }
 
           // get menu categories
-          menuResponse.categories = await getMenuCategories(customerId, reqBody.restaurantId);
+          menuResponse.categories = await getMenuCategories(reqBody.restaurantId);
 
           // commit changes
           client.query('COMMIT');
