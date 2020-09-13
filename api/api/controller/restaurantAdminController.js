@@ -1070,11 +1070,13 @@ module.exports = {
           }
 
           // check user permissions
-          const requiredRole = 'admin';
+          const permission = 'restaurant menu';
           const permRes = await client.query(
-            'SELECT employeerole FROM public.restaurantemployee'
-            + ' WHERE userid = $1::integer AND restaurantid = $2::integer AND LOWER(employeerole) = $3::text',
-            [userToken.data.userId, reqBody.restaurantId, requiredRole]
+            'SELECT employeeaccessright.permissionid FROM public.employeeaccessright'
+            + ' INNER JOIN public.accessright ON accessright.permissionid = employeeaccessright.permissionid'
+            + ' INNER JOIN public.restaurantemployee ON restaurantemployee.employeeid = employeeaccessright.employeeid'
+            + ' WHERE restaurantemployee.userid = $1::integer AND restaurantemployee.restaurantid = $2::integer AND LOWER(accessright.description) = $3::text',
+            [userToken.data.userId, reqBody.restaurantId, permission]
           );
 
           if (permRes.rows.length === 0) {
@@ -1122,7 +1124,156 @@ module.exports = {
         }
       })()
         .catch((err) => {
-          console.error('Query Error [Restaurant - Add Menu Category]', err.stack);
+          console.error('Query Error [Restaurant - Add Menu Item]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  editMenuItem: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'menuItemId')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'categoryId')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'itemName')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'itemDescription')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'price')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'waitingTime')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'attributes')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'arAsset')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'available')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'images')
+      || Object.keys(reqBody).length !== 12) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    const userToken = validateToken(reqBody.token, true);
+
+    if (userToken.state === tokenState.VALID) {
+      return (async () => {
+        const client = await db.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+
+          // check if menu item exists
+          const cRes = await client.query(
+            'SELECT menucategory.restaurantid FROM public.menuitem'
+            + ' INNER JOIN public.menucategory on menucategory.categoryid = menuitem.categoryid'
+            + ' WHERE menuitemid = $1::integer',
+            [reqBody.menuItemId]
+          );
+
+          if (cRes.rows.length === 0) {
+            // menu item does not exist
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          // check if category exists at this restaurant
+          const categRes = await client.query(
+            'SELECT categoryid FROM public.menucategory'
+            + ' WHERE categoryid = $1::integer AND restaurantid = $2::integer',
+            [reqBody.categoryId, cRes.rows[0].restaurantid]
+          );
+
+          if (categRes.rows.length === 0) {
+            // categry does not exist at this restaurant
+            return response.status(405).send({ status: 405, reason: 'Not Found' });
+          }
+
+          // check user permissions
+          const permission = 'restaurant menu';
+          const permRes = await client.query(
+            'SELECT employeeaccessright.permissionid FROM public.employeeaccessright'
+            + ' INNER JOIN public.accessright ON accessright.permissionid = employeeaccessright.permissionid'
+            + ' INNER JOIN public.restaurantemployee ON restaurantemployee.employeeid = employeeaccessright.employeeid'
+            + ' WHERE restaurantemployee.userid = $1::integer AND restaurantemployee.restaurantid = $2::integer AND LOWER(accessright.description) = $3::text',
+            [userToken.data.userId, cRes.rows[0].restaurantid, permission]
+          );
+
+          if (permRes.rows.length === 0) {
+            // Access denied
+            return response.status(403).send({ status: 403, reason: 'Access Denied' });
+          }
+
+          // edit menu item
+          const menuItemRes = await client.query(
+            'UPDATE public.menuitem'
+            + ' SET categoryid = $1::integer, menuitemname = $2::text, menuitemdescription = $3::text, price = $4::real, estimatedwaitingtime = $5::text, attributes = $6::json, arasset = $7::text, availability = $8::boolean'
+            + ' WHERE menuitemid = $9::integer',
+            [
+              reqBody.categoryId,
+              reqBody.itemName,
+              reqBody.itemDescription,
+              reqBody.price,
+              reqBody.waitingTime,
+              reqBody.attributes,
+              reqBody.arAsset,
+              reqBody.available,
+              reqBody.menuItemId
+            ]
+          );
+
+          await client.query(
+            'DELETE FROM public.menuitemimages WHERE menuitemid = $1::integer',
+            [reqBody.menuItemId]
+          );
+
+          // insert images
+          for (let i = 0; i < reqBody.images.length; i++) {
+            // eslint-disable-next-line no-await-in-loop
+            await client.query(
+              'INSERT INTO menuitemimages (menuitemid, imageurl) VALUES ($1::integer,$2::text)',
+              [menuItemRes.rows[0].menuitemid, reqBody.images[i]]
+            );
+          }
+
+          // commit changes and end transaction
+          await client.query('COMMIT');
+
+          const itemInfo = await client.query(
+            'SELECT * FROM public.menuitem WHERE menuitemid = $1::integer',
+            [reqBody.menuItemId]
+          );
+
+          const menuImage = await client.query(
+            'SELECT imageurl FROM public.menuitemimages WHERE menuitemid = $1::integer',
+            [reqBody.menuItemId]
+          );
+
+          const itemImages = [];
+          menuImage.rows.forEach((image) => {
+            itemImages.push(image.imageurl);
+          });
+
+          // return edited menu item info
+          return response.status(201).send({
+            menuItemId: itemInfo.rows[0].menuitemid,
+            categoryId: itemInfo.rows[0].categoryid,
+            name: itemInfo.rows[0].menuitemname,
+            description: itemInfo.rows[0].menuitemdescription,
+            price: itemInfo.rows[0].price,
+            waitingTime: itemInfo.rows[0].estimatedwaitingtime,
+            attributes: itemInfo.rows[0].attributes,
+            arAsset: itemInfo.rows[0].arasset,
+            available: itemInfo.rows[0].availability,
+            images: itemImages,
+          });
+        } catch (err) {
+          await client.query('ROLLBACK');
+          throw err;
+        } finally {
+          client.release();
+        }
+      })()
+        .catch((err) => {
+          console.error('Query Error [Restaurant - Edit Menu Item]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }
