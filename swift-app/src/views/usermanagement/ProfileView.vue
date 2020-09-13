@@ -14,11 +14,11 @@
       <v-col cols="12" class="pt-0" align="center">
         <image-input v-model="avatar">
           <div slot="activator">
-            <v-avatar @click="uploadImage()" height="120" width="120" v-ripple v-if="!avatar"  class="grey lighten-3 mb-3">
+            <v-avatar height="120" width="120" v-ripple v-if="!avatar"  class="grey lighten-3 mb-3">
               <v-img :src="customerInfo.profileimageurl" cover alt="avatar"></v-img>
             </v-avatar>
             <v-avatar height="120" width="120" v-ripple v-else class="mb-3">
-              <v-img ref="newImage" :src="avatar.imageURL" cover alt="avatar"></v-img>
+              <v-img :src="avatar.imageURL" cover alt="avatar"></v-img>
             </v-avatar>
           </div>
         </image-input>
@@ -58,7 +58,7 @@
               </v-btn>
             </v-list-item-action>
           </v-list-item>
-          <v-list-item  v-ripple>
+          <v-list-item @click=profilePaymentInformation() v-ripple>
             <v-list-item-avatar>
               <v-icon class="grey lighten-2 secondary--text" >mdi-credit-card-outline</v-icon>
             </v-list-item-avatar>
@@ -150,7 +150,8 @@ export default {
     avatar: null,
     saving: false,
     saved: false,
-    darkMode: null
+    darkMode: null,
+    photo: null
   }),
   components: {
     'NavBar': NavBar,
@@ -172,22 +173,13 @@ export default {
     backNavigation () {
       this.$router.back()
     },
-    async uploadImage(avatar) {
-      this.saving = true
-      // setTimeout(() => this.savedAvatar(), 1000)
-      console.log(avatar.imageURL)
-
-
-      /* var profileObj = {
-        name: this.customerInfo.name,
-        surname: this.customerInfo.name,
-        profileImage: this.customerInfo.profileimageurl,
-        theme: this.customerInfo.theme
-      }
-
-      await this.$store.dispatch('CustomerStore/editProfile', profileObj); */
-      this.saving = false
-      this.saved = true
+    profilePaymentInformation() {
+      this.$router.push('/profilePaymentInformation')
+    },
+    selectFile(event) {
+      // `files` is always an array because the file input may be in multiple mode
+      this.photo = event.target.files[0];
+      console.log(this.photo)
     },
     async darkModeUpdate() {
       this.darkMode = !this.darkMode;
@@ -203,8 +195,6 @@ export default {
         profileImage: this.customerInfo.profileimageurl,
         theme: themeSettings
       }
-
-      console.log(this.$refs["newImage"])
 
       await this.$store.dispatch('CustomerStore/editProfile', profileObj);
 
@@ -239,6 +229,20 @@ export default {
     goToCart() {
       this.$router.push('/cart')
     },
+  },
+  watch: {
+    async avatar(AvatarObj) {
+      // var base64Img = "data:image/jpg;base64," + btoa(AvatarObj.imageURL);
+
+      var profileObj = {
+        name: this.customerInfo.name,
+        surname: this.customerInfo.surname,
+        profileImage: "data:image/jpg;base64," + btoa(AvatarObj.imageFile.name),
+        theme: this.customerInfo.theme
+      }
+
+      await this.$store.dispatch('CustomerStore/editProfile', profileObj);
+    }
   },
   mounted() {
     if (this.customerInfo.theme === 'light') {

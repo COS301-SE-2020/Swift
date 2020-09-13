@@ -31,7 +31,7 @@
       errorDialog: null,
       errorText: '',
       uploadFieldName: 'file',
-      maxSize: 1024
+      maxSize: 2048
     }),
     props: {
     // Use "value" to enable using v-model
@@ -50,17 +50,19 @@
             // check whether the upload is an image
             this.errorDialog = true
             this.errorText = 'Please choose an image file'
-          } else if (size>3) {
+          } else if (size>5) {
             // check whether the size is greater than the size limit
             this.errorDialog = true
-            this.errorText = 'Your file is too big! Please select an image under 1MB'
+            this.errorText = 'Your file is too big! Please select an image under 5MB'
           } else {
             // Append file into FormData and turn file into image URL
             let formData = new FormData()
-            let imageURL = URL.createObjectURL(imageFile)
+            // let imageURL = URL.createObjectURL(imageFile)
+            // var base64Img = "data:image/jpg;base64," + btoa(imageFile);
+            
             formData.append(fieldName, imageFile)
             // Emit the FormData and image URL to the parent component
-            this.$emit('input', { formData, imageURL })
+            this.$emit('input', { formData, imageFile })
           }
         }
       }
