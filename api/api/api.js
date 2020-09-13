@@ -150,6 +150,10 @@ router.post('/', (req, res) => {
         restaurantAdminController.createTable(req.body, res);
         break;
       }
+      case 'editTable': {
+        restaurantAdminController.editTable(req.body, res);
+        break;
+      }
       case 'getTableQR': {
         restaurantController.getTableQRCode(req.body, res);
         break;

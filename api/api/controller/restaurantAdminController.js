@@ -151,6 +151,18 @@ module.exports = {
           // begin transaction
           await client.query('BEGIN');
 
+          // check if restaurant exists
+          const cRes = await client.query(
+            'SELECT restaurantname FROM public.restaurant WHERE restaurantid = $1::integer',
+            [reqBody.restaurantId]
+          );
+
+          if (cRes.rows.length === 0) {
+            // restaurant does not exist
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          // check if admin rights
           const requiredRole = 'admin';
           const permRes = await client.query(
             'SELECT employeerole FROM public.restaurantemployee'
@@ -300,11 +312,13 @@ module.exports = {
           }
 
           // check user permissions
-          const requiredRole = 'admin';
+          const permission = 'tables';
           const permRes = await client.query(
-            'SELECT employeerole FROM public.restaurantemployee'
-            + ' WHERE userid = $1::integer AND restaurantid = $2::integer AND LOWER(employeerole) = $3::text',
-            [userToken.data.userId, reqBody.restaurantId, requiredRole]
+            'SELECT employeeaccessright.permissionid FROM public.employeeaccessright'
+            + ' INNER JOIN public.accessright ON accessright.permissionid = employeeaccessright.permissionid'
+            + ' INNER JOIN public.restaurantemployee ON restaurantemployee.employeeid = employeeaccessright.employeeid'
+            + ' WHERE restaurantemployee.userid = $1::integer AND restaurantemployee.restaurantid = $2::integer AND LOWER(accessright.description) = $3::text',
+            [userToken.data.userId, reqBody.restaurantId, permission]
           );
 
           if (permRes.rows.length === 0) {
@@ -343,7 +357,131 @@ module.exports = {
           await client.query('COMMIT');
 
           // send response
-          return response.status(201).send({ tableId: tblRes.rows[0].tableid, qrcode });
+          return response.status(201).send({
+            tableId: tblRes.rows[0].tableid,
+            qrcode
+          });
+        } catch (err) {
+          // rollback changes
+          await client.query('ROLLBACK');
+
+          // throw error for async catch
+          throw err;
+        } finally {
+          // close connection
+          client.release();
+        }
+      })()
+        .catch((err) => {
+          console.error('Query Error [Restaurant Admin - Create Restaurant Table]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  editTable: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'tableId')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'tableNumber')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'seatCount')
+      || Object.keys(reqBody).length !== 6
+      || Number.isNaN(reqBody.seatCount)
+      || reqBody.seatCount < 1) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      return (async () => {
+        const client = await db.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+
+          // check if restaurant exists
+          const cRes = await client.query(
+            'SELECT restaurantname FROM public.restaurant WHERE restaurantid = $1::integer',
+            [reqBody.restaurantId]
+          );
+
+          if (cRes.rows.length === 0) {
+            // restaurant does not exist
+            return response.status(404).send({ status: 404, reason: 'Restaurant Not Found' });
+          }
+
+          // check if table exists
+          const tRes = await client.query(
+            'SELECT qrcode, code FROM public.restauranttable WHERE tableid = $1::integer',
+            [reqBody.tableId]
+          );
+
+          if (tRes.rows.length === 0) {
+            // table does not exist
+            return response.status(405).send({ status: 405, reason: 'Table Not Found' });
+          }
+
+          // check user permissions
+          const permission = 'tables';
+          const permRes = await client.query(
+            'SELECT employeeaccessright.permissionid FROM public.employeeaccessright'
+            + ' INNER JOIN public.accessright ON accessright.permissionid = employeeaccessright.permissionid'
+            + ' INNER JOIN public.restaurantemployee ON restaurantemployee.employeeid = employeeaccessright.employeeid'
+            + ' WHERE restaurantemployee.userid = $1::integer AND restaurantemployee.restaurantid = $2::integer AND LOWER(accessright.description) = $3::text',
+            [userToken.data.userId, reqBody.restaurantId, permission]
+          );
+
+          if (permRes.rows.length === 0) {
+            // Access denied
+            return response.status(403).send({ status: 403, reason: 'Access Denied' });
+          }
+
+          // check if the table number is now already in use
+          const tblDup = await client.query(
+            'SELECT tablenumber FROM public.restauranttable'
+            + ' WHERE restaurantid = $1::integer AND tablenumber = $2::text',
+            [reqBody.restaurantId, reqBody.tableNumber]
+          );
+
+          if (tblDup.rows.length > 0) {
+            // table number already in use
+            return response.status(409).send({ status: 409, reason: 'Table Number Already In Use' });
+          }
+
+          // create table
+          await client.query(
+            'UPDATE public.restauranttable'
+            + ' SET tablenumber = $1::text, numseats = $2::integer'
+            + ' WHERE tableid = $3::integer',
+            [
+              reqBody.tableNumber,
+              parseInt(reqBody.seatCount, 10),
+              reqBody.tableId
+            ]
+          );
+
+          // commit changes
+          await client.query('COMMIT');
+
+          const tableInfo = await client.query(
+            'SELECT * FROM public.restauranttable WHERE tableid = $1::integer',
+            [reqBody.tableId]
+          );
+
+          // send response
+          return response.status(201).send({
+            tableId: tableInfo.rows[0].tableid,
+            tableNumber: tableInfo.rows[0].tablenumber,
+            seatCount: tableInfo.rows[0].numseats,
+            qrcode: tableInfo.rows[0].qrcode
+          });
         } catch (err) {
           // rollback changes
           await client.query('ROLLBACK');
