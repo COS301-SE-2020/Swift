@@ -34,7 +34,7 @@ const getOrderItems = async (oid = 0) => db.query(
 
 // helper to get individual menu items
 // eslint-disable-next-line arrow-body-style
-const getMenuItems = (categoryId = 0) => {
+const getMenuItems = (categoryId) => {
   return (async () => {
     const client = await db.connect();
     try {
@@ -44,7 +44,7 @@ const getMenuItems = (categoryId = 0) => {
       const menuItems = await client.query(
         'SELECT menuitemid, menuitemname, menuitemdescription, price, estimatedwaitingtime,'
         + ' menuitem.attributes, arasset, availability FROM public.menuitem'
-        + ' WHERE categoryid = $1::integer;',
+        + ' WHERE categoryid = $1::integer ORDER BY menuitemid ASC;',
         [categoryId]
       );
 
@@ -66,7 +66,7 @@ const getMenuItems = (categoryId = 0) => {
         // menu item images
         // eslint-disable-next-line no-await-in-loop
         const menuItemImages = await client.query(
-          'SELECT imageurl FROM public.menuitemimages WHERE menuitemid = $1::integer',
+          'SELECT imageurl FROM public.menuitemimages WHERE menuitemid = $1::integer ORDER BY imageid ASC',
           [resMenuItem.menuitemid]
         );
 
@@ -111,8 +111,8 @@ const getMenuItems = (categoryId = 0) => {
         menuItem.reviews = [];
         // eslint-disable-next-line no-await-in-loop
         const revRes = await client.query(
-          'SELECT review.reviewid, review.orderid, review.ratingscore, review.comment, review.reviewdatetime, review.public, review.adminid, review.response'
-          + ' FROM public.review WHERE review.menuitemid = $1::integer AND review.comment IS NOT NULL;',
+          'SELECT *'
+          + ' FROM public.review WHERE review.menuitemid = $1::integer AND review.comment IS NOT NULL ORDER BY review.reviewid ASC;',
           [resMenuItem.menuitemid]
         );
 
@@ -156,24 +156,26 @@ const getMenuItems = (categoryId = 0) => {
               reviewItem.totalLikes = 0;
             }
 
-            // const likedRevRes = await client.query(
-            //   'SELECT *'
-            //   + ' FROM public.likedreview WHERE likedreview.userid = $1::integer'
-            //   + ' AND likedreview.reviewid = $2::integer',
-            //   [userId, review.reviewid]
-            // );
+            // if (userId !== 0) {
+            //   const likedRevRes = await client.query(
+            //     'SELECT *'
+            //     + ' FROM public.likedreview WHERE likedreview.userid = $1::integer'
+            //     + ' AND likedreview.reviewid = $2::integer',
+            //     [userId, review.reviewid]
+            //   );
 
-            // if (likedRevRes.rows.length !== 0) {
-            //   reviewItem.likedComment = true;
-            // } else {
-            //   reviewItem.likedComment = false;
+            //   if (likedRevRes.rows.length !== 0) {
+            //     reviewItem.likedComment = true;
+            //   } else {
+            //     reviewItem.likedComment = false;
+            //   }
             // }
 
-            if (review.adminId != null) {
+            if (review.adminid != null) {
               const adminInfoRes = await client.query(
                 'SELECT person.name, person.surname, person.profileimageurl'
                 + ' FROM public.person WHERE person.userid = $1::integer',
-                [review.adminId]
+                [review.adminid]
               );
 
               if (adminInfoRes.rows.length !== 0) {
@@ -187,6 +189,7 @@ const getMenuItems = (categoryId = 0) => {
               reviewItem.adminImage = null;
             }
             reviewItem.response = review.response;
+            reviewItem.responseDate = review.responsedatetime;
           }
           menuItem.reviews.push(reviewItem);
         });
@@ -195,17 +198,18 @@ const getMenuItems = (categoryId = 0) => {
         menuItem.ratingPhrases = [];
         // eslint-disable-next-line no-await-in-loop
         const rpRes = await client.query(
-          'SELECT ratingphrase.phrasedescription, AVG(customerphraserating.ratingscore) AS "rating"'
+          'SELECT ratingphrase.phraseid, ratingphrase.phrasedescription, AVG(customerphraserating.ratingscore) AS "rating"'
           + ' FROM public.customerphraserating'
           + ' INNER JOIN public.ratingphrase ON ratingphrase.phraseid = customerphraserating.phraseid'
           + ' INNER JOIN public.review ON customerphraserating.reviewid = review.reviewid'
           + " WHERE review.menuitemid = $1::integer AND LOWER(ratingphrase.type) = 'item'"
-          + ' GROUP BY ratingphrase.phrasedescription;',
+          + ' GROUP BY ratingphrase.phraseid;',
           [resMenuItem.menuitemid]
         );
 
         rpRes.rows.forEach((ratePhrase) => {
           const ratingphraseItem = {};
+          ratingphraseItem.phraseId = ratePhrase.phraseid;
           ratingphraseItem.phrase = ratePhrase.phrasedescription;
           ratingphraseItem.rating = ratePhrase.rating;
           menuItem.ratingPhrases.push(ratingphraseItem);
@@ -264,7 +268,7 @@ module.exports = {
         // menu item images
         // eslint-disable-next-line no-await-in-loop
         const menuItemImages = await client.query(
-          'SELECT imageurl FROM public.menuitemimages WHERE menuitemid = $1::integer',
+          'SELECT imageurl FROM public.menuitemimages WHERE menuitemid = $1::integer ORDER BY imageid ASC;',
           [res.rows[f].menuitemid]
         );
 
@@ -334,7 +338,7 @@ module.exports = {
     }),
   getReviews: (restaurantId = 0) => db.query(
     'SELECT review.comment, review.reviewdatetime, review.public, review.adminid, review.response'
-    + ' FROM public.review WHERE review.restaurantid = $1::integer AND review.comment IS NOT NULL;',
+    + ' FROM public.review WHERE review.restaurantid = $1::integer AND review.comment IS NOT NULL ORDER BY reviewid ASC;',
     [restaurantId]
   )
     .then((res) => {
@@ -388,7 +392,7 @@ module.exports = {
       const res = await client.query(
         'SELECT categoryid, categoryname, categorydescription, parentcategoryid, categorytype'
           + ' FROM public.menucategory'
-          + ' WHERE restaurantid = $1::integer;',
+          + ' WHERE restaurantid = $1::integer ORDER BY categoryid ASC;',
         [restaurantId]
       );
 

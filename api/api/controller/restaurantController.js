@@ -28,7 +28,7 @@ module.exports = {
           await client.query('BEGIN');
 
           const res = await client.query(
-            'SELECT restaurantid,restaurantname,location,branch,coverimageurl FROM public.restaurant'
+            'SELECT restaurantid,restaurantname,location,branch,coverimageurl FROM public.restaurant ORDER BY restaurantid ASC'
           );
 
           const restaurantResponse = {};

@@ -1245,7 +1245,7 @@ module.exports = {
           );
 
           const menuImage = await client.query(
-            'SELECT imageurl FROM public.menuitemimages WHERE menuitemid = $1::integer',
+            'SELECT imageurl FROM public.menuitemimages WHERE menuitemid = $1::integer ORDER BY imageid ASC;',
             [reqBody.menuItemId]
           );
 
@@ -1286,5 +1286,6 @@ module.exports = {
 
     // Invalid token
     return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
-  }
+  },
+
 };
