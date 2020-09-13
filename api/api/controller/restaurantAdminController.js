@@ -387,11 +387,10 @@ module.exports = {
   },
   editTable: (reqBody, response) => {
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
-      || !Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'tableId')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'tableNumber')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'seatCount')
-      || Object.keys(reqBody).length !== 6
+      || Object.keys(reqBody).length !== 5
       || Number.isNaN(reqBody.seatCount)
       || reqBody.seatCount < 1) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
@@ -406,26 +405,15 @@ module.exports = {
           // begin transaction
           await client.query('BEGIN');
 
-          // check if restaurant exists
-          const cRes = await client.query(
-            'SELECT restaurantname FROM public.restaurant WHERE restaurantid = $1::integer',
-            [reqBody.restaurantId]
-          );
-
-          if (cRes.rows.length === 0) {
-            // restaurant does not exist
-            return response.status(404).send({ status: 404, reason: 'Restaurant Not Found' });
-          }
-
           // check if table exists
           const tRes = await client.query(
-            'SELECT qrcode, code FROM public.restauranttable WHERE tableid = $1::integer',
+            'SELECT restaurantid FROM public.restauranttable WHERE tableid = $1::integer',
             [reqBody.tableId]
           );
 
           if (tRes.rows.length === 0) {
             // table does not exist
-            return response.status(405).send({ status: 405, reason: 'Table Not Found' });
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
           }
 
           // check user permissions
@@ -435,7 +423,7 @@ module.exports = {
             + ' INNER JOIN public.accessright ON accessright.permissionid = employeeaccessright.permissionid'
             + ' INNER JOIN public.restaurantemployee ON restaurantemployee.employeeid = employeeaccessright.employeeid'
             + ' WHERE restaurantemployee.userid = $1::integer AND restaurantemployee.restaurantid = $2::integer AND LOWER(accessright.description) = $3::text',
-            [userToken.data.userId, reqBody.restaurantId, permission]
+            [userToken.data.userId, tRes.rows[0].restaurantid, permission]
           );
 
           if (permRes.rows.length === 0) {
@@ -447,7 +435,7 @@ module.exports = {
           const tblDup = await client.query(
             'SELECT tablenumber FROM public.restauranttable'
             + ' WHERE restaurantid = $1::integer AND tablenumber = $2::text',
-            [reqBody.restaurantId, reqBody.tableNumber]
+            [tRes.rows[0].restaurantid, reqBody.tableNumber]
           );
 
           if (tblDup.rows.length > 0) {
@@ -494,7 +482,7 @@ module.exports = {
         }
       })()
         .catch((err) => {
-          console.error('Query Error [Restaurant Admin - Create Restaurant Table]', err.stack);
+          console.error('Query Error [Restaurant Admin - Edit Restaurant Table]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }
