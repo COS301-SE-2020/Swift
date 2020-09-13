@@ -71,6 +71,9 @@ export default {
       }
     }
   },
+
+
+
   menuDistribution: {
     series: [144, 55, 80],
     chartOptions: {
@@ -80,7 +83,7 @@ export default {
         breakpoint: 480,
         options: {
           chart: {
-            width: 200
+            width: 200,
           },
           legend: {
             position: 'bottom'
@@ -151,4 +154,202 @@ export default {
       },
     }
   },
+  revenueData: {
+    analyticsData: {
+      thisMonth: 86589,
+      lastMonth: 73683
+    },
+    series: [{
+        name: "This Month",
+        data: [45000, 47000, 44800, 47500, 45500, 48000, 46500, 48600]
+      },
+      {
+        name: "Last Month",
+        data: [46000, 48000, 45500, 46600, 44500, 46500, 45000, 47000]
+      }
+    ],
+    chartOptions: {
+      chart: {
+        toolbar: {
+          show: true
+        },
+        dropShadow: {
+          enabled: true,
+          top: 5,
+          left: 0,
+          blur: 4,
+          opacity: 0.10,
+        },
+      },
+      stroke: {
+        curve: 'smooth',
+        dashArray: [0, 8],
+        width: [4, 2],
+      },
+      grid: {
+        borderColor: '#e7e7e7',
+      },
+      legend: {
+        show: false,
+      },
+      colors: ['#F97794', '#b8c2cc'],
+      fill: {
+        type: 'gradient',
+        gradient: {
+          shade: 'dark',
+          inverseColors: false,
+          gradientToColors: ['#7367F0', '#b8c2cc'],
+          shadeIntensity: 1,
+          type: 'horizontal',
+          opacityFrom: 1,
+          opacityTo: 1,
+          stops: [0, 100, 100, 100]
+        },
+      },
+      markers: {
+        size: 0,
+        hover: {
+          size: 5
+        }
+      },
+      xaxis: {
+        labels: {
+          style: {
+            cssClass: 'text-grey fill-current',
+          }
+        },
+        axisTicks: {
+          show: false,
+        },
+        categories: ['01', '05', '09', '13', '17', '21', '26', '31'],
+        axisBorder: {
+          show: false,
+        },
+      },
+      yaxis: {
+        tickAmount: 5,
+        labels: {
+          style: {
+            cssClass: 'text-grey fill-current',
+          },
+          formatter: function (val) {
+            return val > 999 ? (val / 1000).toFixed(1) + 'k' : val;
+          }
+        }
+      },
+      tooltip: {
+        x: {
+          show: false
+        }
+      }
+    }
+  },
+  avgOrderPrice: {
+    series: [{
+      name: "Average Price",
+      data: [50, 52, 54, 49, 55, 50, 52, 54, 49]
+    }],
+    chartOptions: {
+      chart: {
+        zoom: {
+          enabled: true
+        }
+      },
+      colors: chartColors,
+      dataLabels: {
+        enabled: false
+      },
+      stroke: {
+        curve: 'smooth'
+      },
+      grid: {
+        row: {
+          colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+          opacity: 0.5
+        },
+      },
+      xaxis: {
+        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+      }
+    }
+  },
+  topSellingItems: [{
+    id: 1,
+    name: 'Hawaian',
+    totalIncome: 5510,
+    ratio: 60,
+    growthPerc: '5'
+  },
+  {
+    id: 3,
+    name: 'Quattro',
+    totalIncome: 2820,
+    ratio: 55,
+    growthPerc: '-2'
+  },
+  {
+    id: 2,
+    name: 'Regina',
+    totalIncome: 1992,
+    ratio: 10,
+    growthPerc: '1'
+  },
+  {
+    id: 4,
+    name: 'BBQ Chicken',
+    totalIncome: 1500,
+    ratio: 9,
+    growthPerc: '-5'
+  },
+],
+incomeByMenu: {
+  series: [{
+          name: 'Pizza',
+          data: [440, 550, 570, 560, 610, 580, 630, 600, 660]
+      }, {
+          name: 'Pasta',
+          data: [760, 850, 1010, 980, 870, 1050, 910, 1140, 940]
+      }, {
+          name: 'Drinks',
+          data: [350, 410, 360, 260, 450, 480, 520, 530, 410]
+  }],
+  chartOptions: {
+      colors: chartColors,
+      plotOptions: {
+          bar: {
+              horizontal: false,
+              endingShape: 'rounded',
+              columnWidth: '55%',
+          },
+      },
+      dataLabels: {
+          enabled: false
+      },
+      stroke: {
+          show: true,
+          width: 2,
+          colors: ['transparent']
+      },
+
+      xaxis: {
+          categories: ['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+      },
+      yaxis: {
+          title: {
+              text: 'ZAR (Rands)'
+          }
+      },
+      fill: {
+          opacity: 1
+
+      },
+      tooltip: {
+          y: {
+              formatter: function(val) {
+                  return "R " + val
+              }
+          }
+      }
+  }
+},
 }
