@@ -36,15 +36,16 @@ module.exports = {
 
           // create restaurant
           const cRes = await client.query(
-            'INSERT INTO public.restaurant (restaurantname,restaurantdescription,branch,location,coverimageurl)'
-            + ' VALUES ($1::text, $2::text, $3::text, $4::text, $5::text)'
+            'INSERT INTO public.restaurant (restaurantname,restaurantdescription,branch,location,coverimageurl, in_business)'
+            + ' VALUES ($1::text, $2::text, $3::text, $4::text, $5::text, $6::boolean)'
             + ' RETURNING restaurantid',
             [
               reqBody.name,
               reqBody.description,
               reqBody.branch,
               reqBody.location,
-              reqBody.coverImageURL
+              reqBody.coverImageURL,
+              true
             ]
           );
 
@@ -123,8 +124,10 @@ module.exports = {
       || !Object.prototype.hasOwnProperty.call(reqBody, 'description')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'branch')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'location')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'categories')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'coverImageURL')
-      || Object.keys(reqBody).length !== 8) {
+      || !Array.isArray(reqBody.categories)
+      || Object.keys(reqBody).length !== 9) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 
@@ -153,6 +156,40 @@ module.exports = {
             ]
           );
 
+          await client.query(
+            'DELETE FROM public.restaurantcategory WHERE restaurantId = $1::integer;',
+            [reqBody.restaurantId]
+          );
+
+          // add new categories
+          for (let c = 0; c < reqBody.categories.length; c++) {
+            // check if category exists
+            // eslint-disable-next-line no-await-in-loop
+            const catRes = await client.query(
+              'SELECT categoryid FROM public.category WHERE categoryid = $1::integer;',
+              [reqBody.categories[c]]
+            );
+
+            if (catRes.rows.length === 0) {
+              // undo changes
+              // eslint-disable-next-line no-await-in-loop
+              await client.query('ROLLBACK');
+              return response.status(404).send({
+                status: 404,
+                reason: 'Category Not Found',
+                category: reqBody.categories[c]
+              });
+            }
+
+            // associate categories with restaurant
+            // eslint-disable-next-line no-await-in-loop
+            await client.query(
+              'INSERT INTO public.restaurantcategory (categoryid, restaurantid)'
+              + ' VALUES ($1::integer, $2::integer)',
+              [parseInt(reqBody.categories[c], 10), reqBody.restaurantId]
+            );
+          }
+
           // commit changes
           await client.query('COMMIT');
 
@@ -162,12 +199,25 @@ module.exports = {
             [reqBody.restaurantId]
           );
 
+          const categories = await client.query(
+            'SELECT category.categoryname FROM public.restaurantcategory'
+            + ' INNER JOIN public.category on category.categoryid = restaurantcategory.categoryid'
+            + ' WHERE restaurantid = $1::integer',
+            [reqBody.restaurantId]
+          );
+
+          const categoryList = [];
+          categories.rows.forEach((category) => {
+            categoryList.push(category.categoryname);
+          });
+
           // send response
           return response.status(201).send({
             name: rest.rows[0].restaurantname,
             description: rest.rows[0].restaurantdescription,
             branch: rest.rows[0].branch,
             location: rest.rows[0].location,
+            categories: categoryList,
             coverImageURL: rest.rows[0].coverimageurl
           });
         } catch (err) {
