@@ -76,9 +76,9 @@
                 </template>
 
                 <!-- <v-list-item-group  class="pl-2" :multiple="(parseInt(attribute.max) > 1) ? true : false" :mandatory="(attribute.min == '1') ? true : false" v-model="model[i]"> -->
-                <v-list-item-group  class="pl-2" :multiple="(parseInt(attribute.max) > 1) ? true : false"  v-model="model[i]">
+                <v-list-item-group  class="pl-2" :multiple="(parseInt(attribute.max) > 1) ? true : false" :mandatory="(parseInt(attribute.min) != 0) ? true : false"  v-model="model[i]">
                   <template v-for="(value, j) in attribute.values">
-                    <v-list-item @click="checkInput(i, j, value)" ref="attributeVal" class="px-2 attributeValues" :key="`item-${j}`" :value="value.name">
+                    <v-list-item @click="checkInput(i, j, attribute)" ref="attributeVal" class="px-2 attributeValues" :key="`item-${j}`" :value="value.name">
                       <template v-slot:default="{ active }">
                         <v-row>
                           <v-col cols="8">
@@ -129,7 +129,7 @@
       </v-tab-item>
       <v-tab-item class="overflow-x-hidden">
         <v-card flat class="mt-2 mb-5">
-          <v-row v-for="phrase in ratingPhrases" :key="phrase.phrase">
+          <v-row v-for="phrase in newMenuItem.ratingPhrases" :key="phrase.phrase">
             <v-card-text class="pb-0 pt-1 mt-0 ml-5">
               <v-row class="mx-0 pb-0 pt-1">
                 <v-col cols="8" class="pt-0 pl-0 pb-0">
@@ -278,6 +278,7 @@ export default {
       selected: ['John'],
       text: 'small',
       selection: 0,
+      prevVal: 0,
       prices: ['low-high', 'high-low', 'R0-R49', 'R50-100'],
       comments: [
         {
@@ -370,17 +371,24 @@ export default {
         return { color: 'primary', icon: 'mdi-heart' }
       }
     },
-    checkInput(i, j, value) {
+    checkInput(i, j, attribute) {
       // console.log($(".attributeElements").eq(i).find(".v-radio i").html());
+      let values = attribute.values;
       $(".attributeElements").eq(i).find(".v-radio i").removeClass("mdi-radiobox-marked");
-      $("#" + i + j + (value.name).replace(/\s+/g, '')).parent().children("i").addClass("mdi-radiobox-marked");
-
+      $("#" + i + j + (values[j].name).replace(/\s+/g, '')).parent().children("i").addClass("mdi-radiobox-marked");
+      let radio = attribute.max == '1' && attribute.min == '1';
       let checked = $(".attributeElements").eq(i).find(".attributeValues").eq(j).hasClass("v-item--active v-list-item--active");
-
-      if ('price' in value && checked) {
-        this.addOns -= value.price
-      } else if ('price' in value && !checked) {
-        this.addOns += value.price
+      
+      if (radio) {
+        this.addOns -= this.prevVal
+        this.addOns += values[j].price
+        this.prevVal = values[j].price
+      } else {
+        if (checked) {
+          this.addOns -= values[j].price
+        } else {
+          this.addOns += values[j].price
+        }
       }
       this.changeTotal;
     },
@@ -543,6 +551,7 @@ export default {
     // console.log($(".attributeElements").find(".attributeValues").html())
     console.log(this.$refs.attributeVal);
     this.total = this.newMenuItem.price
+    // this.model[0] = 1
     
     // $(".attributeValues.v-item--active.v-list-item--active").find("i").addClass("mdi-radiobox-marked");
     // this.itemTotal = this.newMenuItem.price

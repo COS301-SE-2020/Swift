@@ -27,6 +27,7 @@ const actions = {
       }
     ).then(result => {
       commit('SAVE_MENU', result.data);
+      console.log("menu set")
       return true;
     }).catch(({ response }) => {
     });

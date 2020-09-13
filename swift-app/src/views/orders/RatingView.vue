@@ -38,9 +38,9 @@
                 </v-row>
                 <v-divider></v-divider>
               </v-card>
-              <v-list-item-group v-model="phraseRatingMenuItem[ind]" multiple class="mt-6">
+              <v-list-item-group multiple class="mt-6">
                 <template v-for="(rating, i) in ratingType.ratingPhrases">
-                  <v-list-item class="px-2 attributeValues" :key="`item-${i}`" :value="i">
+                  <v-list-item class="px-2 attributeValues" :key="`item-${i}`">
                     <template>
                       <v-card class="mx-auto mt-2 rounded-card" flat width="100%" height="50px" color="#F5F5F5" style="border-radius: 30px">
                         <v-row class="px-4">
@@ -49,7 +49,7 @@
                           </v-col>
                           <v-col cols="5">
                             <v-list-item-action class="my-0 mx-0">
-                              <v-rating size="18" v-model="rating1I[i]" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
+                              <v-rating size="18" @input="addPhraseItemScore($event, ind, i)" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
                             </v-list-item-action>
                           </v-col>
                         </v-row>
@@ -111,7 +111,7 @@
             </v-row>
             <v-divider></v-divider>
           </v-card>
-          <v-list-item-group v-model="phraseRating[index]" multiple class="mt-6">
+          <v-list-item-group multiple class="mt-6">
             <template v-for="(rating, i) in ratingType.ratingPhrases">
               <v-list-item class="px-2 attributeValues" :key="`item-${i}`" :value="i">
                 <template>
@@ -122,7 +122,7 @@
                       </v-col>
                       <v-col cols="5">
                         <v-list-item-action class="my-0 mx-0">
-                          <v-rating size="18" v-model="rating1R[i]" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
+                          <v-rating @input="addPhraseScore($event, i)" size="18" dense color="yellow darken-3" background-color="secondary" :value=0></v-rating>
                         </v-list-item-action>
                       </v-col>
                     </v-row>
@@ -192,13 +192,13 @@ export default {
       //   type:Array
       // },
 
-      rating1R: [],
-      rating2R: [],
-      rating3R: [],
+      // rating1R: [],
+      // rating2R: [],
+      // rating3R: [],
 
-      rating1I: [],
-      rating2I: [],
-      rating3I: [],
+      // rating1I: [],
+      // rating2I: [],
+      // rating3I: [],
 
       ratingFeedback: [],
       ratingFeedbackMenuItem: [],
@@ -206,7 +206,7 @@ export default {
       ratingValue: [],
       ratingValueMenuItem: [],
       phraseRating: [],
-      phraseRatingMenuItem: [],
+      phraseRatingMenuItem: [[],[]],
       comment: [],
       commentMenuItem: [],
       publicValue: [],
@@ -216,42 +216,42 @@ export default {
       icons: ['mdi-silverware-fork-knife', 'mdi-pasta', 'mdi-account',],
       currentIndex: 0,
       currentTab: 0,
-      rating: [
-        {
-          type: 'Restaurant',
-          info: {
-            name: 'Mugg and Bean',
-            img: '',
-          },
-          ratingPhrases: [
-            'Atmosphere', 'Good Food', 'Service'
-          ],
-        },
-        {
-          type: 'Items',
-          info: [{
-            name: 'Avo on Toast',
-            img: '',
-          },
-          {
-            name: 'Classic Breakfast',
-            img: '',
-          }],
-          ratingPhrases: [
-            'Taste', 'Presentation', 'Value'
-          ],
-        },
-        {
-          type: 'Waiter',
-          info: {
-            name: 'John Doe',
-            img: 'https://source.unsplash.com/800x800/?man',
-          },
-          ratingPhrases: [
-            'Quick', 'Attentive', 'Service'
-          ],
-        },
-      ]
+      // rating: [
+      //   {
+      //     type: 'Restaurant',
+      //     info: {
+      //       name: 'Mugg and Bean',
+      //       img: '',
+      //     },
+      //     ratingPhrases: [
+      //       'Atmosphere', 'Good Food', 'Service'
+      //     ],
+      //   },
+      //   {
+      //     type: 'Items',
+      //     info: [{
+      //       name: 'Avo on Toast',
+      //       img: '',
+      //     },
+      //     {
+      //       name: 'Classic Breakfast',
+      //       img: '',
+      //     }],
+      //     ratingPhrases: [
+      //       'Taste', 'Presentation', 'Value'
+      //     ],
+      //   },
+      //   {
+      //     type: 'Waiter',
+      //     info: {
+      //       name: 'John Doe',
+      //       img: 'https://source.unsplash.com/800x800/?man',
+      //     },
+      //     ratingPhrases: [
+      //       'Quick', 'Attentive', 'Service'
+      //     ],
+      //   },
+      // ]
     }
   },
   methods: {
@@ -290,6 +290,15 @@ export default {
       for (let i = 0; i < this.itemToRate().rating.length; i++) {
         let data = {}
         if (!Array.isArray(this.itemToRate().rating[i].info)) {
+          let phrases = [];
+          for (let j = 0; j < this.itemToRate().rating[i].ratingPhrases.length; j++) {
+            let phrase = {
+              "phraseId": this.itemToRate().rating[i].ratingPhrases[j].phraseId,
+              "phraseScore": (this.phraseRating[j] != undefined) ? this.phraseRating[j] : 0
+            }
+            phrases.push(phrase)
+          }
+
           data = {
             "type": "restaurant",
             "itemId": this.itemToRate().rating[i].info.itemId,
@@ -297,11 +306,20 @@ export default {
             "ratingScore": (this.ratingValue[i] != undefined) ? this.ratingValue[i] : 0,
             "comment": (this.comment[i] != undefined) ? this.comment[i] : null,
             "public": (this.publicValue[i] != undefined) ? this.publicValue[i] : false,
-            "phrases": (this.phrase1R != undefined) ? this.phrase1R : 0
+            "phrases": phrases
           }
           ratings.push(data)
         } else {
             for (let j = 0; j < this.itemToRate().rating[i].info.length; j++) {
+              let phrases = [];
+              for (let y = 0; y < this.itemToRate().rating[i].ratingPhrases.length; y++) {
+                let phrase = {
+                  "phraseId": this.itemToRate().rating[i].ratingPhrases[y].phraseId,
+                  "phraseScore": (this.phraseRatingMenuItem[j][y] != undefined) ? this.phraseRatingMenuItem[j][y] : 0
+                }
+                phrases.push(phrase)
+              }
+
               data = {
                 "type": "menuItem",
                 "itemId": this.itemToRate().rating[i].info[j].itemId,
@@ -309,7 +327,7 @@ export default {
                 "ratingScore": (this.ratingValueMenuItem[j] != undefined) ? this.ratingValueMenuItem[j] : 0,
                 "comment": (this.commentMenuItem[j] != undefined) ? this.commentMenuItem[j] : null,
                 "public": (this.publicValueMenuItem[j] != undefined) ? this.publicValueMenuItem[j] : false,
-                "phrases": (this.phrase1I != undefined) ? this.phrase1R : 0
+                "phrases": phrases
               }
               ratings.push(data)
             }
@@ -321,14 +339,23 @@ export default {
         "ratings": ratings
       }
 
+      console.log(rate)
+
       // console.log("restaurant")
       // console.log(ratings)
       // console.log("item")
       // console.log(this.rating1I)
 
       this.submitRatingVals(rate)
-      // this.$router.push("/orders");
+      this.$router.push("/orders");
 
+    },
+    addPhraseItemScore(score, tab, id) {
+      this.phraseRatingMenuItem[tab][id] = score;
+      console.log(this.phraseRatingMenuItem[tab][id])
+    },
+    addPhraseScore(score, id) {
+      this.phraseRating[id] = score;
     },
     hideAlert () {
       this.$router.push('/')

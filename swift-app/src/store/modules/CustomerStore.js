@@ -72,7 +72,6 @@ const actions = {
   },
 
   login({commit}, data) {
-    console.log("LOGGED IN")
     return axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "login",
@@ -82,10 +81,21 @@ const actions = {
     ).then(result => {
       commit('SAVE_TOKEN', result.data.token);
       sessionStorage.setItem('authToken', result.data.token);
-      commit('SET_CHECKED_IN_CODE', result.data.checkedIn);
       commit('SAVE_CUSTOMER', result.data);
       this.dispatch('OrderStore/initOrderHistory');
       this.dispatch('OrderStore/ratingPhrasesRestaurant');
+      commit('SET_CHECKED_IN_CODE', result.data.checkedIn);
+    }).then(result => {
+      let checkedInVal = this.getters['CustomerStore/getCheckedInQRCode'];
+      if (checkedInVal != null && this.getters['CustomerStore/getCheckedInRestaurantId'] == null) {
+        this.isLoading = true;
+        var data = {
+          "qrcode": checkedInVal
+        }
+
+        this.dispatch('CustomerStore/checkInCustomer', data);
+      }
+      
       return "Success";
     }).catch(({ response }) => {
       return "Fail";
@@ -119,7 +129,6 @@ const actions = {
       return true;
     })
   },
-  
 
   googleRegister({commit}) {
     return axios.post('https://api.swiftapp.ml', 
@@ -160,6 +169,22 @@ const actions = {
     });
   },
 
+  editProfile({commit}, data) {
+    axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "editProfile",
+      "name": data.name,
+      "surname": data.surname,
+      "profileImage": data.profileImage,
+      "theme": data.theme,
+      "token": sessionStorage.getItem('authToken')
+    }).then(result => {
+      commit('EDIT_PROFILE', result.data.profileInfo);
+    }).catch(({ response }) => {
+      return response
+    });
+  },
+
   callWaiter({commit}, data) {
     axios.post('https://api.swiftapp.ml', 
     {
@@ -193,7 +218,7 @@ const actions = {
     return axios.post('https://api.swiftapp.ml', 
     {
       "requestType": "verify",
-      "token": data.token,
+      "email": data.email,
       "code": data.code
     }).then(result => {
       // console.log(result.data)
@@ -219,6 +244,8 @@ const actions = {
       return response
     });
   }
+
+  
 }
 
 // Mutations
@@ -257,6 +284,13 @@ const mutations = {
 
   SET_AUTHENTICATION(state, authentication_state) {
     state.isAuthenticated = authentication_state;
+  },
+
+  EDIT_PROFILE(state, profileInfo) {
+    state.customer.name = profileInfo.name;
+    state.customer.surname = profileInfo.surname;
+    state.customer.profileimageurl = profileInfo.profileImage;
+    state.customer.theme = profileInfo.theme;
   },
 
   RESET(state) {
