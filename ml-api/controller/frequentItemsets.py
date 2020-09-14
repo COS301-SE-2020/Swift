@@ -60,6 +60,8 @@ def Apriori(viz = False):
     #sort association by lift then confidence, return top 20
     associationRules = (associationRules.sort_values(['lift', 'confidence'], ascending=False))[0:20]
 
+    if(viz):
+        return associationRules
     #group all of the top associated items
     groupedItems = []
 

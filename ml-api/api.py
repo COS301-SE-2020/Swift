@@ -43,7 +43,7 @@ def viz():
     if not customerId:
         return badRequest()
     else:
-        return vd.collaborativeFiltering(customerId)
+        return vd.collaborativeFiltering(customerId) + vd.Apriori()
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=os.getenv('PORT', 8080), debug=True)
