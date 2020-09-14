@@ -82,6 +82,10 @@ router.post('/', (req, res) => {
         userController.refreshToken(req.body, res);
         break;
       }
+      case 'checkUAToken': {
+        authController.checkUAToken(req.body, res);
+        break;
+      }
       case 'addFavourite': {
         userController.addFavourite(req.body, res);
         break;
