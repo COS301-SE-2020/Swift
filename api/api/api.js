@@ -162,6 +162,10 @@ router.post('/', (req, res) => {
         restaurantAdminController.editTable(req.body, res);
         break;
       }
+      case 'addPromotion': {
+        restaurantAdminController.addPromotion(req.body, res);
+        break;
+      }
       case 'getTableQR': {
         restaurantController.getTableQRCode(req.body, res);
         break;
