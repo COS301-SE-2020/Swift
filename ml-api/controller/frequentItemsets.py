@@ -9,13 +9,17 @@ import db
 def retrieveOrderData():
     connection = db.connect()
     cursor = connection.cursor()
-    cursor.execute("SELECT customerorder.orderid, customerid,  menuitemid, quantity FROM itemordered" +
+    cursor.execute("SELECT customerorder.orderid, customerid,  itemordered.menuitemid, menuitem.menuitemname, menuitem.restaurantid, quantity FROM itemordered" +
                     " INNER JOIN customerorder" +
-                    " ON customerorder.orderid = itemordered.orderid;")
+                    " ON customerorder.orderid = itemordered.orderid" +
+                    " INNER JOIN menuitem" +
+                    " ON menuitem.menuitemid = itemordered.menuitemid;")
     records = cursor.fetchall()
     cursor.close()
     db.close(connection)
     return records
+
+#restaurantID & #menuItemname
 
 #cache record data on Server start
 retrieveOrderData()
@@ -34,11 +38,16 @@ def Apriori(viz = False):
 
     #read and filter the data
     orders_df =  pd.DataFrame.from_records(retrieveOrderData())
-    orders_df.columns = ['orderId','customerId', 'menuItemId', 'quantity']
-    orders_df = orders_df.dropna()
+    orders_df.columns = ['orderId','customerId', 'menuItemId', 'menuItemName', 'restaurantId', 'quantity']
+    #orders_df = orders_df.dropna()
 
     #convert to a basket of orderId (row) x menuItemId (col) (which items are present in which orders)
-    orderBasket = (orders_df.groupby(['orderId', 'menuItemId'])['quantity']
+    if(viz): #if this is a visualization call, use menuItemName instead of ID
+        orderBasket = (orders_df.groupby(['orderId', 'menuItemName'])['quantity']
+                .sum().unstack().reset_index().fillna(0)
+                .set_index('orderId'))
+    else:
+        orderBasket = (orders_df.groupby(['orderId', 'menuItemId'])['quantity']
             .sum().unstack().reset_index().fillna(0)
             .set_index('orderId'))
     

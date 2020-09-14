@@ -34,18 +34,17 @@ def create_apriori_figure():
     import networkx as nx  
     associationGraph = nx.DiGraph()
 
-    fig = plt.figure()
+    fig = plt.figure(figsize=(10,10))
 
     rules = fi.Apriori(True);
 
-    #TODO: select max between 10 and len(rules)
-    rules_to_show = 7
+    rules_to_show = min(len(rules), 15)
    
     color_map=[]
     N = 50
     colors = np.random.rand(N)    
     #accomodate 11 rules
-    ruleLables=['R0', 'R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11']  
+    ruleLables=['R0', 'R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'R14', 'R15']  
    
     for i in range (rules_to_show):      
         associationGraph.add_nodes_from(["R"+str(i)])
@@ -75,8 +74,8 @@ def create_apriori_figure():
     nx.draw(associationGraph, pos, node_color = color_map, alpha=0.7,edge_color=colors, width=weights, font_size=16, with_labels=False)            
 
     for p in pos:  # raise text positions
-           pos[p][1] += 0.12
-    nx.draw_networkx_labels(associationGraph, pos)
+           pos[p][1] += 0.05
+    nx.draw_networkx_labels(associationGraph, pos, font_size=8)
     fig.suptitle(
         'Apriori Algorithm (Frequent Item Sets) \n', fontsize=16, y=1.05)
     fig.subplots_adjust(top=2.80)
