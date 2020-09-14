@@ -98,9 +98,9 @@
         </li>
       </ul>
 
- <h5 class="mb-2 mt-4">Promo Image</h5>
+      <h5 class="mb-2 mt-4">Promo Image</h5>
       <p class="mb-4 subTitle">Select a vibrant image for the promotion</p>
-      <vx-card>
+      <vx-card class="mb-4">
         <vs-button type="border" size="small" @click="chooseFiles()">Choose promo image</vs-button>
         <input
           hidden
@@ -117,11 +117,13 @@
           :style="'background-image:url('+newPromoImage+')'"
         ></div>
       </vx-card>
+      <vs-button type="border" @click="submitNewPromo">Add Promotion</vs-button>
     </vs-popup>
   </div>
 </template>
 <script>
 import modulemenuList from "@/store/menu/menuDataList.js";
+import promoDataList from "@/store/promos/promosDataList.js";
 import VueSimpleSuggest from "vue-simple-suggest";
 import "vue-simple-suggest/dist/styles.css";
 import flatPickr from "vue-flatpickr-component";
@@ -212,6 +214,40 @@ export default {
           });
         });
     },
+    submitNewPromo() {
+      var selectedDays = [];
+      this.newPromoActiveDays.forEach((day) => {
+        if (day.value == true) selectedDays.push(day.day);
+      });
+      var chosenItemIds = [];
+      this.chosenItems.forEach((item) => {
+        chosenItemIds.push({ itemId: item.menuItemId, attribute: {} });
+      });
+      this.$store
+        .dispatch("promoData/addNewPromo", {
+          message: this.newPromoDesc,
+          image: this.newPromoImage,
+          startDate: this.newPromoFromDate,
+          endDate: this.newPromoToDate,
+          days: selectedDays,
+          value: this.newPromoValue,
+          type: this.newPromoType,
+          promotions: [{ items: chosenItemIds }],
+          restaurantId: this.getCurrentRestaurantId(),
+          authKey: this.getAuthToken(),
+        })
+        .then((res) => {
+          if (res.status == 201) {
+            //this.listPromos();
+            this.$vs.notify({
+              title: "Promotion successfully created!",
+              text: "Wohoo!",
+              color: "success",
+            });
+          }
+        });
+      this.addPromoActive = false;
+    },
     listMenuItems() {
       this.$store
         .dispatch("menuList/listMenuItems", {
@@ -229,6 +265,12 @@ export default {
         this.$store.registerModule("menuList", modulemenuList);
         modulemenuList.isRegistered = true;
       }
+
+      if (!promoDataList.isRegistered) {
+        this.$store.registerModule("promoData", promoDataList);
+        promoDataList.isRegistered = true;
+      }
+
       this.listMenuItems(); //load menu items in order to select them for promotions
     }
   },
