@@ -1,4 +1,4 @@
-Udmlxtend==0.17.3
+mlxtend==0.17.3
 Flask==1.1.2
 pandas==1.1.0
 matplotlib==3.3.0
