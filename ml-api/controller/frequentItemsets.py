@@ -3,7 +3,9 @@ import sys
 import json
 sys.path.append('..') #import from parent directory
 from functools import lru_cache
+import api
 import db
+from flask import jsonify
 
 @lru_cache(maxsize=100)
 def retrieveOrderData():
@@ -41,7 +43,9 @@ def Apriori(restaurantId, viz = False):
     orders_df.columns = ['orderId','customerId', 'menuItemId', 'menuItemName', 'restaurantId', 'quantity']
     #orders_df = orders_df.dropna()
     orders_df = orders_df.loc[orders_df['restaurantId'] == restaurantId]
-    print(orders_df)
+    if(len(orders_df) < 5):
+        api.notFound("Not enough orders")
+        return
 
     #convert to a basket of orderId (row) x menuItemId (col) (which items are present in which orders)
     if(viz): #if this is a visualization call, use menuItemName instead of ID
@@ -90,4 +94,4 @@ def Apriori(restaurantId, viz = False):
         group["consequents"] = consequents
         groupedItems.append(group)
     
-    return groupedItems
+    return jsonify(groupedItems)

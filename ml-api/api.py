@@ -14,6 +14,9 @@ api = Api(app)
 def badRequest():
     abort(make_response(jsonify(reason="Bad Request", status=400), 400))
 
+def notFound(message):
+    abort(make_response(jsonify(reason=message, status=404), 404))
+
 @app.route('/', methods=["POST", "GET"])
 def api():
     if(request.method == "GET"):
