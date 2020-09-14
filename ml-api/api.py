@@ -25,7 +25,10 @@ def api():
         if(request.json["requestType"] == "estimatedPrepTime"):
             return ept.updatePrepTime()
         if(request.json["requestType"] == "promoSuggest"):
-            return jsonify(ps.getPopularItemsets())
+            if(not 'restaurantId' in request.json):
+                badRequest()
+            else:
+                return ps.getPopularItemsets(request.json["restaurantId"])
         if(request.json["requestType"] == "getTrending"):
             return jsonify(ms.suggestFromTrending())
         if(request.json["requestType"] == "suggestFromRatings"):
@@ -37,13 +40,16 @@ def api():
             return re.clearRatingsCache()
         badRequest()
 
+
+
 @app.route('/visualize', methods=["GET"])
 def viz():
-    customerId = request.args.get('customerId')
-    if not customerId:
-        return badRequest()
+    if(request.args.get('customerId')):
+        return vd.collaborativeFiltering(request.args.get('customerId'))
+    elif(request.args.get('restaurantId')):
+        return vd.Apriori(request.args.get('restaurantId'))
     else:
-        return vd.collaborativeFiltering(customerId) + vd.Apriori()
+        return badRequest()
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=os.getenv('PORT', 8080), debug=True)

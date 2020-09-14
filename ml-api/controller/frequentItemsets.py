@@ -30,7 +30,7 @@ def clearOrdersCache():
     retrieveOrderData() #slow to execute
     return {'message': 'Cache Cleared'}
 
-def Apriori(viz = False):
+def Apriori(restaurantId, viz = False):
     import pandas as pd
     from mlxtend.frequent_patterns import apriori
     from mlxtend.frequent_patterns import association_rules
@@ -40,6 +40,8 @@ def Apriori(viz = False):
     orders_df =  pd.DataFrame.from_records(retrieveOrderData())
     orders_df.columns = ['orderId','customerId', 'menuItemId', 'menuItemName', 'restaurantId', 'quantity']
     #orders_df = orders_df.dropna()
+    orders_df = orders_df.loc[orders_df['restaurantId'] == restaurantId]
+    print(orders_df)
 
     #convert to a basket of orderId (row) x menuItemId (col) (which items are present in which orders)
     if(viz): #if this is a visualization call, use menuItemName instead of ID
@@ -61,7 +63,7 @@ def Apriori(viz = False):
     
     #apply mlxtend apriori to the basket, items need to occur together in an order 
     #for at least 1.5% of all orders in database
-    frequent_itemsets = apriori(basket_sets, min_support=0.015, use_colnames=True, low_memory=True)
+    frequent_itemsets = apriori(basket_sets, min_support=0.015, max_len=3, use_colnames=True, low_memory=True)
     frequent_itemsets.sort_values('support', ascending=False)
 
     associationRules = association_rules(frequent_itemsets, metric="lift", min_threshold=0)

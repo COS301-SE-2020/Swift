@@ -27,23 +27,23 @@ def create_ratings_figure(customerId):
                ncol=2,
                fontsize=8)
     fig.suptitle(
-        'Collaborative Filtering (Ratings Estimation) \n', fontsize=16, y=1.05)
+        'Collaborative Filtering (Ratings Estimation) \n', fontsize=16, y=1.01)
     return fig
 
-def create_apriori_figure():
+def create_apriori_figure(restaurantId):
     import networkx as nx  
     associationGraph = nx.DiGraph()
 
     fig = plt.figure(figsize=(10,10))
 
-    rules = fi.Apriori(True);
+    rules = fi.Apriori(int(restaurantId), True);
 
     rules_to_show = min(len(rules), 15)
    
     color_map=[]
     N = 50
     colors = np.random.rand(N)    
-    #accomodate 11 rules
+    #accomodate 15 rules
     ruleLables=['R0', 'R1', 'R2', 'R3', 'R4', 'R5', 'R6', 'R7', 'R8', 'R9', 'R10', 'R11', 'R12', 'R13', 'R14', 'R15']  
    
     for i in range (rules_to_show):      
@@ -68,23 +68,23 @@ def create_apriori_figure():
     edges = associationGraph.edges()
     colors = [associationGraph[u][v]['color'] for u,v in edges]
     #TODO: scale lift (weight) value to a regionable margin
-    weights = [associationGraph[u][v]['weight']/8 for u,v in edges]
+    weights = [associationGraph[u][v]['weight']/4 for u,v in edges]
 
     pos = nx.spring_layout(associationGraph, k=16, scale=1)
-    nx.draw(associationGraph, pos, node_color = color_map, alpha=0.7,edge_color=colors, width=weights, font_size=16, with_labels=False)            
+    nx.draw(associationGraph, pos, node_color = color_map, alpha=0.5,edge_color=colors, width=weights, font_size=16, with_labels=False)            
 
     for p in pos:  # raise text positions
            pos[p][1] += 0.05
     nx.draw_networkx_labels(associationGraph, pos, font_size=8)
     fig.suptitle(
-        'Apriori Algorithm (Frequent Item Sets) \n', fontsize=16, y=1.05)
+        'Apriori Algorithm (Frequent Item Sets) \n', fontsize=16, y=1.01)
     fig.subplots_adjust(top=2.80)
     return fig
 
 
-def Apriori():
+def Apriori(restaurantId):
     figurePNG = io.BytesIO()
-    create_apriori_figure().savefig(figurePNG,  format='png', bbox_inches="tight")
+    create_apriori_figure(restaurantId).savefig(figurePNG,  format='png', bbox_inches="tight")
     figureHash = base64.b64encode(figurePNG.getvalue()).decode('utf-8')
     return '<img align="center" src="data:image/png;base64,%s">' % figureHash
 
