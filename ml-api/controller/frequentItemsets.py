@@ -45,7 +45,6 @@ def Apriori(restaurantId, viz = False):
     orders_df = orders_df.loc[orders_df['restaurantId'] == restaurantId]
     if(len(orders_df) < 5):
         api.notFound("Not enough orders")
-        return
 
     #convert to a basket of orderId (row) x menuItemId (col) (which items are present in which orders)
     if(viz): #if this is a visualization call, use menuItemName instead of ID

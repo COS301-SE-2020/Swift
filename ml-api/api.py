@@ -1,21 +1,40 @@
 from flask import Flask, request, abort, jsonify, make_response
 from flask_restful import Resource, Api
+import urllib.request
+import os
+import json
 import controller.estimatedPrepTime as ept
 import controller.promoSuggest as ps
 import controller.menuSuggest as ms
 import controller.ratingEstimator as re
 import controller.visualizeData as vd
-import os
+
 
 app = Flask(__name__)
 api = Api(app)
 
+APP_API_ENDPOINT = "https://api.swiftapp.ml/"
 
+#responses
 def badRequest():
     abort(make_response(jsonify(reason="Bad Request", status=400), 400))
 
 def notFound(message):
     abort(make_response(jsonify(reason=message, status=404), 404))
+
+def notAuthorized():
+    abort(make_response(jsonify(reason="Not authorized", status=401), 401))
+
+#authorization
+def checkAuth(token):
+    body = {'requestType': 'checkUAToken', 'tokenToCheck': token}  
+
+    req = urllib.request.Request(APP_API_ENDPOINT)
+    req.add_header('Content-Type', 'application/json; charset=utf-8')
+    jsondata = json.dumps(body)
+    jsondataasbytes = jsondata.encode('utf-8') 
+    req.add_header('Content-Length', len(jsondataasbytes))
+    return urllib.request.urlopen(req, jsondataasbytes)
 
 @app.route('/', methods=["POST", "GET"])
 def api():
@@ -25,6 +44,13 @@ def api():
         #check request format
         if not request.json or not 'requestType' in request.json:
             badRequest()
+
+        if('token' in request.json):
+            if(not(json.loads(checkAuth(request.json["token"]).read().decode('utf-8'))["tokenValid"])):
+                notAuthorized()
+        else:
+            notAuthorized()
+
         if(request.json["requestType"] == "estimatedPrepTime"):
             return ept.updatePrepTime()
         if(request.json["requestType"] == "promoSuggest"):
