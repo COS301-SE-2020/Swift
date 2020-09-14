@@ -77,13 +77,17 @@ def Apriori(restaurantId, viz = False):
     groupedItems = []
 
     for indx in associationRules.index: 
-        group = []
+        group = {}
+        group["confidence"] = associationRules["confidence"][indx]
+        antecedents =[]
         for antecedent in associationRules["antecedents"][indx]:
-            group.append(antecedent)
-            
-        for consequent in associationRules["consequents"][indx]:
-            group.append(consequent)
+            antecedents.append(antecedent)
+        group["antecedents"] = antecedents
 
+        consequents = []
+        for consequent in associationRules["consequents"][indx]:
+            consequents.append(consequent)
+        group["consequents"] = consequents
         groupedItems.append(group)
     
     return groupedItems
