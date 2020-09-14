@@ -41,5 +41,26 @@ export default {
         console.log(response)
       });
     });
+  },
+  editTable({
+    commit
+  }, payload) {
+    return new Promise((resolve, reject) => {
+      axios.post(process.env.VUE_APP_BASEURL, {
+        "requestType": "editTable",
+        "token": payload.authKey,
+        "tableId": payload.tableId,
+        "tableNumber": payload.tableNum,
+        "seatCount": payload.tableSeats
+      }).then(result => {
+        console.log(result);
+        resolve(result);
+      }).catch(({
+        response
+      }) => {
+        resolve(response);
+        console.log(response)
+      });
+    });
   }
 }
