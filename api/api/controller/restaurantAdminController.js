@@ -768,7 +768,7 @@ module.exports = {
               ? res.rows[r].coverimageurl : null;
 
             // eslint-disable-next-line operator-linebreak
-            restaurantResponse.restaurants[r].menuCategories =
+            restaurantResponse.restaurants[r].categories =
               // eslint-disable-next-line no-await-in-loop
               await getMenuCategories(res.rows[r].restaurantid);
             // eslint-disable-next-line no-await-in-loop
@@ -781,9 +781,9 @@ module.exports = {
               [res.rows[r].restaurantid]
             );
 
-            restaurantResponse.restaurants[r].categories = [];
+            restaurantResponse.restaurants[r].restaurantCategories = [];
             mainCatRes.rows.forEach((category) => {
-              restaurantResponse.restaurants[r].categories.push(category.categoryid);
+              restaurantResponse.restaurants[r].restaurantCategories.push(category.categoryid);
             });
 
             // eslint-disable-next-line no-await-in-loop
