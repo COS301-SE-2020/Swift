@@ -5,7 +5,7 @@ const path = require('path');
 const configFacebook = require('../config/config-facebook-oauth.json');
 const configGoogle = require('../config/config-google-oauth.json');
 const db = require('../db');
-const { generateToken } = require('../helper/tokenHandler');
+const { generateToken, validateToken, tokenState } = require('../helper/tokenHandler');
 const { getFavourites, getOrderHistory } = require('../helper/objectBuilder');
 const { registerUser } = require('./userController');
 
@@ -105,6 +105,16 @@ const loginUser = (userEmail, userName, response) => db.query(
   });
 
 module.exports = {
+  checkUAToken: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'tokenToCheck')
+      || Object.keys(reqBody).length !== 2) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token
+    const userToken = validateToken(reqBody.tokenToCheck, true);
+    return response.status(200).send({ tokenValid: (userToken.state === tokenState.VALID) });
+  },
   getFacebookLoginURL: (reqBody, response) => {
     // Generate Facebook authentication URL
     let fbLoginURL = `https://www.facebook.com/${configFacebook.apiVersion}/dialog/oauth`;
