@@ -5,6 +5,7 @@ export default {
     commit,
     state
   }, payload) {
+    return new Promise((resolve, reject) => {
     axios.post(process.env.VUE_APP_BASEURL, {
       "requestType": "restaurantMenu",
       "restaurantId": payload.currentRestaurantId,
@@ -14,10 +15,12 @@ export default {
       console.log(result);
 
       commit('SET_RESTAURANT_OBJECT', result.data);
+      resolve(result);
 
     }).catch(({
       response
     }) => {});
+  });
   },
   addMenuCategory({
     dispatch
