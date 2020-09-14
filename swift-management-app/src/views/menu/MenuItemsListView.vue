@@ -137,7 +137,7 @@
               <feather-icon
                 icon="EditIcon"
                 svgClasses="w-5 h-5 hover:text-primary stroke-current"
-                @click.stop="editData(tr)"
+                @click.stop="$router.push({name: 'edit-menu-item', params: { menuItemId: tr.menuItemId }})"
               />
               <feather-icon
                 icon="TrashIcon"
