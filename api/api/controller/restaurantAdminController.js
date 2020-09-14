@@ -4,6 +4,7 @@ const db = require('../db');
 const { validateToken, tokenState } = require('../helper/tokenHandler');
 const {
   getReviews,
+  // getPromotions,
   // getRatingPhrasesObj,
   getMenuCategories,
   // getOrderHistory,
@@ -407,7 +408,7 @@ module.exports = {
 
           // check if table exists
           const tRes = await client.query(
-            'SELECT restaurantid FROM public.restauranttable WHERE tableid = $1::integer',
+            'SELECT restaurantid, tablenumber FROM public.restauranttable WHERE tableid = $1::integer',
             [reqBody.tableId]
           );
 
@@ -431,16 +432,18 @@ module.exports = {
             return response.status(403).send({ status: 403, reason: 'Access Denied' });
           }
 
-          // check if the table number is now already in use
-          const tblDup = await client.query(
-            'SELECT tablenumber FROM public.restauranttable'
-            + ' WHERE restaurantid = $1::integer AND tablenumber = $2::text',
-            [tRes.rows[0].restaurantid, reqBody.tableNumber]
-          );
+          if (reqBody.tableNumber !== tRes.rows[0].tablenumber) {
+            // check if the table number is now already in use
+            const tblDup = await client.query(
+              'SELECT tablenumber FROM public.restauranttable'
+              + ' WHERE restaurantid = $1::integer AND tablenumber = $2::text',
+              [tRes.rows[0].restaurantid, reqBody.tableNumber]
+            );
 
-          if (tblDup.rows.length > 0) {
-            // table number already in use
-            return response.status(409).send({ status: 409, reason: 'Table Number Already In Use' });
+            if (tblDup.rows.length > 0) {
+              // table number already in use
+              return response.status(409).send({ status: 409, reason: 'Table Number Already In Use' });
+            }
           }
 
           // edit table
