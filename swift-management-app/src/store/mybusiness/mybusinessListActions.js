@@ -59,14 +59,14 @@ export default {
     commit,
     dispatch
   }, payload) {
-
-
+    return new Promise((resolve, reject) => {
     axios({
       method: 'post',
       url: process.env.VUE_APP_BASEURL,
       data: {
         "requestType": "editRestaurant",
         "token": payload.authKey,
+        "restaurantId": payload.restaurantId,
         "name": payload.restaurantName,
         "description": payload.restaurantDesc,
         "branch": payload.restaurantBranch,
@@ -75,28 +75,23 @@ export default {
         "coverImageURL": payload.restaurantImage
       }
     }).then(result => {
-
       console.log(result);
-
       dispatch("setCurrentRestaurant", {
-        id: result.data.restaurantId,
+        id: payload.restaurantId,
         name: payload.restaurantName,
       }, {
         root: true
       });
 
-      dispatch("retrieveMyRestaurants", {
-        authKey: payload.authKey,
-        currentRestaurantName: payload.restaurantName,
-      }, {
-        root: true
-      });
+      resolve(result)
 
     }).catch(({
       response
     }) => {
       console.log(response)
+      resolve(response)
     });
+  });
   },
   retrieveRestaurantCategories({
     commit

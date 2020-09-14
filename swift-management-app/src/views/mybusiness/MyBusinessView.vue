@@ -99,6 +99,7 @@
         <label class="vs-input--label">Select (up to 3) Restaurant Categories</label>
         <div style="margin: auto" class="vx-row mt-4">
           <vx-card
+            :ref="'categoryCard'+category.categoryId"
             style="pointer-events: all;cursor: pointer;"
             @click="selectCategory($event, category.categoryId)"
             class="categoryOptionCards mr-2 ml-2 mb-6 md:w-1/6 lg:w-1/6 xl:w-1/6"
@@ -196,9 +197,7 @@ export default {
     },
     updateImage() {
       var reader = new FileReader();
-      reader.readAsDataURL(
-        document.getElementById("uploadImageInput").files[0]
-      );
+      reader.readAsDataURL(this.$refs.uploadImageInputRef.files[0]);
       reader.onload = () => {
         this.setnewRestaurantImage(reader.result);
       };
@@ -220,8 +219,12 @@ export default {
       this.newRestaurantDesc = business.description;
       this.newRestaurantBranch = business.branch;
       this.setnewRestaurantImage(business.image);
-      this.newRestaurantCategories = business.categories;
-      console.log(business)
+      if (business.restaurantCategories)
+        for (var i = 0; i < business.restaurantCategories.length; i++) {
+          this.$refs[
+            "categoryCard" + business.restaurantCategories[i]
+          ][0].$el.click();
+        }
       //show popup
       this.restaurantPopupActive = true;
     },
@@ -243,14 +246,26 @@ export default {
         });
         this.restaurantPopupActive = false;
       } else if (this.restaurantPopupAction == "edit") {
-         this.$store.dispatch("mybusinessData/editRestaurant", {
-          restaurantName: this.newRestaurantName,
-          restaurantDesc: this.newRestaurantDesc,
-          restaurantBranch: this.newRestaurantBranch,
-          restaurantImage: this.newRestaurantImage,
-          restaurantCategories: JSON.stringify(this.newRestaurantCategories),
-          authKey: this.getAuthToken(),
-        });
+        this.$store
+          .dispatch("mybusinessData/editRestaurant", {
+            restaurantName: this.newRestaurantName,
+            restaurantDesc: this.newRestaurantDesc,
+            restaurantBranch: this.newRestaurantBranch,
+            restaurantImage: this.newRestaurantImage,
+            restaurantCategories: JSON.stringify(this.newRestaurantCategories),
+            restaurantId: this.getCurrentRestaurantId(),
+            authKey: this.getAuthToken(),
+          })
+          .then((res) => {
+            if (res.status == 201) {
+              this.listMyRestaurants();
+              this.$vs.notify({
+                title: "Restaurant edit successful",
+                text: "Restaurant information has been updated.",
+                color: "success",
+              });
+            }
+          });
         this.restaurantPopupActive = false;
       }
     },

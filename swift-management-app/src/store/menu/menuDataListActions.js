@@ -19,7 +19,7 @@ export default {
 
     }).catch(({
       response
-    }) => {});
+    }) => {console.log(response)});
   });
   },
   addMenuCategory({

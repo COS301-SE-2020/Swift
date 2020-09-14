@@ -185,7 +185,7 @@ export default {
     updateImage() {
       var reader = new FileReader();
       reader.readAsDataURL(
-        document.getElementById("uploadImageInput").files[0]
+         this.$refs.uploadImageInputRef.files[0]
       );
       reader.onload = () => {
         this.setnewPromoImage(reader.result);

@@ -393,7 +393,7 @@ export default {
       this.$refs.uploadImageInputRef.click();
     },
     updateItemImage() {
-      var file = document.getElementById("uploadImageInput").files[0];
+      var file =  this.$refs.uploadImageInputRef.files[0];
       var reader = new FileReader();
 
       if (file && file.type.match("image.*")) {
