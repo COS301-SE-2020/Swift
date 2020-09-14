@@ -745,7 +745,7 @@ module.exports = {
           await client.query('BEGIN');
           const res = await client.query(
             'SELECT restaurant.restaurantid, restaurant.restaurantname, restaurant.branch,'
-            + ' restaurant.location, restaurant.coverimageurl, restaurantemployee.employeerole,'
+            + ' restaurant.location, restaurant.coverimageurl, restaurant.in_business, restaurantemployee.employeerole,'
             + ' restaurant.restaurantdescription FROM public.restaurantemployee'
             + ' INNER JOIN public.restaurant ON restaurant.restaurantid = restaurantemployee.restaurantid'
             + ' WHERE restaurantemployee.userid = $1::integer',
@@ -763,15 +763,28 @@ module.exports = {
             restaurantResponse.restaurants[r].yourRole = res.rows[r].employeerole;
             restaurantResponse.restaurants[r].branch = res.rows[r].branch;
             restaurantResponse.restaurants[r].location = res.rows[r].location;
+            restaurantResponse.restaurants[r].inBusiness = res.rows[r].in_business;
             restaurantResponse.restaurants[r].image = (reqBody.includeImage === true)
               ? res.rows[r].coverimageurl : null;
 
             // eslint-disable-next-line operator-linebreak
-            restaurantResponse.restaurants[r].categories =
+            restaurantResponse.restaurants[r].menuCategories =
               // eslint-disable-next-line no-await-in-loop
               await getMenuCategories(res.rows[r].restaurantid);
             // eslint-disable-next-line no-await-in-loop
             restaurantResponse.restaurants[r].reviews = await getReviews(res.rows[r].restaurantid);
+
+            // eslint-disable-next-line no-await-in-loop
+            const mainCatRes = await client.query(
+              'SELECT categoryid FROM public.restaurantcategory'
+              + ' WHERE restaurantid = $1::integer;',
+              [res.rows[r].restaurantid]
+            );
+
+            restaurantResponse.restaurants[r].categories = [];
+            mainCatRes.rows.forEach((category) => {
+              restaurantResponse.restaurants[r].categories.push(category.categoryid);
+            });
 
             // eslint-disable-next-line no-await-in-loop
             const ratingRes = await client.query(
