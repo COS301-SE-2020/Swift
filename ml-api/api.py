@@ -28,7 +28,7 @@ def notAuthorized():
 
 #authorization
 def checkAuth(token):
-    body = {'requestType': 'checkUAToken', 'tokenToCheck': token}  
+    body = {'requestType': 'checkUAToken', 'token': token}  
 
     req = urllib.request.Request(APP_API_ENDPOINT)
     req.add_header('Content-Type', 'application/json; charset=utf-8')
@@ -43,14 +43,13 @@ def api():
         return {'whoami': 'Swift AI'}
     elif (request.method == "POST"):
         #check request format
-        if not request.json or not 'requestType' in request.json:
+        if not request.json or not 'requestType' in request.json or not 'token' in request.json:
             badRequest()
 
-        if('token' in request.json):
-            if(not(json.loads(checkAuth(request.json["token"]).read().decode('utf-8'))["tokenValid"])):
-                notAuthorized()
-        else:
+        if(not(json.loads(checkAuth(request.json["token"]).read().decode('utf-8'))["tokenValid"])):
             notAuthorized()
+
+        customerId = json.loads(checkAuth(request.json["token"]).read().decode('utf-8'))["userId"]
 
         if(request.json["requestType"] == "estimatedPrepTime"):
             return ept.updatePrepTime()
@@ -62,10 +61,7 @@ def api():
         if(request.json["requestType"] == "getTrending"):
             return jsonify(ms.suggestFromTrending())
         if(request.json["requestType"] == "suggestFromRatings"):
-            if(not 'customerId' in request.json):
-                badRequest()
-            else:
-                return ms.suggestFromRatings(request.json["customerId"])
+            return ms.suggestFromRatings(customerId)
         if(request.json["requestType"] == "clearRatingsCache"):
             return re.clearRatingsCache()
         

@@ -92,8 +92,8 @@ def countersTableOccupancyHistory(restaurantId):
     cursor = connection.cursor()
     qry = """select * from tableoccupancyhistory
             WHERE datetime > NOW() - INTERVAL '2 days'
-            AND restaurantid = %s;
-            ORDER BY datetime DESC"""
+            AND restaurantid = %s
+            ORDER BY datetime DESC;"""
     cursor.execute(qry, [restaurantId])
     records = cursor.fetchall()
     cursor.close()
