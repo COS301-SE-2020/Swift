@@ -10,9 +10,9 @@ if (pool == null) {
     database: process.env.DB_NAME || configDB.database,
     password: process.env.DB_PASS || configDB.password,
     port: process.env.DB_PORT || configDB.port,
-    connectionTimeoutMillis: 5000,
-    idleTimeoutMillis: 5000,
-    max: 16
+    connectionTimeoutMillis: 0, // wait forever until a connection is available
+    idleTimeoutMillis: 5000, // release unused connections after 5 sec
+    max: 20
   });
 }
 
