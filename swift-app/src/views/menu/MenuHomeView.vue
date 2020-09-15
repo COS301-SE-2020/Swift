@@ -34,12 +34,39 @@
           </v-row>
         </div>
     </v-container>
-    <v-container v-show="!isLoading" class="px-0 overflow-x-hidden" transition="slide-x-transition">
+
+    <v-container v-show="!isLoading && filterPromotionItems(promotionItems).length != 0" class="mt-0 pt-0">
       <v-row style="max-width: 400px" class="overflow-y-auto">
+        <v-col cols="12" class="pt-0">
+          <div class="subtitle">Suggested for you</div>
+        </v-col>
+      </v-row>        
+      <v-list v-for="(promotionItem, i) in filterPromotionItems(promotionItems)" :key="i" class="py-0">
+        <v-card class="mb-2" elevation="2">
+          <v-list-item class="py-1 pr-0">
+            <v-list-item-avatar @click="goToMenuItem(promotionItem.menuItemId)" tile  style="border-radius: 4px" size="45" >
+              <v-img v-if="promotionItem.images.length !=  0" :src="promotionItem.images[0]"/>
+              <v-img v-else src="../../assets/menuItemImages/item-placeholder.png"/>
+            </v-list-item-avatar>
+            <v-list-item-content ripple @click="goToMenuItem(promotionItem.menuItemId)">
+              <v-list-item-title v-html="promotionItem.menuItemName"></v-list-item-title>
+              <v-list-item-subtitle v-html="promotionItem.menuItemDescription"></v-list-item-subtitle>
+            </v-list-item-content>
+            <v-list-item-action class="ml-0 mr-2 mt-0">
+              <v-rating background-color="secondary" readonly size="11" dense color="yellow darken-3" :value="parseInt(promotionItem.rating)"></v-rating>
+              <span class="subtitle-1">R{{ (promotionItem.price).toFixed(2) }}</span>
+            </v-list-item-action>
+          </v-list-item>
+        </v-card>
+      </v-list>
+    </v-container>  
+
+    <v-container v-show="!isLoading" class="px-0 pt-0 overflow-x-hidden" transition="slide-x-transition">
+      <!-- <v-row style="max-width: 400px" class="overflow-y-auto">
         <v-col cols="12" class="pt-0">
           <div class="title pl-3">Categories</div>
         </v-col>
-      </v-row>
+      </v-row> -->
 
       <v-tabs v-model="secondaryCategoryTab" background-color="secondary" color="primary" dark>
         <v-tab v-for="(category, index) in primaryCategoryList" :key="index">
@@ -62,7 +89,8 @@
                     <v-list-item-title v-html="menuItem.menuItemName"></v-list-item-title>
                     <v-list-item-subtitle v-html="menuItem.menuItemDescription"></v-list-item-subtitle>
                   </v-list-item-content>
-                  <v-list-item-action-text class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</v-list-item-action-text>
+                  <!-- <v-list-item-action-text class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</v-list-item-action-text> -->
+                  <span class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</span>
                 </v-list-item>
                 <v-divider divider class="ml-3" width="93%"></v-divider>
               </v-list>
@@ -81,8 +109,9 @@
                   <v-list-item-subtitle class="mt-2" v-html="menuItem.menuItemDescription"></v-list-item-subtitle>
                 </v-list-item-content>
                 <div class="d-flex flex-column justify-content-end">
-                  <v-list-item-action-text class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</v-list-item-action-text>
                   <v-rating readonly size="14" dense color="yellow darken-3" background-color="secondary" :value="parseInt(menuItem.rating)"></v-rating>
+                  <!-- <v-list-item-action-text class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</v-list-item-action-text> -->
+                  <span class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</span>
                 </div>                
               </v-list-item>
               <v-divider divider class="ml-3" width="93%"></v-divider>
@@ -93,15 +122,6 @@
 
       <!-- <div v-for="(suggestedItem, i) in filteredSuggestions(suggestedItems)" :key="i">
         
-      </div> -->
-
-      <div v-for="(promotionItem, i) in filterPromotionItems(promotionItems)" :key="i">
-        {{promotionItem}}
-      </div>
-      <!-- <div v-for="(promotionItem, i) in promotionItems" :key="i">
-        <div v-for="(itemIds, j) in promotionItem.antecedents" :key="j">
-          {{itemIds}}
-        </div>
       </div> -->
 
     </v-container>
@@ -135,60 +155,6 @@ export default {
     search: '',
     primaryCategoryTab: null,
     secondaryCategoryTab: null,
-    items: [
-      { tab: 'Coffee and Tea', content: 'Tab 1 Content' },
-      { tab: 'Soft Drinks', content: 'Tab 2 Content' },
-      { tab: 'Alcohol', content: 'Tab 3 Content' },
-    ],
-
-    restaurantImages: [
-      { img: "https://source.unsplash.com/800x800/?fruit" },
-      { img: "https://source.unsplash.com/800x800/?salad" },
-      { img: "https://source.unsplash.com/800x800/?spaghetti" },
-      { img: "https://source.unsplash.com/800x800/?sandwich" }
-    ],
-    categories: [
-      { img: "https://source.unsplash.com/800x800/?tea", name: "Drinks" },
-      { img: "https://source.unsplash.com/800x800/?salad", name: "Starters" },
-      { img: "https://source.unsplash.com/800x800/?spaghetti", name: "Meals" },
-      {
-        img: "https://source.unsplash.com/800x800/?sandwich",
-        name: "Sandwiches"
-      },
-      { img: "https://source.unsplash.com/800x800/?dessert", name: "Desserts" },
-      { img: "https://source.unsplash.com/800x800/?alcohol", name: "Alcohol" },
-      {
-        img: "https://source.unsplash.com/800x800/?hamburger",
-        name: "Burgers"
-      },
-      { img: "https://source.unsplash.com/800x800/?cake", name: "Cakes" }
-    ],
-    popularDrinks: [
-      {
-        title: "Filter Coffee",
-        price: "R82.00",
-        rating: 5,
-        src: "https://source.unsplash.com/800x800/?coffee"
-      },
-      {
-        title: "Boxed Water",
-        price: "R52.00",
-        rating: 5,
-        src: "https://source.unsplash.com/800x800/?boxedwater"
-      },
-      {
-        title: "Tea",
-        price: "R62.00",
-        rating: 4,
-        src: "https://source.unsplash.com/800x800/?tea"
-      },
-      {
-        title: "Juice",
-        price: "R87.00",
-        rating: 3,
-        src: "https://source.unsplash.com/800x800/?juice"
-      }
-    ],
     called: false,
     favourited: false,
     snackbar: true,
@@ -244,6 +210,7 @@ export default {
     },
     filterPromotionItems(promotionItems) {
       var promotionItemsList = [];
+
       for (let i = 0; i < promotionItems.length; i++) {
         var tempList = [];
         for (let j = 0; j < promotionItems[i].antecedents.length; j++) {
@@ -254,8 +221,6 @@ export default {
             for (let l = 0; l < this.orderHistory[k].items.length; l++) {
               if (promotionItems[i].antecedents[j] === this.orderHistory[k].items[l].menuItemId) {
                 tempList2.push(promotionItems[i].antecedents[j])
-                console.log(tempList2)
-
               }
             }
           }
@@ -272,8 +237,30 @@ export default {
       $.each(promotionItemsList, function(i, el){
         if($.inArray(el, uniquePromotionItems) === -1) uniquePromotionItems.push(el);
       });
+      
+      var promotionMenuItems = [];
 
-      return uniquePromotionItems
+      for (let i = 0; i < uniquePromotionItems.length; i++) {
+        var menuItem = this.retrievMenuItem(uniquePromotionItems[i])
+        if (menuItem != undefined)
+          promotionMenuItems.push(menuItem);        
+      }
+
+      return promotionMenuItems;
+    },
+    retrievMenuItem(menuId) {
+      if (this.findCategory(menuId) != undefined)
+        return this.findCategory(menuId).menuItems.find(menuItem => menuItem.menuItemId === menuId )
+    },
+    findCategory(menuId) {
+      if (this.menu.categories != undefined) {
+        return  this.menu.categories.find(
+          (category) => {
+            if (category.menuItems != undefined)
+              return category.menuItems.find(menuItem => menuItem.menuItemId === menuId )
+          }
+        )
+      } 
     },
   },
   async mounted() {
@@ -283,14 +270,14 @@ export default {
     }
 
     var menuObj = await this.menu;
-
-    if (Object.keys(menuObj).length == 0 || Object.keys(menuObj).length == undefined) { 
+    var promotionItems = await this.promotionItems;
+    
+    if (Object.keys(menuObj).length == 0 || Object.keys(menuObj).length == undefined || Object.keys(promotionItems).length == 0) { 
       this.isLoading = !this.isLoading;
       var menuResponse = await this.$store.dispatch('MenuStore/retrieveMenu', this.$route.params.menuId);
       var promotionItemsResponse = await this.$store.dispatch('MenuStore/retrieveSuggestedPromotions', this.$route.params.menuId);
-      // var suggestedItemsResponse = await this.$store.dispatch('RestaurantStore/retrieveSuggestedMenuItemsFromRatings');
       
-      if (menuResponse)
+      if (menuResponse && promotionItemsResponse)
         this.isLoading = !this.isLoading;
     }
   },
