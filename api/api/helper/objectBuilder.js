@@ -143,10 +143,9 @@ const getMenuItems = (categoryId) => {
       );
 
       const menuItems = await client.query(
-        'SELECT sum(itemordered.quantity) as "popularity", menuitem.menuitemid, menuitem.menuitemname, menuitem.menuitemdescription,'
+        'SELECT menuitem.menuitemid, menuitem.menuitemname, menuitem.menuitemdescription,'
         + ' menuitem.price, menuitem.estimatedwaitingtime, menuitem.attributes, arasset, availability FROM public.menuitem'
-        + ' inner join public.itemordered on itemordered.menuitemid = menuitem.menuitemid '
-        + ' WHERE categoryid = $1::integer group by (menuitem.menuitemid) ORDER BY menuitemid ASC;',
+        + ' WHERE categoryid = $1::integer ORDER BY menuitemid ASC;',
         [categoryId]
       );
 
@@ -163,12 +162,22 @@ const getMenuItems = (categoryId) => {
       for (let mi = 0; mi < menuItems.rows.length; mi++) {
         const menuItem = {};
         const resMenuItem = menuItems.rows[mi];
+
+        // eslint-disable-next-line no-await-in-loop
+        const popularity = await client.query(
+          'SELECT sum(itemordered.quantity) as "popularity" FROM public.itemordered'
+          + ' WHERE menuitemid = $1::integer',
+          [resMenuItem.menuitemid]
+        );
+
+        const itemQuantity = (popularity.rows.length !== 0) ? popularity.rows[0].popularity : 0;
+
         menuItem.menuItemId = resMenuItem.menuitemid;
         menuItem.menuItemName = resMenuItem.menuitemname;
         menuItem.menuItemDescription = resMenuItem.menuitemdescription;
         menuItem.price = resMenuItem.price;
         menuItem.popularity = (mostPopular.rows.length !== 0 && mostPopular.rows[0].quant !== 0)
-          ? parseFloat(((resMenuItem.popularity / mostPopular.rows[0].quant) * 100).toFixed(2), 10)
+          ? parseFloat(((itemQuantity / mostPopular.rows[0].quant) * 100).toFixed(2), 10)
           : 0;
         menuItem.estimatedWaitingTime = resMenuItem.estimatedwaitingtime;
         menuItem.images = [];
