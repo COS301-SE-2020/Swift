@@ -6,6 +6,7 @@ module.exports = {
     const serviceStatus = {};
     serviceStatus.timestamp = `${new Date().toLocaleString('en-US', { timeZone: 'UTC' })} (UTC)`;
     serviceStatus.API = {};
+    serviceStatus.MLAPI = {};
     serviceStatus.DB = {};
     serviceStatus.docs = {};
     serviceStatus.ManagementWebApp = {};
@@ -25,6 +26,21 @@ module.exports = {
       .catch(() => {
         serviceStatus.API.status = 503;
         serviceStatus.API.detail = 'API is offline';
+      });
+
+    await axios.get('https://ml.api.swiftapp.ml')
+      .then((ares) => {
+        if (ares.status === 200) {
+          serviceStatus.MLAPI.status = 200;
+          serviceStatus.MLAPI.detail = 'ML API is online';
+        } else {
+          serviceStatus.MLAPI.status = 503;
+          serviceStatus.MLAPI.detail = 'ML API is offline';
+        }
+      })
+      .catch(() => {
+        serviceStatus.MLAPI.status = 503;
+        serviceStatus.MLAPI.detail = 'ML API is offline';
       });
 
     // Check DB availability

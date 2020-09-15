@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 const db = require('../db');
 const paymentEmail = require('../helper/notifications/sendEmail');
 const { validateToken, tokenState } = require('../helper/tokenHandler');
@@ -27,7 +28,7 @@ module.exports = {
           await client.query('BEGIN');
 
           const res = await client.query(
-            'SELECT restaurantid,restaurantname,location,branch,coverimageurl FROM public.restaurant'
+            'SELECT restaurantid,restaurantname,location,branch,coverimageurl FROM public.restaurant ORDER BY restaurantid ASC'
           );
 
           const restaurantResponse = {};
@@ -55,12 +56,14 @@ module.exports = {
             const ratingPhraseFetchLimit = 2;
             // eslint-disable-next-line no-await-in-loop
             const ratePhraseQ = await client.query(
-              'SELECT ratingphrase.phrasedescription, customerphraserating.ratingscore'
+              'SELECT ratingphrase.phrasedescription, AVG(customerphraserating.ratingscore) as "avgScore" '
               + ' FROM public.customerphraserating'
-              + ' INNER JOIN public.review ON customerphraserating.reviewid = review.reviewid'
-              + ' INNER JOIN public.ratingphrase ON customerphraserating.phraseid = ratingphrase.phraseid'
-              + ' ORDER BY customerphraserating.ratingscore DESC LIMIT $1::integer',
-              [ratingPhraseFetchLimit]
+              + ' INNER JOIN public.ratingphrase ON customerphraserating.phraseid = ratingphrase.phraseid '
+              + ' INNER JOIN public.review ON customerphraserating.reviewid = review.reviewid '
+              + " WHERE LOWER(ratingphrase.type) = 'restaurant' AND review.restaurantId = $1::integer "
+              + ' GROUP BY ratingphrase.phrasedescription '
+              + ' ORDER BY "avgScore" DESC LIMIT $2::integer',
+              [res.rows[r].restaurantid, ratingPhraseFetchLimit]
             );
 
             ratePhraseQ.rows.forEach((ratePhrase) => {
@@ -116,7 +119,7 @@ module.exports = {
 
     if (userToken.state === tokenState.VALID) {
       return db.query(
-        'SELECT categoryid, categoryname, categoryimage FROM public.category'
+        'SELECT categoryid, categoryname, categoryimage, categoryicon FROM public.category'
       )
         .then((res) => {
           const categoryResponse = {};
@@ -126,6 +129,7 @@ module.exports = {
             categoryResponse.categories[c].categoryId = res.rows[c].categoryid;
             categoryResponse.categories[c].categoryName = res.rows[c].categoryname;
             categoryResponse.categories[c].categoryImage = res.rows[c].categoryimage;
+            categoryResponse.categories[c].categoryicon = res.rows[c].categoryicon;
           }
 
           // return categories
@@ -364,8 +368,11 @@ module.exports = {
     }
 
     // Check token
-    const userToken = validateToken(reqBody.token);
+    const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
+      // eslint-disable-next-line no-console
+      // console.log(userToken);
+
       return (async () => {
         const client = await db.connect();
         try {

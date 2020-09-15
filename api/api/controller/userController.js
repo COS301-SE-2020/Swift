@@ -1,3 +1,6 @@
+/* eslint-disable linebreak-style */
+/* eslint-disable no-console */
+/* eslint-disable linebreak-style */
 const bcrypt = require('bcrypt');
 const validator = require('email-validator');
 const db = require('../db');
@@ -29,7 +32,7 @@ module.exports = {
     // Check if user exists
     // TODO: Check if account is active
     return db.query(
-      'SELECT userid, name, surname, email, password, theme, checkedin'
+      'SELECT userid, name, surname, email, profileimageurl, password, theme, checkedin'
       + ' FROM public.person WHERE person.email = $1::text',
       [email]
     )
@@ -50,6 +53,7 @@ module.exports = {
           loginResponse.name = res.rows[0].name;
           loginResponse.surname = res.rows[0].surname;
           loginResponse.email = res.rows[0].email;
+          loginResponse.profileimageurl = res.rows[0].profileimageurl;
           loginResponse.checkedIn = res.rows[0].checkedin;
           loginResponse.theme = res.rows[0].theme;
 
@@ -454,5 +458,118 @@ module.exports = {
 
         return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
       });
-  }
+  },
+  orderHistory: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+    || Object.keys(reqBody).length !== 2) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token validity
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      const orderHistoryPromises = [];
+      const orderHistoryResponse = {};
+      const id = userToken.data.userId;
+
+      orderHistoryPromises.push(new Promise((resolve, reject) => {
+        orderHistoryPromises.push(getOrderHistory(id).then((orderHistoryPromise) => {
+          orderHistoryResponse.orderHistory = [];
+          Promise.all(orderHistoryPromise)
+            .then((orderHistoryItem) => {
+              orderHistoryItem.forEach((ordHistItem) => {
+                orderHistoryResponse.orderHistory.push(ordHistItem);
+              });
+              resolve();
+            })
+            .catch((err) => {
+              reject(err);
+            });
+        }));
+      }));
+
+      Promise.all(orderHistoryPromises).then(() => response.status(200).send(orderHistoryResponse))
+        .catch((err) => {
+          console.error('Login Promise Error', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+    return true;
+  },
+  editProfile: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+    || Object.keys(reqBody).length !== 6) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token validity
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      const id = userToken.data.userId;
+      return db.query(
+        'UPDATE public.person SET name = $1::text, surname = $2::text, profileimageurl = $3::text, theme = $4::text  WHERE userid = $5::integer;',
+        [reqBody.name, reqBody.surname, reqBody.profileImage, reqBody.theme, id]
+      )
+        .then(() => response.status(201).send({
+          profileInfo: {
+            name: reqBody.name,
+            surname: reqBody.surname,
+            profileImage: reqBody.profileImage,
+            theme: reqBody.theme
+          }
+        }))
+        .catch((err) => {
+          console.error('Query Error [Profile update error]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+    return true;
+  },
+  addCommentLike: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+    || !Object.prototype.hasOwnProperty.call(reqBody, 'reviewId')
+    || Object.keys(reqBody).length !== 3) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token validity
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      return db.query(
+        'SELECT reviewId FROM public.review WHERE reviewId = $1::integer;',
+        [reqBody.reviewId]
+      )
+        .then((res) => {
+          if (res.rows.length === 0) {
+            // Review does not exist
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          // add review like if it has not already been added
+          return db.query(
+            'INSERT INTO public.likedreview (reviewId, userid)'
+            + ' SELECT $1::integer, $2::integer WHERE NOT EXISTS'
+            + ' (SELECT 1 FROM public.likedreview WHERE'
+            + ' reviewId = $1::integer AND userid = $2::integer);',
+            [reqBody.reviewId, userToken.data.userId]
+          )
+            .then(() => response.status(201).send({ status: 201, reason: 'Comment liked successfully' }))
+            .catch((err) => {
+              console.error('Query Error [Review - Add Review Item]', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
+        })
+        .catch((err) => {
+          console.error('Query Error [Review - Check Review]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
 };
