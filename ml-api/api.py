@@ -86,7 +86,16 @@ def api():
             return dashboard.countersTableOccupancyHistory(request.json["restaurantId"])
         if(request.json["requestType"] == "dashboardActiveWaiters"):
             return dashboard.countersActiveWaiters(request.json["restaurantId"])
-            
+        if(request.json["requestType"] == "dashboardTopMenuItems"):
+            if(not 'startPeriod' in request.json or not 'endPeriod in request.json'):
+                badRequest()
+            else:
+                return dashboard.topMenuItems(request.json["restaurantId"], request.json["startPeriod"], request.json["endPeriod"])
+        if(request.json["requestType"] == "dashboardTopMenus"):
+            if(not 'startPeriod' in request.json):
+                badRequest()
+            else:
+                return dashboard.topMenus(request.json["restaurantId"], request.json["startPeriod"])            
             
         badRequest()
 

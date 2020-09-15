@@ -116,3 +116,69 @@ def countersActiveWaiters(restaurantId):
     cursor.close()
     db.close(connection)
     return jsonify({"totalWaiters" : records[0][0], "occupiedWaiters": records[0][1]})
+
+def topMenuItems(restaurantId, start, end):
+    connection = db.connect()
+    #current number of active customers
+    cursor = connection.cursor()
+    qry = """SELECT currentPeriod.menuitemname, currentPeriod.totalpurchased, currentPeriod.ratio,
+            previousPeriod.totalpurchased as prevtotalpurchased, previousPeriod.ratio as prevratio FROM topMenuItems(%s,%s,%s) as currentPeriod
+            FULL JOIN topMenuItems(%s,%s,%s) as previousPeriod
+            ON currentPeriod.menuitemname = previousPeriod.menuitemname
+            WHERE not(currentPeriod.menuitemname is NULL)
+            ORDER BY currentPeriod.totalpurchased DESC;"""
+    cursor.execute(qry, [restaurantId, start, end, restaurantId, (start)*2, start-end])
+    records = cursor.fetchall()
+    cursor.close()
+    db.close(connection)
+    return jsonify(records)
+"""
+Postgres Function does the heavy lifting:
+restaurantID, startDaysAgo, endDaysAgo
+SELECT topMenuItems(62,7,0) as currentPeriod, topMenuItems(62,14,7) as previousPeriod;
+
+CREATE OR REPLACE FUNCTION topMenuItems(INTEGER, INTEGER, INTEGER) RETURNS TABLE(menuitemname text, totalpurchased bigint, ratio float) AS
+$$
+    BEGIN 
+        RETURN QUERY
+		SELECT menuitem.menuitemname, SUM(quantity) as totalpurchased, (SUM(quantity)::FLOAT/(SELECT SUM(quantity) from itemordered
+        INNER JOIN menuitem
+        ON menuitem.menuitemid = itemordered.menuitemid
+        INNER JOIN customerorder
+        ON customerorder.orderid = itemordered.orderid
+        WHERE customerorder.orderdatetime > NOW() - ($2::TEXT || ' DAYS')::INTERVAL
+		AND NOW() - ($3::TEXT || ' DAYS')::INTERVAL > customerorder.orderdatetime																											   	
+		AND restaurantid = $1))
+        as ratio from itemordered
+        INNER JOIN menuitem
+        ON menuitem.menuitemid = itemordered.menuitemid
+        INNER JOIN customerorder
+        ON customerorder.orderid = itemordered.orderid
+        WHERE customerorder.orderdatetime > NOW() - ($2::TEXT || ' DAYS')::INTERVAL
+		AND NOW() - ($3::TEXT || ' DAYS')::INTERVAL > customerorder.orderdatetime
+		AND restaurantid = $1
+        GROUP BY 1
+        ORDER BY totalpurchased DESC;
+    END
+$$ LANGUAGE plpgsql;
+"""
+def topMenus(restaurantId, start):
+    connection = db.connect()
+    #current number of active customers
+    cursor = connection.cursor()
+    qry = """SELECT menucategory.categoryname, COUNT(*) FROM itemordered
+            INNER JOIN menuitem
+            ON itemordered.menuitemid = menuitem.menuitemid
+            INNER JOIN menucategory
+            ON menuitem.categoryid = menucategory.categoryid
+            INNER JOIN customerorder
+            ON customerorder.orderid = itemordered.orderid
+            WHERE menucategory.restaurantid = %s
+            AND menucategory.categorytype = 'primary'
+            AND customerorder.orderdatetime > NOW() - (%s::TEXT || ' DAYS')::INTERVAL
+            GROUP BY 1;"""
+    cursor.execute(qry, [restaurantId, start])
+    records = cursor.fetchall()
+    cursor.close()
+    db.close(connection)
+    return jsonify(records)
