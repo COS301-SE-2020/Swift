@@ -27,5 +27,26 @@ export default {
         console.log(response)
       });
     });
+  },
+  listPromos({
+    commit
+  }, payload) {
+    return new Promise((resolve, reject) => {
+      axios.post(process.env.VUE_APP_BASEURL, {
+        "requestType": "listRestaurantPromotions",
+        "token": payload.authKey,
+        "restaurantId": payload.restaurantId,
+      }).then(result => {
+        console.log(result);
+        commit('SET_PROMOS_OBJECT', result.data.restaurantPromo);
+
+        resolve(result);
+      }).catch(({
+        response
+      }) => {
+        resolve(response);
+        console.log(response)
+      });
+    });
   }
 }

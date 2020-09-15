@@ -6,6 +6,55 @@
       </div>
       <vs-button @click="addPromo()" :disabled="addPromoButtonDisabled">Add Promo</vs-button>
     </div>
+
+    <div class="flex flex-wrap">
+      <vs-card
+        class="text-center mb-4 mt-4 ml-4 mr-4 w-full sm:w-full md:w-full lg:w-1/4 xl:w-1/4"
+        v-for="promo in promos"
+        :key="promo.promotionId"
+      >
+        <img class="existingPromoImage" :src="promo.image" />
+        <h6 class="mb-2 mt-4">Description</h6>
+        <p style="font-size: 14px">{{promo.message}}</p>
+
+        <h6 class="mb-2 mt-4">Active Period</h6>
+        <p style="font-size: 14px">{{formatDate(promo.startDate)}} - {{formatDate(promo.endDate)}}</p>
+
+        <h6 class="mb-2 mt-4">Promotion Items</h6>
+        <div class="flex flex-wrap">
+          <div
+            v-for="item in menuItemsByIds(promo.promotions[0].items)"
+            :key="item.menuItemId"
+            class="mb-1 ml-1 mr-1 sm:w-1/3 md:w-1/4 lg:w-1/4 xl:w-1/4 ml-auto mr-auto"
+          >
+            <vs-card
+              type="border"
+              class="miniMenuItem mediumSize"
+              :style="'background:linear-gradient(120deg ,rgba(0,0,0,.6), rgba(0,0,0,0.1)),url('+item.images[0]+')'"
+            >
+              <p style="color:white;">{{ item.menuItemName }}</p>
+            </vs-card>
+          </div>
+        </div>
+
+        <h6 class="mb-2 mt-4">Active Days</h6>
+        <vs-chip class="mb-8 mt-4" v-for="days in promo.days" :key="days">{{ days }}</vs-chip>
+        <vs-divider></vs-divider>
+        <div class="flex flex-wrap">
+          <vs-alert color="dark" class="largeChip mb-2 mt-2 mr-4 w-1/3 ml-auto">
+            Type:
+            <span
+              style="font-weight: 400"
+            >{{ promo.type.charAt(0).toUpperCase() + promo.type.slice(1) }}</span>
+          </vs-alert>
+          <vs-alert color="dark" class="largeChip mb-2 mt-2 ml-4 w-1/3 mr-auto">
+            Value:
+            <span style="font-weight: 400">{{ promo.value }}</span>
+          </vs-alert>
+        </div>
+      </vs-card>
+    </div>
+
     <vs-popup class="text-center" title="Add Promotion" :active.sync="addPromoActive">
       <vs-textarea label="Promotion Description" v-model="newPromoDesc" />
 
@@ -21,7 +70,7 @@
         class="mb-4"
       ></vue-simple-suggest>
 
-      <div class="flex flex-wrap flex-reverse flex-start">
+      <div class="flex flex-wrap">
         <div
           v-for="item in chosenItems"
           :key="item.menuItemId"
@@ -167,6 +216,12 @@ export default {
     };
   },
   computed: {
+    promos() {
+      if (this.$store.state.promoData) {
+        console.log("PROMOTIONS", this.$store.state.promoData.promos);
+        return this.$store.state.promoData.promos;
+      } else return null;
+    },
     restaurantObject() {
       if (this.$store.state.menuList)
         return this.$store.state.menuList.restaurantObject;
@@ -174,6 +229,26 @@ export default {
     },
   },
   methods: {
+    formatDate(date){
+      return new Date(date).toDateString()
+    },
+    menuItemsByIds(idList) {
+      var menuList = [];
+      idList.forEach((id) => {
+        for (var i = 0; i < this.restaurantObject.categories.length; i++)
+          for (
+            var j = 0;
+            j < this.restaurantObject.categories[i].menuItems.length;
+            j++
+          ) {
+            var item = this.restaurantObject.categories[i].menuItems[j];
+            if (item.menuItemId == id.itemId) {
+              menuList.push(item);
+            }
+          }
+      });
+      return menuList;
+    },
     removeChosenItem(id) {
       for (var i = 0; i < this.chosenItems.length; i++) {
         if (this.chosenItems[i].menuItemId == id) this.chosenItems.splice(i, 1);
@@ -184,9 +259,7 @@ export default {
     },
     updateImage() {
       var reader = new FileReader();
-      reader.readAsDataURL(
-         this.$refs.uploadImageInputRef.files[0]
-      );
+      reader.readAsDataURL(this.$refs.uploadImageInputRef.files[0]);
       reader.onload = () => {
         this.setnewPromoImage(reader.result);
       };
@@ -237,8 +310,8 @@ export default {
           authKey: this.getAuthToken(),
         })
         .then((res) => {
-          if (res.status == 201) {
-            //this.listPromos();
+          if (res.status == 201 || res.status == 200) {
+            this.listPromos();
             this.$vs.notify({
               title: "Promotion successfully created!",
               text: "Wohoo!",
@@ -258,6 +331,12 @@ export default {
           this.addPromoButtonDisabled = false;
         });
     },
+    listPromos() {
+      this.$store.dispatch("promoData/listPromos", {
+        authKey: this.getAuthToken(),
+        restaurantId: this.getCurrentRestaurantId(),
+      });
+    },
   },
   created() {
     if (this.getAuthToken() != null) {
@@ -270,6 +349,9 @@ export default {
         this.$store.registerModule("promoData", promoDataList);
         promoDataList.isRegistered = true;
       }
+
+      if (this.promos == null) this.$vs.loading();
+      this.listPromos();
 
       this.listMenuItems(); //load menu items in order to select them for promotions
     }
@@ -293,6 +375,9 @@ export default {
     },
     newPromoFromDate: function (val) {
       this.configTodateTimePicker.minDate = new Date(val);
+    },
+    promos(newCount, oldCount) {
+      this.$vs.loading.close();
     },
   },
 };
@@ -318,7 +403,9 @@ export default {
   display: table-cell;
   vertical-align: middle;
 }
-
+.mediumSize {
+  margin: 20px !important;
+}
 #promoImageUploadPreview {
   height: 200px;
   width: 100%;
@@ -329,5 +416,30 @@ export default {
 }
 .subTitle {
   font-size: 12px;
+}
+.existingPromoImage {
+  max-width: 300px;
+  max-height: 200px;
+  margin: 20px;
+  border-radius: 10px;
+}
+.largeChip {
+  height: 50px !important;
+  display: table;
+  text-align: center;
+}
+.largeChip >>> .vs-alert {
+  display: table-cell;
+  vertical-align: middle;
+}
+@media (max-width: 600px) {
+  .existingPromoImage {
+    max-width: 250px;
+  }
+}
+@media (max-width: 350px) {
+  .existingPromoImage {
+    max-width: 200px;
+  }
 }
 </style>
