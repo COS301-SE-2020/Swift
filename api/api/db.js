@@ -11,7 +11,7 @@ if (pool == null) {
     password: process.env.DB_PASS || configDB.password,
     port: process.env.DB_PORT || configDB.port,
     connectionTimeoutMillis: 5000,
-    idleTimeoutMillis: 10000,
+    idleTimeoutMillis: 5000,
     max: 16
   });
 }
