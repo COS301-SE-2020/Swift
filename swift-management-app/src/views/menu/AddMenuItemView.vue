@@ -345,7 +345,20 @@ export default {
   },
   computed: {
     restaurantObject() {
-      return this.$store.state.menuList.restaurantObject;
+       if (this.$store.state.menuList)
+        return this.$store.state.menuList.restaurantObject;
+      else if (this.$store.state.myRestaurants) {
+        for (var i = 0; i < this.$store.state.myRestaurants.length; i++)
+          if (
+            this.$store.state.myRestaurants[i].restaurantId ==
+            this.getCurrentRestaurantId()
+          ) {
+            this.addPromoButtonDisabled = false;
+            return this.$store.state.myRestaurants[i];
+          }
+      } else {
+        return null;
+      }
     },
     itemCategoryTitle() {
       if (this.itemCategoryName) return this.itemCategoryName;

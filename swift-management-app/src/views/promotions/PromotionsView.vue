@@ -176,8 +176,7 @@
     </vs-popup>
   </div>
 </template>
-<script>
-import modulemenuList from "@/store/menu/menuDataList.js";
+data<script>
 import promoDataList from "@/store/promos/promosDataList.js";
 import VueSimpleSuggest from "vue-simple-suggest";
 import "vue-simple-suggest/dist/styles.css";
@@ -228,9 +227,18 @@ export default {
       } else return null;
     },
     restaurantObject() {
-      if (this.$store.state.menuList)
-        return this.$store.state.menuList.restaurantObject;
-      else return null;
+      if (this.$store.state.myRestaurants) {
+        for (var i = 0; i < this.$store.state.myRestaurants.length; i++)
+          if (
+            this.$store.state.myRestaurants[i].restaurantId ==
+            this.getCurrentRestaurantId()
+          ) {
+            this.addPromoButtonDisabled = false;
+            return this.$store.state.myRestaurants[i];
+          }
+      } else {
+        return null;
+      }
     },
     promoCount() {
       if (this.promos) return this.promos.length;
@@ -330,16 +338,6 @@ export default {
         });
       this.addPromoActive = false;
     },
-    listMenuItems() {
-      this.$store
-        .dispatch("menuList/listMenuItems", {
-          authKey: this.getAuthToken(),
-          currentRestaurantId: this.getCurrentRestaurantId(),
-        })
-        .then(() => {
-          this.addPromoButtonDisabled = false;
-        });
-    },
     listPromos() {
       this.$store.dispatch("promoData/listPromos", {
         authKey: this.getAuthToken(),
@@ -349,11 +347,6 @@ export default {
   },
   created() {
     if (this.getAuthToken() != null) {
-      if (!modulemenuList.isRegistered) {
-        this.$store.registerModule("menuList", modulemenuList);
-        modulemenuList.isRegistered = true;
-      }
-
       if (!promoDataList.isRegistered) {
         this.$store.registerModule("promoData", promoDataList);
         promoDataList.isRegistered = true;
@@ -361,8 +354,6 @@ export default {
 
       if (this.promos == null) this.$vs.loading();
       this.listPromos();
-
-      this.listMenuItems(); //load menu items in order to select them for promotions
     }
   },
   watch: {
