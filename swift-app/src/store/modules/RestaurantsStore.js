@@ -71,12 +71,13 @@ const actions = {
     return axios.post('https://api.swiftapp.ml', 
     {
       "requestType": "suggestFromRatings",
-      // "customerId": 157,
+      // "customerId": 5,
       "token": sessionStorage.getItem('authToken'),
     }
     ).then(result => {
       // Need another call that builds the json for each menu item OR only do it in the menu you are checked into
-      commit('SAVE_SUGGESTED_ITEMS', result.data.menuItemIds);
+      console.log(result.menuItemIds)
+      // commit('SAVE_SUGGESTED_ITEMS', result.data.menuItemIds);
       return true;
     }).catch(({ response }) => {
 
