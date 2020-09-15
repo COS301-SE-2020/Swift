@@ -106,14 +106,17 @@ const loginUser = (userEmail, userName, response) => db.query(
 
 module.exports = {
   checkUAToken: (reqBody, response) => {
-    if (!Object.prototype.hasOwnProperty.call(reqBody, 'tokenToCheck')
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
       || Object.keys(reqBody).length !== 2) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 
     // Check token
-    const userToken = validateToken(reqBody.tokenToCheck, true);
-    return response.status(200).send({ tokenValid: (userToken.state === tokenState.VALID) });
+    const userToken = validateToken(reqBody.token, true);
+    return response.status(200).send({
+      tokenValid: (userToken.state === tokenState.VALID),
+      userId: userToken.data.userId
+    });
   },
   getFacebookLoginURL: (reqBody, response) => {
     // Generate Facebook authentication URL
