@@ -1,4 +1,5 @@
 from flask import Flask, request, abort, jsonify, make_response
+from flask_cors import CORS, cross_origin
 from flask_restful import Resource, Api
 import urllib.request
 import os
@@ -12,6 +13,8 @@ import controller.dashboard as dashboard
 
 
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 api = Api(app)
 
 APP_API_ENDPOINT = "https://api.swiftapp.ml/"
@@ -38,6 +41,7 @@ def checkAuth(token):
     return urllib.request.urlopen(req, jsondataasbytes)
 
 @app.route('/', methods=["POST", "GET"])
+@cross_origin()
 def api():
     if(request.method == "GET"):
         return {'whoami': 'Swift AI'}
@@ -102,6 +106,7 @@ def api():
 
 
 @app.route('/visualize', methods=["GET"])
+@cross_origin()
 def viz():
     if(request.args.get('customerId')):
         return vd.collaborativeFiltering(request.args.get('customerId'))
