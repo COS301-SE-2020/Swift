@@ -115,7 +115,7 @@ module.exports = {
     const userToken = validateToken(reqBody.token, true);
     return response.status(200).send({
       tokenValid: (userToken.state === tokenState.VALID),
-      userId: userToken.data.userId
+      userId: (userToken.state === tokenState.VALID) ? userToken.data.userId : 0
     });
   },
   getFacebookLoginURL: (reqBody, response) => {
