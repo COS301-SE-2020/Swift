@@ -39,13 +39,12 @@ const actions = {
   retrieveSuggestedPromotions({commit}, restaurantId) {
     return axios.post('https://ml.api.swiftapp.ml', 
     {
-      "requestType": "suggestFromRatings",
-      "restaurantId": restaurantId,
+      "requestType": "promoSuggest",
+      "restaurantId": 62,
       "token": sessionStorage.getItem('authToken'),
     }
     ).then(result => {
-      console.log(result.data)
-      // commit('SAVE_PROMOTION_ITEMS', result.data);
+      commit('SAVE_PROMOTION_ITEMS', result.data);
       return true;
     }).catch(({ response }) => {
 

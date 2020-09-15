@@ -91,6 +91,19 @@
         </v-tab-item>
       </v-tabs-items>
 
+      <!-- <div v-for="(suggestedItem, i) in filteredSuggestions(suggestedItems)" :key="i">
+        
+      </div> -->
+
+      <div v-for="(promotionItem, i) in filterPromotionItems(promotionItems)" :key="i">
+        {{promotionItem}}
+      </div>
+      <!-- <div v-for="(promotionItem, i) in promotionItems" :key="i">
+        <div v-for="(itemIds, j) in promotionItem.antecedents" :key="j">
+          {{itemIds}}
+        </div>
+      </div> -->
+
     </v-container>
     <!-- <v-snackbar :v-if=checkedIn id="notification" :timeout="2000" centered color="primary" elevation="24" v-model="snackbar">You have been checked-in to {{menu.name}}</v-snackbar> -->
     <!-- <NavBar></NavBar> -->
@@ -228,7 +241,40 @@ export default {
         }
         return false
       }
-    }
+    },
+    filterPromotionItems(promotionItems) {
+      var promotionItemsList = [];
+      for (let i = 0; i < promotionItems.length; i++) {
+        var tempList = [];
+        for (let j = 0; j < promotionItems[i].antecedents.length; j++) {
+          tempList.push(promotionItems[i].antecedents[j])
+          
+          var tempList2 = [];
+          for (let k = 0; k < this.orderHistory.length; k++) {
+            for (let l = 0; l < this.orderHistory[k].items.length; l++) {
+              if (promotionItems[i].antecedents[j] === this.orderHistory[k].items[l].menuItemId) {
+                tempList2.push(promotionItems[i].antecedents[j])
+                console.log(tempList2)
+
+              }
+            }
+          }
+
+          if (tempList.length == tempList2.length) {
+            for (let k = 0; k < promotionItems[i].consequents.length; k++)
+              promotionItemsList.push(promotionItems[i].consequents[k])
+          }
+        }
+      }
+     
+      var uniquePromotionItems = [];
+
+      $.each(promotionItemsList, function(i, el){
+        if($.inArray(el, uniquePromotionItems) === -1) uniquePromotionItems.push(el);
+      });
+
+      return uniquePromotionItems
+    },
   },
   async mounted() {
     if (this.displayNotification) {
@@ -241,7 +287,8 @@ export default {
     if (Object.keys(menuObj).length == 0 || Object.keys(menuObj).length == undefined) { 
       this.isLoading = !this.isLoading;
       var menuResponse = await this.$store.dispatch('MenuStore/retrieveMenu', this.$route.params.menuId);
-      // var promotionItemsResponse = await this.$store.dispatch('MenuStore/retrieveSuggestedPromotions', this.$route.params.menuId);
+      var promotionItemsResponse = await this.$store.dispatch('MenuStore/retrieveSuggestedPromotions', this.$route.params.menuId);
+      // var suggestedItemsResponse = await this.$store.dispatch('RestaurantStore/retrieveSuggestedMenuItemsFromRatings');
       
       if (menuResponse)
         this.isLoading = !this.isLoading;
@@ -266,6 +313,8 @@ export default {
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
       checkedInTableId: 'CustomerStore/getCheckedInTableId',
       promotionItems: 'MenuStore/getPromotionItems',
+      suggestedItems: 'RestaurantStore/getSuggestedItemsFromRatings',
+      orderHistory: 'CustomerStore/getCustomerOrderHistory',
     }),
     activeCall() {
       if (!this.called) {
@@ -280,6 +329,9 @@ export default {
           return category.categoryName.toLowerCase().includes(this.search.toLowerCase())
         })
       }
+    },
+    filteredSuggestions(promotionItems) {
+
     },
     primaryCategoryList() {
       if (this.menu.categories != undefined) {
