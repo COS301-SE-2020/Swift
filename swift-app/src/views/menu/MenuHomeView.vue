@@ -17,7 +17,7 @@
                       <v-text-field background-color="white" class="menuItemSearchbar"  v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search..."></v-text-field>
                     </v-col>
                     <v-col cols="1" class="d-flex align-center px-0 mt-3">
-                      <v-btn @click="activateFilters" small icon color="white">
+                      <v-btn small icon color="white">
                         <v-icon size="24px">mdi-filter-variant</v-icon> 
                       </v-btn>
                     </v-col>
@@ -228,9 +228,6 @@ export default {
         }
         return false
       }
-    },
-    activateFilters() {
-      console.log("priunting")
     }
   },
   async mounted() {
@@ -243,8 +240,10 @@ export default {
 
     if (Object.keys(menuObj).length == 0 || Object.keys(menuObj).length == undefined) { 
       this.isLoading = !this.isLoading;
-      var response = await this.$store.dispatch('MenuStore/retrieveMenu', this.$route.params.menuId);
-      if (response)
+      var menuResponse = await this.$store.dispatch('MenuStore/retrieveMenu', this.$route.params.menuId);
+      // var promotionItemsResponse = await this.$store.dispatch('MenuStore/retrieveSuggestedPromotions', this.$route.params.menuId);
+      
+      if (menuResponse)
         this.isLoading = !this.isLoading;
     }
   },
@@ -266,6 +265,7 @@ export default {
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
       checkedInTableId: 'CustomerStore/getCheckedInTableId',
+      promotionItems: 'MenuStore/getPromotionItems',
     }),
     activeCall() {
       if (!this.called) {
@@ -289,7 +289,8 @@ export default {
 
         return list;
       }
-    },    
+    },
+    
   }
 };
 </script>

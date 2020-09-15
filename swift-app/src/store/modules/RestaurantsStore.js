@@ -6,7 +6,9 @@ const initialState = () => ({
   tableNumber: "",
   checkedIn: false,
   displayNotification: false,
-  exploreCategories: {}
+  exploreCategories: {},
+  suggestedItemsFromRatings: {},
+  
 });
 
 const state = initialState();
@@ -27,6 +29,9 @@ const getters = {
   },
   getExploreCategories(state) {
     return state.exploreCategories;
+  },
+  getSuggestedItemsFromRatings(state) {
+    return state.suggestedItemsFromRatings;
   },
 }
 
@@ -59,6 +64,22 @@ const actions = {
       commit('SAVE_ALL_EXPLORE_CATEGORIES', result.data.categories);
       return true;
     }).catch(({ response }) => {
+    });
+  },
+
+  retrieveSuggestedMenuItemsFromRatings({commit}, data) {
+    return axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "suggestFromRatings",
+      // "customerId": 157,
+      "token": sessionStorage.getItem('authToken'),
+    }
+    ).then(result => {
+      // Need another call that builds the json for each menu item OR only do it in the menu you are checked into
+      commit('SAVE_SUGGESTED_ITEMS', result.data.menuItemIds);
+      return true;
+    }).catch(({ response }) => {
+
     });
   },
 
@@ -96,6 +117,10 @@ const mutations = {
 
   SAVE_ALL_EXPLORE_CATEGORIES(state, categories) {
     state.exploreCategories = categories;
+  },
+
+  SAVE_SUGGESTED_ITEMS(state, suggestedItems) {
+    state.suggestedItemsFromRatings = suggestedItems;
   },
 
   updateCheckInFlag(state, data) {
