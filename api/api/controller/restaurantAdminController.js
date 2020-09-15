@@ -1496,7 +1496,7 @@ module.exports = {
           }
 
           // edit menu item
-          const menuItemRes = await client.query(
+          await client.query(
             'UPDATE public.menuitem'
             + ' SET categoryid = $1::integer, menuitemname = $2::text, menuitemdescription = $3::text, price = $4::real, estimatedwaitingtime = $5::text, attributes = $6::json, arasset = $7::text, availability = $8::boolean'
             + ' WHERE menuitemid = $9::integer',
@@ -1523,7 +1523,7 @@ module.exports = {
             // eslint-disable-next-line no-await-in-loop
             await client.query(
               'INSERT INTO menuitemimages (menuitemid, imageurl) VALUES ($1::integer,$2::text)',
-              [menuItemRes.rows[0].menuitemid, reqBody.images[i]]
+              [reqBody.menuItemId, reqBody.images[i]]
             );
           }
 
