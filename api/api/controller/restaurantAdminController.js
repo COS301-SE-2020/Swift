@@ -1070,8 +1070,8 @@ module.exports = {
 
           // check if existing employee
           const existingEmp = await client.query(
-            'SELECT employeeid FROM public.restaurantemployee WHERE userid = $1::integer',
-            [empRes.rows[0].userid]
+            'SELECT employeeid FROM public.restaurantemployee WHERE userid = $1::integer AND restaurantid = $2::integer',
+            [empRes.rows[0].userid, reqBody.restaurantId]
           );
 
           if (existingEmp.rows.length !== 0) {
