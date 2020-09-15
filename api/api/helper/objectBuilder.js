@@ -137,11 +137,26 @@ const getMenuItems = (categoryId) => {
     // begin transaction
       await client.query('BEGIN');
 
-      const menuItems = await client.query(
-        'SELECT menuitemid, menuitemname, menuitemdescription, price, estimatedwaitingtime,'
-        + ' menuitem.attributes, arasset, availability FROM public.menuitem'
-        + ' WHERE categoryid = $1::integer ORDER BY menuitemid ASC;',
+      const restId = await client.query(
+        'SELECT restaurantid FROM menucategory WHERE categoryid = $1::integer;',
         [categoryId]
+      );
+
+      const menuItems = await client.query(
+        'SELECT sum(itemordered.quantity) as "popularity", menuitem.menuitemid, menuitem.menuitemname, menuitem.menuitemdescription,'
+        + ' menuitem.price, menuitem.estimatedwaitingtime, menuitem.attributes, arasset, availability FROM public.menuitem'
+        + ' inner join public.itemordered on itemordered.menuitemid = menuitem.menuitemid '
+        + ' WHERE categoryid = $1::integer group by (menuitem.menuitemid) ORDER BY menuitemid ASC;',
+        [categoryId]
+      );
+
+      const mostPopular = await client.query(
+        'SELECT sum(itemordered.quantity) as "quant" from public.itemordered'
+        + ' INNER JOIN public.menuitem ON menuitem.menuitemid = itemordered.menuitemid'
+        + ' INNER JOIN public.menucategory ON menucategory.categoryid = menuitem.categoryid'
+        + ' WHERE menucategory.restaurantid = $1::integer'
+        + ' GROUP BY itemordered.menuitemid ORDER BY sum(itemordered.quantity) DESC limit 1',
+        [restId.rows[0].restaurantid]
       );
 
       const menuItemsArr = [];
@@ -152,6 +167,9 @@ const getMenuItems = (categoryId) => {
         menuItem.menuItemName = resMenuItem.menuitemname;
         menuItem.menuItemDescription = resMenuItem.menuitemdescription;
         menuItem.price = resMenuItem.price;
+        menuItem.popularity = (mostPopular.rows.length !== 0 && mostPopular.rows[0].quant !== 0)
+          ? parseFloat(((resMenuItem.popularity / mostPopular.rows[0].quant) * 100).toFixed(2), 10)
+          : 0;
         menuItem.estimatedWaitingTime = resMenuItem.estimatedwaitingtime;
         menuItem.images = [];
         menuItem.dietaryLabels = [];
