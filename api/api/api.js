@@ -158,6 +158,10 @@ router.post('/', (req, res) => {
         restaurantController.getMenu(req.body, res);
         break;
       }
+      case 'replyToComment': {
+        restaurantAdminController.replyToComment(req.body, res);
+        break;
+      }
       case 'createTable': {
         restaurantAdminController.createTable(req.body, res);
         break;

@@ -31,6 +31,31 @@ const getOrderItems = async (oid = 0) => db.query(
     console.error('Query Error [Order Helper - Get Order Items]', err.stack);
     return [];
   });
+const getReviewer = async (pid, adminId = 0) => db.query(
+  'SELECT name, surname, profileimageurl'
+    + ' FROM public.person WHERE person.userid IN ($1::integer, $2::integer)',
+  [pid, adminId]
+)
+  .then((reviewerInfoRes) => {
+    const reviewItem = {};
+    reviewItem.customerName = reviewerInfoRes.rows[0].name;
+    reviewItem.customerSurname = reviewerInfoRes.rows[0].surname;
+    reviewItem.customerImage = reviewerInfoRes.rows[0].profileimageurl;
+    if (reviewerInfoRes.rows.length > 1) {
+      reviewItem.adminName = reviewerInfoRes.rows[1].name;
+      reviewItem.adminSurname = reviewerInfoRes.rows[1].surname;
+      reviewItem.adminImage = reviewerInfoRes.rows[1].profileimageurl;
+    } else {
+      reviewItem.adminName = null;
+      reviewItem.adminSurname = null;
+      reviewItem.adminImage = null;
+    }
+    return reviewItem;
+  })
+  .catch((err) => {
+    console.error('Query Error [Order Helper - Get Order Items]', err.stack);
+    return [];
+  });
 
 // helper to get individual menu items
 // eslint-disable-next-line arrow-body-style
@@ -133,6 +158,8 @@ const getMenuItems = (categoryId) => {
               [orderIdRes.rows[0].customerid]
             );
 
+            reviewItem.customerId = orderIdRes.rows[0].customerid;
+
             if (customerInfoRes.rows.length !== 0) {
               reviewItem.customerName = customerInfoRes.rows[0].name;
               reviewItem.customerSurname = customerInfoRes.rows[0].surname;
@@ -170,6 +197,8 @@ const getMenuItems = (categoryId) => {
             //     reviewItem.likedComment = false;
             //   }
             // }
+
+            reviewItem.adminId = review.adminid;
 
             if (review.adminid != null) {
               const adminInfoRes = await client.query(
@@ -303,7 +332,7 @@ module.exports = {
     + ' INNER JOIN public.restauranttable ON customerorder.tableid = restauranttable.tableid'
     + ' INNER JOIN public.restaurant ON restauranttable.restaurantid = restaurant.restaurantid'
     + ' INNER JOIN public.person ON customerorder.employeeid = person.userid'
-    + ' WHERE customerorder.customerid = $1::integer;',
+    + ' WHERE customerorder.customerid = $1::integer ORDER BY customerorder.orderdatetime DESC;',
     [userId]
   )
     .then((res) => {
@@ -337,20 +366,34 @@ module.exports = {
       return Promise.reject(err);
     }),
   getReviews: (restaurantId = 0) => db.query(
-    'SELECT review.comment, review.reviewdatetime, review.public, review.adminid, review.response'
-    + ' FROM public.review WHERE review.restaurantid = $1::integer AND review.comment IS NOT NULL ORDER BY reviewid ASC;',
+    'SELECT review.reviewid, review.comment, review.reviewdatetime, review.public, review.adminid, review.response, review.ratingscore, review.responsedatetime, customerorder.customerid FROM public.review'
+    + ' INNER JOIN public.customerorder ON customerorder.orderid = review.orderid'
+    + ' WHERE review.restaurantid = $1::integer AND review.comment IS NOT NULL ORDER BY reviewid DESC;',
     [restaurantId]
   )
     .then((res) => {
       const reviewsArr = [];
       res.rows.forEach((review) => {
-        const reviewItem = {};
-        reviewItem.comment = review.comment;
-        reviewItem.reviewDateTime = review.reviewdatetime;
-        reviewItem.public = review.public;
-        reviewItem.adminId = review.adminid;
-        reviewItem.response = review.response;
-        reviewsArr.push(reviewItem);
+        reviewsArr.push(getReviewer(review.customerid, review.adminid)
+          .then((reviewer) => {
+            const reviewItem = {};
+            reviewItem.reviewId = review.reviewid;
+            reviewItem.customerId = review.customerid;
+            reviewItem.customerName = reviewer.customerName;
+            reviewItem.customerSurname = reviewer.customerSurname;
+            reviewItem.customerImage = reviewer.customerImage;
+            reviewItem.ratingScore = review.ratingscore;
+            reviewItem.comment = review.comment;
+            reviewItem.reviewDateTime = review.reviewdatetime;
+            reviewItem.public = review.public;
+            reviewItem.adminName = reviewer.adminName;
+            reviewItem.adminSurname = reviewer.adminSurname;
+            reviewItem.adminImage = reviewer.adminImage;
+            reviewItem.adminId = review.adminid;
+            reviewItem.response = review.response;
+            reviewItem.responseDate = review.responsedatetime;
+            return reviewItem;
+          }));
       });
       return reviewsArr;
     })
@@ -427,5 +470,36 @@ module.exports = {
     .catch((err) => {
       console.error('Query Error [Categories - Get Restaurant Menu Categories]', err.stack);
       return [];
-    })
+    }),
+  // getPromotions: (restaurantId = 0, response) => db.query(
+  //   'SELECT * FROM public.promotion'
+  //   + ' WHERE promotion.restaurantid = $1::integer ORDER BY promotionid DESC',
+  //   [restaurantId]
+  // )
+  //   .then((res) => {
+  //     const promotionPromises = [];
+  //     res.rows.forEach(async (promotion) => {
+  //       promotionPromises.push(await getPromotionGroups(promotion.promotionid, response)
+  //         .then((promoItems) => {
+  //           // eslint-disable-next-line no-console
+  //           console.log(promoItems);
+  //           const promotionItem = {};
+  //           promotionItem.message = promotion.promotionalmessage;
+  //           promotionItem.image = promotion.promotionalimage;
+  //           promotionItem.startDate = promotion.startdatetime;
+  //           promotionItem.endDate = promotion.enddatetime;
+  //           promotionItem.value = promotion.promotionvalue;
+  //           promotionItem.type = promotion.promotiontype;
+  //           promotionItem.promotions = promoItems;
+  //           promotionItem.days = [];
+  //           // historyItem.items = orderItems.items;
+  //           return promotionItem;
+  //         }));
+  //     });
+  //     return promotionPromises;
+  //   })
+  //   .catch((err) => {
+  //     console.error('Query Error [Promotions - Get Restaurant Promotions]', err.stack);
+  //     return Promise.reject(err);
+  //   }),
 };

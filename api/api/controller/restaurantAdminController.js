@@ -7,6 +7,7 @@ const {
   // getPromotions,
   // getRatingPhrasesObj,
   getMenuCategories,
+  // getAllReviews,
   // getOrderHistory,
   // getOrderItems
 } = require('../helper/objectBuilder');
@@ -774,8 +775,18 @@ module.exports = {
             restaurantResponse.restaurants[r].categories =
               // eslint-disable-next-line no-await-in-loop
               await getMenuCategories(res.rows[r].restaurantid);
+
+            restaurantResponse.restaurants[r].reviews = [];
+
             // eslint-disable-next-line no-await-in-loop
-            restaurantResponse.restaurants[r].reviews = await getReviews(res.rows[r].restaurantid);
+            const reviewsPromises = await getReviews(res.rows[r].restaurantid);
+
+            Promise.all(reviewsPromises)
+              .then((reviewItem) => {
+                reviewItem.forEach((review) => {
+                  restaurantResponse.restaurants[r].reviews.push(review);
+                });
+              });
 
             // eslint-disable-next-line no-await-in-loop
             const mainCatRes = await client.query(
@@ -1445,6 +1456,117 @@ module.exports = {
       })()
         .catch((err) => {
           console.error('Query Error [Restaurant - Add Promotion]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  replyToComment: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'reviewId')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'response')
+      || Object.keys(reqBody).length !== 4) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    const userToken = validateToken(reqBody.token, true);
+
+    if (userToken.state === tokenState.VALID) {
+      // eslint-disable-next-line consistent-return
+      return (async () => {
+        const client = await db.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+
+          // check if review exists
+          const cRes = await client.query(
+            'SELECT restauranttable.restaurantid, review.adminid FROM public.review'
+            + ' INNER JOIN public.customerorder ON customerorder.orderid = review.orderid'
+            + ' INNER JOIN public.restauranttable ON restauranttable.tableid = customerorder.tableid'
+            + ' WHERE review.reviewid = $1::integer;',
+            [reqBody.reviewId]
+          );
+
+          if (cRes.rows.length === 0) {
+            // review does not exist
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          // check user permissions
+          const permission = 'reviews';
+          const permRes = await client.query(
+            'SELECT employeeaccessright.permissionid FROM public.employeeaccessright'
+            + ' INNER JOIN public.accessright ON accessright.permissionid = employeeaccessright.permissionid'
+            + ' INNER JOIN public.restaurantemployee ON restaurantemployee.employeeid = employeeaccessright.employeeid'
+            + ' WHERE restaurantemployee.userid = $1::integer AND restaurantemployee.restaurantid = $2::integer AND LOWER(accessright.description) = $3::text',
+            [userToken.data.userId, cRes.rows[0].restaurantid, permission]
+          );
+
+          if (permRes.rows.length === 0) {
+            // Access denied
+            return response.status(403).send({ status: 403, reason: 'Access Denied' });
+          }
+
+          // add response
+          await client.query(
+            'UPDATE public.review SET adminid = $1::integer, response = $2::text, responsedatetime = NOW()'
+            + ' WHERE reviewid = $3::integer;',
+            [userToken.data.userId, reqBody.response, reqBody.reviewId]
+          );
+
+          // commit changes and end transaction
+          await client.query('COMMIT');
+
+          const rRes = await client.query(
+            'SELECT review.reviewid, review.comment, review.reviewdatetime, review.public, review.adminid, review.response, review.ratingscore, review.responsedatetime, customerorder.customerid'
+            + ' FROM public.review'
+            + ' INNER JOIN public.customerorder ON customerorder.orderid = review.orderid'
+            + ' WHERE review.reviewid = $1::integer',
+            [reqBody.reviewId]
+          );
+
+          const adminId = (rRes.rows[0].adminid === null) ? 0 : rRes.rows[0].adminid;
+
+          const pRes = await client.query(
+            'SELECT name, surname, profileimageurl FROM public.person WHERE userid IN ($1::integer, $2::integer);',
+            [rRes.rows[0].customerid, adminId]
+          );
+
+          const reviewItem = {};
+          reviewItem.reviewId = rRes.rows[0].reviewid;
+          reviewItem.customerId = rRes.rows[0].customerid;
+          reviewItem.customerName = pRes.rows[0].name;
+          reviewItem.customerSurname = pRes.rows[0].surname;
+          reviewItem.customerImage = pRes.rows[0].profileimageurl;
+          reviewItem.ratingScore = rRes.rows[0].ratingscore;
+          reviewItem.comment = rRes.rows[0].comment;
+          reviewItem.reviewDateTime = rRes.rows[0].reviewdatetime;
+          reviewItem.public = rRes.rows[0].public;
+          reviewItem.adminName = (pRes.rows.length > 1) ? pRes.rows[1].name : null;
+          reviewItem.adminSurname = (pRes.rows.length > 1) ? pRes.rows[1].surname : null;
+          reviewItem.adminImage = (pRes.rows.length > 1) ? pRes.rows[1].profileimageurl : null;
+          reviewItem.adminId = rRes.rows[0].adminid;
+          reviewItem.response = rRes.rows[0].response;
+          reviewItem.responseDate = rRes.rows[0].responsedatetime;
+
+          return response.status(201).send(reviewItem);
+        } catch (err) {
+          await client.query('ROLLBACK');
+          throw err;
+        } finally {
+          client.release();
+        }
+      })()
+        .catch((err) => {
+          console.error('Query Error [Restaurant - Add Menu Item]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }
