@@ -1010,6 +1010,144 @@ module.exports = {
     // Invalid token
     return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
   },
+  addEmployee: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'email')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'role')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'priviliges')
+      || !Array.isArray(reqBody.priviliges)
+      || Object.keys(reqBody).length !== 6) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    const userToken = validateToken(reqBody.token, true);
+
+    if (userToken.state === tokenState.VALID) {
+      return (async () => {
+        const client = await db.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+
+          // check if restaurant exists
+          const cRes = await client.query(
+            'SELECT restaurantname FROM public.restaurant WHERE restaurantid = $1::integer',
+            [reqBody.restaurantId]
+          );
+
+          if (cRes.rows.length === 0) {
+            // restaurant does not exist
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          // check user permissions
+          const permission = 'employees';
+          const permRes = await client.query(
+            'SELECT employeeaccessright.permissionid FROM public.employeeaccessright'
+            + ' INNER JOIN public.accessright ON accessright.permissionid = employeeaccessright.permissionid'
+            + ' INNER JOIN public.restaurantemployee ON restaurantemployee.employeeid = employeeaccessright.employeeid'
+            + ' WHERE restaurantemployee.userid = $1::integer AND restaurantemployee.restaurantid = $2::integer AND LOWER(accessright.description) = $3::text',
+            [userToken.data.userId, reqBody.restaurantId, permission]
+          );
+
+          if (permRes.rows.length === 0) {
+            // Access denied
+            return response.status(403).send({ status: 403, reason: 'Access Denied' });
+          }
+
+          // check if user registered
+          const empRes = await client.query(
+            'SELECT person.userid FROM public.person WHERE person.email = $1::text',
+            [reqBody.email]
+          );
+
+          if (empRes.rows.length === 0) {
+            // Access denied
+            return response.status(405).send({ status: 405, reason: 'Employee must be registered on the system' });
+          }
+
+          // check if existing employee
+          const existingEmp = await client.query(
+            'SELECT employeeid FROM public.restaurantemployee WHERE userid = $1::integer',
+            [empRes.rows[0].userid]
+          );
+
+          if (existingEmp.rows.length !== 0) {
+            // Access denied
+            return response.status(409).send({ status: 409, reason: 'The user is already an employee of this restaurant' });
+          }
+
+          // add new employee
+          const employeeNumber = `emp${reqBody.restaurantId}${empRes.rows[0].userid}`;
+          const empId = await client.query(
+            'INSERT INTO public.restaurantemployee'
+            + ' (userid, restaurantid, employeerole, employeenumber)'
+            + ' VALUES ($1::integer, $2::integer, $3::text, $4::text)'
+            + ' RETURNING employeeid',
+            [
+              empRes.rows[0].userid,
+              reqBody.restaurantId,
+              reqBody.role,
+              employeeNumber
+            ]
+          );
+
+          reqBody.priviliges.forEach(async (right) => {
+            await client.query(
+              'INSERT INTO public.employeeaccessright (employeeid, permissionid)'
+              + ' VALUES ($1::integer, $2::integer)',
+              [empId.rows[0].employeeid, right]
+            );
+          });
+
+          // commit changes and end transaction
+          await client.query('COMMIT');
+
+          const employees = await client.query(
+            'SELECT person.userid, person.name, person.surname, person.email, person.profileimageurl, restaurantemployee.employeeid, restaurantemployee.employeerole, restaurantemployee.employeenumber FROM public.person'
+            + ' INNER JOIN public.restaurantemployee ON restaurantemployee.userid = person.userid'
+            + ' WHERE restaurantemployee.restaurantid = $1::integer',
+            [reqBody.restaurantId]
+          );
+
+          const employeeList = [];
+          employees.rows.forEach((emp) => {
+            const employee = {};
+            employee.userId = emp.userid;
+            employee.employeeId = emp.employeeid;
+            employee.name = emp.name;
+            employee.surname = emp.surname;
+            employee.email = emp.email;
+            employee.profileImage = emp.profileimageurl;
+            employee.role = emp.employeerole;
+            employee.employeeNumber = emp.employeenumber;
+            employeeList.push(employee);
+          });
+
+          // return newly created category id
+          return response.status(201).send({ employees: employeeList });
+        } catch (err) {
+          await client.query('ROLLBACK');
+          throw err;
+        } finally {
+          client.release();
+        }
+      })()
+        .catch((err) => {
+          console.error('Query Error [Restaurant - Add Employee]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
   editMenuCategory: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
