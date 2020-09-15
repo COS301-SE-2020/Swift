@@ -82,6 +82,12 @@ def api():
             return dashboard.countersActiveCustomerHistory(request.json["restaurantId"])
         if(request.json["requestType"] == "dashboardAvailableTables"):
             return dashboard.countersAvailableTables(request.json["restaurantId"])
+        if(request.json["requestType"] == "dashboardTableOccupancyHistory"):
+            return dashboard.countersTableOccupancyHistory(request.json["restaurantId"])
+        if(request.json["requestType"] == "dashboardActiveWaiters"):
+            return dashboard.countersActiveWaiters(request.json["restaurantId"])
+            
+            
         badRequest()
 
 

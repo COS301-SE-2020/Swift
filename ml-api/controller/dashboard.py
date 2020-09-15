@@ -85,3 +85,34 @@ def countersAvailableTables(restaurantId):
     cursor.close()
     db.close(connection)
     return jsonify({"totalTables" : records[0][0], "occupiedTables": records[0][1]})
+
+def countersTableOccupancyHistory(restaurantId):
+    connection = db.connect()
+    #current number of active customers
+    cursor = connection.cursor()
+    qry = """select * from tableoccupancyhistory
+            WHERE datetime > NOW() - INTERVAL '2 days'
+            AND restaurantid = %s;
+            ORDER BY datetime DESC"""
+    cursor.execute(qry, [restaurantId])
+    records = cursor.fetchall()
+    cursor.close()
+    db.close(connection)
+    return jsonify(records)
+
+def countersActiveWaiters(restaurantId):
+    connection = db.connect()
+    #current number of active customers
+    cursor = connection.cursor()
+    qry = """SELECT (SELECT count(*) as employeecount FROM restaurantemployee
+            WHERE restaurantId = %s
+            AND employeerole = 'Waiter'), COUNT(DISTINCT employeeid) as assignedemployees FROM customerorder
+            WHERE employeeid IN (SELECT userid FROM restaurantemployee
+            WHERE restaurantId = %s
+            AND employeerole = 'Waiter')
+            and progress < 100;"""
+    cursor.execute(qry, [restaurantId, restaurantId])
+    records = cursor.fetchall()
+    cursor.close()
+    db.close(connection)
+    return jsonify({"totalWaiters" : records[0][0], "occupiedWaiters": records[0][1]})
