@@ -8,6 +8,7 @@ import controller.promoSuggest as ps
 import controller.menuSuggest as ms
 import controller.ratingEstimator as re
 import controller.visualizeData as vd
+import controller.dashboard as dashboard
 
 
 app = Flask(__name__)
@@ -67,6 +68,20 @@ def api():
                 return ms.suggestFromRatings(request.json["customerId"])
         if(request.json["requestType"] == "clearRatingsCache"):
             return re.clearRatingsCache()
+        
+        #dashboard stats below (requires restaurantId)
+        if(not 'restaurantId' in request.json):
+            badRequest()
+        if(request.json["requestType"] == "dashboardActiveOrderCount"):
+            return dashboard.countersActiveOrderCount(request.json["restaurantId"])
+        if(request.json["requestType"] == "dashboardOrderHistory"):
+            return dashboard.countersOrderHistory(request.json["restaurantId"])
+        if(request.json["requestType"] == "dashboardActiveCustomerCount"):
+            return dashboard.countersActiveCustomerCount(request.json["restaurantId"])
+        if(request.json["requestType"] == "dashboardActiveCustomerHistory"):
+            return dashboard.countersActiveCustomerHistory(request.json["restaurantId"])
+        if(request.json["requestType"] == "dashboardAvailableTables"):
+            return dashboard.countersAvailableTables(request.json["restaurantId"])
         badRequest()
 
 

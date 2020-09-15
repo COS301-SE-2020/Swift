@@ -1,0 +1,87 @@
+# dashboard.py Module - retrieve and transform data for use on the Swift management dashboard
+import sys
+from flask import jsonify
+sys.path.append('..') #import from parent directory
+import db
+
+def countersActiveOrderCount(restaurantId):
+    connection = db.connect()
+
+    #active order count
+    cursor = connection.cursor()
+    qry = """SELECT  COUNT(DISTINCT customerorder.orderid) as ActiveOrders
+             FROM customerorder
+             INNER JOIN itemordered
+             ON customerorder.orderid = itemordered.orderid
+             INNER JOIN menuitem
+             ON menuitem.menuitemid = itemordered.menuitemid
+             WHERE menuitem.restaurantid = %s
+             AND customerorder.progress < 100;"""
+    cursor.execute(qry, [restaurantId])
+    records = cursor.fetchall()
+    cursor.close()
+    db.close(connection)
+    return jsonify(records)
+
+def countersOrderHistory(restaurantId):
+    connection = db.connect()
+    #order history count
+    cursor = connection.cursor()
+    qry = """SELECT date_trunc('hour', customerorder.ordercompletiontime) as OrderTime, COUNT(DISTINCT customerorder.orderid) as OrderCount
+            FROM customerorder
+            INNER JOIN itemordered
+            ON customerorder.orderid = itemordered.orderid
+            INNER JOIN menuitem
+            ON menuitem.menuitemid = itemordered.menuitemid
+            WHERE menuitem.restaurantid = %s
+            AND customerorder.ordercompletiontime > NOW() - INTERVAL '7 days'
+            GROUP BY 1
+            ORDER BY OrderTime DESC;"""
+    cursor.execute(qry, [restaurantId])
+    records = cursor.fetchall()
+    cursor.close()
+    db.close(connection)
+    return jsonify(records)
+
+def countersActiveCustomerCount(restaurantId):
+    connection = db.connect()
+    #current number of active customers
+    cursor = connection.cursor()
+    qry = """SELECT COUNT(*) from person
+            INNER JOIN restauranttable
+            ON person.checkedin = restauranttable.qrcode
+            WHERE restaurantid = %s;"""
+    cursor.execute(qry, [restaurantId])
+    records = cursor.fetchall()
+    cursor.close()
+    db.close(connection)
+    return jsonify(records)
+
+def countersActiveCustomerHistory(restaurantId):
+    connection = db.connect()
+    #current number of active customers
+    cursor = connection.cursor()
+    qry = """SELECT date_trunc('hour', datetime) as OrderTime, operation, COUNT(operation) from checkedinhistory
+            WHERE restaurantid = %s
+            GROUP BY 1,2
+            ORDER BY OrderTime DESC;"""
+    cursor.execute(qry, [restaurantId])
+    records = cursor.fetchall()
+    cursor.close()
+    db.close(connection)
+    return jsonify(records)
+
+def countersAvailableTables(restaurantId):
+    connection = db.connect()
+    #current number of active customers
+    cursor = connection.cursor()
+    qry = """SELECT COUNT(*) AS TotalTables, (SELECT COUNT(DISTINCT tablenumber) as Occupied from restauranttable
+            INNER JOIN person
+            ON person.checkedin = restauranttable.qrcode
+            WHERE restaurantid = %s) from restauranttable
+            WHERE restaurantid = %s"""
+    cursor.execute(qry, [restaurantId, restaurantId])
+    records = cursor.fetchall()
+    cursor.close()
+    db.close(connection)
+    return jsonify({"totalTables" : records[0][0], "occupiedTables": records[0][1]})
