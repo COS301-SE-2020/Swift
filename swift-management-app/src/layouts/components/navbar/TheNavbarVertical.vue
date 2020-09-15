@@ -35,8 +35,6 @@
         <search-bar />
         <vs-spacer />
 
-        <notification-drop-down />
-
         <profile-drop-down />
       </vs-navbar>
     </div>
@@ -51,9 +49,7 @@ import ProfileDropDown from "./components/ProfileDropDown.vue";
 
 export default {
   data() {
-    return {
-      currentRestaurantName: "",
-    };
+    return {};
   },
   name: "the-navbar-vertical",
   props: {
@@ -68,6 +64,9 @@ export default {
     ProfileDropDown,
   },
   computed: {
+    currentRestaurantName() {
+      return this.getCurrentRestaurantName();
+    },
     myRestaurants() {
       if (this.$store.state) return this.$store.state.myRestaurants;
       else return null;
@@ -114,16 +113,10 @@ export default {
     },
   },
   created() {
-    console.log(this.getCurrentRestaurantId());
     this.$store.dispatch("retrieveMyRestaurants", {
       authKey: this.getAuthToken(),
       currentRestaurantName: this.getCurrentRestaurantName(),
     });
-
-    //TODO: on initial load - set restaurant name
-    if (this.getCurrentRestaurantName())
-      this.currentRestaurantName = this.getCurrentRestaurantName();
-    else this.currentRestaurantName = "select one";
   },
 };
 </script>

@@ -249,7 +249,7 @@
     </vx-card>
 
     <div class="text-center">
-      <vs-button @click="addMenuItem()" type="filled" class="mb-4 mr-4">
+      <vs-button @click="editMenuItem()" type="filled" class="mb-4 mr-4">
         <span class="flex items-center">
           <feather-icon icon="SaveIcon" svgClasses="h-4 w-4 mr-1" />
           <span>Save Item</span>
@@ -310,6 +310,7 @@ import modulemenuList from "@/store/menu/menuDataList.js";
 export default {
   data() {
     return {
+      itemId: "",
       newCategoryParentName: "",
       newCategoryDescription: "",
       newCategoryType: "primary",
@@ -343,7 +344,20 @@ export default {
   },
   computed: {
     restaurantObject() {
-      return this.$store.state.menuList.restaurantObject;
+      if (this.$store.state.menuList)
+        return this.$store.state.menuList.restaurantObject;
+      else if (this.$store.state.myRestaurants) {
+        for (var i = 0; i < this.$store.state.myRestaurants.length; i++)
+          if (
+            this.$store.state.myRestaurants[i].restaurantId ==
+            this.getCurrentRestaurantId()
+          ) {
+            this.addPromoButtonDisabled = false;
+            return this.$store.state.myRestaurants[i];
+          }
+      } else {
+        return null;
+      }
     },
     itemCategoryTitle() {
       if (this.itemCategoryName) return this.itemCategoryName;
@@ -441,11 +455,11 @@ export default {
           this.newCategoryParent = null;
         });
     },
-    addMenuItem() {
+    editMenuItem() {
       this.$store
-        .dispatch("menuList/addMenuItem", {
+        .dispatch("menuList/editMenuItem", {
           authKey: this.getAuthToken(),
-          currentRestaurantId: this.getCurrentRestaurantId(),
+          itemId: this.itemId,
           categoryId: this.itemCategory,
           itemName: this.itemName,
           itemDescription: this.itemDescription,
@@ -462,12 +476,10 @@ export default {
           this.$vs.notify({
             title: "Success",
             text:
-              "Your menu item: <b>" + this.itemName + "</b> has been added.",
+              "The menu item: <b>" + this.itemName + "</b> has been updated.",
             color: "success",
           });
-          if (!this.bulkAddMode) {
-            this.$router.push("/menu");
-          }
+          this.$router.push("/menu");
         });
     },
     restaurantLoaded() {
@@ -517,6 +529,7 @@ export default {
             this.itemPrice = item.price;
             this.itemPrepTime = item.estimatedWaitingTime;
             this.itemCategory = this.restaurantObject.categories[i].categoryId;
+            this.itemId = item.menuItemId;
             if (item.images.length > 0)
               this.setItemImagePreview(item.images[0]);
 

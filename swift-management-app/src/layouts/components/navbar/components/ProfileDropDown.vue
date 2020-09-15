@@ -4,7 +4,6 @@
       <p class="font-semibold">{{ activeUserInfo.displayName }}</p>
       <small>Restaurant Owner</small>
     </div>
-
     <vs-dropdown vs-custom-content vs-trigger-click class="cursor-pointer">
       <div class="con-img ml-3">
         <img
@@ -23,11 +22,6 @@
           <li class="flex py-2 px-4 cursor-pointer hover:bg-primary hover:text-white">
             <feather-icon icon="UserIcon" svgClasses="w-4 h-4" />
             <span class="ml-2">Profile</span>
-          </li>
-
-          <li class="flex py-2 px-4 cursor-pointer hover:bg-primary hover:text-white">
-            <feather-icon icon="MailIcon" svgClasses="w-4 h-4" />
-            <span class="ml-2">Messages</span>
           </li>
 
           <vs-divider class="m-1" />
@@ -52,7 +46,10 @@ export default {
   },
   computed: {
     activeUserInfo() {
-      return this.$store.state.AppActiveUser;
+      if(localStorage.getItem("userInfo") === null)
+        return this.$store.state.AppActiveUser;
+      else
+        return JSON.parse(localStorage.getItem("userInfo"))
     },
   },
   methods: {
@@ -61,6 +58,7 @@ export default {
       this.$store.commit("SET_CURRENT_RESTAURANT", {});
 
       localStorage.setItem("currentRestaurantName", null);
+      localStorage.setItem("userInfo", null);
       localStorage.setItem("currentRestaurantId", null);
       localStorage.setItem("authToken", null);
 

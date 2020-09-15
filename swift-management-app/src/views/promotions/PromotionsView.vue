@@ -6,10 +6,16 @@
       </div>
       <vs-button @click="addPromo()" :disabled="addPromoButtonDisabled">Add Promo</vs-button>
     </div>
-
+    <vs-row v-if="promoCount <= 0" vs-type="flex" vs-justify="center" vs-align="center" vs-w="12">
+      <vs-col class="mt-20" vs-sm="12" vs-lg="6">
+        <vx-card>
+          <h5 class="mb-1 text-center">No Promotions Yet</h5>
+        </vx-card>
+      </vs-col>
+    </vs-row>
     <div class="flex flex-wrap">
       <vs-card
-        class="text-center mb-4 mt-4 ml-4 mr-4 w-full sm:w-full md:w-full lg:w-1/4 xl:w-1/4"
+        class="text-center mb-4 mt-4 ml-4 mr-4 w-full sm:w-full md:w-full lg:w-1/4 xl:w-1/4 ml-auto mr-auto"
         v-for="promo in promos"
         :key="promo.promotionId"
       >
@@ -170,8 +176,7 @@
     </vs-popup>
   </div>
 </template>
-<script>
-import modulemenuList from "@/store/menu/menuDataList.js";
+data<script>
 import promoDataList from "@/store/promos/promosDataList.js";
 import VueSimpleSuggest from "vue-simple-suggest";
 import "vue-simple-suggest/dist/styles.css";
@@ -218,19 +223,31 @@ export default {
   computed: {
     promos() {
       if (this.$store.state.promoData) {
-        console.log("PROMOTIONS", this.$store.state.promoData.promos);
         return this.$store.state.promoData.promos;
       } else return null;
     },
     restaurantObject() {
-      if (this.$store.state.menuList)
-        return this.$store.state.menuList.restaurantObject;
-      else return null;
+      if (this.$store.state.myRestaurants) {
+        for (var i = 0; i < this.$store.state.myRestaurants.length; i++)
+          if (
+            this.$store.state.myRestaurants[i].restaurantId ==
+            this.getCurrentRestaurantId()
+          ) {
+            this.addPromoButtonDisabled = false;
+            return this.$store.state.myRestaurants[i];
+          }
+      } else {
+        return null;
+      }
+    },
+    promoCount() {
+      if (this.promos) return this.promos.length;
+      else return 0;
     },
   },
   methods: {
-    formatDate(date){
-      return new Date(date).toDateString()
+    formatDate(date) {
+      return new Date(date).toDateString();
     },
     menuItemsByIds(idList) {
       var menuList = [];
@@ -321,16 +338,6 @@ export default {
         });
       this.addPromoActive = false;
     },
-    listMenuItems() {
-      this.$store
-        .dispatch("menuList/listMenuItems", {
-          authKey: this.getAuthToken(),
-          currentRestaurantId: this.getCurrentRestaurantId(),
-        })
-        .then(() => {
-          this.addPromoButtonDisabled = false;
-        });
-    },
     listPromos() {
       this.$store.dispatch("promoData/listPromos", {
         authKey: this.getAuthToken(),
@@ -340,11 +347,6 @@ export default {
   },
   created() {
     if (this.getAuthToken() != null) {
-      if (!modulemenuList.isRegistered) {
-        this.$store.registerModule("menuList", modulemenuList);
-        modulemenuList.isRegistered = true;
-      }
-
       if (!promoDataList.isRegistered) {
         this.$store.registerModule("promoData", promoDataList);
         promoDataList.isRegistered = true;
@@ -352,8 +354,6 @@ export default {
 
       if (this.promos == null) this.$vs.loading();
       this.listPromos();
-
-      this.listMenuItems(); //load menu items in order to select them for promotions
     }
   },
   watch: {
