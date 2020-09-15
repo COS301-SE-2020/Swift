@@ -190,6 +190,10 @@ router.post('/', (req, res) => {
         restaurantAdminController.getTableStatus(req.body, res);
         break;
       }
+      case 'getAllAccessRights': {
+        restaurantAdminController.getAllAccessRights(req.body, res);
+        break;
+      }
       case 'addOrder': {
         restaurantController.addOrder(req.body, res);
         break;
