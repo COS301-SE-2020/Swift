@@ -4,7 +4,7 @@ const db = require('../db');
 const { validateToken, tokenState } = require('../helper/tokenHandler');
 const {
   getReviews,
-  // getPromotions,
+  getPromotionElements,
   // getRatingPhrasesObj,
   getMenuCategories,
   // getAllReviews,
@@ -829,6 +829,71 @@ module.exports = {
       })()
         .catch((err) => {
           console.error('Query Error [Restaurant - Get Admin Restaurant List]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  getRestaurantPromotions: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')
+      || Object.keys(reqBody).length !== 3) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    const userToken = validateToken(reqBody.token, true);
+
+    if (userToken.state === tokenState.VALID) {
+      // eslint-disable-next-line consistent-return
+      return (async () => {
+        const client = await db.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+
+          // check if restaurant exists
+          const cRes = await client.query(
+            'SELECT restaurantname FROM public.restaurant WHERE restaurantid = $1::integer',
+            [reqBody.restaurantId]
+          );
+
+          if (cRes.rows.length === 0) {
+            // restaurant does not exist
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          const resObj = {};
+          const resPromise = await getPromotionElements(reqBody.restaurantId);
+          resObj.restaurantPromo = [];
+
+          Promise.all(resPromise)
+            .then((group) => {
+              group.forEach((groupItems) => {
+                resObj.restaurantPromo.push(groupItems);
+              });
+              return response.status(201).send(resObj);
+            })
+            .catch((err) => {
+              console.error('Add Review Promise Error', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
+        } catch (err) {
+          // rollback changes
+          await client.query('ROLLBACK');
+          throw err;
+        } finally {
+          client.release();
+        }
+      })()
+        .catch((err) => {
+          console.error('Query Error [Restaurant - Get Promotion List]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }

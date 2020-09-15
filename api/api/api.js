@@ -134,6 +134,10 @@ router.post('/', (req, res) => {
         restaurantAdminController.getRestaurantList(req.body, res);
         break;
       }
+      case 'listRestaurantPromotions': {
+        restaurantAdminController.getRestaurantPromotions(req.body, res);
+        break;
+      }
       case 'createRestaurant': {
         restaurantAdminController.createRestaurant(req.body, res);
         break;

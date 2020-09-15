@@ -31,6 +31,7 @@ const getOrderItems = async (oid = 0) => db.query(
     console.error('Query Error [Order Helper - Get Order Items]', err.stack);
     return [];
   });
+
 const getReviewer = async (pid, adminId = 0) => db.query(
   'SELECT name, surname, profileimageurl'
     + ' FROM public.person WHERE person.userid IN ($1::integer, $2::integer)',
@@ -55,6 +56,76 @@ const getReviewer = async (pid, adminId = 0) => db.query(
   .catch((err) => {
     console.error('Query Error [Order Helper - Get Order Items]', err.stack);
     return [];
+  });
+const getPromotionItems = async (pid) => db.query(
+  'SELECT * FROM public.promotionitem'
+  + ' WHERE promogroupid = $1::integer',
+  [pid]
+)
+  .then((items) => {
+    const promoItems = [];
+    items.rows.forEach((item) => {
+      const itemObj = {};
+      itemObj.itemId = item.menuitemid;
+      itemObj.attributeId = item.attributeid;
+      itemObj.attributeVal = item.attributevalue;
+      promoItems.push(itemObj);
+    });
+    return promoItems;
+  })
+  .catch((err) => {
+    console.error('Query Error [Promotion Helper - Get Promotion Items]', err.stack);
+    return [];
+  });
+
+const getPromotionGroups = async (promotionId) => db.query(
+  'SELECT * FROM public.promogroup'
+  + ' WHERE promogroup.promotionid = $1::integer',
+  [promotionId]
+)
+  .then((res) => {
+    const promotionPromises = [];
+    res.rows.forEach((promotion) => {
+      promotionPromises.push(getPromotionItems(promotion.promogroupid)
+        .then((promoItems) => {
+          const promotionItem = {};
+          promotionItem.items = [];
+          promoItems.forEach((item) => {
+            promotionItem.items.push(item);
+          });
+          // eslint-disable-next-line no-console
+          // console.log(promotionItem);
+          return promotionItem;
+        }));
+    });
+    // eslint-disable-next-line no-console
+    // console.log(promotionPromises);
+    return promotionPromises;
+  })
+  .catch((err) => {
+    console.error('Query Error [Promotions - Get Restaurant Promotions]', err.stack);
+    return Promise.reject(err);
+  });
+
+const getPromoDays = async (promotionId) => db.query(
+  'SELECT dayofweek.description, dayOfWeek.dayid FROM public.dayofweek'
+  + ' INNER JOIN public.dayvalid ON dayvalid.dayid = dayofweek.dayid'
+  + ' INNER JOIN public.promotion ON promotion.promotionid = dayvalid.promotionid'
+  + ' WHERE dayvalid.promotionid = $1::integer',
+  [promotionId]
+)
+  .then(async (res) => {
+    // const promotionItem = {};
+    // promotionItem.promotions = [];
+    const days = [];
+    res.rows.forEach((day) => {
+      days.push(day.description);
+    });
+    return days;
+  })
+  .catch((err) => {
+    console.error('Query Error [Promotions - Get Restaurant Promotions]', err.stack);
+    return Promise.reject(err);
   });
 
 // helper to get individual menu items
@@ -471,35 +542,42 @@ module.exports = {
       console.error('Query Error [Categories - Get Restaurant Menu Categories]', err.stack);
       return [];
     }),
-  // getPromotions: (restaurantId = 0, response) => db.query(
-  //   'SELECT * FROM public.promotion'
-  //   + ' WHERE promotion.restaurantid = $1::integer ORDER BY promotionid DESC',
-  //   [restaurantId]
-  // )
-  //   .then((res) => {
-  //     const promotionPromises = [];
-  //     res.rows.forEach(async (promotion) => {
-  //       promotionPromises.push(await getPromotionGroups(promotion.promotionid, response)
-  //         .then((promoItems) => {
-  //           // eslint-disable-next-line no-console
-  //           console.log(promoItems);
-  //           const promotionItem = {};
-  //           promotionItem.message = promotion.promotionalmessage;
-  //           promotionItem.image = promotion.promotionalimage;
-  //           promotionItem.startDate = promotion.startdatetime;
-  //           promotionItem.endDate = promotion.enddatetime;
-  //           promotionItem.value = promotion.promotionvalue;
-  //           promotionItem.type = promotion.promotiontype;
-  //           promotionItem.promotions = promoItems;
-  //           promotionItem.days = [];
-  //           // historyItem.items = orderItems.items;
-  //           return promotionItem;
-  //         }));
-  //     });
-  //     return promotionPromises;
-  //   })
-  //   .catch((err) => {
-  //     console.error('Query Error [Promotions - Get Restaurant Promotions]', err.stack);
-  //     return Promise.reject(err);
-  //   }),
+  getPromotionElements: (restaurantId) => db.query(
+    'SELECT * FROM public.promotion'
+    + ' WHERE promotion.restaurantid = $1::integer ORDER BY promotionid DESC',
+    [restaurantId]
+  ).then((res) => {
+    const restaurantPromotions = [];
+    res.rows.forEach((promotion) => {
+      restaurantPromotions.push(getPromoDays(promotion.promotionid)
+        .then(async (dayArr) => {
+          const promotionItem = {};
+          promotionItem.promotionId = promotion.promotionid;
+          promotionItem.message = promotion.promotionalmessage;
+          promotionItem.image = promotion.promotionalimage;
+          promotionItem.startDate = promotion.startdatetime;
+          promotionItem.endDate = promotion.enddatetime;
+          promotionItem.value = promotion.promotionvalue;
+          promotionItem.type = promotion.promotiontype;
+          promotionItem.days = dayArr;
+          promotionItem.promotions = [];
+
+          const promotionsPromise = await getPromotionGroups(promotion.promotionid);
+
+          await Promise.all(promotionsPromise)
+            .then((group) => {
+              group.forEach((groupItems) => {
+                promotionItem.promotions.push(groupItems);
+              });
+            });
+
+          return promotionItem;
+        }));
+    });
+    return restaurantPromotions;
+  })
+    .catch((err) => {
+      console.error('Query Error [Promotions - Get Restaurant Promotions]', err.stack);
+      return Promise.reject(err);
+    }),
 };
