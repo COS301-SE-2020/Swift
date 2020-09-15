@@ -167,6 +167,10 @@ router.post('/', (req, res) => {
         restaurantController.getRatingPhrases(req.body, res);
         break;
       }
+      case 'handleGoogle': {
+        authController.handleGoogleCallback(req.body, res);
+        break;
+      }
       default: {
         res.status(400).send({ status: 400, reason: 'Bad Request' });
       }

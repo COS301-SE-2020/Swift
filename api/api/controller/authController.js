@@ -162,9 +162,14 @@ module.exports = {
         return response.status(400).send({ status: 400, reason: 'Bad Request' });
       });
   },
-  handleGoogleCallback: async (urlParams, response) => {
+
+  handleGoogleCallback: async (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'code')
+    || Object.keys(reqBody).length !== 2) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
     try {
-      const { tokens } = await Oauth2Client.getToken(urlParams.code);
+      const { tokens } = await Oauth2Client.getToken(reqBody.code);
       Oauth2Client.setCredentials(tokens);
       const userInfo = await oauth2.userinfo.get({ auth: Oauth2Client });
       return loginUser(userInfo.data.email, userInfo.data.name, response);
