@@ -3,6 +3,7 @@ import axios from 'axios'
 // State object
 const initialState = () => ({
   menu: {},
+  promotionItems: {}
 });
 
 const state = initialState();
@@ -13,6 +14,9 @@ const state = initialState();
 const getters = {
   getMenu(state) {
     return state.menu;
+  },
+  getPromotionItems(state) {
+    return state.promotionItems;
   },
 }
 
@@ -27,9 +31,23 @@ const actions = {
       }
     ).then(result => {
       commit('SAVE_MENU', result.data);
-      console.log("menu set")
       return true;
     }).catch(({ response }) => {
+    });
+  },
+
+  retrieveSuggestedPromotions({commit}, restaurantId) {
+    return axios.post('https://ml.api.swiftapp.ml', 
+    {
+      "requestType": "promoSuggest",
+      "restaurantId": 62,
+      "token": sessionStorage.getItem('authToken'),
+    }
+    ).then(result => {
+      commit('SAVE_PROMOTION_ITEMS', result.data);
+      return true;
+    }).catch(({ response }) => {
+
     });
   },
   
@@ -46,6 +64,10 @@ const mutations = {
 
   CLEAR_MENU(state) {
     state.menu = {};
+  },
+
+  SAVE_PROMOTION_ITEMS(state, promoItems) {
+    state.promotionItems = promoItems;
   },
 
   // Used to reset the store

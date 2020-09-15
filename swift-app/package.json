@@ -20,6 +20,7 @@
     "cordova-plugin-request-location-accuracy": "^2.3.0",
     "core-js": "^3.6.5",
     "google-auth-library": "^6.0.6",
+    "image-to-base64": "^2.1.1",
     "jquery": "^3.5.1",
     "moment": "^2.27.0",
     "null-loader": "^4.0.0",

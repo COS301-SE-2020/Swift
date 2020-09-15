@@ -2,10 +2,8 @@
   <div>
     <div class="router-header flex flex-wrap items-center mb-6">
       <div class="content-area__heading pr-4">
-        <h2 class="mb-1">Add Menu Item</h2>
+        <h2 class="mb-1">Edit Menu Item</h2>
       </div>
-      <label class="mr-4">Bulk add mode</label>
-      <vs-switch color="success" v-model="bulkAddMode" />
       <vs-divider></vs-divider>
       <vs-button @click="$router.push('/menu')" type="filled" class="mb-4 mr-4">
         <span class="flex items-center">
@@ -239,6 +237,7 @@
               accept="image/*"
             />
             <div
+              ref="itemImageUploadPreview"
               id="itemImageUploadPreview"
               hidden
               class="mt-4 rounded-lg"
@@ -250,7 +249,7 @@
     </vx-card>
 
     <div class="text-center">
-      <vs-button @click="addMenuItem()" type="filled" class="mb-4 mr-4">
+      <vs-button @click="editMenuItem()" type="filled" class="mb-4 mr-4">
         <span class="flex items-center">
           <feather-icon icon="SaveIcon" svgClasses="h-4 w-4 mr-1" />
           <span>Save Item</span>
@@ -311,7 +310,7 @@ import modulemenuList from "@/store/menu/menuDataList.js";
 export default {
   data() {
     return {
-      bulkAddMode: true,
+      itemId: "",
       newCategoryParentName: "",
       newCategoryDescription: "",
       newCategoryType: "primary",
@@ -345,7 +344,7 @@ export default {
   },
   computed: {
     restaurantObject() {
-       if (this.$store.state.menuList)
+      if (this.$store.state.menuList)
         return this.$store.state.menuList.restaurantObject;
       else if (this.$store.state.myRestaurants) {
         for (var i = 0; i < this.$store.state.myRestaurants.length; i++)
@@ -406,7 +405,7 @@ export default {
       this.$refs.uploadImageInputRef.click();
     },
     updateItemImage() {
-      var file =  this.$refs.uploadImageInputRef.files[0];
+      var file = this.$refs.uploadImageInputRef.files[0];
       var reader = new FileReader();
 
       if (file && file.type.match("image.*")) {
@@ -422,7 +421,12 @@ export default {
     },
     setItemImagePreview(image) {
       this.itemImage = image;
-      document.getElementById("itemImageUploadPreview").style.display = "block";
+      if (this.$refs.itemImageUploadPreview)
+        this.$refs.itemImageUploadPreview.style.display = "block";
+      else
+        setTimeout(() => {
+          this.$refs.itemImageUploadPreview.style.display = "block";
+        }, 500);
     },
     addMenuCategory() {
       this.$store
@@ -451,11 +455,12 @@ export default {
           this.newCategoryParent = null;
         });
     },
-    addMenuItem() {
+    editMenuItem() {
+      this.$vs.loading();
       this.$store
-        .dispatch("menuList/addMenuItem", {
+        .dispatch("menuList/editMenuItem", {
           authKey: this.getAuthToken(),
-          currentRestaurantId: this.getCurrentRestaurantId(),
+          itemId: this.itemId,
           categoryId: this.itemCategory,
           itemName: this.itemName,
           itemDescription: this.itemDescription,
@@ -469,15 +474,14 @@ export default {
           itemImages: [this.itemImage],
         })
         .then(() => {
+          this.$vs.loading.close();
           this.$vs.notify({
             title: "Success",
             text:
-              "Your menu item: <b>" + this.itemName + "</b> has been added.",
+              "The menu item: <b>" + this.itemName + "</b> has been updated.",
             color: "success",
           });
-          if (!this.bulkAddMode) {
-            this.$router.push("/menu");
-          }
+          this.$router.push("/menu");
         });
     },
     restaurantLoaded() {
@@ -509,6 +513,32 @@ export default {
       };
       this.itemAddons.find((i) => i.id === id).values.push(newAddOnValue);
     },
+    setInitialValues() {
+      for (var i = 0; i < this.restaurantObject.categories.length; i++)
+        for (
+          var j = 0;
+          j < this.restaurantObject.categories[i].menuItems.length;
+          j++
+        ) {
+          var item = this.restaurantObject.categories[i].menuItems[j];
+          console.log(item);
+          if (item.menuItemId == this.$route.params.menuItemId) {
+            this.itemCategoryName = this.restaurantObject.categories[
+              i
+            ].categoryName;
+            this.itemName = item.menuItemName;
+            this.itemDescription = item.menuItemDescription;
+            this.itemPrice = item.price;
+            this.itemPrepTime = item.estimatedWaitingTime;
+            this.itemCategory = this.restaurantObject.categories[i].categoryId;
+            this.itemId = item.menuItemId;
+            if (item.images.length > 0)
+              this.setItemImagePreview(item.images[0]);
+
+            this.itemAddons = item.attributes.attributes;
+          }
+        }
+    },
   },
   created() {
     if (this.getAuthToken() != null) {
@@ -518,10 +548,16 @@ export default {
       }
       //if menu has not been loaded yet, load it first
       if (!this.restaurantLoaded()) {
-        this.$store.dispatch("menuList/listMenuItems", {
-          currentRestaurantId: this.getCurrentRestaurantId(),
-          authKey: this.getAuthToken(),
-        });
+        this.$store
+          .dispatch("menuList/listMenuItems", {
+            currentRestaurantId: this.getCurrentRestaurantId(),
+            authKey: this.getAuthToken(),
+          })
+          .then(() => {
+            this.setInitialValues();
+          });
+      } else {
+        this.setInitialValues();
       }
     }
   },

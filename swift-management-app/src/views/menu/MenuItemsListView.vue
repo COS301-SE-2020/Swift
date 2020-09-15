@@ -116,8 +116,8 @@
 
             <vs-td>
               <vs-progress
-                :percent="Number(getPopularity())"
-                :color="getPopularityColor(100)"
+                :percent="Number(tr.popularity)"
+                :color="getPopularityColor(tr.popularity)"
                 class="shadow-md"
               />
             </vs-td>
@@ -137,7 +137,7 @@
               <feather-icon
                 icon="EditIcon"
                 svgClasses="w-5 h-5 hover:text-primary stroke-current"
-                @click.stop="editData(tr)"
+                @click.stop="$router.push({name: 'edit-menu-item', params: { menuItemId: tr.menuItemId }})"
               />
               <feather-icon
                 icon="TrashIcon"
@@ -169,9 +169,21 @@ export default {
   },
   computed: {
     restaurantObject() {
+      //if restaurant has been loaded before menu - use that
       if (this.$store.state.menuList)
         return this.$store.state.menuList.restaurantObject;
-      else return null;
+      else if (this.$store.state.myRestaurants) {
+        for (var i = 0; i < this.$store.state.myRestaurants.length; i++)
+          if (
+            this.$store.state.myRestaurants[i].restaurantId ==
+            this.getCurrentRestaurantId()
+          ) {
+            this.addPromoButtonDisabled = false;
+            return this.$store.state.myRestaurants[i];
+          }
+      } else {
+        return null;
+      }
     },
     currentPage() {
       if (this.isMounted) {
@@ -217,9 +229,6 @@ export default {
     },
   },
   methods: {
-    getPopularity() {
-      return Math.floor(Math.random() * 100) + 15;
-    },
     addFirstItemPrompt() {
       this.$vs.dialog({
         color: "primary",
@@ -248,10 +257,9 @@ export default {
       return "primary";
     },
     getPopularityColor(num) {
-      if (num > 90) return "success";
-      if (num > 70) return "primary";
-      if (num >= 50) return "warning";
-      if (num < 50) return "danger";
+      if (num > 60) return "success";
+      if (num >= 30) return "warning";
+      if (num < 30) return "danger";
       return "primary";
     },
     listMenuItems() {

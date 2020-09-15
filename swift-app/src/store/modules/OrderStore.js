@@ -181,6 +181,7 @@ const actions = {
 
   initOrderHistory({commit, state}) {
     var orderHistory = this.getters['CustomerStore/getCustomerOrderHistory']
+    // var orderHistory = this.getters['CustomerStore/getFetchedOrderHistory']
     commit('SET_ORDER_HISTORY', orderHistory);
   },
 

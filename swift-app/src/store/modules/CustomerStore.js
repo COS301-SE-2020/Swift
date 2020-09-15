@@ -9,7 +9,8 @@ const initialState = () => ({
   checkedInStatus: null,
   checkedInQRCode: null,
   checkedInRestaurantId: null,
-  checkedInTableId: null
+  checkedInTableId: null,
+  fetchedOrderHistory: {}
 });
 
 const state = initialState();
@@ -38,6 +39,9 @@ const getters = {
   },
   getCheckedInTableId( state ) {
     return state.checkedInTableId;
+  },
+  getFetchedOrderHistory( state ) {
+    return state.fetchedOrderHistory;
   },
   isAuthenticated(state) {
     return state.isAuthenticated;
@@ -103,7 +107,6 @@ const actions = {
   },
 
   login({commit}, data) {
-    console.log("LOGGED IN")
     return axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "login",
@@ -202,6 +205,22 @@ const actions = {
     });
   },
 
+  editProfile({commit}, data) {
+    axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "editProfile",
+      "name": data.name,
+      "surname": data.surname,
+      "profileImage": data.profileImage,
+      "theme": data.theme,
+      "token": sessionStorage.getItem('authToken')
+    }).then(result => {
+      commit('EDIT_PROFILE', result.data.profileInfo);
+    }).catch(({ response }) => {
+      return response
+    });
+  },
+
   callWaiter({commit}, data) {
     axios.post('https://api.swiftapp.ml', 
     {
@@ -209,6 +228,19 @@ const actions = {
       "tableId": data.tableId,
       "token": sessionStorage.getItem('authToken')
     })
+  },
+
+  fetchOrderHistory({commit}) {
+    axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "orderHistory",
+      "token": sessionStorage.getItem('authToken'),
+    } 
+    ).then(result => {
+      console.log(result.data.orderHistory)
+      commit('SET_FETCHED_ORDER_HISTORY', result.data.orderHistory);
+    }).catch(({ response }) => {
+    });
   },
   
   reset({ commit }) {
@@ -261,6 +293,8 @@ const actions = {
       return response
     });
   }
+
+  
 }
 
 // Mutations
@@ -300,6 +334,19 @@ const mutations = {
   SET_AUTHENTICATION(state, authentication_state) {
     state.isAuthenticated = authentication_state;
   },
+
+  EDIT_PROFILE(state, profileInfo) {
+    state.customer.name = profileInfo.name;
+    state.customer.surname = profileInfo.surname;
+    state.customer.profileimageurl = profileInfo.profileImage;
+    state.customer.theme = profileInfo.theme;
+  },
+
+  SET_FETCHED_ORDER_HISTORY(state, orderHistory) {
+    state.fetchedOrderHistory = orderHistory;
+  },
+
+  
 
   RESET(state) {
     const newState = initialState();

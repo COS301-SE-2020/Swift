@@ -6,11 +6,11 @@
       </v-col>
     </v-row>
     <div>
-      <v-text-field class="searchBarBg" v-model="search" rounded clearable flat solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search"></v-text-field>
+      <v-text-field class="searchBarBg" v-model="search" rounded clearable flat solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search for an item..."></v-text-field>
     </div>
     <template v-if="!isLoading && customerInfo.favourites.length != 0">
       <v-list v-for="(restaurantName, index) in restaurantFilteredList" :key="index" class="py-0">
-        <v-subheader v-once style="height: 20px" class="mt-3 mb-1 pl-1">{{ restaurantName }}</v-subheader>
+        <v-subheader v-show="filteredList(restaurantName).length > 0" style="height: 20px" class="mt-3 mb-1 pl-1">{{ restaurantName }}</v-subheader>
         <v-list v-for="item in filteredList(restaurantName)" :key="item.menuItemName" class="py-0">
           <v-list-item class="py-1 pr-0">
             <v-list-item-avatar @click="goToMenuItem(item.menuItemId)" tile  style="border-radius: 4px" size="45" >

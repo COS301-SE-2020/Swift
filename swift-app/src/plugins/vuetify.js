@@ -11,6 +11,12 @@ export default new Vuetify({
         secondary: '#343434',
         accent: '#76C5BA',
       },
+      dark: {
+        primary: '#F75564',
+        secondary: '#FFFFFF',
+        accent: '#76C5BA',
+        background: "#343434"
+      }
     },
   },
   breakpoint: {
