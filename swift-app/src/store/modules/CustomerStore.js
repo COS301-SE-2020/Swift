@@ -71,6 +71,37 @@ const actions = {
     )
   },
 
+  //send url to api
+  handleGoogle({commit}, code)
+  {
+    return axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "handleGoogle",
+      "code" : code
+    }).then(result => {
+      console.log("result.data.token");
+      commit('SAVE_TOKEN', result.data.token);
+      sessionStorage.setItem('authToken', result.data.token);
+      commit('SAVE_CUSTOMER', result.data);
+      this.dispatch('OrderStore/initOrderHistory');
+      this.dispatch('OrderStore/ratingPhrasesRestaurant');
+      commit('SET_CHECKED_IN_CODE', result.data.checkedIn);
+    }).then(result => {
+      let checkedInVal = this.getters['CustomerStore/getCheckedInQRCode'];
+      if (checkedInVal != null && this.getters['CustomerStore/getCheckedInRestaurantId'] == null) {
+        this.isLoading = true;
+        var data = {
+          "qrcode": checkedInVal
+        }
+
+        this.dispatch('CustomerStore/checkInCustomer', data);
+      }
+      return "Success";
+    }).catch(({ response }) => {
+      return "Fail";
+    }); 
+  },
+
   login({commit}, data) {
     console.log("LOGGED IN")
     return axios.post('https://api.swiftapp.ml', 
@@ -130,12 +161,12 @@ const actions = {
       return true;
     })
   },
-  
 
   googleRegister({commit}) {
     return axios.post('https://api.swiftapp.ml', 
     {
       "requestType": "loginGoogle"
+
     } 
     ).then(result => {
       return response.data.url

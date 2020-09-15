@@ -63,11 +63,35 @@ export default {
       isLoading: false,
       errorMsg: '*Login Failed',
       loginFailed: false,
-      // googleAuthUrl: '',
-      // googleAuthActive: false
     }
   },
+  mounted:function(){
+        this.handlegoogle()
+  },
   methods: {
+    handlegoogle: async function() {
+      //let url= window.location.href;
+      //console.log("got here ??" + url);
+      let uri = window.location.search.substring(1); 
+      let params = new URLSearchParams(uri);
+
+       if(params.get("code") !== null){
+        // console.log("CODE --" + params.get("code"));
+        let code =  params.get("code");
+        let user = await this.handleGoogle(code);
+        
+        this.isLoading = !this.isLoading;
+        this.loginFailed = false
+        if (user == "Success") 
+          this.$router.push('/');
+        else 
+          this.loginFailed = true
+
+       }
+       else{
+        console.log("got error");
+       }
+    },
     goToRegister () {
       this.$router.push('/register')
     },
@@ -95,36 +119,38 @@ export default {
 
       }
     },
-    /* loginWithGoogle () {
-      this.$gAuth
-      .signIn()
-      .then(GoogleUser => {
-        // on success do something
-        console.log('GoogleUser', GoogleUser)
-        console.log('getId', GoogleUser.getId())
-        console.log('getBasicProfile', GoogleUser.getBasicProfile())
-        console.log('getAuthResponse', GoogleUser.getAuthResponse())
-        var userInfo = {
-          loginType: 'google',
-          google: GoogleUser.getAuthResponse(),
-        }
-        // this.$store.commit('setLoginUser', userInfo)
-        this.googleLogin(userInfo);
-        this.$router.push('/');
-      })
-      .catch(error => {
-        console.log('error', error)
-      })
-    }, */
+    /*
     async loginWithGoogle () {
-      this.googleAuthActive = true;
+      this.$gAuth
+        .signIn()
+        .then(GoogleUser => {
+          // on success do something
+          // console.log('GoogleUser', GoogleUser)
+          // console.log('getId', GoogleUser.getId())
+          // console.log('getBasicProfile', GoogleUser.getBasicProfile())
+          // console.log('getAuthResponse', GoogleUser.getAuthResponse())
+          var userInfo = {
+            loginType: 'google',
+            google: GoogleUser
+          }
+          let url = await this.googleLogin();
+          console.log(new URL(url).searchParams.get('code'));
+
+         // this.$store.commit('setLoginUser', userInfo)
+          router.push('/')
+        })
+        .catch(error => {
+          console.log('error', error)
+        })
+    }, */
+    
+    async loginWithGoogle () {
       let url = await this.googleLogin();
-      // this.googleAuthUrl = url;
-      // window.location.href = url;
-      console.log(new URL(url).searchParams.get('code'))
+      this.googleAuthUrl = url;
+      window.location.href = url;
+      console.log('url :'+ url);
 
-
-      // this.$router.push('/');
+       this.$router.push('/');
     },
     ...mapGetters({
       isAuthenticated: 'isAuthenticated',
@@ -133,6 +159,7 @@ export default {
     ...mapActions({
       login: 'CustomerStore/login',
       googleLogin: 'CustomerStore/googleLogin',
+      handleGoogle: 'CustomerStore/handleGoogle',
     }),
   },
   computed: {
