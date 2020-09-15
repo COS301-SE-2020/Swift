@@ -456,6 +456,7 @@ export default {
         });
     },
     editMenuItem() {
+      this.$vs.loading();
       this.$store
         .dispatch("menuList/editMenuItem", {
           authKey: this.getAuthToken(),
@@ -473,6 +474,7 @@ export default {
           itemImages: [this.itemImage],
         })
         .then(() => {
+          this.$vs.loading.close();
           this.$vs.notify({
             title: "Success",
             text:
