@@ -227,7 +227,8 @@ def averageOrderPrice(restaurantId):
             INNER JOIN menuitem
             ON itemordered.menuitemid = menuitem.menuitemid
             WHERE restaurantid = %s
-            GROUP BY 1;"""
+            GROUP BY 1
+            ORDER BY OrderTime ASC;"""
     cursor.execute(qry, [restaurantId])
     records = cursor.fetchall()
     cursor.close()
@@ -247,7 +248,8 @@ def revenueByMenu(restaurantId):
             ON customerorder.orderid = itemordered.orderid
             WHERE menucategory.restaurantid = %s
             AND menucategory.categorytype = 'primary'
-            GROUP BY 1,2;"""
+            GROUP BY 1,2
+            ORDER BY OrderTime ASC;"""
     cursor.execute(qry, [restaurantId])
     records = cursor.fetchall()
     cursor.close()
