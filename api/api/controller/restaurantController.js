@@ -1,8 +1,10 @@
 /* eslint-disable linebreak-style */
 /* eslint-disable no-console */
+const axios = require('axios');
 const db = require('../db').poolr;
 const dbw = require('../db').poolw;
 const paymentEmail = require('../helper/notifications/sendEmail');
+const { mlApiURL } = require('../config/config-ml-api.json');
 const { validateToken, tokenState } = require('../helper/tokenHandler');
 const {
   getReviews,
@@ -577,6 +579,17 @@ module.exports = {
               orderHistoryItem.forEach((ordHistItem) => {
                 orderResponse.orderHistory.push(ordHistItem);
               });
+
+              // refresh ML API cache
+              axios.post(mlApiURL,
+                {
+                  requestType: 'clearOrdersCache',
+                  token: reqBody.token
+                }).catch((err) => {
+                console.error('ML API Orders Cache Reset -', err.stack);
+              });
+
+              // send response
               return response.status(201).send(orderResponse);
             })
             .catch((err) => {
@@ -826,6 +839,17 @@ module.exports = {
               orderHistoryItem.forEach((ordHistItem) => {
                 orderResponse.orderHistory.push(ordHistItem);
               });
+
+              // refresh ML API cache
+              axios.post(mlApiURL,
+                {
+                  requestType: 'clearOrdersCache',
+                  token: reqBody.token
+                }).catch((err) => {
+                console.error('ML API Orders Cache Reset -', err.stack);
+              });
+
+              // send response
               return response.status(201).send(orderResponse);
             })
             .catch((err) => {
@@ -1107,6 +1131,7 @@ module.exports = {
 
               // rate order
               let rQuery = 'INSERT INTO public.review';
+              let isMenuItemReview = false;
               rQuery += ' (orderid, reviewdatetime, ratingscore, comment, public, ';
               switch (reqBody.type.toLowerCase()) {
                 case 'restaurant':
@@ -1117,6 +1142,7 @@ module.exports = {
                   break;
                 default:
                   rQuery += 'menuitemid';
+                  isMenuItemReview = true;
                   break;
               }
 
@@ -1145,7 +1171,20 @@ module.exports = {
                     'UPDATE public.customerorder SET orderstatus = $1::text WHERE orderid = $2::integer',
                     ['Rated', reqBody.orderId]
                   )
-                    .then(() => response.status(201).send({ status: 201, reason: 'Reivew Recorded' }))
+                    .then(() => {
+                      if (isMenuItemReview) {
+                        // refresh ML API cache
+                        axios.post(mlApiURL,
+                          {
+                            requestType: 'clearRatingsCache',
+                            token: reqBody.token
+                          }).catch((err) => {
+                          console.error('ML API Ratings Cache Reset -', err.stack);
+                        });
+                      }
+
+                      return response.status(201).send({ status: 201, reason: 'Reivew Recorded' });
+                    })
                     .catch((err) => {
                       console.error('Query Error [Order Review - Update Order Status]', err.stack);
                       return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
