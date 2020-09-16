@@ -1,5 +1,5 @@
-/* eslint-disable no-console */
 /* eslint-disable linebreak-style */
+/* eslint-disable no-console */
 const db = require('../db').poolr;
 const dbw = require('../db').poolw;
 const paymentEmail = require('../helper/notifications/sendEmail');
@@ -1177,6 +1177,7 @@ module.exports = {
     // Invalid token
     return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
   },
+  // eslint-disable-next-line consistent-return
   getSuggestedMenuItems: (reqBody, response) => {
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
       || Object.keys(reqBody).length !== 3) {
