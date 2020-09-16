@@ -488,7 +488,7 @@ module.exports = {
 
       // eslint-disable-next-line consistent-return
       return (async () => {
-        const client = await db.connect();
+        const client = await dbw.connect();
         try {
           // begin transaction
           await client.query('BEGIN');
@@ -708,7 +708,6 @@ module.exports = {
       || Object.keys(reqBody).length !== 4) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
-
     // Check token
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
@@ -721,7 +720,7 @@ module.exports = {
 
       // eslint-disable-next-line consistent-return
       return (async () => {
-        const client = await db.connect();
+        const client = await dbw.connect();
         try {
           // begin transaction
           await client.query('BEGIN');
@@ -735,7 +734,6 @@ module.exports = {
             + ' WHERE customerorder.orderid = $1::integer AND person.userid = $2::integer',
             [reqBody.orderId, userToken.data.userId]
           );
-
           if (res.rows.length === 0) {
             // restaurant and/or table does not exist
             return response.status(404).send({ status: 404, reason: 'Not Found' });
@@ -795,7 +793,6 @@ module.exports = {
                 ]
               );
             }
-
             orderTotal += parseFloat(reqBody.orderItems[oi].itemTotal);
           }
 
