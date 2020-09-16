@@ -114,6 +114,14 @@ router.post('/', (req, res) => {
         restaurantController.getRestaurantCategories(req.body, res);
         break;
       }
+      case 'getRestaurantEmployees': {
+        restaurantAdminController.getRestaurantEmployees(req.body, res);
+        break;
+      }
+      case 'getEmployee': {
+        restaurantAdminController.getEmployee(req.body, res);
+        break;
+      }
       case 'addMenuCategory': {
         restaurantAdminController.addMenuCategory(req.body, res);
         break;

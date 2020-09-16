@@ -32,7 +32,23 @@ const getOrderItems = async (oid = 0) => db.query(
     return [];
   });
 
-const getReviewer = async (pid, adminId = 0) => db.query(
+const getAvgScore = (employeeid, restaurantId = 0) => db.query(
+  'SELECT AVG(review.ratingscore) AS "score" FROM public.review'
+  + ' INNER JOIN public.customerorder ON customerorder.orderid = review.orderid'
+  + ' INNER JOIN public.restauranttable ON restauranttable.tableid = customerorder.tableid'
+  + ' WHERE customerorder.employeeid = $1::integer AND restauranttable.restaurantid = $2::integer AND review.employeeid IS NOT NULL',
+  [employeeid, restaurantId]
+).then((scoreRes) => {
+  const score = (scoreRes.rows.length !== 0 && scoreRes.rows[0].score !== null)
+    ? parseFloat(scoreRes.rows[0].score.toFixed(2), 10) : 0;
+  return score;
+})
+  .catch((err) => {
+    console.error('Query Error [Score - Get Avergae Employee Score]', err.stack);
+    return [];
+  });
+
+const getUserInfo = async (pid, adminId = 0) => db.query(
   'SELECT name, surname, profileimageurl'
     + ' FROM public.person WHERE person.userid IN ($1::integer, $2::integer)',
   [pid, adminId]
@@ -57,6 +73,48 @@ const getReviewer = async (pid, adminId = 0) => db.query(
     console.error('Query Error [Order Helper - Get Order Items]', err.stack);
     return [];
   });
+const getRatings = async (reviewid = 0) => db.query(
+  'SELECT customerphraserating.ratingscore, customerphraserating.phraseid, ratingphrase.phrasedescription FROM public.customerphraserating'
+  + ' INNER JOIN public.ratingphrase ON ratingphrase.phraseid = customerphraserating.phraseid'
+  + ' WHERE customerphraserating.reviewid = $1::integer',
+  [reviewid]
+)
+  .then((res) => {
+    const ratingsArr = [];
+    res.rows.forEach((rating) => {
+      const ratingItem = {};
+      ratingItem.phraseId = rating.phraseid;
+      ratingItem.ratingScore = rating.ratingscore;
+      ratingItem.description = rating.phrasedescription;
+
+      ratingsArr.push(ratingItem);
+    });
+    return ratingsArr;
+  })
+  .catch((err) => {
+    console.error('Query Error [Ratings - Get Phrase Ratings]', err.stack);
+    return [];
+  });
+
+const getRatingInfo = async (phraseid = 0, employeeid, restaurantid) => db.query(
+  'SELECT AVG(customerphraserating.ratingscore) AS "score" FROM customerphraserating'
+  + ' INNER JOIN public.review ON review.reviewid = customerphraserating.reviewid'
+  + ' INNER JOIN public.customerorder ON customerorder.orderid = review.orderid'
+  + ' INNER JOIN public.restauranttable ON restauranttable.tableid = customerorder.tableid'
+  + ' WHERE customerphraserating.phraseid = $1::integer AND customerorder.employeeid = $2::integer AND restauranttable.restaurantid = $3::integer',
+  [phraseid, employeeid, restaurantid]
+)
+  .then((res) => {
+    const ratingItem = {};
+    ratingItem.score = (res.rows[0].score !== null)
+      ? parseFloat(res.rows[0].score.toFixed(2), 10) : 0;
+    return ratingItem;
+  })
+  .catch((err) => {
+    console.error('Query Error [Ratings - Get Phrase Rating Score]', err.stack);
+    return [];
+  });
+
 const getPromotionItems = async (pid) => db.query(
   'SELECT * FROM public.promotionitem'
   + ' WHERE promogroupid = $1::integer',
@@ -75,6 +133,21 @@ const getPromotionItems = async (pid) => db.query(
   })
   .catch((err) => {
     console.error('Query Error [Promotion Helper - Get Promotion Items]', err.stack);
+    return [];
+  });
+
+const getEmployeeRights = async (employeeId = 0) => db.query(
+  'SELECT * FROM public.employeeaccessright WHERE employeeid = $1::integer',
+  [employeeId]
+).then((employees) => {
+  const permissions = [];
+  employees.rows.forEach((permission) => {
+    permissions.push(permission.permissionid);
+  });
+  return permissions;
+})
+  .catch((err) => {
+    console.error('Query Error [Permissions - Get Employee Permissions]', err.stack);
     return [];
   });
 
@@ -472,7 +545,7 @@ module.exports = {
     .then((res) => {
       const reviewsArr = [];
       res.rows.forEach((review) => {
-        reviewsArr.push(getReviewer(review.customerid, review.adminid)
+        reviewsArr.push(getUserInfo(review.customerid, review.adminid)
           .then((reviewer) => {
             const reviewItem = {};
             reviewItem.reviewId = review.reviewid;
@@ -497,6 +570,100 @@ module.exports = {
     })
     .catch((err) => {
       console.error('Query Error [Reviews - Get Restaurant Reviews]', err.stack);
+      return [];
+    }),
+  getEmployeeReviews: (employeeid = 0, restaurantid) => db.query(
+    'SELECT customerorder.customerid, review.reviewid, review.ratingscore, review.reviewdatetime, review.comment, review.public, review.adminid, review.response, review.responsedatetime FROM public.review'
+    + ' INNER JOIN public.customerorder ON customerorder.orderid = review.orderid'
+    + ' INNER JOIN public.restauranttable ON restauranttable.tableid = customerorder.tableid'
+    + ' WHERE review.employeeid = $1::integer AND restauranttable.restaurantId = $2::integer',
+    [employeeid, restaurantid]
+  )
+    .then((res) => {
+      const reviewsArr = [];
+      res.rows.forEach((review) => {
+        reviewsArr.push(getUserInfo(review.customerid, review.adminid)
+          .then(async (reviewer) => {
+            const reviewItem = {};
+            reviewItem.reviewId = review.reviewid;
+            reviewItem.customerId = review.customerid;
+            reviewItem.customerName = reviewer.customerName;
+            reviewItem.customerSurname = reviewer.customerSurname;
+            reviewItem.customerImage = reviewer.customerImage;
+            reviewItem.ratingScore = review.ratingscore;
+            reviewItem.comment = review.comment;
+            reviewItem.reviewDateTime = review.reviewdatetime;
+            reviewItem.public = review.public;
+            reviewItem.adminName = reviewer.adminName;
+            reviewItem.adminSurname = reviewer.adminSurname;
+            reviewItem.adminImage = reviewer.adminImage;
+            reviewItem.adminId = review.adminid;
+            reviewItem.response = review.response;
+            reviewItem.responseDate = review.responsedatetime;
+            reviewItem.ratings = await getRatings(review.reviewid);
+            return reviewItem;
+          }));
+      });
+      return reviewsArr;
+    })
+    .catch((err) => {
+      console.error('Query Error [Reviews - Get Employee Reviews]', err.stack);
+      return [];
+    }),
+  getEmployeeRatings: (employeeid = 0, restaurantid) => db.query(
+    "SELECT * FROM public.ratingphrase WHERE LOWER(ratingphrase.type) = 'waiter';"
+  )
+    .then((res) => {
+      const ratingsArr = [];
+      res.rows.forEach((rating) => {
+        ratingsArr.push(getRatingInfo(rating.phraseid, employeeid, restaurantid)
+          .then((info) => {
+            const ratingItem = {};
+            ratingItem.phraseId = rating.phraseid;
+            ratingItem.description = rating.phrasedescription;
+            ratingItem.score = info.score;
+            return ratingItem;
+          }));
+      });
+      return ratingsArr;
+    })
+    .catch((err) => {
+      console.error('Query Error [Ratings - Get Employee Ratings...]', err.stack);
+      return [];
+    }),
+  getEmployeeOrders: (employeeid = 0, restaurantid) => db.query(
+    'SELECT customerorder.orderid, customerorder.customerid, customerorder.ordernumber, customerorder.orderdatetime, '
+    + ' customerorder.ordercompletiontime, customerorder.orderstatus, customerorder.progress, customerorder.waitertip FROM public.customerorder'
+    + ' INNER JOIN public.restauranttable ON restauranttable.tableid = customerorder.tableid'
+    + ' WHERE customerorder.employeeid = $1::integer AND restauranttable.restaurantid = $2::integer',
+    [employeeid, restaurantid]
+  )
+    .then((res) => {
+      const reviewsArr = [];
+      res.rows.forEach((order) => {
+        reviewsArr.push(getOrderItems(order.orderid)
+          .then(async (items) => {
+            const orderObj = {};
+            const customer = await getUserInfo(order.customerid);
+            orderObj.orderId = order.orderid;
+            orderObj.customerId = order.customerid;
+            orderObj.customerName = customer.customerName;
+            orderObj.customerSurname = customer.customerSurname;
+            orderObj.customerImage = customer.customerImage;
+            orderObj.orderNumber = order.ordernumber;
+            orderObj.date = order.orderdatetime;
+            orderObj.completionTime = order.ordercompletiontime;
+            orderObj.status = order.orderstatus;
+            orderObj.progress = order.progress;
+            orderObj.tip = order.waitertip;
+            orderObj.items = items;
+            return orderObj;
+          }));
+      });
+      return reviewsArr;
+    })
+    .catch((err) => {
+      console.error('Query Error [Orders - Get Employee Orders]', err.stack);
       return [];
     }),
   getRatingPhrasesObj: (restaurantId = 0) => db.query(
@@ -567,6 +734,124 @@ module.exports = {
   })()
     .catch((err) => {
       console.error('Query Error [Categories - Get Restaurant Menu Categories]', err.stack);
+      return [];
+    }),
+  getAvgScore: (employeeid, restaurantId = 0) => (async () => {
+    const client = await db.connect();
+    try {
+      // begin transaction
+      await client.query('BEGIN');
+
+      // get average employee score
+      const scoreRes = await client.query(
+        'SELECT AVG(review.ratingscore) AS "score" FROM public.review'
+        + ' INNER JOIN public.customerorder ON customerorder.orderid = review.orderid'
+        + ' INNER JOIN public.restauranttable ON restauranttable.tableid = customerorder.tableid'
+        + ' WHERE customerorder.employeeid = $1::integer AND restauranttable.restaurantid = $2::integer AND review.employeeid IS NOT NULL',
+        [employeeid, restaurantId]
+      );
+
+      const score = (scoreRes.rows.length !== 0 && scoreRes.rows[0].score !== null)
+        ? parseFloat(scoreRes.rows[0].score.toFixed(2), 10) : 0;
+      return score;
+    } catch (err) {
+      // rollback changes
+      await client.query('ROLLBACK');
+
+      // throw error for async catch
+      throw err;
+    } finally {
+      client.release();
+    }
+  })()
+    .catch((err) => {
+      console.error('Query Error [Score - Get Avergae Employee Score]', err.stack);
+      return [];
+    }),
+  getEmployees: (restaurantId = 0) => (async () => {
+    const client = await db.connect();
+    try {
+      // begin transaction
+      await client.query('BEGIN');
+
+      const employees = await client.query(
+        'SELECT person.userid, person.name, person.surname, person.email, person.profileimageurl, restaurantemployee.employeeid, restaurantemployee.employeerole, restaurantemployee.employeenumber FROM public.person'
+        + ' INNER JOIN public.restaurantemployee ON restaurantemployee.userid = person.userid'
+        + ' WHERE restaurantemployee.restaurantid = $1::integer',
+        [restaurantId]
+      );
+
+      const employeeList = [];
+      employees.rows.forEach((emp) => {
+        employeeList.push(getAvgScore(emp.userid, restaurantId)
+          .then(async (score) => {
+            const employee = {};
+            employee.userId = emp.userid;
+            employee.employeeId = emp.employeeid;
+            employee.name = emp.name;
+            employee.surname = emp.surname;
+            employee.email = emp.email;
+            employee.profileImage = emp.profileimageurl;
+            employee.role = emp.employeerole;
+            employee.employeeNumber = emp.employeenumber;
+            employee.averageRating = score;
+
+            const accessRightPromises = await getEmployeeRights(emp.employeeid);
+            employee.rights = [];
+
+            await Promise.all(accessRightPromises)
+              .then((accessItem) => {
+                accessItem.forEach((access) => {
+                  employee.rights.push(access);
+                });
+              });
+
+            return employee;
+          }));
+      });
+      return employeeList;
+    } catch (err) {
+      // rollback changes
+      await client.query('ROLLBACK');
+
+      // throw error for async catch
+      throw err;
+    } finally {
+      client.release();
+    }
+  })()
+    .catch((err) => {
+      console.error('Query Error [Score - Get Avergae Employee Score]', err.stack);
+      return [];
+    }),
+  getEmployeeRights: (employeeId = 0) => (async () => {
+    const client = await db.connect();
+    try {
+      // begin transaction
+      await client.query('BEGIN');
+
+      const employees = await client.query(
+        'SELECT * FROM public.employeeaccessright WHERE employeeid = $1::integer',
+        [employeeId]
+      );
+
+      const permissions = [];
+      employees.rows.forEach((permission) => {
+        permissions.push(permission.permissionid);
+      });
+      return permissions;
+    } catch (err) {
+      // rollback changes
+      await client.query('ROLLBACK');
+
+      // throw error for async catch
+      throw err;
+    } finally {
+      client.release();
+    }
+  })()
+    .catch((err) => {
+      console.error('Query Error [Permissions - Get Employee Permissions]', err.stack);
       return [];
     }),
   getPromotionElements: (restaurantId) => db.query(
