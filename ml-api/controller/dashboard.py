@@ -221,7 +221,7 @@ def averageOrderPrice(restaurantId):
     connection = db.connect()
     #current number of active customers
     cursor = connection.cursor()
-    qry = """SELECT date_trunc('day', orderdatetime) as OrderTime, AVG(nullif(ordertotal, 'NaN')) FROM customerorder
+    qry = """SELECT date_trunc('month', orderdatetime) as OrderTime, AVG(nullif(ordertotal, 'NaN')) FROM customerorder
             INNER JOIN itemordered
             ON customerorder.orderid = itemordered.orderid
             INNER JOIN menuitem
@@ -238,7 +238,7 @@ def revenueByMenu(restaurantId):
     connection = db.connect()
     #current number of active customers
     cursor = connection.cursor()
-    qry = """SELECT date_trunc('day', customerorder.orderdatetime) as OrderTime, menucategory.categoryname, SUM(itemordered.itemtotal), COUNT(*) FROM itemordered
+    qry = """SELECT date_trunc('month', customerorder.orderdatetime) as OrderTime, menucategory.categoryname, SUM(itemordered.itemtotal), COUNT(*) FROM itemordered
             INNER JOIN menuitem
             ON itemordered.menuitemid = menuitem.menuitemid
             INNER JOIN menucategory
