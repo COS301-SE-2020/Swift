@@ -161,19 +161,22 @@ export default {
   },
   revenueData: {
     analyticsData: {
-      thisMonth: 86589,
-      lastMonth: 73683
+      thisMonth: 0,
+      lastMonth: 0
     },
     series: [{
         name: "This Month",
-        data: [45000, 47000, 44800, 47500, 45500, 48000, 46500, 48600]
+        data: []
       },
       {
         name: "Last Month",
-        data: [46000, 48000, 45500, 46600, 44500, 46500, 45000, 47000]
+        data: []
       }
     ],
     chartOptions: {
+      noData: {
+        text: 'No data.'
+      },
       chart: {
         toolbar: {
           show: true

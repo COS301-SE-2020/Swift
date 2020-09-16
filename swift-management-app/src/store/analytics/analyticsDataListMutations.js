@@ -43,7 +43,7 @@ export default {
 
             state.customerCount.series[0].data.push(checkInCount);
             state.customerCount.series[1].data.push(checkOutCount);
-            state.customerCount.series[2].data.push(checkInCount-checkOutCount);
+            state.customerCount.series[2].data.push(checkInCount - checkOutCount);
         }
 
     },
@@ -80,8 +80,67 @@ export default {
         if (topMenu.length > 5)
             listLength = 5
         for (var i = 0; i < listLength; i++) {
-            state.menuDistribution.chartOptions.labels .push(topMenu[i][0])
-            state.menuDistribution.series.push(topMenu[i][1]) 
+            state.menuDistribution.chartOptions.labels.push(topMenu[i][0])
+            state.menuDistribution.series.push(topMenu[i][1])
         }
     },
+    SET_REVENUE_DATA(state, payload) {
+        var now = new Date()
+        var revData = payload.obj;
+        var prevMonth = payload.month - 1;
+        if (prevMonth < 0) prevMonth = 11;
+        var thisMonthTotal = 0;
+        var lastMonthTotal = 0;
+        state.revenueData.series[0].data = [];
+        state.revenueData.series[1].data = [];
+
+        for (var i = 0; i < revData.length; i++) {
+            var startDate = new Date(now.getFullYear(), payload.month, 1);
+            var endDate = new Date(now.getFullYear(), payload.month + 1, 0);
+            var prevStartDate = new Date(now.getFullYear(), prevMonth, 1);
+            var prevEndDate = new Date(now.getFullYear(), prevMonth + 1, 0);
+            var dataPointDate = new Date(revData[i][0]);
+
+            if (dataPointDate > startDate && dataPointDate < endDate) {
+                state.revenueData.series[0].data.push(revData[i][1])
+                thisMonthTotal += revData[i][1];
+            } else if (dataPointDate > prevStartDate && dataPointDate < prevEndDate) {
+                state.revenueData.series[1].data.push(revData[i][1])
+                lastMonthTotal += revData[i][1];
+            }
+        }
+        state.revenueData.analyticsData.thisMonth = thisMonthTotal;
+        state.revenueData.analyticsData.lastMonth = lastMonthTotal;
+
+        payload.chart.updateSeries([{
+                name: "This Month",
+                data: state.revenueData.series[0].data
+            },
+            {
+                name: "Last Month",
+                data: state.revenueData.series[1].data
+            }
+        ]);
+
+        console.log(state.revenueData)
+
+    },
+
+    SET_TOP_REVENUE_MENU_ITEMS(state, topMenuItems) {
+        state.topSellingItems = [];
+        var listLength = topMenuItems.length;
+        if (topMenuItems.length > 4)
+            listLength = 4
+        for (var i = 0; i < listLength; i++) {
+            var tableObject = {};
+            tableObject["name"] = topMenuItems[i][0];
+            tableObject["totalIncome"] = (topMenuItems[i][1] * topMenuItems[i][2]).toFixed(2);
+            tableObject["ratio"] = (topMenuItems[i][3] * 100).toFixed(2);
+            tableObject["growthPerc"] = (topMenuItems[i][3] * 100 - topMenuItems[i][5] * 100).toFixed(2);
+            state.topSellingItems.push(tableObject);
+        }
+    },
+
+    
+
 }

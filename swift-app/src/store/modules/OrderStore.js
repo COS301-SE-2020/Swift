@@ -35,8 +35,6 @@ const getters = {
   },
 
   getItemToRate(state) {
-    console.log("FETCH DATA")
-    console.log(state.itemToRate)
     return state.itemToRate;
   },
 
@@ -93,11 +91,27 @@ const actions = {
       }).catch(({ response }) => {
       });
     } else {
+      let id = state.currentId;
+      if (state.currentId == -1) {
+        var maxid = 0;
+        var maxobj;
+
+        state.orderHistory.map(obj => {  
+            if (obj.orderId > maxid) maxid = obj.orderId;    
+        });
+
+        state.orderHistory.map(obj => {   
+            if (obj.orderId == maxid) maxobj = obj;    
+        });
+
+        id = maxobj.orderId;
+      }
+
       axios.post('https://api.swiftapp.ml', 
         {
           "requestType": "updateOrder",
           "token": sessionStorage.getItem('authToken'),
-          "orderId": state.currentId,
+          "orderId": id,
           "orderItems": this.getters['OrderStore/getOrderInfo'].orderItems
         }
       ).then(result => {
@@ -122,7 +136,6 @@ const actions = {
   },
 
   submitRating({commit}, ratingObject) {
-    console.log(ratingObject.ratings)
     for (let i = 0; i < ratingObject.ratings.length; i++) {
       axios.post('https://api.swiftapp.ml', 
           {
@@ -137,8 +150,6 @@ const actions = {
             "phrases": ratingObject.ratings[i].phrases,
           }
         ).then(result => {
-          // return result.data
-          console.log(yay)
         }).catch(({ response }) => {
         });
     }
@@ -158,7 +169,7 @@ const actions = {
         "waiterTip": this.getters['OrderStore/getPaymentInfo'].waiterTip,
         "orderTax": this.getters['OrderStore/getPaymentInfo'].orderTax
     }
-    console.log(data)
+    
     axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "payment",
@@ -203,7 +214,6 @@ const actions = {
 
   retrieveOrderStatus({commit}, data) {
     var orderId = data.orderId;
-    // console.log(orderId)
     axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "orderStatus",
@@ -277,12 +287,9 @@ const mutations = {
           "orderItems": itemsOrdered
         // }
       }
-      // console.log("NEW OLD")
-      // console.log(data.orderItems)
 
       state.orderedItems = data;
 
-      // console.log(state.orderedItems.orderItems)
     }
     
 
@@ -297,8 +304,6 @@ const mutations = {
   },
 
   ADD_ITEM_TO_ORDER(state, orderItemInfo) {
-    // console.log("ITEM TO ORDER:")
-    // console.log(orderItemInfo)
     let empty = Object.keys(state.orderInfo).length === 0 && state.orderInfo.constructor === Object
     if (!empty) {
       for (let i = 0; i < orderItemInfo.orderInfo.orderItems.length; i++)

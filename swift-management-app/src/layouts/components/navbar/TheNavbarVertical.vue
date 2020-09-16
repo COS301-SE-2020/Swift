@@ -126,6 +126,7 @@ export default {
       authKey: this.getAuthToken(),
       restaurantId: this.getCurrentRestaurantId(),
     });
+    
   },
 };
 </script>

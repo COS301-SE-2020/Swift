@@ -6,20 +6,35 @@
       </div>
     </div>
     <h4 class="mb-2">Financial Statistics</h4>
+    <vs-dropdown class="mb-4 mr-4">
+      <vs-button type="filled">
+        <span class="flex items-center">
+          <span>Month: {{ selectedMonth }}</span>
+          <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
+        </span>
+      </vs-button>
+      <vs-dropdown-menu>
+        <vs-dropdown-item
+          v-for="(index, month) in months"
+          :key="index"
+          @click="selectedMonth = months[month]"
+        >{{ months[month] }}</vs-dropdown-item>
+      </vs-dropdown-menu>
+    </vs-dropdown>
     <div class="vx-row">
       <div class="vx-col w-full md:w-2/3 mb-base">
         <vx-card title="Revenue">
           <div slot="no-body" class="p-6 pb-0">
             <div class="flex" v-if="revenueData.analyticsData">
               <div class="mr-6">
-                <p class="mb-1 font-semibold">This Month</p>
+                <p class="mb-1 font-semibold">{{ selectedMonth }}</p>
                 <p class="text-3xl text-success">
                   <sup class="text-base mr-1">R</sup>
                   {{ revenueData.analyticsData.thisMonth.toLocaleString() }}
                 </p>
               </div>
               <div>
-                <p class="mb-1 font-semibold">Last Month</p>
+                <p class="mb-1 font-semibold">{{ previousMonth }}</p>
                 <p class="text-3xl">
                   <sup class="text-base mr-1">R</sup>
                   {{ revenueData.analyticsData.lastMonth.toLocaleString() }}
@@ -27,6 +42,7 @@
               </div>
             </div>
             <vue-apex-charts
+              ref="revenueChart"
               type="line"
               height="257"
               :options="revenueData.chartOptions"
@@ -60,7 +76,7 @@
                 </span>
               </div>
             </div>
-            <vs-progress :percent="menuItem.ratio"></vs-progress>
+            <vs-progress :percent="parseFloat(menuItem.ratio)"></vs-progress>
           </div>
         </vx-card>
       </div>
@@ -78,14 +94,13 @@
       </div>
 
       <div class="vx-col md:w-1/2 w-full mb-base">
-        <vx-card title="Income By Menu" code-toggler>
+        <vx-card title="Income By Menu">
           <vue-apex-charts
             type="bar"
             height="350"
             :options="incomeByMenu.chartOptions"
             :series="incomeByMenu.series"
           ></vue-apex-charts>
-          <template slot="codeContainer">{{ incomeByMenuCode }}</template>
         </vx-card>
       </div>
     </div>
@@ -99,7 +114,31 @@ export default {
   components: {
     VueApexCharts,
   },
+  data() {
+    return {
+      selectedMonth: "January",
+      months: [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ],
+    };
+  },
   computed: {
+    previousMonth() {
+      var index = this.months.indexOf(this.selectedMonth) - 1;
+      if (index == -1) index = 11;
+      return this.months[index];
+    },
     revenueData() {
       if (this.$store.state.analytics)
         return this.$store.state.analytics.revenueData;
@@ -121,15 +160,65 @@ export default {
       else return null;
     },
   },
+  methods: {
+    loadStatistics() {
+      this.$store.dispatch("loadStatistics", {
+        authKey: this.getAuthToken(),
+        restaurantId: this.getCurrentRestaurantId(),
+      });
+    },
+  },
   created() {
     //check authtoken
     if (!analyticsData.isRegistered) {
       this.$store.registerModule("analytics", analyticsData);
       analyticsData.isRegistered = true;
     }
+    //set selectedMonth to current month
+    this.selectedMonth = this.months[new Date().getMonth()];
+    this.loadStatistics();
   },
   mounted() {
     this.isMounted = true;
+  },
+  watch: {
+    selectedMonth: function (val) {
+      var now = new Date();
+      var startDate = new Date(now.getFullYear(), this.months.indexOf(val), 1);
+      var endDate = new Date(
+        now.getFullYear(),
+        this.months.indexOf(val) + 1,
+        0
+      );
+
+      startDate = (
+        (now.getTime() - startDate.getTime()) /
+        (1000 * 3600 * 24)
+      ).toFixed(0);
+      endDate = (
+        (now.getTime() - endDate.getTime()) /
+        (1000 * 3600 * 24)
+      ).toFixed(0);
+
+      if (endDate < 0) endDate = 0;
+
+      alert(startDate)
+      alert(endDate)
+
+      this.$store.dispatch("analytics/statsRevenue", {
+        authKey: this.getAuthToken(),
+        restaurantId: this.getCurrentRestaurantId(),
+        month: this.months.indexOf(val),
+        chart: this.$refs.revenueChart,
+      });
+
+      this.$store.dispatch("analytics/statsTopMenuItems", {
+        authKey: this.getAuthToken(),
+        restaurantId: this.getCurrentRestaurantId(),
+        startPeriod: startDate,
+        endPeriod: endDate,
+      });
+    },
   },
 };
 </script>
