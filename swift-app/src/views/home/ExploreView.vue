@@ -50,25 +50,26 @@
     </v-container>
     <v-container v-show="!isLoading" class="px-0 py-0" v-if="search == ''">
       <v-container py-0>
-        <v-carousel v-model="carouselIndex" class="promotionalMaterial" :continuous="true" :cycle="cycle" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="170px">
-          <v-carousel-item v-for="(promotion, i) in promotions" :key="i">
+        <v-carousel v-model="carouselIndex" class="promotionalMaterial" :continuous="true" :cycle="false" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="170px">
+          <v-carousel-item v-for="(promotion, i) in activePromotions.restaurantPromo" :key="i">
             <v-sheet :color="(i == 3) ? 'primary' : 'secondary'" height="150px" flat tile style="border-radius: 10px !important" class="mt-5">
               <v-row class="d-flex justify-space-between px-0 py-0">
                 <v-col cols="6" class="py-3 pr-0">
                   <v-layout column justify-space-between fill-height>
                     <div class="px-3">
                       <!-- <span class="specialsText font-weight-light">30%</span> <span class="specialsText discount font-weight-light">discount</span> <span class="specialsText font-weight-light">on all pizza slices</span> -->
-                      <span class="specialsText font-weight-light">{{ promotion.promotionalMessage }}</span>
-                      <div class="mt-1 specialsDate">{{ promotion.period }}</div>
+                      <span class="specialsText font-weight-light">{{ promotion.message }}</span>
+                      <div class="mt-1 specialsDate">{{ getDate(promotion.startDate) }} until {{ getDate(promotion.endDate) }}</div>
                     </div>
                     <!-- <div class="browseButton">
                       <v-btn @click="goToRestaurant(promotion.restaurantId)" color="accent" height="33px" class="browseMenu px-2">Browse Menu</v-btn>
                     </div> -->
                   </v-layout>
                 </v-col>
-                <v-col cols="6" class="py-0">
-                  <v-layout column >
-                    <v-img height="155px" :src="promotion.promotionalImage" :class="(i == 3) ? 'specialsImage bannerImage pl-2' : 'specialsImage'">{{ promotion.restaurant }}</v-img>
+                <v-col cols="6" class="py-0" style="height: 155px">
+                  <v-layout column class="py-0 d-flex flex-column align-end">
+                    <v-img height="155px" :src="promotion.image" :class="(i == 3) ? 'specialsImage bannerImage pl-2' : 'specialsImage'"></v-img>
+                    <span class="specialsRestaurantName" style="top: 80px; right: 15px; position: absolute">{{ getCheckedInRestaurantName(promotion.restaurantId) }}</span>
                   </v-layout>
                 </v-col>
               </v-row>
@@ -243,7 +244,7 @@ import RestaurantSearchToolBar from '@/components/layout/RestaurantSearchToolBar
 import store from '@/store/store.js';
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import $ from 'jquery'
-
+import moment from 'moment'
 
 export default {
   components: {
@@ -289,7 +290,9 @@ export default {
         this.selectedCategories.push(this.exploreCategories[i].categoryId)
       }
     },
-    
+    getDate(date) {
+      return moment(String(date.slice(0, 10))).format('DD MMM')
+    },
     goToCart() {
       this.$router.push('/cart')
     },
@@ -352,6 +355,8 @@ export default {
       // await this.$store.dispatch('MenuStore/retrieveMenu', this.checkedInRestaurantId);
       var menuItemsList = await this.$store.dispatch('RestaurantsStore/retrieveSuggestedMenuItemIds');
       await this.$store.dispatch('RestaurantsStore/retrieveSuggestedMenuItemsFromRatings', menuItemsList);
+      await this.$store.dispatch('RestaurantsStore/retrieveActivePromotions');
+      await this.$store.dispatch('MenuStore/retrieveMenu', this.checkedInRestaurantId);
       
       if (retrievedAllRestaurants && retrievedExploreCategories)
         this.isLoading = false;
@@ -367,7 +372,6 @@ export default {
         return { color: "primary", icon: "mdi-bell-outline" };
       }
     },
-    
     filteredList() {
       if (this.allRestaurants.length != undefined)
         return this.allRestaurants.filter(restaurant => {
@@ -392,7 +396,8 @@ export default {
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
       suggestedItemsIds: 'RestaurantsStore/getSuggestedItemsIds',
-      suggestedItemsFromRatings: 'RestaurantsStore/getSuggestedItemsFromRatings'
+      suggestedItemsFromRatings: 'RestaurantsStore/getSuggestedItemsFromRatings',
+      activePromotions: 'RestaurantsStore/getAllActiveRestaurantPromotions',
     }),
   },
 }
@@ -443,7 +448,7 @@ export default {
   }
 
   .specialsText {
-    font-size: 18px;
+    font-size: 14px;
     color: white;
     white-space: pre-wrap;
   }
@@ -471,12 +476,17 @@ export default {
     background-size: cover; */
     /* height: 100%; */
     /* width: 103.5%; */
+    opacity: 0.85;
     border-top-right-radius: 7px;
     border-bottom-right-radius: 7px;
-    color: white !important;
-    font-size: 24px;
+    /* color: white !important; */
+    
+    line-height: 50px;
+  }
+
+  .specialsRestaurantName {
+    font-size: 18px;
     text-align: center;
-    line-height: 180px;
   }
 
   /* .activeButtonClass {
@@ -484,8 +494,8 @@ export default {
   } */
 
   .bannerImage {
-    line-height: 150px;
-    font-size: 22px;
+    /* line-height: 150px; */
+    /* font-size: 17px; */
     border-bottom-left-radius: 160px;
   }
 
