@@ -3,7 +3,8 @@
 /* eslint-disable linebreak-style */
 const bcrypt = require('bcrypt');
 const validator = require('email-validator');
-const db = require('../db');
+const db = require('../db').poolr;
+const dbw = require('../db').poolw;
 const { registrationEmail, passResetEmail } = require('../helper/notifications/sendEmail');
 const { getCode, validateCode } = require('../helper/notifications/resetHandler');
 const { generateToken, validateToken, tokenState } = require('../helper/tokenHandler');
@@ -59,7 +60,7 @@ module.exports = {
 
           // Update token in DB - async
           const loginPromises = [];
-          loginPromises.push(db.query(
+          loginPromises.push(dbw.query(
             'UPDATE public.person SET refreshtoken = $1::text WHERE userid = $2::integer;',
             [bcrypt.hashSync(newTokenPair.refreshToken, BC_SALT_ROUNDS), res.rows[0].userid]
           )
@@ -213,7 +214,7 @@ module.exports = {
           return response.status(404).send({ status: 404, reason: 'Not Found' });
         }
 
-        return db.query(
+        return dbw.query(
           'UPDATE public.person SET password = $1::text WHERE email = $2::text;',
           [bcrypt.hashSync(reqBody.password, BC_SALT_ROUNDS), reqBody.email]
         )
@@ -249,7 +250,7 @@ module.exports = {
           }
 
           // add favourite if it has not already been added
-          return db.query(
+          return dbw.query(
             'INSERT INTO public.favourite (menuitemid, userid)'
             + ' SELECT $1::integer, $2::integer WHERE NOT EXISTS'
             + ' (SELECT 1 FROM public.favourite WHERE'
@@ -357,7 +358,7 @@ module.exports = {
         const newTokenPair = generateToken(userToken.data.userId);
 
         // Update DB
-        return db.query(
+        return dbw.query(
           'UPDATE public.person SET refreshtoken = $1::text WHERE userid = $2::integer;',
           [bcrypt.hashSync(newTokenPair.refreshToken, BC_SALT_ROUNDS), userToken.data.userId]
         )
@@ -418,7 +419,7 @@ module.exports = {
 
         // Create new account
         // TODO: Generate and send user account activation email-DONE
-        return db.query(
+        return dbw.query(
           'INSERT INTO public.person (name, surname, email, password, profileimageurl, refreshtoken, theme)'
             + ' VALUES ($1::text, $2::text, $3::text, $4::text, $5::text, $6::text, $7::text);',
           [
@@ -506,7 +507,7 @@ module.exports = {
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
       const id = userToken.data.userId;
-      return db.query(
+      return dbw.query(
         'UPDATE public.person SET name = $1::text, surname = $2::text, profileimageurl = $3::text, theme = $4::text  WHERE userid = $5::integer;',
         [reqBody.name, reqBody.surname, reqBody.profileImage, reqBody.theme, id]
       )
@@ -546,7 +547,7 @@ module.exports = {
           }
 
           // add review like if it has not already been added
-          return db.query(
+          return dbw.query(
             'INSERT INTO public.likedreview (reviewId, userid)'
             + ' SELECT $1::integer, $2::integer WHERE NOT EXISTS'
             + ' (SELECT 1 FROM public.likedreview WHERE'

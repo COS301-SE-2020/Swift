@@ -4,7 +4,8 @@ const { google } = require('googleapis');
 const path = require('path');
 const configFacebook = require('../config/config-facebook-oauth.json');
 const configGoogle = require('../config/config-google-oauth.json');
-const db = require('../db');
+const db = require('../db').poolr;
+const dbw = require('../db').poolw;
 const { generateToken, validateToken, tokenState } = require('../helper/tokenHandler');
 const { getFavourites, getOrderHistory } = require('../helper/objectBuilder');
 const { registerUser } = require('./userController');
@@ -64,7 +65,7 @@ const loginUser = (userEmail, userName, response) => db.query(
 
     // Update token in DB - async
     const loginPromises = [];
-    loginPromises.push(db.query(
+    loginPromises.push(dbw.query(
       'UPDATE public.person SET refreshtoken = $1::text WHERE userid = $2::integer;',
       [bcrypt.hashSync(newTokenPair.refreshToken, BC_SALT_ROUNDS), res.rows[0].userid]
     )

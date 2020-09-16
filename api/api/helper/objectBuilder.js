@@ -1,5 +1,6 @@
 /* eslint-disable linebreak-style */
-const db = require('../db');
+const db = require('../db').poolr;
+// const dbw = require('../db').poolw;
 
 // helper to get individual order items
 const getOrderItems = async (oid = 0) => db.query(

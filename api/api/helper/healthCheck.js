@@ -1,5 +1,5 @@
 const axios = require('axios');
-const db = require('../db');
+const db = require('../db').poolr;
 
 module.exports = {
   getServiceStatus: async (res) => {

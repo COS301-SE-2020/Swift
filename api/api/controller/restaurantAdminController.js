@@ -1,6 +1,7 @@
 /* eslint-disable linebreak-style */
 const { v4: uuidv4 } = require('uuid');
-const db = require('../db');
+const db = require('../db').poolr;
+const dbw = require('../db').poolw;
 const { validateToken, tokenState } = require('../helper/tokenHandler');
 const {
   getReviews,
@@ -37,7 +38,7 @@ module.exports = {
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
       return (async () => {
-        const client = await db.connect();
+        const client = await dbw.connect();
         try {
           // begin transaction
           await client.query('BEGIN');
@@ -154,7 +155,7 @@ module.exports = {
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
       return (async () => {
-        const client = await db.connect();
+        const client = await dbw.connect();
         try {
           // begin transaction
           await client.query('BEGIN');
@@ -303,7 +304,7 @@ module.exports = {
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
       return (async () => {
-        const client = await db.connect();
+        const client = await dbw.connect();
         try {
           // begin transaction
           await client.query('BEGIN');
@@ -408,7 +409,7 @@ module.exports = {
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
       return (async () => {
-        const client = await db.connect();
+        const client = await dbw.connect();
         try {
           // begin transaction
           await client.query('BEGIN');
@@ -653,7 +654,7 @@ module.exports = {
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
       return (async () => {
-        const client = await db.connect();
+        const client = await dbw.connect();
         try {
           // begin transaction
           await client.query('BEGIN');
@@ -932,7 +933,7 @@ module.exports = {
 
     if (userToken.state === tokenState.VALID) {
       return (async () => {
-        const client = await db.connect();
+        const client = await dbw.connect();
         try {
           // begin transaction
           await client.query('BEGIN');
@@ -1032,7 +1033,7 @@ module.exports = {
 
     if (userToken.state === tokenState.VALID) {
       return (async () => {
-        const client = await db.connect();
+        const client = await dbw.connect();
         try {
           // begin transaction
           await client.query('BEGIN');
@@ -1236,7 +1237,7 @@ module.exports = {
 
     if (userToken.state === tokenState.VALID) {
       return (async () => {
-        const client = await db.connect();
+        const client = await dbw.connect();
         try {
           // begin transaction
           await client.query('BEGIN');
@@ -1351,7 +1352,7 @@ module.exports = {
 
     if (userToken.state === tokenState.VALID) {
       return (async () => {
-        const client = await db.connect();
+        const client = await dbw.connect();
         try {
           // begin transaction
           await client.query('BEGIN');
@@ -1456,7 +1457,7 @@ module.exports = {
 
     if (userToken.state === tokenState.VALID) {
       return (async () => {
-        const client = await db.connect();
+        const client = await dbw.connect();
         try {
           // begin transaction
           await client.query('BEGIN');
@@ -1807,7 +1808,7 @@ module.exports = {
 
     if (userToken.state === tokenState.VALID) {
       return (async () => {
-        const client = await db.connect();
+        const client = await dbw.connect();
         try {
           // begin transaction
           await client.query('BEGIN');
@@ -1954,7 +1955,7 @@ module.exports = {
     if (userToken.state === tokenState.VALID) {
       // eslint-disable-next-line consistent-return
       return (async () => {
-        const client = await db.connect();
+        const client = await dbw.connect();
         try {
           // begin transaction
           await client.query('BEGIN');

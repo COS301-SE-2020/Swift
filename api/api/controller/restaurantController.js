@@ -1,5 +1,6 @@
 /* eslint-disable linebreak-style */
-const db = require('../db');
+const db = require('../db').poolr;
+const dbw = require('../db').poolw;
 const paymentEmail = require('../helper/notifications/sendEmail');
 const { validateToken, tokenState } = require('../helper/tokenHandler');
 const {
@@ -1010,12 +1011,12 @@ module.exports = {
           // pay for order
           const newOrderStatus = 'Paid';
 
-          return db.query(
+          return dbw.query(
             'INSERT INTO public.payment (orderid, paymentmethod, paymentamount, paymentdatetime)'
             + ' VALUES ($1::integer, $2::text, $3::real, NOW());',
             [reqBody.orderId, reqBody.paymentMethod, reqBody.amountPaid]
           )
-            .then(() => db.query(
+            .then(() => dbw.query(
               'UPDATE public.customerorder SET orderstatus = $1::text WHERE orderid = $2::integer',
               [newOrderStatus, reqBody.orderId]
             )
@@ -1124,7 +1125,7 @@ module.exports = {
               rQuery += ') VALUES ';
               rQuery += '($1::integer, NOW(), $2::real, $3::text, $4::boolean, $5::integer)';
               rQuery += ' RETURNING reviewid;';
-              return db.query(rQuery, [
+              return dbw.query(rQuery, [
                 reqBody.orderId,
                 reqBody.ratingScore,
                 reqBody.comment === '' ? null : reqBody.comment,
@@ -1134,7 +1135,7 @@ module.exports = {
                 .then((rRes) => {
                   // add phrases
                   reqBody.phrases.forEach((rPhrase) => {
-                    Promise.resolve(db.query(
+                    Promise.resolve(dbw.query(
                       'INSERT INTO public.customerphraserating (reviewid, phraseid, ratingscore)'
                       + ' VALUES ($1::integer, $2::integer, $3::real);',
                       [rRes.rows[0].reviewid, rPhrase.phraseId, rPhrase.phraseScore]
@@ -1142,7 +1143,7 @@ module.exports = {
                   });
 
                   // Update order status
-                  return db.query(
+                  return dbw.query(
                     'UPDATE public.customerorder SET orderstatus = $1::text WHERE orderid = $2::integer',
                     ['Rated', reqBody.orderId]
                   )
