@@ -1193,7 +1193,7 @@ module.exports = {
             .then(async () => {
               const menuItemObj = {};
               const res = await db.query(
-                'SELECT menuitemid, menuitemname, menuitemdescription, price, estimatedwaitingtime,'
+                'SELECT menuitemid, restaurantid, menuitemname, menuitemdescription, price, estimatedwaitingtime,'
                 + ' menuitem.attributes, arasset, availability FROM public.menuitem'
                 + ' WHERE menuitemid = $1::integer ORDER BY menuitemid ASC;',
                 [menuItem]
@@ -1214,7 +1214,7 @@ module.exports = {
               menuItemObj.menuItemInfo.images = [];
 
               for (let i = 0; i < res2.rows.length; i++) {
-                menuItemObj.menuItemInfo.images = res2.rows[i];
+                menuItemObj.menuItemInfo.images.push(res2.rows[i]);
               }
 
               menuItemsList.push(menuItemObj);
