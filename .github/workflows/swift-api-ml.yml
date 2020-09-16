@@ -16,10 +16,10 @@ jobs:
     - name: Get Environment Secrets
       uses: ./.github/actions/yaml-env-secrets-ml
       env:
-        DB_HOST: ${{ secrets.DB_HOST }}
+        DB_HOST: ${{ secrets.DB_HOSTR }}
         DB_NAME: ${{ secrets.DB_NAME }}
         DB_PASS: ${{ secrets.DB_PASS_RO }}
-        DB_PORT: ${{ secrets.DB_PORT }}
+        DB_PORT: ${{ secrets.DB_PORTR }}
         DB_USER: ${{ secrets.DB_USER_RO }}
 
     # Setup and configure gcloud CLI
