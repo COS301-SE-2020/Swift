@@ -8,7 +8,7 @@ const dbw = require('../db').poolw;
 const { registrationEmail, passResetEmail } = require('../helper/notifications/sendEmail');
 const { getCode, validateCode } = require('../helper/notifications/resetHandler');
 const { generateToken, validateToken, tokenState } = require('../helper/tokenHandler');
-const { getFavourites, getOrderHistory } = require('../helper/objectBuilder');
+const { getFavourites, getOrderHistory, getEmployeeData } = require('../helper/objectBuilder');
 const phImg = require('../helper/assets/placeholderImage.json');
 
 const BC_SALT_ROUNDS = 10;
@@ -68,6 +68,22 @@ module.exports = {
               console.error('Query Error [Login - Update Account Token]', err.stack);
               return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
             }));
+
+          loginPromises.push(new Promise((resolve, reject) => {
+            loginPromises.push(getEmployeeData(res.rows[0].userid).then((employeeDataPromise) => {
+              loginResponse.employeeData = [];
+              Promise.all(employeeDataPromise)
+                .then((dataItems) => {
+                  dataItems.forEach((item) => {
+                    loginResponse.employeeData.push(item);
+                  });
+                  resolve();
+                })
+                .catch((err) => {
+                  reject(err);
+                });
+            }));
+          }));
 
           loginPromises.push(getFavourites(res.rows[0].userid).then((favourites) => {
             loginResponse.favourites = favourites;

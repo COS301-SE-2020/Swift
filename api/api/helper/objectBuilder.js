@@ -138,12 +138,15 @@ const getPromotionItems = async (pid) => db.query(
   });
 
 const getEmployeeRights = async (employeeId = 0) => db.query(
-  'SELECT * FROM public.employeeaccessright WHERE employeeid = $1::integer',
+  'SELECT accessright.description FROM public.employeeaccessright'
+  + ' INNER JOIN public.accessright ON accessright.permissionid = employeeaccessright.permissionid'
+  + ' WHERE employeeid = $1::integer',
   [employeeId]
+
 ).then((employees) => {
   const permissions = [];
   employees.rows.forEach((permission) => {
-    permissions.push(permission.permissionid);
+    permissions.push(permission.description);
   });
   return permissions;
 })
@@ -494,6 +497,57 @@ module.exports = {
       console.error('Query Error [Favourites - Get User Favourites]', err.stack);
       return [];
     }),
+  getEmployeeData: (userId = 0) => (async () => {
+    const client = await db.connect();
+    try {
+      // begin transaction
+      await client.query('BEGIN');
+      const res = await client.query(
+        'SELECT restaurantemployee.employeeid, restaurantemployee.restaurantid, restaurantemployee.employeerole,'
+          + ' restaurantemployee.employeenumber FROM public.restaurantemployee'
+          + ' WHERE restaurantemployee.userid = $1::integer;',
+        [userId]
+      );
+
+      const employeeInfo = [];
+      res.rows.forEach((emp) => {
+        employeeInfo.push(getAvgScore(emp.userid, emp.restaurantid)
+          .then(async (score) => {
+            const employee = {};
+            employee.restaurantId = emp.restaurantid;
+            employee.employeeId = emp.employeeid;
+            employee.role = emp.employeerole;
+            employee.employeeNumber = emp.employeenumber;
+            employee.averageRating = score;
+
+            const accessRightPromises = await getEmployeeRights(emp.employeeid);
+            employee.rights = [];
+
+            await Promise.all(accessRightPromises)
+              .then((accessItem) => {
+                accessItem.forEach((access) => {
+                  employee.rights.push(access);
+                });
+              });
+            // eslint-disable-next-line no-console
+            console.log(employee);
+            return employee;
+          }));
+      });
+      // commit and return favourites array
+      await client.query('COMMIT');
+      return employeeInfo;
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+  })()
+    .catch((err) => {
+      console.error('Query Error [Favourites - Get User Favourites]', err.stack);
+      return [];
+    }),
   getOrderItems,
   getOrderHistory: (userId = 0) => db.query(
     'SELECT customerorder.orderid, restaurant.restaurantid, restaurant.restaurantname,'
@@ -832,13 +886,15 @@ module.exports = {
       await client.query('BEGIN');
 
       const employees = await client.query(
-        'SELECT * FROM public.employeeaccessright WHERE employeeid = $1::integer',
+        'SELECT accessright.description FROM public.employeeaccessright'
+        + ' INNER JOIN public.accessright ON accessright.permissionid = employeeaccessright.permissionid'
+        + ' WHERE employeeid = $1::integer',
         [employeeId]
       );
 
       const permissions = [];
       employees.rows.forEach((permission) => {
-        permissions.push(permission.permissionid);
+        permissions.push(permission.description);
       });
       return permissions;
     } catch (err) {
