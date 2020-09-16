@@ -46,6 +46,7 @@
 import SearchBar from "./components/SearchBar.vue";
 import NotificationDropDown from "./components/NotificationDropDown.vue";
 import ProfileDropDown from "./components/ProfileDropDown.vue";
+import analyticsData from "@/store/analytics/analyticsDataList.js";
 
 export default {
   data() {
@@ -113,9 +114,17 @@ export default {
     },
   },
   created() {
+    if (!analyticsData.isRegistered) {
+      this.$store.registerModule("analytics", analyticsData);
+      analyticsData.isRegistered = true;
+    }
     this.$store.dispatch("retrieveMyRestaurants", {
       authKey: this.getAuthToken(),
       currentRestaurantName: this.getCurrentRestaurantName(),
+    });
+    this.$store.dispatch("loadDashboard", {
+      authKey: this.getAuthToken(),
+      restaurantId: this.getCurrentRestaurantId(),
     });
   },
 };

@@ -1,5 +1,6 @@
 import axios from "@/axios.js"
 
+
 export default {
   dashboardActiveOrderCount({
     commit
@@ -85,7 +86,6 @@ export default {
       "restaurantId": payload.restaurantId,
       "token": payload.authKey,
     }).then(result => {
-      console.log(result.data)
       commit('SET_AVAILABLE_TABLES_COUNT', result.data);
     }).catch(({
       result
@@ -101,7 +101,6 @@ export default {
       "restaurantId": payload.restaurantId,
       "token": payload.authKey,
     }).then(result => {
-      console.log(result.data)
       commit('SET_TABLE_OCUPANCY_HISTORY', result.data);
     }).catch(({
       result
@@ -109,4 +108,40 @@ export default {
       console.log(result)
     });
   },
+  dashboardTopMenuItems({
+    commit
+  }, payload) {
+    axios.post(process.env.VUE_APP_MLURL, {
+      "requestType": "dashboardTopMenuItems",
+      "startPeriod": payload.startPeriod,
+      "endPeriod": 0,
+      "restaurantId": payload.restaurantId,
+      "token": payload.authKey,
+    }).then(result => {
+      commit('SET_TOP_MENU_ITEMS', result.data);
+    }).catch(({
+      result
+    }) => {
+      console.log(result)
+    });
+  },
+  dashboardTopMenus({
+    commit
+  }, payload) {
+    axios.post(process.env.VUE_APP_MLURL, {
+      "requestType": "dashboardTopMenus",
+      "startPeriod": payload.startPeriod,
+      "restaurantId": payload.restaurantId,
+      "token": payload.authKey,
+    }).then(result => {
+      commit('SET_TOP_MENU', result.data);
+    }).catch(({
+      result
+    }) => {
+      console.log(result)
+    });
+  },
+
+
+
 }

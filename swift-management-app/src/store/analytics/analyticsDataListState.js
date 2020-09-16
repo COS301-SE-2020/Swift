@@ -38,28 +38,9 @@ export default {
     }
   },
   topItems: [{
-      id: 1,
       name: 'Hawaian',
       ratio: 50,
-      growthPerc: '5'
-    },
-    {
-      id: 3,
-      name: 'Quattro',
-      ratio: 8,
-      growthPerc: '-2'
-    },
-    {
-      id: 2,
-      name: 'Regina',
-      ratio: 19,
-      growthPerc: '1'
-    },
-    {
-      id: 4,
-      name: 'BBQ Chicken',
-      ratio: 27,
-      growthPerc: '-5'
+      growthPerc: 5
     },
   ],
   customerCount: {
@@ -98,9 +79,6 @@ export default {
       }
     }
   },
-
-
-
   menuDistribution: {
     series: [144, 55, 80],
     chartOptions: {

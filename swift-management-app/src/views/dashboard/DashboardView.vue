@@ -1,4 +1,4 @@
-<template>
+<template :key="myDashboard">
   <div>
     <div class="router-header flex flex-wrap items-center mb-6">
       <div class="content-area__heading pr-4">
@@ -58,22 +58,22 @@
     <vs-dropdown class="mb-4 mr-4">
       <vs-button type="filled">
         <span class="flex items-center">
-          <span>Timeframe: Today</span>
+          <span>Timeframe: {{ timePeriod }}</span>
           <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
         </span>
       </vs-button>
       <vs-dropdown-menu>
-        <vs-dropdown-item>Today</vs-dropdown-item>
-        <vs-dropdown-item>This Week</vs-dropdown-item>
-        <vs-dropdown-item>This Month</vs-dropdown-item>
-        <vs-dropdown-item>This Year</vs-dropdown-item>
-        <vs-dropdown-item>This All Time</vs-dropdown-item>
+        <vs-dropdown-item @click="timePeriod = 'Today'">Today</vs-dropdown-item>
+        <vs-dropdown-item @click="timePeriod = 'This Week'">This Week</vs-dropdown-item>
+        <vs-dropdown-item @click="timePeriod = 'This Month'">This Month</vs-dropdown-item>
+        <vs-dropdown-item @click="timePeriod = 'This Year'">This Year</vs-dropdown-item>
+        <vs-dropdown-item @click="timePeriod = 'All Time'">All Time</vs-dropdown-item>
       </vs-dropdown-menu>
     </vs-dropdown>
     <div class="vx-row">
       <div class="vx-col w-full md:w-1/3 mb-base">
         <vx-card title="Top Menu Items">
-          <div v-for="(menuItem, index) in topItems" :key="menuItem.id" :class="{'mt-4': index}">
+          <div v-for="(menuItem, index) in topItems" :key="index" :class="{'mt-4': index}">
             <div class="flex justify-between">
               <div class="flex flex-col">
                 <span class="mb-1">{{ menuItem.name }}</span>
@@ -89,13 +89,16 @@
                 </span>
               </div>
             </div>
-            <vs-progress :percent="menuItem.ratio"></vs-progress>
+            <vs-progress :percent="parseFloat(menuItem.ratio)"></vs-progress>
           </div>
         </vx-card>
       </div>
       <div class="vx-col md:w-1/3 w-full mb-base">
         <vx-card title="Menu Popularity">
+          <span v-if="menuDistribution.series.length == 0">No Data</span>
           <vue-apex-charts
+          v-if="menuDistribution.series.length > 0"
+            :key="menuPopularityChartKey"
             type="donut"
             height="310"
             :options="menuDistribution.chartOptions"
@@ -161,6 +164,13 @@ export default {
     VueApexCharts,
     StatisticsCardLine,
   },
+  data() {
+    return {
+      menuPopularityChartKey: 1,
+      timePeriod: "All Time",
+      myDashboard: 1,
+    };
+  },
   computed: {
     currentOrders() {
       if (this.$store.state.analytics)
@@ -219,31 +229,7 @@ export default {
       else return 0;
     },
     loadDashboard() {
-      this.$store.dispatch("analytics/dashboardActiveOrderCount", {
-        authKey: this.getAuthToken(),
-        restaurantId: this.getCurrentRestaurantId(),
-      });
-      this.$store.dispatch("analytics/dashboardOrderHistory", {
-        authKey: this.getAuthToken(),
-        restaurantId: this.getCurrentRestaurantId(),
-      });
-      this.$store.dispatch("analytics/dashboardActiveCustomerCount", {
-        authKey: this.getAuthToken(),
-        restaurantId: this.getCurrentRestaurantId(),
-      });
-      this.$store.dispatch("analytics/dashboardActiveCustomerHistory", {
-        authKey: this.getAuthToken(),
-        restaurantId: this.getCurrentRestaurantId(),
-      });
-      this.$store.dispatch("analytics/dashboardActiveWaiters", {
-        authKey: this.getAuthToken(),
-        restaurantId: this.getCurrentRestaurantId(),
-      });
-      this.$store.dispatch("analytics/dashboardAvailableTables", {
-        authKey: this.getAuthToken(),
-        restaurantId: this.getCurrentRestaurantId(),
-      });
-      this.$store.dispatch("analytics/dashboardTableOccupancyHistory", {
+      this.$store.dispatch("loadDashboard", {
         authKey: this.getAuthToken(),
         restaurantId: this.getCurrentRestaurantId(),
       });
@@ -259,6 +245,48 @@ export default {
   },
   mounted() {
     this.isMounted = true;
+  },
+  watch: {
+    timePeriod(val) {
+      var start = 1;
+      var now = new Date();
+      switch (val) {
+        case "Today":
+          start = 1;
+          break;
+        case "This Week":
+          start = now.getDay();
+          break;
+        case "This Month":
+          start = now.getDate();
+          break;
+        case "This Year":
+          var beginOfYear = new Date(now.getFullYear(), 0, 0);
+          var Difference = now - beginOfYear;
+          var oneDay = 1000 * 60 * 60 * 24;
+          var daysIntoYear = Math.floor(Difference / oneDay);
+          start = daysIntoYear;
+          break;
+        case "All Time":
+          start = 999999;
+          break;
+
+        default:
+          break;
+      }
+      this.$store.dispatch("analytics/dashboardTopMenuItems", {
+        authKey: this.getAuthToken(),
+        restaurantId: this.getCurrentRestaurantId(),
+        startPeriod: start,
+      });
+      this.$store.dispatch("analytics/dashboardTopMenus", {
+        authKey: this.getAuthToken(),
+        restaurantId: this.getCurrentRestaurantId(),
+        startPeriod: start,
+      });
+      this.menuPopularityChartKey++;
+      this.myDashboard++;
+    },
   },
 };
 </script>
