@@ -77,26 +77,21 @@ const actions = {
       "token": sessionStorage.getItem('authToken'),
     }
     ).then(result => {
-      console.log(result.data)
-      // Call retrieveSuggestedMenuItemsFromRatings (array)
-      // this.dispatch('RestaurantsStore/retrieveSuggestedMenuItemsFromRatings', result.data);
-      return true;
+      this.dispatch('RestaurantsStore/retrieveSuggestedMenuItemsFromRatings', result.data.menuItemIds);
     }).catch(({ response }) => {
 
     });
   },
 
   retrieveSuggestedMenuItemsFromRatings({commit}, menuItemIdList) {
-    return axios.post('https://ml.api.swiftapp.ml', 
+    return axios.post('https://api.swiftapp.ml', 
     {
-      "requestType": "suggestFromRatings",
-      "menuItems": menuItemIdList,
+      "requestType": "suggestedMenuItems",
+      "menuItems": [65, 16, 43],
       "token": sessionStorage.getItem('authToken'),
     }
     ).then(result => {
-      console.log(result.data)
-      // commit('SAVE_SUGGESTED_ITEMS', result.data.menuItems);
-      return true;
+      commit('SAVE_SUGGESTED_ITEMS', result.data);
     }).catch(({ response }) => {
 
     });
