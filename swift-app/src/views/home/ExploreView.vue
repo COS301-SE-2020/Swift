@@ -52,7 +52,7 @@
       <v-container py-0>
         <v-carousel v-model="carouselIndex" class="promotionalMaterial" :continuous="true" :cycle="false" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="170px">
           <v-carousel-item v-for="(promotion, i) in activePromotions.restaurantPromo" :key="i">
-            <v-sheet :color="(i == 3) ? 'primary' : 'secondary'" height="150px" flat tile style="border-radius: 10px !important" class="mt-5">
+            <v-sheet @click="goToRestaurant(promotion.restaurantId)" :color="(i == 3) ? 'primary' : 'secondary'" height="150px" flat tile style="border-radius: 10px !important" class="mt-5">
               <v-row class="d-flex justify-space-between px-0 py-0">
                 <v-col cols="6" class="py-3 pr-0">
                   <v-layout column justify-space-between fill-height>
