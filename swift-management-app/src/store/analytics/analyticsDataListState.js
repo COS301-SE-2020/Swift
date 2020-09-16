@@ -4,7 +4,34 @@ export default {
   currentOrders: {
     series: [{
       name: 'Orders',
-      data: [28, 40, 36, 52, 38, 60, 55]
+      data: []
+    }],
+    analyticsData: {
+      count: 23
+    }
+  },
+  currentCustomers: {
+    series: [{
+      name: 'Customers',
+      data: []
+    }],
+    analyticsData: {
+      count: 23
+    }
+  },
+  activeWaiters: {
+    series: [{
+      name: 'Waiters',
+      data: []
+    }],
+    analyticsData: {
+      count: 23
+    }
+  },
+  availableTables: {
+    series: [{
+      name: 'Tables',
+      data: []
     }],
     analyticsData: {
       count: 23

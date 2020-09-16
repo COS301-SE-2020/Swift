@@ -16,8 +16,8 @@
     </vs-row>
     <div class="vx-row">
       <div
-        v-for="order in orders"
-        :key="order.orderId"
+        v-for="(order, index) in orders"
+        :key="index"
         class="vx-col w-full md:w-1/3 lg:w-1/3 xl:w-1/3 mb-base"
       >
         <vx-card

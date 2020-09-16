@@ -20,11 +20,11 @@
 
       <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base">
         <statistics-card-line
-          v-if="currentOrders.analyticsData"
+          v-if="currentCustomers.analyticsData"
           icon="UserIcon"
-          :statistic="currentOrders.analyticsData.count"
+          :statistic="currentCustomers.analyticsData.count"
           statisticTitle="Customers Checked-In"
-          :chartData="currentOrders.series"
+          :chartData="currentCustomers.series"
           type="area"
           color="success"
         />
@@ -32,11 +32,11 @@
 
       <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base">
         <statistics-card-line
-          v-if="currentOrders.analyticsData"
+          v-if="activeWaiters.analyticsData"
           icon="UsersIcon"
-          :statistic="currentOrders.analyticsData.count"
+          :statistic="getActiveWaiterCount(activeWaiters)"
           statisticTitle="Idle Employees"
-          :chartData="currentOrders.series"
+          :chartData="activeWaiters.series"
           color="warning"
           type="area"
         />
@@ -44,11 +44,11 @@
 
       <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base">
         <statistics-card-line
-          v-if="currentOrders.analyticsData"
+          v-if="availableTables.analyticsData"
           icon="BookOpenIcon"
-          :statistic="currentOrders.analyticsData.count"
+          :statistic="getAvailableTableCount(availableTables)"
           statisticTitle="Available Tables"
-          :chartData="currentOrders.series"
+          :chartData="availableTables.series"
           color="dark"
           type="area"
         />
@@ -124,7 +124,9 @@
               class="w-1/2 border border-solid d-theme-border-grey-light border-r-0 border-b-0 border-l-0"
             >
               <p class="mt-4">Completed</p>
-              <p class="mb-4 text-3xl font-semibold">{{ goalOverviewRadialBar.analyticsData.completed }}</p>
+              <p
+                class="mb-4 text-3xl font-semibold"
+              >{{ goalOverviewRadialBar.analyticsData.completed }}</p>
             </div>
             <div class="w-1/2 border border-solid d-theme-border-grey-light border-r-0 border-b-0">
               <p class="mt-4">Goal</p>
@@ -136,7 +138,7 @@
     </div>
 
     <div class="vx-row">
-      <div class="vx-col w-full ">
+      <div class="vx-col w-full">
         <vx-card title="Customer Count">
           <vue-apex-charts
             type="area"
@@ -165,6 +167,21 @@ export default {
         return this.$store.state.analytics.currentOrders;
       else return null;
     },
+    currentCustomers() {
+      if (this.$store.state.analytics)
+        return this.$store.state.analytics.currentCustomers;
+      else return null;
+    },
+    activeWaiters() {
+      if (this.$store.state.analytics)
+        return this.$store.state.analytics.activeWaiters;
+      else return null;
+    },
+    availableTables() {
+      if (this.$store.state.analytics)
+        return this.$store.state.analytics.availableTables;
+      else return null;
+    },
     topItems() {
       if (this.$store.state.analytics)
         return this.$store.state.analytics.topItems;
@@ -186,12 +203,59 @@ export default {
       } else return null;
     },
   },
+  methods: {
+    getActiveWaiterCount(activeWaiters) {
+      var active =
+        activeWaiters.analyticsData.count.totalWaiters -
+        activeWaiters.analyticsData.count.occupiedWaiters;
+      if (active) return active;
+      else return 0;
+    },
+    getAvailableTableCount(availableTables) {
+      var available =
+        availableTables.analyticsData.count.totalTables -
+        availableTables.analyticsData.count.occupiedTables;
+      if (available) return available;
+      else return 0;
+    },
+    loadDashboard() {
+      this.$store.dispatch("analytics/dashboardActiveOrderCount", {
+        authKey: this.getAuthToken(),
+        restaurantId: this.getCurrentRestaurantId(),
+      });
+      this.$store.dispatch("analytics/dashboardOrderHistory", {
+        authKey: this.getAuthToken(),
+        restaurantId: this.getCurrentRestaurantId(),
+      });
+      this.$store.dispatch("analytics/dashboardActiveCustomerCount", {
+        authKey: this.getAuthToken(),
+        restaurantId: this.getCurrentRestaurantId(),
+      });
+      this.$store.dispatch("analytics/dashboardActiveCustomerHistory", {
+        authKey: this.getAuthToken(),
+        restaurantId: this.getCurrentRestaurantId(),
+      });
+      this.$store.dispatch("analytics/dashboardActiveWaiters", {
+        authKey: this.getAuthToken(),
+        restaurantId: this.getCurrentRestaurantId(),
+      });
+      this.$store.dispatch("analytics/dashboardAvailableTables", {
+        authKey: this.getAuthToken(),
+        restaurantId: this.getCurrentRestaurantId(),
+      });
+      this.$store.dispatch("analytics/dashboardTableOccupancyHistory", {
+        authKey: this.getAuthToken(),
+        restaurantId: this.getCurrentRestaurantId(),
+      });
+    },
+  },
   created() {
     //check authtoken
     if (!analyticsData.isRegistered) {
       this.$store.registerModule("analytics", analyticsData);
       analyticsData.isRegistered = true;
     }
+    this.loadDashboard();
   },
   mounted() {
     this.isMounted = true;
