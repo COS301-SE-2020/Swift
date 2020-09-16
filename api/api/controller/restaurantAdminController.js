@@ -31,8 +31,8 @@ module.exports = {
       || !Object.prototype.hasOwnProperty.call(reqBody, 'categories')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'coverImageURL')
       || !Array.isArray(reqBody.categories)
-      || reqBody.categories.length < 1
-      || Object.keys(reqBody).length !== 8) {
+      || reqBody.categories.length < 1) {
+      // || Object.keys(reqBody).length !== 8) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 
@@ -46,8 +46,8 @@ module.exports = {
 
           // create restaurant
           const cRes = await client.query(
-            'INSERT INTO public.restaurant (restaurantname,restaurantdescription,branch,location,coverimageurl, in_business)'
-            + ' VALUES ($1::text, $2::text, $3::text, $4::text, $5::text, $6::boolean)'
+            'INSERT INTO public.restaurant (restaurantname,restaurantdescription,branch,location,coverimageurl, order_service_goal, in_business)'
+            + ' VALUES ($1::text, $2::text, $3::text, $4::text, $5::text, $6::integer, $7::boolean)'
             + ' RETURNING restaurantid',
             [
               reqBody.name,
@@ -55,7 +55,10 @@ module.exports = {
               reqBody.branch,
               reqBody.location,
               reqBody.coverImageURL,
-              true
+              (Object.prototype.hasOwnProperty.call(reqBody, 'serviceGoal'))
+                ? reqBody.serviceGoal : 0,
+              (Object.prototype.hasOwnProperty.call(reqBody, 'inBusiness'))
+                ? reqBody.inBusiness : true
             ]
           );
 
@@ -148,8 +151,8 @@ module.exports = {
       || !Object.prototype.hasOwnProperty.call(reqBody, 'location')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'categories')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'coverImageURL')
-      || !Array.isArray(reqBody.categories)
-      || Object.keys(reqBody).length !== 9) {
+      || !Array.isArray(reqBody.categories)) {
+      // || Object.keys(reqBody).length !== 9) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 
@@ -163,7 +166,7 @@ module.exports = {
 
           // check if restaurant exists
           const cRes = await client.query(
-            'SELECT restaurantname FROM public.restaurant WHERE restaurantid = $1::integer',
+            'SELECT restaurantname, order_service_goal, in_business FROM public.restaurant WHERE restaurantid = $1::integer',
             [reqBody.restaurantId]
           );
 
@@ -190,14 +193,18 @@ module.exports = {
             'UPDATE public.restaurant'
             + ' SET restaurantname = $1::text, restaurantdescription = $2::text,'
             + ' branch = $3::text, location = $4::text,'
-            + ' coverimageurl = $5::text'
-            + ' WHERE restaurantid = $6::integer',
+            + ' coverimageurl = $5::text, order_service_goal = $6::integer, in_business = $7::boolean'
+            + ' WHERE restaurantid = $8::integer',
             [
               reqBody.name,
               reqBody.description,
               reqBody.branch,
               reqBody.location,
               reqBody.coverImageURL,
+              (Object.prototype.hasOwnProperty.call(reqBody, 'serviceGoal'))
+                ? reqBody.serviceGoal : cRes.rows[0].order_service_goal,
+              (Object.prototype.hasOwnProperty.call(reqBody, 'inBusiness'))
+                ? reqBody.inBusiness : cRes.rows[0].in_business,
               reqBody.restaurantId
             ]
           );
@@ -263,6 +270,8 @@ module.exports = {
             description: rest.rows[0].restaurantdescription,
             branch: rest.rows[0].branch,
             location: rest.rows[0].location,
+            inBusiness: rest.rows[0].in_business,
+            serviceGoal: rest.rows[0].order_service_goal,
             categories: categoryList,
             coverImageURL: rest.rows[0].coverimageurl
           });
@@ -758,7 +767,7 @@ module.exports = {
           const res = await client.query(
             'SELECT restaurant.restaurantid, restaurant.restaurantname, restaurant.branch,'
             + ' restaurant.location, restaurant.coverimageurl, restaurant.in_business, restaurantemployee.employeerole,'
-            + ' restaurant.restaurantdescription FROM public.restaurantemployee'
+            + ' restaurant.restaurantdescription, restaurant.order_service_goal FROM public.restaurantemployee'
             + ' INNER JOIN public.restaurant ON restaurant.restaurantid = restaurantemployee.restaurantid'
             + ' WHERE restaurantemployee.userid = $1::integer',
             [userToken.data.userId]
@@ -776,6 +785,7 @@ module.exports = {
             restaurantResponse.restaurants[r].branch = res.rows[r].branch;
             restaurantResponse.restaurants[r].location = res.rows[r].location;
             restaurantResponse.restaurants[r].inBusiness = res.rows[r].in_business;
+            restaurantResponse.restaurants[r].serviceGoal = res.rows[r].order_service_goal;
             restaurantResponse.restaurants[r].image = (reqBody.includeImage === true)
               ? res.rows[r].coverimageurl : null;
 
