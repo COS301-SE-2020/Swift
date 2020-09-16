@@ -1,3 +1,17 @@
+var months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+];
 export default {
     SET_ACTIVE_ORDER_COUNT(state, activeOrderCount) {
         state.currentOrders.analyticsData.count = activeOrderCount;
@@ -111,19 +125,6 @@ export default {
         }
         state.revenueData.analyticsData.thisMonth = thisMonthTotal;
         state.revenueData.analyticsData.lastMonth = lastMonthTotal;
-
-        payload.chart.updateSeries([{
-                name: "This Month",
-                data: state.revenueData.series[0].data
-            },
-            {
-                name: "Last Month",
-                data: state.revenueData.series[1].data
-            }
-        ]);
-
-        console.log(state.revenueData)
-
     },
 
     SET_TOP_REVENUE_MENU_ITEMS(state, topMenuItems) {
@@ -140,7 +141,48 @@ export default {
             state.topSellingItems.push(tableObject);
         }
     },
+    SET_AVG_ORDER_PRICE(state, avgOrderPrices) {
+        state.avgOrderPrice.series[0].data = [];
+        state.avgOrderPrice.chartOptions.xaxis.categories = [];
+        var now = new Date()
+        var beginningOfYear = new Date(now.getFullYear(), 0, 1)
+        for (var i = 0; i < avgOrderPrices.length; i++) {
+            var dataPointDate = new Date(avgOrderPrices[i][0])
+            if (dataPointDate > beginningOfYear) {
+                state.avgOrderPrice.series[0].data.push(avgOrderPrices[i][1].toFixed(0));
+                state.avgOrderPrice.chartOptions.xaxis.categories.push(months[dataPointDate.getMonth()]);
+            }
 
-    
+        }
+    },
+    SET_MENU_REVENUE(state, menuRevenue) {
+        console.log(menuRevenue)
+        state.incomeByMenu.series = []
+        state.incomeByMenu.chartOptions.xaxis.categories = [];
+        var now = new Date()
+        var beginningOfYear = new Date(now.getFullYear(), 0, 1)
+        for (var i = 0; i < menuRevenue.length; i++) {
+            var dataPointDate = new Date(menuRevenue[i][0])
+            if (dataPointDate > beginningOfYear) {
+                var existing = false;
+                for (var j = 0; j < state.incomeByMenu.series.length; j++) {
+                    if (state.incomeByMenu.series[j].name === menuRevenue[i][1]) {
+                        existing = true;
+                        state.incomeByMenu.series[j].data.push(menuRevenue[i][2])
+                    }
+                }
+                if (!existing) {
+                    var dataPoint = {};
+                    dataPoint["name"] = menuRevenue[i][1];
+                    dataPoint["data"] = [];
+                    dataPoint.data.push(menuRevenue[i][2]);
+                    state.incomeByMenu.series.push(dataPoint);
+                }
+                if (state.incomeByMenu.chartOptions.xaxis.categories.indexOf(months[dataPointDate.getMonth()]) < 0)
+                    state.incomeByMenu.chartOptions.xaxis.categories.push(months[dataPointDate.getMonth()]);
+            }
+        }
+    },
+
 
 }

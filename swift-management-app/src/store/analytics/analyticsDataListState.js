@@ -38,11 +38,10 @@ export default {
     }
   },
   topItems: [{
-      name: 'Hawaian',
-      ratio: 50,
-      growthPerc: 5
-    },
-  ],
+    name: 'Hawaian',
+    ratio: 50,
+    growthPerc: 5
+  }, ],
   customerCount: {
     series: [{
         name: 'Check-in',
@@ -255,9 +254,12 @@ export default {
   avgOrderPrice: {
     series: [{
       name: "Average Price",
-      data: [50, 52, 54, 49, 55, 50, 52, 54, 49]
+      data: []
     }],
     chartOptions: {
+      noData: {
+        text: 'No data.'
+      },
       chart: {
         zoom: {
           enabled: true
@@ -277,87 +279,53 @@ export default {
         },
       },
       xaxis: {
-        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+        categories: [],
       }
     }
   },
-  topSellingItems: [{
-    id: 1,
-    name: 'Hawaian',
-    totalIncome: 5510,
-    ratio: 60,
-    growthPerc: '5'
-  },
-  {
-    id: 3,
-    name: 'Quattro',
-    totalIncome: 2820,
-    ratio: 55,
-    growthPerc: '-2'
-  },
-  {
-    id: 2,
-    name: 'Regina',
-    totalIncome: 1992,
-    ratio: 10,
-    growthPerc: '1'
-  },
-  {
-    id: 4,
-    name: 'BBQ Chicken',
-    totalIncome: 1500,
-    ratio: 9,
-    growthPerc: '-5'
-  },
-],
-incomeByMenu: {
-  series: [{
-          name: 'Pizza',
-          data: [440, 550, 570, 560, 610, 580, 630, 600, 660]
-      }, {
-          name: 'Pasta',
-          data: [760, 850, 1010, 980, 870, 1050, 910, 1140, 940]
-      }, {
-          name: 'Drinks',
-          data: [350, 410, 360, 260, 450, 480, 520, 530, 410]
-  }],
-  chartOptions: {
+  topSellingItems: [],
+  incomeByMenu: {
+    series: [],
+    chartOptions: {
+      noData: {
+        text: 'No data.'
+      },
       colors: chartColors,
       plotOptions: {
-          bar: {
-              horizontal: false,
-              endingShape: 'rounded',
-              columnWidth: '55%',
-          },
+        bar: {
+          horizontal: false,
+          endingShape: 'rounded',
+          columnWidth: '55%',
+        },
       },
       dataLabels: {
-          enabled: false
+        enabled: false
       },
       stroke: {
-          show: true,
-          width: 2,
-          colors: ['transparent']
+        show: true,
+        width: 2,
+        colors: ['transparent']
       },
 
       xaxis: {
-          categories: ['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+        categories: []
       },
       yaxis: {
-          title: {
-              text: 'ZAR (Rands)'
-          }
+        title: {
+          text: 'ZAR (Rands)'
+        }
       },
       fill: {
-          opacity: 1
+        opacity: 1
 
       },
       tooltip: {
-          y: {
-              formatter: function(val) {
-                  return "R " + val
-              }
+        y: {
+          formatter: function (val) {
+            return "R " + val
           }
+        }
       }
-  }
-},
+    }
+  },
 }

@@ -153,7 +153,6 @@ export default {
         commit('SET_REVENUE_DATA', {
           obj: result.data,
           month: payload.month,
-          chart: payload.chart
         });
         resolve(result);
       }).catch(({
@@ -183,7 +182,40 @@ export default {
       });
     });
   },
-
-
-
+  statsAvgOrderPrice({
+    commit
+  }, payload) {
+    return new Promise((resolve, reject) => {
+      axios.post(process.env.VUE_APP_MLURL, {
+        "requestType": "statsAvgOrderPrice",
+        "restaurantId": payload.restaurantId,
+        "token": payload.authKey,
+      }).then(result => {
+        commit('SET_AVG_ORDER_PRICE', result.data);
+        resolve(result);
+      }).catch(({
+        result
+      }) => {
+        console.log(result)
+      });
+    });
+  },
+  statsMenuRevenue({
+    commit
+  }, payload) {
+    return new Promise((resolve, reject) => {
+      axios.post(process.env.VUE_APP_MLURL, {
+        "requestType": "statsMenuRevenue",
+        "restaurantId": payload.restaurantId,
+        "token": payload.authKey,
+      }).then(result => {
+        commit('SET_MENU_REVENUE', result.data);
+        resolve(result);
+      }).catch(({
+        result
+      }) => {
+        console.log(result)
+      });
+    });
+  },
 }
