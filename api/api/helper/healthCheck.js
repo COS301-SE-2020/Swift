@@ -55,7 +55,7 @@ module.exports = {
           // begin transaction
           await client.query('BEGIN');
 
-          // check if restaurant exists
+          // check if DB is responding to queries
           const db0Stat = await client.query('SELECT 1 AS "Online"');
 
           if (db0Stat.rows.length === 0) {
@@ -99,7 +99,7 @@ module.exports = {
           // begin transaction
           await client.query('BEGIN');
 
-          // check if restaurant exists
+          // check if DB is responding to queries
           const db1Stat = await client.query('SELECT 1 AS "Online"');
 
           if (db1Stat.rows.length === 0) {
