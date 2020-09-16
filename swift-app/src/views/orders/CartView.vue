@@ -284,6 +284,7 @@ export default {
     ...mapGetters({
       menu: "MenuStore/getMenu",
       orderInfo: "OrderStore/getOrderInfo",
+      orderedItemsInfo: "OrderStore/getOrderedItems",
       orderedItems: "OrderStore/getOrderedItems",
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
@@ -306,12 +307,15 @@ export default {
     },
   },
   mounted: function() {
-    // console.log("order");
-    // console.log(this.orderInfo());
     if (Object.keys(this.orderInfo()).length != 0) {
       for (let i = 0; i < this.orderInfo().orderItems.length; i++) {
         this.subtotal += (this.orderInfo().orderItems[i].itemTotal != null) ? parseFloat(this.orderInfo().orderItems[i].itemTotal): 0;
         this.quantity[i] = parseFloat(this.orderInfo().orderItems[i].quantity)
+      }
+    }
+    if (Object.keys(this.orderedItemsInfo()).length != 0) {
+      for (let i = 0; i < this.orderedItemsInfo().orderItems.length; i++) {
+        this.subtotal += (this.orderedItemsInfo().orderItems[i].itemTotal != null) ? parseFloat(this.orderedItemsInfo().orderItems[i].itemTotal): 0;
       }
     }
   }
