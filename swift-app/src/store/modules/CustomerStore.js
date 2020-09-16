@@ -236,6 +236,7 @@ const actions = {
     } 
     ).then(result => {
       commit('SET_FETCHED_ORDER_HISTORY', result.data.orderHistory);
+      this.dispatch('OrderStore/setOrderHistory', result.data.orderHistory);
     }).catch(({ response }) => {
     });
   },
@@ -331,10 +332,15 @@ const mutations = {
   },
 
   SET_FETCHED_ORDER_HISTORY(state, orderHistory) {
-    state.fetchedOrderHistory = orderHistory;
+    state.fetchedOrderHistory = orderHistory.orderHistory;
   },
 
-  
+  RESET_FETCHED_ORDER_HISTORY(state) {
+    const newState = initialState();
+    Object.keys(newState).forEach(key => {
+      fetchedOrderHistory[key] = newState[key]
+    });
+  },
 
   RESET(state) {
     const newState = initialState();

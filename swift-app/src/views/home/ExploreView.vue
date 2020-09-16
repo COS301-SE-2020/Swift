@@ -143,7 +143,7 @@
         </v-row> -->
          <v-row style="max-width: 400px" class="overflow-y-auto">
           <v-col cols="12">
-            <div class="categoryTitle">Suggested Items</div>
+            <div class="categoryTitle">Based On Your Ratings</div>
           </v-col>
         </v-row>
         <v-sheet class="mx-auto" max-width="700">
