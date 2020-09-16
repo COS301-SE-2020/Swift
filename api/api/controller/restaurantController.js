@@ -219,7 +219,7 @@ module.exports = {
             .then((cRes) => {
               if (cRes.rows[0].checkedin == null) {
                 // check in user
-                return db.query(
+                return dbw.query(
                   'UPDATE public.person SET checkedin = $1::text WHERE userid = $2::integer;',
                   [reqBody.qrcode, userToken.data.userId]
                 )
