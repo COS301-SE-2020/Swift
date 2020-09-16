@@ -200,6 +200,10 @@ const actions = {
     commit('ADD_ITEM_TO_ORDER', orderItemInfo);
   },
 
+  editOrder({commit,}, orderItemInfo) {
+    commit('EDIT_ORDER', orderItemInfo);
+  },
+  
   addItemToRate({commit,}, itemInfo) {
     commit('ADD_ITEM_TO_RATE', itemInfo);
   },
@@ -310,6 +314,16 @@ const mutations = {
         state.orderInfo.orderItems.push(orderItemInfo.orderInfo.orderItems[i])
     } else
       state.orderInfo = orderItemInfo.orderInfo;
+  },
+
+  EDIT_ORDER(state, orderItemInfo) {
+    let menuItem = state.orderInfo.orderItems.find((item) => {
+      return item.menuItemId == orderItemInfo.menuItemId
+    });
+
+    menuItem.itemTotal = orderItemInfo.itemTotal;
+    menuItem.quantity = orderItemInfo.quantity;
+    menuItem.orderSelections = orderItemInfo.orderSelections;
   },
 
   ADD_PAYMENT(state, orderPaymentinfo) {

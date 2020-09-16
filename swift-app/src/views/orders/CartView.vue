@@ -237,9 +237,9 @@ export default {
       }
     },
     editItem(item) {
-      // console.log(item)
-      // this.addItemToEdit(item)
-      // this.$router.push("/menuItem/" + item.menuItemId);
+      // console.log("pressed")
+      this.addItemToEdit(item)
+      this.$router.push("/menuItem/" + item.menuItemId);
     },
     goToCart() {
       // this.$router.push('/cart')
@@ -278,8 +278,9 @@ export default {
     },
     ...mapActions({
       updateOrderFlag: 'OrderStore/updateOrderFlag',
-      // addItemToEdit: 'OrderStore/addItemToEdit',
+      addItemToEdit: 'MenuItemsStore/addItemToEdit',
       submitOrder: 'OrderStore/submitOrder',
+      // clearItem: "MenuItemsStore/clearItem",
     }),
     ...mapGetters({
       menu: "MenuStore/getMenu",
@@ -307,6 +308,7 @@ export default {
     },
   },
   mounted: function() {
+    // this.clearItem;
     if (Object.keys(this.orderInfo()).length != 0) {
       for (let i = 0; i < this.orderInfo().orderItems.length; i++) {
         this.subtotal += (this.orderInfo().orderItems[i].itemTotal != null) ? parseFloat(this.orderInfo().orderItems[i].itemTotal): 0;

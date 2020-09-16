@@ -19,7 +19,8 @@ const initialState = () => ({
       prepTime: '15',
       images: [],
     },
-  ]
+  ],
+  menuItem: null
 });
 
 const state = initialState();
@@ -28,6 +29,10 @@ const state = initialState();
 const getters = {
   getVariable1( state ) {
     return state.varaible1;
+  },
+
+  getMenuItem( state ) {
+    return state.menuItem;
   },
 }
 
@@ -45,7 +50,16 @@ const actions = {
       commit('SET_VARIABLE_1', data); 
       resolve();
     })
-  }
+  },
+
+  addItemToEdit({commit,}, orderItemInfo) {
+    commit('ADD_ITEM_TO_EDIT', orderItemInfo);
+  },
+
+  clearItem({commit,}, orderItemInfo) {
+    commit('CLEAR_ITEM_TO_EDIT', orderItemInfo);
+  },
+
 }
 
 // Mutations
@@ -61,6 +75,15 @@ const mutations = {
   SET_VARIABLE_1(state, data) {
     state.varaible1 = data;
   },
+
+  ADD_ITEM_TO_EDIT(state, data) {
+    state.menuItem = data;
+    console.log(this.getters['MenuItemsStore/getMenuItem'])
+  },
+
+  CLEAR_ITEM_TO_EDIT(state, data) {
+    state.menuItem = null;
+  }
 }
 export default {
   namespaced: true,
