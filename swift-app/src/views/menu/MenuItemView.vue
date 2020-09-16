@@ -88,9 +88,9 @@
                 </template>
 
                 <!-- <v-list-item-group  class="pl-2" :multiple="(parseInt(attribute.max) > 1) ? true : false" :mandatory="(attribute.min == '1') ? true : false" v-model="model[i]"> -->
-                <v-list-item-group  class="pl-2" :multiple="(parseInt(attribute.max) > 1) ? true : false" :mandatory="(parseInt(attribute.min) != 0) ? true : false"  v-model="model[i]">
+                <v-list-item-group  class="pl-2" :multiple="(parseInt(attribute.max) > 1) ? true : false" :mandatory="(parseInt(attribute.min) != 0) ? true : false" :max="parseInt(attribute.max)"  v-model="model[i]">
                   <template v-for="(value, j) in attribute.values">
-                    <v-list-item @click="checkInput(i, j, attribute)" ref="attributeVal" class="px-2 attributeValues" :key="`item-${j}`" :value="value.name">
+                    <v-list-item @click="checkInput(i, j, attribute)" ref="attributeVal" class="px-2 attributeValues" :key="`item-${j}`" :value="j">
                       <template v-slot:default="{ active }">
                         <v-row>
                           <v-col cols="8">
@@ -131,7 +131,8 @@
                 </v-btn> -->
               </v-col>
               <v-col cols="7" class="d-flex justify-center px-0">
-                <v-btn @click="addToOrder" style="border-radius: 13px; color: white" height="45px" color="accent">R {{total.toFixed(2)}} | Add to order</v-btn>
+                <v-btn v-if="item == null" @click="addToOrder" style="border-radius: 13px; color: white" height="45px" color="accent">R {{total.toFixed(2)}} | Add to order</v-btn>
+                <v-btn v-else @click="editMenuItem" style="border-radius: 13px; color: white" height="45px" color="accent">R {{total.toFixed(2)}} | Edit Item</v-btn>
               </v-col>
             </v-row>
 
@@ -279,7 +280,7 @@ $('.commentInfo').text($('.commentInfo').text().substring(0,200))
 export default {
   data() {
     return {
-      model: [],
+      model: [[],[]],
       total: 0,
       addOns: 0,
       valid: true,
@@ -363,6 +364,7 @@ export default {
   },
   methods: {
     backNavigation () {
+      this.clearItem
       this.$router.go(-1)
     },
     detractPrice() {
@@ -462,11 +464,19 @@ export default {
       let selectionValues = [];
       if(this.newMenuItem.attributes != null) {
         for (let i = 0; i < this.newMenuItem.attributes.attributes.length; i++) {
-          let data = {
-            "name": $('.label').eq(i).text(),
-            "values": this.model[i]
-          };
-          selectionValues[i] = data;
+          if (this.model[i].length != 0) {
+            let values = [];
+            for (let j = 0; j < this.model[i].length; j++)
+              values.push(this.newMenuItem.attributes.attributes[i].values[this.model[i][j]].name)
+            let data = {
+              "name": $('.label').eq(i).text(),
+              "values": (this.model[i].length > 1) ? values 
+                : this.newMenuItem.attributes.attributes[i].values[this.model[i]].name
+            };
+            selectionValues[i] = data;
+          }
+
+          
         }
       }
 
@@ -492,6 +502,38 @@ export default {
       this.addItemToOrder(data)
       this.$router.push("/cart");
     },
+    editMenuItem() {;
+      let selectionValues = [];
+      if(this.newMenuItem.attributes != null) {
+        for (let i = 0; i < this.newMenuItem.attributes.attributes.length; i++) {
+          if (this.model[i].length != 0) {
+            let values = [];
+            for (let j = 0; j < this.model[i].length; j++)
+              values.push(this.newMenuItem.attributes.attributes[i].values[this.model[i][j]].name)
+            let data = {
+              "name": $('.label').eq(i).text(),
+              "values": (this.model[i].length > 1) ? values 
+                : this.newMenuItem.attributes.attributes[i].values[this.model[i]].name
+            };
+            selectionValues[i] = data;
+          }
+
+          
+        }
+      }
+
+      let data = {
+        "menuItemId": this.newMenuItem.menuItemId,
+        "itemTotal": this.total,
+        "quantity": this.quantity,
+        "orderSelections": {
+          "selections": selectionValues
+        }
+      }
+      
+      this.editOrder(data);
+      this.$router.push("/cart");
+    },
     changeFavourite () {
       let data = {
         menuItemId: this.menuItemId
@@ -501,7 +543,9 @@ export default {
     ...mapActions({
       addFavourite: "CustomerStore/addFavourite",
       removeFavourite: "CustomerStore/removeFavourite",
-      addItemToOrder: "OrderStore/addItemToOrder"
+      addItemToOrder: "OrderStore/addItemToOrder",
+      editOrder: "OrderStore/editOrder",
+      clearItem: "MenuItemsStore/clearItem",
     }),
     checkedIn() {
       let checkedInVal = this.checkedInQRCode;
@@ -562,6 +606,7 @@ export default {
     ...mapGetters({
       menu: "MenuStore/getMenu",
       customer: "CustomerStore/getCustomerProfile",
+      item: "MenuItemsStore/getMenuItem",
       // itemToEdit: "OrderStore/getItemToEdit",
       checkedInTableId: "CustomerStore/getCheckedInTableId",
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
@@ -570,13 +615,53 @@ export default {
     }),
   },
   mounted: function() {
-    // console.log($(".attributeElements").find(".attributeValues").html())
-    console.log(this.$refs.attributeVal);
     this.total = this.newMenuItem.price
-    // this.model[0] = 1
-    
-    // $(".attributeValues.v-item--active.v-list-item--active").find("i").addClass("mdi-radiobox-marked");
-    // this.itemTotal = this.newMenuItem.price
+    if (this.item != null) {
+      this.quantity = this.item.quantity
+      // console.log(this.item)
+    }
+
+    for (let i = 0; i < this.newMenuItem.attributes.attributes.length; i++) {
+      console.log(this.newMenuItem.attributes.attributes[i].max)
+      if (this.newMenuItem.attributes.attributes[i].max == 1) {
+        var item = 0;
+        this.newMenuItem.attributes.attributes[i].values.find((val, index) => {
+          item = index
+          if (this.item == null || this.item.orderSelections.selections[i] == undefined)
+            return val.selectedByDefault 
+          else {
+            return val.name == this.item.orderSelections.selections[i].values
+          } 
+        });
+
+        this.model[i] = item;
+      }
+      else {
+        var item = [];
+        if (this.item == null || this.item.orderSelections.selections[i] == undefined) {
+          this.newMenuItem.attributes.attributes[i].values.filter((val, index) => {
+            if (val.selectedByDefault)
+              item.push(index);
+            return val.selectedByDefault 
+          });
+        } else {
+          this.newMenuItem.attributes.attributes[i].values.filter((val, index) => {
+            // console.log(this.item.orderSelections.selections[i].values)
+            if (Array.isArray(this.item.orderSelections.selections[i].values)) {
+              if (val.name == this.item.orderSelections.selections[i].values[index])
+                item.push(index);
+              return val.name == this.item.orderSelections.selections[i].values[index]
+            } else {
+              if (val.name == this.item.orderSelections.selections[i].values)
+                item.push(index);
+              return val.name == this.item.orderSelections.selections[i].values
+            }
+          });
+        }
+
+        this.model[i] = item;
+      }
+    }
   }
 }
 </script>

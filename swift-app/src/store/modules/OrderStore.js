@@ -200,6 +200,14 @@ const actions = {
     commit('ADD_ITEM_TO_ORDER', orderItemInfo);
   },
 
+  editOrder({commit,}, orderItemInfo) {
+    commit('EDIT_ORDER', orderItemInfo);
+  },
+
+  removeItem({commit,}, itemId) {
+    commit('REMOVE_ITEM', itemId);
+  },
+  
   addItemToRate({commit,}, itemInfo) {
     commit('ADD_ITEM_TO_RATE', itemInfo);
   },
@@ -249,12 +257,13 @@ const actions = {
 const mutations = {
   SET_ORDER_HISTORY(state, orderHistory) {
     state.orderHistory = orderHistory;
+    console.log(orderHistory)
 
     var maxid = 0;
     var maxobj = null;
 
     orderHistory.map(obj => {  
-        if (obj.orderId > maxid) maxid = obj.orderId;    
+        if (obj.orderId > maxid && obj.orderStatus == "Received") maxid = obj.orderId;    
     });
 
     orderHistory.map(obj => {   
@@ -310,6 +319,30 @@ const mutations = {
         state.orderInfo.orderItems.push(orderItemInfo.orderInfo.orderItems[i])
     } else
       state.orderInfo = orderItemInfo.orderInfo;
+  },
+
+  EDIT_ORDER(state, orderItemInfo) {
+    let menuItem = state.orderInfo.orderItems.find((item) => {
+      return item.menuItemId == orderItemInfo.menuItemId
+    });
+
+    menuItem.itemTotal = orderItemInfo.itemTotal;
+    menuItem.quantity = orderItemInfo.quantity;
+    menuItem.orderSelections = orderItemInfo.orderSelections;
+  },
+
+  REMOVE_ITEM(state, itemId) {
+    let itemIndex = -1;
+    state.orderInfo.orderItems.find((item, index) => {
+      itemIndex = index;
+      return item.menuItemId == itemId
+    });
+
+    // console.log("info")
+    // console.log(state.orderInfo.orderItems)
+    // console.log(itemIndex)
+    if (itemIndex != -1)
+      state.orderInfo.orderItems.splice(itemIndex, 1);
   },
 
   ADD_PAYMENT(state, orderPaymentinfo) {

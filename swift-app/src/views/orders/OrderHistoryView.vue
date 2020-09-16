@@ -181,6 +181,7 @@ export default {
     var length = await this.orderHistory.length;
     if (length == undefined) {
       this.isLoading = !this.isLoading;
+      await this.$store.dispatch('MenuStore/retrieveMenu', this.checkedInRestaurantId);
       var response = await this.orderHistory;
       if (response)
         this.isLoading = !this.isLoading;

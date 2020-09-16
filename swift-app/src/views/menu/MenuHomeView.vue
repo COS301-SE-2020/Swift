@@ -6,7 +6,7 @@
     </div>
     <v-container v-show="!isLoading" class="pb-0">
       <div class="backgroundImage" style="margin-top: 0px">
-        <v-row style="margin-top: -12px; margin-bottom: 10px"> 
+        <v-row style="margin-top: -12px; margin-bottom: 0px"> 
             <v-col cols="12" class="pt-0 px-0 pb-0">
               <v-carousel height="200px" :show-arrows="false" hide-delimiter cycle hide-delimiters continuous>
                 <v-carousel-item gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.4)" :src="menu.image">
@@ -35,14 +35,14 @@
         </div>
     </v-container>
 
-    <v-container v-show="!isLoading && filterPromotionItems(promotionItems).length != 0" class="mt-0 pt-0 d-flex flex-column">
-      <v-row class="overflow-y-auto" >
+    <v-container v-show="!isLoading && filterPromotionItems(promotionItems).length != 0" class="mt-0 pt-0 d-flex flex-column" style="padding-bottom: 0;">
+      <v-row v-show="!isLoading && filterPromotionItems(promotionItems).length != 0" class="overflow-y-auto pt-2" >
         <v-col cols="12" class="py-0 mb-0">
           <div class="subtitle">Suggested for you</div>
         </v-col>
       </v-row>        
-      <v-row class="mx-0 px-0 d-flex align-baseline">
-        <v-carousel class="promotionalMaterial mt-0 pt-0" v-show="!isLoading && filterPromotionItems(promotionItems).length != 0" v-model="carouselIndex" :continuous="true" :cycle="true" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="160px">
+      <v-row v-show="!isLoading" class="mx-0 px-0 d-flex align-baseline">
+        <v-carousel class="promotionalMaterial mt-0 pt-0 mb-2" v-show="!isLoading && filterPromotionItems(promotionItems).length != 0" v-model="carouselIndex" :continuous="true" :cycle="true" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="160px">
           <v-carousel-item v-for="(promotionItem, i) in filterPromotionItems(promotionItems).slice(0, 5)" :key="i">
             <v-sheet :color="(i % 2 === 0) ? 'secondary' : 'accent'" height="150px" flat tile style="border-radius: 10px !important" class="mt-2">
               <v-row @click="goToMenuItem(promotionItem.menuItemId)"  class="d-flex justify-space-between px-0 py-0">
@@ -83,8 +83,8 @@
           <div v-if="category.menuItems.length == 0">
             <v-list v-for="(secondary, i) in secondaryCategoryList(category.categoryId)" :key="i" class="py-0">
               <div class="ml-2 mt-2">{{secondary.categoryName}}</div>
-              <v-list v-for="(menuItem, i) in secondary.menuItems" :key="i" class="py-0">
-                <v-list-item @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1 ">
+              <v-list  v-for="(menuItem, i) in secondary.menuItems" :key="i" class="py-0">
+                <v-list-item v-if="menuItem.availability" style="opacity: 1" @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1">
                   <v-list-item-avatar tile  style="border-radius: 4px" size="45" >
                     <img v-if="menuItem.images.length != 0" :src="menuItem.images[0]">
                     <img v-else src="../../assets/menuItemImages/item-placeholder.png">
@@ -93,7 +93,17 @@
                     <v-list-item-title v-html="menuItem.menuItemName"></v-list-item-title>
                     <v-list-item-subtitle v-html="menuItem.menuItemDescription"></v-list-item-subtitle>
                   </v-list-item-content>
-                  <!-- <v-list-item-action-text class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</v-list-item-action-text> -->
+                  <span class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</span>
+                </v-list-item>
+                <v-list-item v-else style="opacity: 0.3" @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1">
+                  <v-list-item-avatar tile  style="border-radius: 4px" size="45" >
+                    <img v-if="menuItem.images.length != 0" :src="menuItem.images[0]">
+                    <img v-else src="../../assets/menuItemImages/item-placeholder.png">
+                  </v-list-item-avatar>
+                  <v-list-item-content>
+                    <v-list-item-title v-html="menuItem.menuItemName"></v-list-item-title>
+                    <v-list-item-subtitle v-html="menuItem.menuItemDescription"></v-list-item-subtitle>
+                  </v-list-item-content>
                   <span class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</span>
                 </v-list-item>
                 <v-divider divider class="ml-3" width="93%"></v-divider>
@@ -174,9 +184,7 @@ export default {
     backNavigation () {
       this.$router.push('/')
     },
-    carouselTab () {
-      return 'mdi-checkbox-blank-circle';
-    },
+    
     async callWaiterPressed() {
       // var tableId = localStorage.getItem('checkedInTableId');
       // await this.callWaiter(checkedInTableId)
@@ -272,20 +280,22 @@ export default {
     },
   },
   async mounted() {
+    this.clearItem;
     if (this.displayNotification) {
       document.getElementById("notification").style.display = "block";
       this.updateDisplayNotification(false);
     }
 
-    var menuObj = await this.menu;
-    var promotionItems = await this.promotionItems;
+    // var menuObj = await this.menu;
     
-    if (Object.keys(menuObj).length == 0 || Object.keys(menuObj).length == undefined || Object.keys(promotionItems).length == 0) { 
+    if (Object.keys(this.menu).length == 0 || Object.keys(this.menu).length == undefined) { 
       this.isLoading = !this.isLoading;
       var menuResponse = await this.$store.dispatch('MenuStore/retrieveMenu', this.$route.params.menuId);
-      var promotionItemsResponse = await this.$store.dispatch('MenuStore/retrieveSuggestedPromotions', this.$route.params.menuId);
       
-      if (menuResponse && promotionItemsResponse)
+      if (this.promotionItems.length == 0)
+        await this.$store.dispatch('MenuStore/retrieveSuggestedPromotions', this.$route.params.menuId);
+      
+      if (menuResponse)
         this.isLoading = !this.isLoading;
     }
   },
@@ -297,9 +307,13 @@ export default {
         return { color: "primary", icon: "mdi-heart" };
       }
     },
+    carouselTab () {
+      return 'mdi-checkbox-blank-circle';
+    },
     ...mapActions({
       retrieveMenu: 'MenuStore/retrieveMenu',
-      callWaiter: 'CustomerStore/callWaiter'
+      callWaiter: 'CustomerStore/callWaiter',
+      clearItem: "MenuItemsStore/clearItem",
     }),
     ...mapGetters({
       menu: "MenuStore/getMenu",
@@ -337,7 +351,7 @@ export default {
       }
     },
     
-  }
+  },
 };
 </script>
 

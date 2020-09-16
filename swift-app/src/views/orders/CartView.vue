@@ -64,26 +64,33 @@
 
 
             <v-list v-for="(orderMenuItem,j) in orderInfo().orderItems" :key="j" class="py-2" width="100%">
-              <v-card  @click="editItem(orderMenuItem)" width="100%">
+              <v-card   width="100%">
                 <v-list-item class="pt-1">
-                  <v-list-item-content>
-                    <v-row>
-                      <v-col cols="9">
+                  <v-list-item-content >
+                    <v-row @click="editItem(orderMenuItem)">
+                      <v-col cols="8">
                         <v-list-item-title>{{ getItemName(orderMenuItem.menuItemId) }}</v-list-item-title>
                       </v-col>
-                      <v-col cols="3 d-flex justify-end">
+                      <v-col cols="4 d-flex justify-end">
                         <div>
                           <v-list-item-title><span style="color: #f75564; font-size: 14px" class="pr-1">{{orderMenuItem.quantity}}x</span> R{{((orderMenuItem.itemTotal != null) ? orderMenuItem.itemTotal : (0)).toFixed(2)}}</v-list-item-title>
                         </div>
                       </v-col>
                     </v-row>
                     <v-row >
-                      <v-col cols="8" class="py-0">
+                      <v-col cols="8" class="py-0" @click="editItem(orderMenuItem)">
                         <div v-if="(orderMenuItem.orderSelections != undefined)">
                           <div v-for="(orderItem, index) in orderMenuItem.orderSelections.selections" :key="index">
                             <v-list-item-subtitle v-if="!Array.isArray(orderItem.values)">- {{orderItem.name}}: {{orderItem.values}}</v-list-item-subtitle>
                             <v-list-item-subtitle v-else>- {{orderItem.name}}: {{(orderItem.values).join(', ')}}</v-list-item-subtitle>
                           </div>
+                        </div>
+                      </v-col>
+                      <v-col @click="removeCartItem(orderMenuItem)" cols="4" class="py-0 d-flex justify-end  px-0">
+                        <div >
+                          <v-list-item-icon  class="mb-0 mt-1 mr-2" >
+                            <v-icon color="primary">mdi-delete-outline</v-icon>
+                          </v-list-item-icon>
                         </div>
                       </v-col>
                       <!-- <v-col cols="4" class="py-0 d-flex justify-end">
@@ -237,9 +244,12 @@ export default {
       }
     },
     editItem(item) {
-      // console.log(item)
-      // this.addItemToEdit(item)
-      // this.$router.push("/menuItem/" + item.menuItemId);
+      // console.log("pressed")
+      this.addItemToEdit(item)
+      this.$router.push("/menuItem/" + item.menuItemId);
+    },
+    removeCartItem(item) {
+      this.removeItem(item.menuItemId)
     },
     goToCart() {
       // this.$router.push('/cart')
@@ -278,8 +288,10 @@ export default {
     },
     ...mapActions({
       updateOrderFlag: 'OrderStore/updateOrderFlag',
-      // addItemToEdit: 'OrderStore/addItemToEdit',
+      addItemToEdit: 'MenuItemsStore/addItemToEdit',
+      removeItem: 'OrderStore/removeItem',
       submitOrder: 'OrderStore/submitOrder',
+      // clearItem: "MenuItemsStore/clearItem",
     }),
     ...mapGetters({
       menu: "MenuStore/getMenu",
@@ -307,6 +319,7 @@ export default {
     },
   },
   mounted: function() {
+    // this.clearItem;
     if (Object.keys(this.orderInfo()).length != 0) {
       for (let i = 0; i < this.orderInfo().orderItems.length; i++) {
         this.subtotal += (this.orderInfo().orderItems[i].itemTotal != null) ? parseFloat(this.orderInfo().orderItems[i].itemTotal): 0;

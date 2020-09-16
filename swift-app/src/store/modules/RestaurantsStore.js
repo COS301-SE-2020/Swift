@@ -9,6 +9,7 @@ const initialState = () => ({
   exploreCategories: {},
   suggestedItemsIds: {},
   suggestedItemsFromRatings: {},
+  allActiveRestaurantPromotions: {}
 });
 
 const state = initialState();
@@ -35,6 +36,9 @@ const getters = {
   },
   getSuggestedItemsFromRatings(state) {
     return state.suggestedItemsFromRatings;
+  },
+  getAllActiveRestaurantPromotions(state) {
+    return state.allActiveRestaurantPromotions;
   },
 }
 
@@ -99,6 +103,20 @@ const actions = {
     });
   },
 
+  retrieveActivePromotions({commit}) {
+    return axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "getActivePromotions",
+      "token": sessionStorage.getItem('authToken'),
+    }
+    ).then(result => {
+      console.log(result.data)
+      commit('SAVE_ACTIVE_PROMOTIONS', result.data);
+    }).catch(({ response }) => {
+
+    });
+  },
+
   // Used to reset the store
   reset({ commit }) {
     commit('RESET');
@@ -137,6 +155,10 @@ const mutations = {
 
   SAVE_SUGGESTED_ITEMS(state, suggestedItems) {
     state.suggestedItemsFromRatings = suggestedItems;
+  },
+
+  SAVE_ACTIVE_PROMOTIONS(state, promotions) {
+    state.allActiveRestaurantPromotions = promotions;
   },
 
   updateCheckInFlag(state, data) {
