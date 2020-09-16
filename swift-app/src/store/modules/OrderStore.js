@@ -257,12 +257,13 @@ const actions = {
 const mutations = {
   SET_ORDER_HISTORY(state, orderHistory) {
     state.orderHistory = orderHistory;
+    console.log(orderHistory)
 
     var maxid = 0;
     var maxobj = null;
 
     orderHistory.map(obj => {  
-        if (obj.orderId > maxid) maxid = obj.orderId;    
+        if (obj.orderId > maxid && obj.orderStatus == "Received") maxid = obj.orderId;    
     });
 
     orderHistory.map(obj => {   
