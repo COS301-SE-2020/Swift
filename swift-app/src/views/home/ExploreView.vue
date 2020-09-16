@@ -125,43 +125,26 @@
             </v-slide-item>
           </v-slide-group>
         </v-sheet>
-        <!-- <v-row style="max-width: 400px" class="overflow-y-auto">
+         <v-row style="max-width: 400px" class="overflow-y-auto">
           <v-col cols="12">
-            <div class="categoryTitle">Recommended</div>
+            <div class="categoryTitle">Suggested Items</div>
           </v-col>
         </v-row>
-        <v-row style="max-width: 400px" class="overflow-y-auto">
-          <v-col cols="12">
-            <div class="categoryTitle">Trending</div>
-          </v-col>
-        </v-row>
-        <v-row style="max-width: 400px" class="overflow-y-auto">
-          <v-col cols="12">
-            <div class="categoryTitle">Nearby</div>
-          </v-col>
-        </v-row> -->
+        <v-sheet class="mx-auto" max-width="700">
+          <v-slide-group multiple>
+            <v-slide-item v-for="(item, index) in suggestedItemsFromRatings" :key="index">
+              <v-card ripple flat width="200px" class="mr-4">
+                <v-img v-if="item.menuItemInfo.images.length != 0" :src="item.menuItemInfo.images[0].imageurl" @click="goToRestaurant(item.menuItemInfo.restaurantid)" class="white--text align-center restaurantImage" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="125px" >
+                </v-img>
+                <v-img v-else src="../../assets/menuItemImages/item-placeholder.png" @click="goToRestaurant(item.menuItemInfo.restaurantid)" class="white--text align-center restaurantImage" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="125px" >
+                </v-img>
+                <div class="pl-1 pt-1 resaturantTitle cardFormat font-weight-light">{{item.menuItemInfo.menuitemname}}</div>
+                <span class="pl-1 subtitle-1">R{{ (item.menuItemInfo.price).toFixed(2) }}</span>
+              </v-card>
+            </v-slide-item>
+          </v-slide-group>
+        </v-sheet>
       </v-container>
-
-      <!-- <v-container v-show="!isLoading" pt-0> -->
-        <!-- <v-card color="primary" height="140px" flat tile style="border-radius: 13px !important" class="mt-5">
-          <v-row class="px-0 py-0 specialsInfo">
-            <v-col cols="6" class="pl-7 py-3 pr-0">
-              <v-layout column justify-space-between fill-height>
-                <div class="headingText">Big Promotion</div>
-                <div>
-                  <div class="promotionalText">Only</div>
-                  <div class="priceText">R60.00</div>
-                  <div class="promotionalText">2 Pizzas (Wed-Fri)</div>
-                </div>
-              </v-layout>
-            </v-col>
-            <v-col cols="6" class="py-0">
-              <v-layout column fill-height>
-                <v-img src="../../assets/exploreImages/colcacchio.jpg" class="specialsImage bannerImage pl-2">Pizza Hut</v-img>
-              </v-layout>
-            </v-col>
-          </v-row>
-        </v-card> -->
 
         <v-btn v-if="!checkedIn()" height="50px" width="50px" class="checkInBtn" @click=goToCheckin app color="primary" fab style="position: fixed; bottom: 65px; right: 13px">
           <v-icon size="30">mdi-table-furniture</v-icon>
@@ -198,9 +181,7 @@
             </v-col>
           </v-row>
         </v-card>
-        <div v-for="(item, i) in suggestedItemsFromRatings" :key="i">
-          {{item.menuItemInfo.price}}
-        </div>
+        
       </div>
       <div v-else class="pl-1 py-0 restaurantLocation font-weight-light" style="display: inline; font-size: 15px">No search results...</div>
     </v-container>  

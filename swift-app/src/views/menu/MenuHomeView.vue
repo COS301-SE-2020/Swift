@@ -35,39 +35,43 @@
         </div>
     </v-container>
 
-    <v-container v-show="!isLoading && filterPromotionItems(promotionItems).length != 0" class="mt-0 pt-0">
-      <v-row style="max-width: 400px" class="overflow-y-auto">
-        <v-col cols="12" class="pt-0">
+    <v-container v-show="!isLoading && filterPromotionItems(promotionItems).length != 0" class="mt-0 pt-0 d-flex flex-column">
+      <v-row class="overflow-y-auto" >
+        <v-col cols="12" class="py-0 mb-0">
           <div class="subtitle">Suggested for you</div>
         </v-col>
       </v-row>        
-      <v-list v-for="(promotionItem, i) in filterPromotionItems(promotionItems)" :key="i" class="py-0">
-        <v-card class="mb-2" elevation="2">
-          <v-list-item class="py-1 pr-0">
-            <v-list-item-avatar @click="goToMenuItem(promotionItem.menuItemId)" tile  style="border-radius: 4px" size="45" >
-              <v-img v-if="promotionItem.images.length !=  0" :src="promotionItem.images[0]"/>
-              <v-img v-else src="../../assets/menuItemImages/item-placeholder.png"/>
-            </v-list-item-avatar>
-            <v-list-item-content ripple @click="goToMenuItem(promotionItem.menuItemId)">
-              <v-list-item-title v-html="promotionItem.menuItemName"></v-list-item-title>
-              <v-list-item-subtitle v-html="promotionItem.menuItemDescription"></v-list-item-subtitle>
-            </v-list-item-content>
-            <v-list-item-action class="ml-0 mr-2 mt-0">
-              <v-rating background-color="secondary" readonly size="11" dense color="yellow darken-3" :value="parseInt(promotionItem.rating)"></v-rating>
-              <span class="subtitle-1">R{{ (promotionItem.price).toFixed(2) }}</span>
-            </v-list-item-action>
-          </v-list-item>
-        </v-card>
-      </v-list>
-    </v-container>  
+      <v-row class="mx-0 px-0 d-flex align-baseline">
+        <v-carousel class="promotionalMaterial mt-0 pt-0" v-show="!isLoading && filterPromotionItems(promotionItems).length != 0" v-model="carouselIndex" :continuous="true" :cycle="true" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="160px">
+          <v-carousel-item v-for="(promotionItem, i) in filterPromotionItems(promotionItems).slice(0, 5)" :key="i">
+            <v-sheet :color="(i % 2 === 0) ? 'secondary' : 'accent'" height="150px" flat tile style="border-radius: 10px !important" class="mt-2">
+              <v-row @click="goToMenuItem(promotionItem.menuItemId)"  class="d-flex justify-space-between px-0 py-0">
+                <v-col cols="6" class="py-3 pr-0">
+                  <v-layout column justify-space-between fill-height>
+                    <div class="px-3">
+                      <span class="specialsText font-weight-light">{{ promotionItem.menuItemName }}</span>
+                      <div class="mt-1 specialsDate">{{ promotionItem.menuItemDescription }}</div>
+                      <v-rating background-color="white" readonly size="11" dense color="yellow darken-3" :value="parseInt(promotionItem.rating)"></v-rating>
+                    </div>
+                    <div class="px-3">
+                      <span class="subtitle-1">R{{ (promotionItem.price).toFixed(2) }}</span>
+                    </div>
+                  </v-layout>
+                </v-col>
+                <v-col cols="6" class="py-0">
+                  <v-layout column >
+                    <v-img class="mt-0 pt-0 promoImage" height="150px" v-if="promotionItem.images.length !=  0" :src="promotionItem.images[0]"/>
+                    <v-img class="mt-0 pt-0 promoImage" height="150px" v-else src="../../assets/menuItemImages/item-placeholder.png"/>
+                  </v-layout>
+                </v-col>
+              </v-row>
+            </v-sheet>
+          </v-carousel-item>
+        </v-carousel>
+      </v-row>
+    </v-container> 
 
     <v-container v-show="!isLoading" class="px-0 pt-0 overflow-x-hidden" transition="slide-x-transition">
-      <!-- <v-row style="max-width: 400px" class="overflow-y-auto">
-        <v-col cols="12" class="pt-0">
-          <div class="title pl-3">Categories</div>
-        </v-col>
-      </v-row> -->
-
       <v-tabs v-model="secondaryCategoryTab" background-color="secondary" color="primary" dark>
         <v-tab v-for="(category, index) in primaryCategoryList" :key="index">
           {{ category.categoryName }}
@@ -158,6 +162,7 @@ export default {
     called: false,
     favourited: false,
     snackbar: true,
+    carouselIndex: 0
   }),
   methods: {
     goToMenuItem(id) {
@@ -168,6 +173,9 @@ export default {
     },
     backNavigation () {
       this.$router.push('/')
+    },
+    carouselTab () {
+      return 'mdi-checkbox-blank-circle';
     },
     async callWaiterPressed() {
       // var tableId = localStorage.getItem('checkedInTableId');
@@ -368,6 +376,11 @@ label {
   background: rgba(0, 0, 0, 0.06) !important;
   caret-color: #343434 !important;
   color: #343434 !important;
+}
+
+.promoImage {
+  border-top-right-radius: 13px;
+  border-bottom-right-radius: 13px;
 }
 
 @keyframes callWaiterAnimation {
