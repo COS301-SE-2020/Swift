@@ -79,6 +79,7 @@ const actions = {
     ).then(result => {
       console.log(result.data)
       // Call retrieveSuggestedMenuItemsFromRatings (array)
+      // this.dispatch('RestaurantsStore/retrieveSuggestedMenuItemsFromRatings', result.data);
       return true;
     }).catch(({ response }) => {
 
