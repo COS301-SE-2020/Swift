@@ -9,6 +9,7 @@ const {
   getRatingPhrasesObj,
   getMenuCategories,
   getOrderHistory,
+  getActivePromotions,
   getOrderItems
 } = require('../helper/objectBuilder');
 
@@ -1228,5 +1229,58 @@ module.exports = {
 
       Promise.all(menuItemPromises).then(() => response.status(200).send(menuItemsList));
     }
+  },
+  getAllActivePromotions: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || Object.keys(reqBody).length !== 2) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    const userToken = validateToken(reqBody.token, true);
+
+    if (userToken.state === tokenState.VALID) {
+      // eslint-disable-next-line consistent-return
+      return (async () => {
+        const client = await db.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+
+          const resObj = {};
+          const resPromise = await getActivePromotions(reqBody.restaurantId);
+          resObj.restaurantPromo = [];
+
+          Promise.all(resPromise)
+            .then((group) => {
+              group.forEach((groupItems) => {
+                resObj.restaurantPromo.push(groupItems);
+              });
+              return response.status(201).send(resObj);
+            })
+            .catch((err) => {
+              console.error('Add Review Promise Error', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
+        } catch (err) {
+          // rollback changes
+          await client.query('ROLLBACK');
+          throw err;
+        } finally {
+          client.release();
+        }
+      })()
+        .catch((err) => {
+          console.error('Query Error [Restaurant - Get Promotion List]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
   },
 };
