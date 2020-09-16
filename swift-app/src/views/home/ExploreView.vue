@@ -198,6 +198,9 @@
             </v-col>
           </v-row>
         </v-card>
+        <div v-for="(item, i) in suggestedItemsFromRatings" :key="i">
+          {{item.menuItemInfo.price}}
+        </div>
       </div>
       <div v-else class="pl-1 py-0 restaurantLocation font-weight-light" style="display: inline; font-size: 15px">No search results...</div>
     </v-container>  
@@ -334,7 +337,9 @@ export default {
       // Change this to have the checked-in menu be its own object
       await this.$store.dispatch('MenuStore/retrieveMenu', this.checkedInRestaurantId);
       var menuItemsList = await this.$store.dispatch('RestaurantsStore/retrieveSuggestedMenuItemIds');
-      // await this.$store.dispatch('RestaurantsStore/retrieveSuggestedMenuItemsFromRatings', menuItemsList);
+      await this.$store.dispatch('RestaurantsStore/retrieveSuggestedMenuItemsFromRatings', menuItemsList);
+      var obj = await this.suggestedItemsFromRatings;
+      console.log(obj)
       
       if (retrievedAllRestaurants && retrievedExploreCategories)
         this.isLoading = false;
