@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable linebreak-style */
 const db = require('../db').poolr;
 const dbw = require('../db').poolw;
@@ -1175,5 +1176,59 @@ module.exports = {
 
     // Invalid token
     return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
-  }
+  },
+  getSuggestedMenuItems: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || Object.keys(reqBody).length !== 3) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      const menuItemsList = [];
+      const menuItemPromises = [];
+
+      reqBody.menuItems.forEach((menuItem) => {
+        menuItemPromises.push(new Promise((resolve, reject) => {
+          Promise.all(menuItemPromises)
+            .then(async () => {
+              const menuItemObj = {};
+              const res = await db.query(
+                'SELECT menuitemid, menuitemname, menuitemdescription, price, estimatedwaitingtime,'
+                + ' menuitem.attributes, arasset, availability FROM public.menuitem'
+                + ' WHERE menuitemid = $1::integer ORDER BY menuitemid ASC;',
+                [menuItem]
+              );
+
+              menuItemObj.menuItemInfo = {};
+
+              for (let r = 0; r < res.rows.length; r++) {
+                menuItemObj.menuItemInfo = res.rows[r];
+              }
+
+              const res2 = await db.query(
+                'SELECT imageurl FROM public.menuitemimages'
+                + ' WHERE menuitemid = $1::integer ORDER BY menuitemid ASC;',
+                [menuItem]
+              );
+
+              menuItemObj.menuItemInfo.images = [];
+
+              for (let i = 0; i < res2.rows.length; i++) {
+                menuItemObj.menuItemInfo.images = res2.rows[i];
+              }
+
+              menuItemsList.push(menuItemObj);
+              resolve();
+            })
+            .catch((err) => {
+              reject(err);
+            });
+        }));
+      });
+
+      Promise.all(menuItemPromises).then(() => response.status(200).send(menuItemsList));
+    }
+  },
 };

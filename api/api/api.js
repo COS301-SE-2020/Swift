@@ -238,6 +238,10 @@ router.post('/', (req, res) => {
         authController.handleGoogleCallback(req.body, res);
         break;
       }
+      case 'suggestedMenuItems': {
+        restaurantController.getSuggestedMenuItems(req.body, res);
+        break;
+      }
       default: {
         res.status(400).send({ status: 400, reason: 'Bad Request' });
       }
