@@ -338,6 +338,7 @@ export default {
     checkInCustomer: 'CustomerStore/checkInCustomer',
   }),
   async mounted() {
+    this.clearItem;
     if (this.customerInfo.theme === 'light') {
       this.$vuetify.theme.dark = false;
     } else if (this.customerInfo.theme === 'dark') {
@@ -385,6 +386,7 @@ export default {
       fetchAllRestaurants: 'RestaurantsStore/allRestaurants',
       checkInCustomer: 'CustomerStore/checkInCustomer',
       retrieveExploreCategories: 'RestaurantsStore/retrieveExploreCategories',
+      clearItem: "MenuItemsStore/clearItem",
     }),
     ...mapMutations({
       clearMenu: 'MenuStore/CLEAR_MENU',

@@ -280,6 +280,7 @@ export default {
     },
   },
   async mounted() {
+    this.clearItem;
     if (this.displayNotification) {
       document.getElementById("notification").style.display = "block";
       this.updateDisplayNotification(false);
@@ -311,7 +312,8 @@ export default {
     },
     ...mapActions({
       retrieveMenu: 'MenuStore/retrieveMenu',
-      callWaiter: 'CustomerStore/callWaiter'
+      callWaiter: 'CustomerStore/callWaiter',
+      clearItem: "MenuItemsStore/clearItem",
     }),
     ...mapGetters({
       menu: "MenuStore/getMenu",
@@ -349,7 +351,7 @@ export default {
       }
     },
     
-  }
+  },
 };
 </script>
 
