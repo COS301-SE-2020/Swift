@@ -53,6 +53,7 @@
       </div>
       <div class="vx-col w-full md:w-1/3 mb-base">
         <vx-card title="Top Selling Menu Items">
+          <span v-if="topSellingItems.length == 0">No Data</span>
           <div
             v-for="(menuItem, index) in topSellingItems"
             :key="menuItem.id"
@@ -85,6 +86,7 @@
       <div class="vx-col md:w-1/2 w-full mb-base">
         <vx-card title="Average Order Price">
           <vue-apex-charts
+            ref="avgOrderPriceChart"
             type="line"
             height="350"
             :options="avgOrderPrice.chartOptions"
@@ -96,6 +98,7 @@
       <div class="vx-col md:w-1/2 w-full mb-base">
         <vx-card title="Income By Menu">
           <vue-apex-charts
+            ref="incomeByMenu"
             type="bar"
             height="350"
             :options="incomeByMenu.chartOptions"
@@ -162,10 +165,53 @@ export default {
   },
   methods: {
     loadStatistics() {
-      this.$store.dispatch("loadStatistics", {
+      this.$store
+        .dispatch("analytics/statsRevenue", {
+          authKey: this.getAuthToken(),
+          restaurantId: this.getCurrentRestaurantId(),
+          month: new Date().getMonth(),
+        })
+        .then(() => {
+          this.$refs.revenueChart.updateSeries([
+            {
+              name: "This Month",
+              data: this.$store.state.analytics.revenueData.series[0].data,
+            },
+            {
+              name: "Last Month",
+              data: this.$store.state.analytics.revenueData.series[1].data,
+            },
+          ]);
+        });
+      this.$store.dispatch("analytics/statsTopMenuItems", {
         authKey: this.getAuthToken(),
         restaurantId: this.getCurrentRestaurantId(),
+        startPeriod: new Date().getDay(),
+        endPeriod: 0,
       });
+      this.$store
+        .dispatch("analytics/statsAvgOrderPrice", {
+          authKey: this.getAuthToken(),
+          restaurantId: this.getCurrentRestaurantId(),
+        })
+        .then(() => {
+          this.$refs.avgOrderPriceChart.updateSeries([
+            {
+              name: "Average Price",
+              data: this.$store.state.analytics.avgOrderPrice.series[0].data,
+            },
+          ]);
+        });
+
+      this.$store
+        .dispatch("analytics/statsMenuRevenue", {
+          authKey: this.getAuthToken(),
+          restaurantId: this.getCurrentRestaurantId(),
+        })
+        .then(() => {
+          this.$refs.incomeByMenu.updateSeries(this.$store.state.analytics.incomeByMenu.series);
+          this.$refs.incomeByMenu.updateOptions(this.$store.state.analytics.incomeByMenu.chartOptions);
+        });
     },
   },
   created() {
@@ -191,27 +237,33 @@ export default {
         0
       );
 
-      startDate = (
-        (now.getTime() - startDate.getTime()) /
-        (1000 * 3600 * 24)
-      ).toFixed(0);
-      endDate = (
-        (now.getTime() - endDate.getTime()) /
-        (1000 * 3600 * 24)
-      ).toFixed(0);
+      startDate = parseInt(
+        (now.getTime() - startDate.getTime()) / (1000 * 3600 * 24)
+      );
+      endDate = parseInt(
+        (now.getTime() - endDate.getTime()) / (1000 * 3600 * 24)
+      );
 
       if (endDate < 0) endDate = 0;
 
-      alert(startDate)
-      alert(endDate)
-
-      this.$store.dispatch("analytics/statsRevenue", {
-        authKey: this.getAuthToken(),
-        restaurantId: this.getCurrentRestaurantId(),
-        month: this.months.indexOf(val),
-        chart: this.$refs.revenueChart,
-      });
-
+      this.$store
+        .dispatch("analytics/statsRevenue", {
+          authKey: this.getAuthToken(),
+          restaurantId: this.getCurrentRestaurantId(),
+          month: this.months.indexOf(val),
+        })
+        .then(() => {
+          this.$refs.revenueChart.updateSeries([
+            {
+              name: "This Month",
+              data: this.$store.state.analytics.revenueData.series[0].data,
+            },
+            {
+              name: "Last Month",
+              data: this.$store.state.analytics.revenueData.series[1].data,
+            },
+          ]);
+        });
       this.$store.dispatch("analytics/statsTopMenuItems", {
         authKey: this.getAuthToken(),
         restaurantId: this.getCurrentRestaurantId(),

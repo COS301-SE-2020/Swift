@@ -123,22 +123,6 @@ const actions = {
       startPeriod: 999999,
     });
   },
-  loadStatistics({
-    commit,
-    dispatch
-  }, payload) {
-    dispatch("analytics/statsRevenue", {
-      authKey: payload.authKey,
-      restaurantId: payload.restaurantId,
-      month: new Date().getMonth()
-    });
-    dispatch("analytics/statsTopMenuItems", {
-      authKey: payload.authKey,
-      restaurantId: payload.restaurantId,
-      startPeriod: new Date().getDay(),
-      endPeriod: 0
-    });
-  },
 }
 
 export default actions
