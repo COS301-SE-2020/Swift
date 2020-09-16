@@ -6,7 +6,7 @@
     </div>
     <v-container v-show="!isLoading" class="pb-0">
       <div class="backgroundImage" style="margin-top: 0px">
-        <v-row style="margin-top: -12px; margin-bottom: 10px"> 
+        <v-row style="margin-top: -12px; margin-bottom: 0px"> 
             <v-col cols="12" class="pt-0 px-0 pb-0">
               <v-carousel height="200px" :show-arrows="false" hide-delimiter cycle hide-delimiters continuous>
                 <v-carousel-item gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.4)" :src="menu.image">
@@ -35,14 +35,14 @@
         </div>
     </v-container>
 
-    <v-container v-show="!isLoading && filterPromotionItems(promotionItems).length != 0" class="mt-0 pt-0 d-flex flex-column">
-      <v-row v-show="!isLoading && filterPromotionItems(promotionItems).length != 0" class="overflow-y-auto" >
+    <v-container v-show="!isLoading && filterPromotionItems(promotionItems).length != 0" class="mt-0 pt-0 d-flex flex-column" style="padding-bottom: 0;">
+      <v-row v-show="!isLoading && filterPromotionItems(promotionItems).length != 0" class="overflow-y-auto pt-2" >
         <v-col cols="12" class="py-0 mb-0">
           <div class="subtitle">Suggested for you</div>
         </v-col>
       </v-row>        
       <v-row v-show="!isLoading" class="mx-0 px-0 d-flex align-baseline">
-        <v-carousel class="promotionalMaterial mt-0 pt-0" v-show="!isLoading && filterPromotionItems(promotionItems).length != 0" v-model="carouselIndex" :continuous="true" :cycle="true" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="160px">
+        <v-carousel class="promotionalMaterial mt-0 pt-0 mb-2" v-show="!isLoading && filterPromotionItems(promotionItems).length != 0" v-model="carouselIndex" :continuous="true" :cycle="true" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="160px">
           <v-carousel-item v-for="(promotionItem, i) in filterPromotionItems(promotionItems).slice(0, 5)" :key="i">
             <v-sheet :color="(i % 2 === 0) ? 'secondary' : 'accent'" height="150px" flat tile style="border-radius: 10px !important" class="mt-2">
               <v-row @click="goToMenuItem(promotionItem.menuItemId)"  class="d-flex justify-space-between px-0 py-0">
