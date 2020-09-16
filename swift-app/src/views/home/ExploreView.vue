@@ -335,37 +335,23 @@ export default {
     checkInCustomer: 'CustomerStore/checkInCustomer',
   }),
   async mounted() {
-    /* let checkedInVal = await this.checkedInQRCode;
-    if (checkedInVal != null && this.checkedInRestaurantId == null) {
-      console.log("apples")
-      this.isLoading = true;
-      var data = {
-        "qrcode": checkedInVal
-      }
-
-      await this.$store.dispatch('CustomerStore/checkInCustomer', data);
-    }  */
-
     if (this.customerInfo.theme === 'light') {
       this.$vuetify.theme.dark = false;
     } else if (this.customerInfo.theme === 'dark') {
       this.$vuetify.theme.dark = true;
     }
 
-    var length = await this.allRestaurants.length;
-    var categoryLength = await this.exploreCategories.length;
-    var suggestedItemsIdList = await this.suggestedItemsIds.length;
+    // var length = await this.allRestaurants.length;
+    // var categoryLength = await this.exploreCategories.length;
 
-    if (length == undefined && categoryLength == undefined) {
+    if (this.allRestaurants.length == undefined) {
       this.isLoading = true;
       var retrievedAllRestaurants = await this.fetchAllRestaurants;
       var retrievedExploreCategories = await this.retrieveExploreCategories;
       // Change this to have the checked-in menu be its own object
-      await this.$store.dispatch('MenuStore/retrieveMenu', this.checkedInRestaurantId);
+      // await this.$store.dispatch('MenuStore/retrieveMenu', this.checkedInRestaurantId);
       var menuItemsList = await this.$store.dispatch('RestaurantsStore/retrieveSuggestedMenuItemIds');
       await this.$store.dispatch('RestaurantsStore/retrieveSuggestedMenuItemsFromRatings', menuItemsList);
-      var obj = await this.suggestedItemsFromRatings;
-      console.log(obj)
       
       if (retrievedAllRestaurants && retrievedExploreCategories)
         this.isLoading = false;

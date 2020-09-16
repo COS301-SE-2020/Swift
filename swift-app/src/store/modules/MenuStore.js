@@ -3,7 +3,7 @@ import axios from 'axios'
 // State object
 const initialState = () => ({
   menu: {},
-  promotionItems: {}
+  promotionItems: []
 });
 
 const state = initialState();

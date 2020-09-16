@@ -285,15 +285,16 @@ export default {
       this.updateDisplayNotification(false);
     }
 
-    var menuObj = await this.menu;
-    var promotionItems = await this.promotionItems;
+    // var menuObj = await this.menu;
     
-    if (Object.keys(menuObj).length == 0 || Object.keys(menuObj).length == undefined || Object.keys(promotionItems).length == 0) { 
+    if (Object.keys(this.menu).length == 0 || Object.keys(this.menu).length == undefined) { 
       this.isLoading = !this.isLoading;
       var menuResponse = await this.$store.dispatch('MenuStore/retrieveMenu', this.$route.params.menuId);
-      var promotionItemsResponse = await this.$store.dispatch('MenuStore/retrieveSuggestedPromotions', this.$route.params.menuId);
       
-      if (menuResponse && promotionItemsResponse)
+      if (this.promotionItems.length == 0)
+        await this.$store.dispatch('MenuStore/retrieveSuggestedPromotions', this.$route.params.menuId);
+      
+      if (menuResponse)
         this.isLoading = !this.isLoading;
     }
   },
