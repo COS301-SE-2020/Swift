@@ -125,6 +125,21 @@
             </v-slide-item>
           </v-slide-group>
         </v-sheet>
+        <!-- <v-row style="max-width: 400px" class="overflow-y-auto">
+          <v-col cols="12">
+            <div class="categoryTitle">Recommended</div>
+          </v-col>
+        </v-row>
+        <v-row style="max-width: 400px" class="overflow-y-auto">
+          <v-col cols="12">
+            <div class="categoryTitle">Trending</div>
+          </v-col>
+        </v-row>
+        <v-row style="max-width: 400px" class="overflow-y-auto">
+          <v-col cols="12">
+            <div class="categoryTitle">Nearby</div>
+          </v-col>
+        </v-row> -->
          <v-row style="max-width: 400px" class="overflow-y-auto">
           <v-col cols="12">
             <div class="categoryTitle">Suggested Items</div>
@@ -144,6 +159,36 @@
             </v-slide-item>
           </v-slide-group>
         </v-sheet>
+      </v-container>
+
+      <v-container v-show="!isLoading" class="mt-0 pt-0">
+        <div class="categoryTitle mb-2">More Restaurants</div>
+        <v-row>
+          <v-col class="d-flex flex-column" cols=12>
+            <v-card v-for="(card, index) in filteredList" :key="index" ripple flat  class="mb-1">
+              <v-img :src="card.image" @click="goToRestaurant(card.restaurantId)" class="white--text align-center restaurantImage" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="125px" >
+                <v-rating background-color="white" readonly size="14" dense color="yellow darken-3" :value="parseInt(card.rating)" style="bottom: 3px; right: 3px; position: absolute"></v-rating>
+              </v-img>
+              <v-row class="d-flex flex-row ">
+                <v-col cols="6" class="pt-0">
+                  <div class="pl-1 pt-1 resaturantTitle cardFormat font-weight-light">{{card.name}}</div>
+                  <v-row class="ml-0">
+                    <v-icon size="13px">mdi-map-marker</v-icon>
+                    <div class="pl-0 pt-0 restaurantLocation font-weight-light">{{card.branch}}</div>
+                  </v-row>
+                </v-col>
+                <v-col cols="6" class="pt-0">
+                  <v-row class="pl-3 mt-1">
+                    <div class="ml-1 mr-2 pt-1 restaurantCategory">{{getCategoryNames(card.categories)}}</div>
+                    <v-col cols="auto" v-for="(tag, i) in card.phrases" :key="i" class="pl-0 pr-3 pt-1">
+                      <div class="restaurantDescriptor">{{tag}}</div>
+                    </v-col>
+                  </v-row>
+                </v-col>
+              </v-row>
+            </v-card>
+          </v-col>
+        </v-row>
       </v-container>
 
         <v-btn v-if="!checkedIn()" height="50px" width="50px" class="checkInBtn" @click=goToCheckin app color="primary" fab style="position: fixed; bottom: 65px; right: 13px">
