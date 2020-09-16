@@ -10,6 +10,7 @@ import controller.menuSuggest as ms
 import controller.ratingEstimator as re
 import controller.visualizeData as vd
 import controller.dashboard as dashboard
+import controller.frequentItemsets as fi
 
 
 app = Flask(__name__)
@@ -68,6 +69,9 @@ def api():
             return ms.suggestFromRatings(customerId)
         if(request.json["requestType"] == "clearRatingsCache"):
             return re.clearRatingsCache()
+        if(request.json["requestType"] == "clearOrdersCache"):
+            return re.clearOrdersCache()
+            
         
         #dashboard stats below (requires restaurantId)
         if(not 'restaurantId' in request.json):
