@@ -95,11 +95,22 @@ def api():
             if(not 'startPeriod' in request.json):
                 badRequest()
             else:
-                return dashboard.topMenus(request.json["restaurantId"], request.json["startPeriod"])            
-            
+                return dashboard.topMenus(request.json["restaurantId"], request.json["startPeriod"])     
+
+        #statistics page endpoints
+        if(request.json["requestType"] == "statsRevenue"):
+            return dashboard.revenue(request.json["restaurantId"])       
+        if(request.json["requestType"] == "statsTopMenuItems"):
+            if(not 'startPeriod' in request.json or not 'endPeriod in request.json'):
+                badRequest()
+            else:
+                return dashboard.topRevenueMenuItems(request.json["restaurantId"], request.json["startPeriod"], request.json["endPeriod"])
+        if(request.json["requestType"] == "statsAvgOrderPrice"):
+            return dashboard.averageOrderPrice(request.json["restaurantId"])     
+        if(request.json["requestType"] == "statsMenuRevenue"):
+            return dashboard.revenueByMenu(request.json["restaurantId"])     
+
         badRequest()
-
-
 
 @app.route('/visualize', methods=["GET"])
 @cross_origin()

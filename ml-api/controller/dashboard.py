@@ -182,3 +182,74 @@ def topMenus(restaurantId, start):
     cursor.close()
     db.close(connection)
     return jsonify(records)
+
+def revenue(restaurantId):
+    connection = db.connect()
+    #current number of active customers
+    cursor = connection.cursor()
+    qry = """SELECT date_trunc('day', orderdatetime) as OrderTime, sum(ordertotal) FROM customerorder
+            INNER JOIN itemordered
+            ON customerorder.orderid = itemordered.orderid
+            INNER JOIN menuitem
+            ON itemordered.menuitemid = menuitem.menuitemid
+            WHERE restaurantid = %s
+            GROUP BY 1"""
+    cursor.execute(qry, [restaurantId])
+    records = cursor.fetchall()
+    cursor.close()
+    db.close(connection)
+    return jsonify(records)
+
+def topRevenueMenuItems(restaurantId, start, end):
+    connection = db.connect()
+    #current number of active customers
+    cursor = connection.cursor()
+    qry = """SELECT currentPeriod.menuitemname, currentPeriod.itemprice, currentPeriod.totalpurchased, currentPeriod.ratio,
+            previousPeriod.totalpurchased as prevtotalpurchased, previousPeriod.ratio as prevratio FROM topMenuItems(%s,%s,%s) as currentPeriod
+            FULL JOIN topMenuItems(%s,%s,%s) as previousPeriod
+            ON currentPeriod.menuitemname = previousPeriod.menuitemname
+            WHERE not(currentPeriod.menuitemname is NULL)
+            ORDER BY currentPeriod.itemprice*currentPeriod.totalpurchased DESC;"""
+    cursor.execute(qry, [restaurantId, start, end, restaurantId, (start)*2, start-end])
+    records = cursor.fetchall()
+    cursor.close()
+    db.close(connection)
+    return jsonify(records)
+
+def averageOrderPrice(restaurantId):
+    connection = db.connect()
+    #current number of active customers
+    cursor = connection.cursor()
+    qry = """SELECT date_trunc('day', orderdatetime) as OrderTime, AVG(ordertotal) FROM customerorder
+            INNER JOIN itemordered
+            ON customerorder.orderid = itemordered.orderid
+            INNER JOIN menuitem
+            ON itemordered.menuitemid = menuitem.menuitemid
+            WHERE restaurantid = %s
+            GROUP BY 1;"""
+    cursor.execute(qry, [restaurantId])
+    records = cursor.fetchall()
+    cursor.close()
+    db.close(connection)
+    return jsonify(records)
+
+def revenueByMenu(restaurantId):
+    connection = db.connect()
+    #current number of active customers
+    cursor = connection.cursor()
+    qry = """SELECT date_trunc('day', customerorder.orderdatetime) as OrderTime, menucategory.categoryname, SUM(itemordered.itemtotal), COUNT(*) FROM itemordered
+            INNER JOIN menuitem
+            ON itemordered.menuitemid = menuitem.menuitemid
+            INNER JOIN menucategory
+            ON menuitem.categoryid = menucategory.categoryid
+            INNER JOIN customerorder
+            ON customerorder.orderid = itemordered.orderid
+            WHERE menucategory.restaurantid = %s
+            AND menucategory.categorytype = 'primary'
+            GROUP BY 1,2;"""
+    cursor.execute(qry, [restaurantId])
+    records = cursor.fetchall()
+    cursor.close()
+    db.close(connection)
+    return jsonify(records)
+
