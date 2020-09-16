@@ -325,6 +325,7 @@ export default {
 
     var length = await this.allRestaurants.length;
     var categoryLength = await this.exploreCategories.length;
+    var suggestedItemsIdList = await this.suggestedItemsIds.length;
 
     if (length == undefined && categoryLength == undefined) {
       this.isLoading = true;
@@ -332,6 +333,8 @@ export default {
       var retrievedExploreCategories = await this.retrieveExploreCategories;
       // Change this to have the checked-in menu be its own object
       await this.$store.dispatch('MenuStore/retrieveMenu', this.checkedInRestaurantId);
+      var menuItemsList = await this.$store.dispatch('RestaurantsStore/retrieveSuggestedMenuItemIds');
+      // await this.$store.dispatch('RestaurantsStore/retrieveSuggestedMenuItemsFromRatings', menuItemsList);
       
       if (retrievedAllRestaurants && retrievedExploreCategories)
         this.isLoading = false;
@@ -371,6 +374,8 @@ export default {
       customerInfo: 'CustomerStore/getCustomerProfile',
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
+      suggestedItemsIds: 'RestaurantsStore/getSuggestedItemsIds',
+      suggestedItemsFromRatings: 'RestaurantsStore/getSuggestedItemsFromRatings'
     }),
   },
 }

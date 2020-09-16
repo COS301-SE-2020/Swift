@@ -252,9 +252,6 @@ const mutations = {
     });
 
     if (maxobj != null) {
-      console.log("SET-UP")
-      console.log(maxobj)
-
       let itemsOrdered = [];
       for (let i = 0; i < maxobj.items.length; i++) {
         let data = {
@@ -340,7 +337,6 @@ const mutations = {
       var obj = item.items.find(mItem => 
         mItem.menuitemid == data.itemProgress[i].menuItemId
       )
-      console.log(obj)
       obj.progress = data.itemProgress[i].progress
     }
 
@@ -356,11 +352,6 @@ const mutations = {
       state.orderedItems = state.orderInfo;
     }
     state.orderInfo = {}
-
-    console.log("orderinfo")
-    console.log(this.getters['OrderStore/getOrderInfo'])
-    console.log("ordered")
-    console.log(this.getters['OrderStore/getOrderedItems'])
 
     this.getters['CustomerStore/getCustomer'].orderHistory = orderInformation;
 
