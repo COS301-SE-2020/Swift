@@ -203,6 +203,10 @@ const actions = {
   editOrder({commit,}, orderItemInfo) {
     commit('EDIT_ORDER', orderItemInfo);
   },
+
+  removeItem({commit,}, itemId) {
+    commit('REMOVE_ITEM', itemId);
+  },
   
   addItemToRate({commit,}, itemInfo) {
     commit('ADD_ITEM_TO_RATE', itemInfo);
@@ -324,6 +328,20 @@ const mutations = {
     menuItem.itemTotal = orderItemInfo.itemTotal;
     menuItem.quantity = orderItemInfo.quantity;
     menuItem.orderSelections = orderItemInfo.orderSelections;
+  },
+
+  REMOVE_ITEM(state, itemId) {
+    let itemIndex = -1;
+    state.orderInfo.orderItems.find((item, index) => {
+      itemIndex = index;
+      return item.menuItemId == itemId
+    });
+
+    // console.log("info")
+    // console.log(state.orderInfo.orderItems)
+    // console.log(itemIndex)
+    if (itemIndex != -1)
+      state.orderInfo.orderItems.splice(itemIndex, 1);
   },
 
   ADD_PAYMENT(state, orderPaymentinfo) {

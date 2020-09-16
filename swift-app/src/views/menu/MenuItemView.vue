@@ -627,7 +627,7 @@ export default {
         var item = 0;
         this.newMenuItem.attributes.attributes[i].values.find((val, index) => {
           item = index
-          if (this.item == null)
+          if (this.item == null || this.item.orderSelections.selections[i] == undefined)
             return val.selectedByDefault 
           else {
             return val.name == this.item.orderSelections.selections[i].values
@@ -638,7 +638,7 @@ export default {
       }
       else {
         var item = [];
-        if (this.item == null) {
+        if (this.item == null || this.item.orderSelections.selections[i] == undefined) {
           this.newMenuItem.attributes.attributes[i].values.filter((val, index) => {
             if (val.selectedByDefault)
               item.push(index);
@@ -646,14 +646,15 @@ export default {
           });
         } else {
           this.newMenuItem.attributes.attributes[i].values.filter((val, index) => {
-            if (this.item == null || this.item.orderSelections.selections[i] == undefined) {
-              if (val.selectedByDefault)
-                item.push(index);
-              return val.selectedByDefault 
-            } else {
+            // console.log(this.item.orderSelections.selections[i].values)
+            if (Array.isArray(this.item.orderSelections.selections[i].values)) {
               if (val.name == this.item.orderSelections.selections[i].values[index])
                 item.push(index);
               return val.name == this.item.orderSelections.selections[i].values[index]
+            } else {
+              if (val.name == this.item.orderSelections.selections[i].values)
+                item.push(index);
+              return val.name == this.item.orderSelections.selections[i].values
             }
           });
         }
