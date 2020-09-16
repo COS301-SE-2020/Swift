@@ -300,7 +300,6 @@ export default {
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
       checkedInTableId: 'CustomerStore/getCheckedInTableId',
       promotionItems: 'MenuStore/getPromotionItems',
-      suggestedItems: 'RestaurantStore/getSuggestedItemsFromRatings',
       orderHistory: 'CustomerStore/getCustomerOrderHistory',
     }),
     activeCall() {

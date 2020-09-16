@@ -7,8 +7,8 @@ const initialState = () => ({
   checkedIn: false,
   displayNotification: false,
   exploreCategories: {},
+  suggestedItemsIds: {},
   suggestedItemsFromRatings: {},
-  
 });
 
 const state = initialState();
@@ -29,6 +29,9 @@ const getters = {
   },
   getExploreCategories(state) {
     return state.exploreCategories;
+  },
+  getSuggestedItemsIds(state) {
+    return state.suggestedItemsIds;
   },
   getSuggestedItemsFromRatings(state) {
     return state.suggestedItemsFromRatings;
@@ -67,17 +70,31 @@ const actions = {
     });
   },
 
-  retrieveSuggestedMenuItemsFromRatings({commit}, data) {
-    return axios.post('https://api.swiftapp.ml', 
+  retrieveSuggestedMenuItemIds({commit}) {
+    return axios.post('https://ml.api.swiftapp.ml', 
     {
       "requestType": "suggestFromRatings",
-      // "customerId": 5,
       "token": sessionStorage.getItem('authToken'),
     }
     ).then(result => {
-      // Need another call that builds the json for each menu item OR only do it in the menu you are checked into
-      console.log(result.menuItemIds)
-      // commit('SAVE_SUGGESTED_ITEMS', result.data.menuItemIds);
+      console.log(result.data)
+      // Call retrieveSuggestedMenuItemsFromRatings (array)
+      return true;
+    }).catch(({ response }) => {
+
+    });
+  },
+
+  retrieveSuggestedMenuItemsFromRatings({commit}, menuItemIdList) {
+    return axios.post('https://ml.api.swiftapp.ml', 
+    {
+      "requestType": "suggestFromRatings",
+      "menuItems": menuItemIdList,
+      "token": sessionStorage.getItem('authToken'),
+    }
+    ).then(result => {
+      console.log(result.data)
+      // commit('SAVE_SUGGESTED_ITEMS', result.data.menuItems);
       return true;
     }).catch(({ response }) => {
 

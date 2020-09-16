@@ -18,8 +18,6 @@ const state = initialState();
 // Getter functions
 const getters = {
   getCustomerProfile( state ) {
-    console.log("history:")
-    console.log(state.customer.orderHistory)
     return state.customer;
   },
   getCustomerOrderHistory( state ) {
@@ -237,7 +235,6 @@ const actions = {
       "token": sessionStorage.getItem('authToken'),
     } 
     ).then(result => {
-      console.log(result.data.orderHistory)
       commit('SET_FETCHED_ORDER_HISTORY', result.data.orderHistory);
     }).catch(({ response }) => {
     });
@@ -248,48 +245,39 @@ const actions = {
   },
 
   resetPassword({commit}, data) {
-    console.log(data.email)
     return axios.post('https://api.swiftapp.ml', 
     {
       "requestType": "reset",
       "email": data.email
     }).then(result => {
-      // console.log(result.data)
       return result.data
     }).catch(({ response }) => {
-      // console.log(response)
       return response
     });
   },
 
   verifyCode({commit}, data) {
-    console.log(data.email)
     return axios.post('https://api.swiftapp.ml', 
     {
       "requestType": "verify",
       "email": data.email,
       "code": data.code
     }).then(result => {
-      // console.log(result.data)
       return result.data
     }).catch(({ response }) => {
-      // console.log(response)
       return response
     });
   },
 
   updatePassword({commit}, data) {
-    // console.log(data.email)
     return axios.post('https://api.swiftapp.ml', 
     {
       "requestType": "updatePassword",
       "email": data.email,
       "password": data.password
     }).then(result => {
-      // console.log(result.data)
       return result.data
     }).catch(({ response }) => {
-      // console.log(response)
       return response
     });
   }
