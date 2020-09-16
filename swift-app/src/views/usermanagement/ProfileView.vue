@@ -191,7 +191,7 @@ export default {
 
       var profileObj = {
         name: this.customerInfo.name,
-        surname: this.customerInfo.name,
+        surname: this.customerInfo.surname,
         profileImage: this.customerInfo.profileimageurl,
         theme: themeSettings
       }
