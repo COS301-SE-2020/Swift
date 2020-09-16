@@ -1,14 +1,17 @@
 /* eslint-disable linebreak-style */
 /* eslint-disable no-console */
+const axios = require('axios');
 const db = require('../db').poolr;
 const dbw = require('../db').poolw;
 const paymentEmail = require('../helper/notifications/sendEmail');
+const { mlApiURL } = require('../config/config-ml-api.json');
 const { validateToken, tokenState } = require('../helper/tokenHandler');
 const {
   getReviews,
   getRatingPhrasesObj,
   getMenuCategories,
   getOrderHistory,
+  getActivePromotions,
   getOrderItems
 } = require('../helper/objectBuilder');
 
@@ -219,7 +222,7 @@ module.exports = {
             .then((cRes) => {
               if (cRes.rows[0].checkedin == null) {
                 // check in user
-                return db.query(
+                return dbw.query(
                   'UPDATE public.person SET checkedin = $1::text WHERE userid = $2::integer;',
                   [reqBody.qrcode, userToken.data.userId]
                 )
@@ -278,7 +281,7 @@ module.exports = {
     // Check token validity
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
-      return db.query(
+      return dbw.query(
         'UPDATE public.person SET checkedin = $1::text WHERE userid = $2::integer;',
         [null, userToken.data.userId]
       )
@@ -577,6 +580,17 @@ module.exports = {
               orderHistoryItem.forEach((ordHistItem) => {
                 orderResponse.orderHistory.push(ordHistItem);
               });
+
+              // refresh ML API cache
+              axios.post(mlApiURL,
+                {
+                  requestType: 'clearOrdersCache',
+                  token: reqBody.token
+                }).catch((err) => {
+                console.error('ML API Orders Cache Reset -', err.stack);
+              });
+
+              // send response
               return response.status(201).send(orderResponse);
             })
             .catch((err) => {
@@ -826,6 +840,17 @@ module.exports = {
               orderHistoryItem.forEach((ordHistItem) => {
                 orderResponse.orderHistory.push(ordHistItem);
               });
+
+              // refresh ML API cache
+              axios.post(mlApiURL,
+                {
+                  requestType: 'clearOrdersCache',
+                  token: reqBody.token
+                }).catch((err) => {
+                console.error('ML API Orders Cache Reset -', err.stack);
+              });
+
+              // send response
               return response.status(201).send(orderResponse);
             })
             .catch((err) => {
@@ -1107,6 +1132,7 @@ module.exports = {
 
               // rate order
               let rQuery = 'INSERT INTO public.review';
+              let isMenuItemReview = false;
               rQuery += ' (orderid, reviewdatetime, ratingscore, comment, public, ';
               switch (reqBody.type.toLowerCase()) {
                 case 'restaurant':
@@ -1117,6 +1143,7 @@ module.exports = {
                   break;
                 default:
                   rQuery += 'menuitemid';
+                  isMenuItemReview = true;
                   break;
               }
 
@@ -1145,7 +1172,20 @@ module.exports = {
                     'UPDATE public.customerorder SET orderstatus = $1::text WHERE orderid = $2::integer',
                     ['Rated', reqBody.orderId]
                   )
-                    .then(() => response.status(201).send({ status: 201, reason: 'Reivew Recorded' }))
+                    .then(() => {
+                      if (isMenuItemReview) {
+                        // refresh ML API cache
+                        axios.post(mlApiURL,
+                          {
+                            requestType: 'clearRatingsCache',
+                            token: reqBody.token
+                          }).catch((err) => {
+                          console.error('ML API Ratings Cache Reset -', err.stack);
+                        });
+                      }
+
+                      return response.status(201).send({ status: 201, reason: 'Reivew Recorded' });
+                    })
                     .catch((err) => {
                       console.error('Query Error [Order Review - Update Order Status]', err.stack);
                       return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
@@ -1228,5 +1268,58 @@ module.exports = {
 
       Promise.all(menuItemPromises).then(() => response.status(200).send(menuItemsList));
     }
+  },
+  getAllActivePromotions: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || Object.keys(reqBody).length !== 2) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    const userToken = validateToken(reqBody.token, true);
+
+    if (userToken.state === tokenState.VALID) {
+      // eslint-disable-next-line consistent-return
+      return (async () => {
+        const client = await db.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+
+          const resObj = {};
+          const resPromise = await getActivePromotions(reqBody.restaurantId);
+          resObj.restaurantPromo = [];
+
+          Promise.all(resPromise)
+            .then((group) => {
+              group.forEach((groupItems) => {
+                resObj.restaurantPromo.push(groupItems);
+              });
+              return response.status(201).send(resObj);
+            })
+            .catch((err) => {
+              console.error('Add Review Promise Error', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
+        } catch (err) {
+          // rollback changes
+          await client.query('ROLLBACK');
+          throw err;
+        } finally {
+          client.release();
+        }
+      })()
+        .catch((err) => {
+          console.error('Query Error [Restaurant - Get Promotion List]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
   },
 };
