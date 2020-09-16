@@ -21,16 +21,19 @@ export default {
   dashboardOrderHistory({
     commit
   }, payload) {
-    axios.post(process.env.VUE_APP_MLURL, {
-      "requestType": "dashboardOrderHistory",
-      "restaurantId": payload.restaurantId,
-      "token": payload.authKey,
-    }).then(result => {
-      commit('SET_ORDER_HISTORY', result.data);
-    }).catch(({
-      result
-    }) => {
-      console.log(result)
+    return new Promise((resolve, reject) => {
+      axios.post(process.env.VUE_APP_MLURL, {
+        "requestType": "dashboardOrderHistory",
+        "restaurantId": payload.restaurantId,
+        "token": payload.authKey,
+      }).then(result => {
+        commit('SET_ORDER_HISTORY', result.data);
+        resolve(result);
+      }).catch(({
+        result
+      }) => {
+        console.log(result)
+      });
     });
   },
   dashboardActiveCustomerCount({
@@ -51,16 +54,19 @@ export default {
   dashboardActiveCustomerHistory({
     commit
   }, payload) {
-    axios.post(process.env.VUE_APP_MLURL, {
-      "requestType": "dashboardActiveCustomerHistory",
-      "restaurantId": payload.restaurantId,
-      "token": payload.authKey,
-    }).then(result => {
-      commit('SET_CUSTOMER_HISTORY', result.data);
-    }).catch(({
-      result
-    }) => {
-      console.log(result)
+    return new Promise((resolve, reject) => {
+      axios.post(process.env.VUE_APP_MLURL, {
+        "requestType": "dashboardActiveCustomerHistory",
+        "restaurantId": payload.restaurantId,
+        "token": payload.authKey,
+      }).then(result => {
+        commit('SET_CUSTOMER_HISTORY', result.data);
+        resolve(result);
+      }).catch(({
+        result
+      }) => {
+        console.log(result)
+      });
     });
   },
   dashboardActiveWaiters({
@@ -96,16 +102,19 @@ export default {
   dashboardTableOccupancyHistory({
     commit
   }, payload) {
-    axios.post(process.env.VUE_APP_MLURL, {
-      "requestType": "dashboardTableOccupancyHistory",
-      "restaurantId": payload.restaurantId,
-      "token": payload.authKey,
-    }).then(result => {
-      commit('SET_TABLE_OCUPANCY_HISTORY', result.data);
-    }).catch(({
-      result
-    }) => {
-      console.log(result)
+    return new Promise((resolve, reject) => {
+      axios.post(process.env.VUE_APP_MLURL, {
+        "requestType": "dashboardTableOccupancyHistory",
+        "restaurantId": payload.restaurantId,
+        "token": payload.authKey,
+      }).then(result => {
+        commit('SET_TABLE_OCUPANCY_HISTORY', result.data);
+        resolve(result);
+      }).catch(({
+        result
+      }) => {
+        console.log(result)
+      });
     });
   },
   dashboardTopMenuItems({
@@ -128,17 +137,20 @@ export default {
   dashboardTopMenus({
     commit
   }, payload) {
-    axios.post(process.env.VUE_APP_MLURL, {
-      "requestType": "dashboardTopMenus",
-      "startPeriod": payload.startPeriod,
-      "restaurantId": payload.restaurantId,
-      "token": payload.authKey,
-    }).then(result => {
-      commit('SET_TOP_MENU', result.data);
-    }).catch(({
-      result
-    }) => {
-      console.log(result)
+    return new Promise((resolve, reject) => {
+      axios.post(process.env.VUE_APP_MLURL, {
+        "requestType": "dashboardTopMenus",
+        "startPeriod": payload.startPeriod,
+        "restaurantId": payload.restaurantId,
+        "token": payload.authKey,
+      }).then(result => {
+        commit('SET_TOP_MENU', result.data);
+        resolve(result);
+      }).catch(({
+        result
+      }) => {
+        console.log(result)
+      });
     });
   },
   statsRevenue({

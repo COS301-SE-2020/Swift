@@ -9,6 +9,7 @@
     <div class="vx-row">
       <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base">
         <statistics-card-line
+          ref="counterCurrentOrders"
           v-if="currentOrders.analyticsData"
           icon="ShoppingCartIcon"
           :statistic="currentOrders.analyticsData.count"
@@ -20,6 +21,7 @@
 
       <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base">
         <statistics-card-line
+          ref="counterCurrentCustomers"
           v-if="currentCustomers.analyticsData"
           icon="UserIcon"
           :statistic="currentCustomers.analyticsData.count"
@@ -32,6 +34,7 @@
 
       <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base">
         <statistics-card-line
+          ref="counterActiveWaiters"
           v-if="activeWaiters.analyticsData"
           icon="UsersIcon"
           :statistic="getActiveWaiterCount(activeWaiters)"
@@ -44,6 +47,7 @@
 
       <div class="vx-col w-full sm:w-1/2 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base">
         <statistics-card-line
+          ref="counterAvailableTables"
           v-if="availableTables.analyticsData"
           icon="BookOpenIcon"
           :statistic="getAvailableTableCount(availableTables)"
@@ -95,10 +99,8 @@
       </div>
       <div class="vx-col md:w-1/3 w-full mb-base">
         <vx-card title="Menu Popularity">
-          <span v-if="menuDistribution.series.length == 0">No Data</span>
           <vue-apex-charts
-          v-if="menuDistribution.series.length > 0"
-            :key="menuPopularityChartKey"
+            ref="menuPopularityChart"
             type="donut"
             height="310"
             :options="menuDistribution.chartOptions"
@@ -144,7 +146,8 @@
       <div class="vx-col w-full">
         <vx-card title="Customer Count">
           <vue-apex-charts
-            type="area"
+            ref="largeCustomerCount"
+            type="bar"
             height="295"
             :options="customerCount.chartOptions"
             :series="customerCount.series"
@@ -166,7 +169,6 @@ export default {
   },
   data() {
     return {
-      menuPopularityChartKey: 1,
       timePeriod: "All Time",
       myDashboard: 1,
     };
@@ -229,9 +231,76 @@ export default {
       else return 0;
     },
     loadDashboard() {
-      this.$store.dispatch("loadDashboard", {
+      this.$store.dispatch("analytics/dashboardActiveOrderCount", {
         authKey: this.getAuthToken(),
         restaurantId: this.getCurrentRestaurantId(),
+      });
+      this.$store
+        .dispatch("analytics/dashboardOrderHistory", {
+          authKey: this.getAuthToken(),
+          restaurantId: this.getCurrentRestaurantId(),
+        })
+        .then(() => {
+          this.$refs.counterCurrentOrders.$refs.apexChart.updateSeries(
+            this.$store.state.analytics.currentOrders.series
+          );
+        });
+      this.$store.dispatch("analytics/dashboardActiveCustomerCount", {
+        authKey: this.getAuthToken(),
+        restaurantId: this.getCurrentRestaurantId(),
+      });
+      this.$store
+        .dispatch("analytics/dashboardActiveCustomerHistory", {
+          authKey: this.getAuthToken(),
+          restaurantId: this.getCurrentRestaurantId(),
+        })
+        .then(() => {
+          this.$refs.counterCurrentCustomers.$refs.apexChart.updateSeries(
+            this.$store.state.analytics.currentCustomers.series
+          );
+          this.$refs.largeCustomerCount.updateOptions(
+            this.$store.state.analytics.customerCount.chartOptions
+          );
+          this.$refs.largeCustomerCount.updateSeries(
+            this.$store.state.analytics.customerCount.series
+          );
+        });
+      this.$store.dispatch("analytics/dashboardActiveWaiters", {
+        authKey: this.getAuthToken(),
+        restaurantId: this.getCurrentRestaurantId(),
+      });
+      this.$store.dispatch("analytics/dashboardAvailableTables", {
+        authKey: this.getAuthToken(),
+        restaurantId: this.getCurrentRestaurantId(),
+      });
+      this.$store
+        .dispatch("analytics/dashboardTableOccupancyHistory", {
+          authKey: this.getAuthToken(),
+          restaurantId: this.getCurrentRestaurantId(),
+        })
+        .then(() => {
+          this.$refs.counterAvailableTables.$refs.apexChart.updateSeries(
+            this.$store.state.analytics.availableTables.series
+          );
+        });
+      this.$store
+        .dispatch("analytics/dashboardTopMenuItems", {
+          authKey: this.getAuthToken(),
+          restaurantId: this.getCurrentRestaurantId(),
+          startPeriod: 999999,
+        })
+        .then(() => {
+          this.$refs.menuPopularityChart.updateOptions(
+            this.$store.state.analytics.menuDistribution.chartOptions
+          );
+          this.$refs.menuPopularityChart.updateSeries(
+            this.$store.state.analytics.menuDistribution.series
+          );
+        });
+      this.$store.dispatch("analytics/dashboardTopMenus", {
+        authKey: this.getAuthToken(),
+        restaurantId: this.getCurrentRestaurantId(),
+        startPeriod: 999999,
       });
     },
   },
@@ -279,13 +348,20 @@ export default {
         restaurantId: this.getCurrentRestaurantId(),
         startPeriod: start,
       });
-      this.$store.dispatch("analytics/dashboardTopMenus", {
-        authKey: this.getAuthToken(),
-        restaurantId: this.getCurrentRestaurantId(),
-        startPeriod: start,
-      });
-      this.menuPopularityChartKey++;
-      this.myDashboard++;
+      this.$store
+        .dispatch("analytics/dashboardTopMenus", {
+          authKey: this.getAuthToken(),
+          restaurantId: this.getCurrentRestaurantId(),
+          startPeriod: start,
+        })
+        .then(() => {
+          this.$refs.menuPopularityChart.updateSeries(
+            this.$store.state.analytics.menuDistribution.series
+          );
+          this.$refs.menuPopularityChart.updateOptions(
+            this.$store.state.analytics.menuDistribution.chartOptions
+          );
+        });
     },
   },
 };

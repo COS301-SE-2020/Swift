@@ -22,7 +22,7 @@ export default {
   activeWaiters: {
     series: [{
       name: 'Waiters',
-      data: []
+      data: [0,10,8,6,9,10,6,4,7,4]
     }],
     analyticsData: {
       count: 23
@@ -45,17 +45,20 @@ export default {
   customerCount: {
     series: [{
         name: 'Check-in',
-        data: [31, 40, 28, 51, 42, 109, 100]
+        data: []
       }, {
         name: 'Check-out',
-        data: [-11, -32, -45, -32, -34, -52, -41]
+        data: []
       },
       {
-        name: 'Available',
-        data: [20, 28, 11, 21, 20, 50, 20]
+        name: 'Change',
+        data: []
       }
     ],
     chartOptions: {
+      noData: {
+        text: "No data."
+      },
       dataLabels: {
         enabled: false
       },
@@ -65,23 +68,23 @@ export default {
       colors: chartColors,
       xaxis: {
         type: 'datetime',
-        categories: ["2018-09-19T00:00:00", "2018-09-19T01:30:00", "2018-09-19T02:30:00",
-          "2018-09-19T03:30:00", "2018-09-19T04:30:00", "2018-09-19T05:30:00",
-          "2018-09-19T06:30:00"
-        ],
+        categories: [],
       },
       tooltip: {
         x: {
-          format: 'dd/MM/yy HH:mm'
+          format: 'dd/MM/yy hh:mm'
         },
 
       }
     }
   },
   menuDistribution: {
-    series: [144, 55, 80],
+    series: [],
     chartOptions: {
-      labels: ['Pizza', 'Pasta', 'Drinks'],
+      noData: {
+        text: "No data."
+      },
+      labels: [],
       colors: chartColors,
       responsive: [{
         breakpoint: 480,

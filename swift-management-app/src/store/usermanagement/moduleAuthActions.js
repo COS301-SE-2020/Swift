@@ -12,6 +12,9 @@ export default {
         "email": data.userDetails.email,
         "password": data.userDetails.password
       }).then(result => {
+
+        console.log(result)
+
         commit('SAVE_TOKEN', result.data.token);
         commit('SAVE_USER', result.data);
         commit('SET_AUTHENTICATION', true);

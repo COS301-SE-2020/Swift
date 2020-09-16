@@ -156,6 +156,10 @@ export default {
       }
     },
     menuItemsUpdated() {
+
+      //remove menu items users don't have access to
+      
+
       let clone = this.navMenuItems.slice()
 
       for(let [index, item] of this.navMenuItems.entries()) {

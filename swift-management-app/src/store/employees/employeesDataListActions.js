@@ -4,19 +4,19 @@ export default {
   listEmployees({
     commit
   }, payload) {
+    return new Promise((resolve, reject) => {
     axios.post(process.env.VUE_APP_BASEURL, {
-      "requestType": "getTableStatus",
-      "includeProfileImage": false,
-      "token": payload.authKey,
-      "restaurantId": payload.currentRestaurantId,
+      "requestType": "getRestaurantEmployees",
+      "restaurantId": payload.restaurantId,
+      "token": payload.authKey
     }).then(response => {
       console.log(response);
-      if (response.data.result.length == 0) {
-        commit('SET_TABLE_OBJECT', []);
-      } else commit('SET_TABLE_OBJECT', response.data.result);
+      commit('SET_EMP_OBJECT', response.data.employees);
+      resolve(response);
     }).catch(({
       response
-    }) => {});
+    }) => {console.log(response)});
+  });
   },
   getAccessRights({
     commit

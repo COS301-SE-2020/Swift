@@ -21,7 +21,7 @@
         <ul style="min-width: 9rem">
           <li class="flex py-2 px-4 cursor-pointer hover:bg-primary hover:text-white">
             <feather-icon icon="UserIcon" svgClasses="w-4 h-4" />
-            <span class="ml-2">Profile</span>
+            <span @click="newProfilePopupActive = true" class="ml-2">Profile</span>
           </li>
 
           <vs-divider class="m-1" />
@@ -36,23 +36,30 @@
         </ul>
       </vs-dropdown-menu>
     </vs-dropdown>
+    <vs-popup class="text-center" title="Manage Profile" :active.sync="newProfilePopupActive">
+
+      
+
+    </vs-popup>
   </div>
 </template>
 
 <script>
 export default {
   data() {
-    return {};
+    return {
+      newProfilePopupActive: false,
+    };
   },
   computed: {
     activeUserInfo() {
-      if(localStorage.getItem("userInfo") === null)
+      if (localStorage.getItem("userInfo") === null)
         return this.$store.state.AppActiveUser;
-      else
-        return JSON.parse(localStorage.getItem("userInfo"))
+      else return JSON.parse(localStorage.getItem("userInfo"));
     },
   },
   methods: {
+    updateProfileImage() {},
     logout() {
       this.$store.commit("SET_MY_RESTAURANTS", null);
       this.$store.commit("SET_CURRENT_RESTAURANT", {});

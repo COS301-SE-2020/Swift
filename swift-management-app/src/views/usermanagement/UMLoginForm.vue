@@ -34,12 +34,13 @@
 
 <script>
 import authData from "@/store/usermanagement/moduleAuth.js";
+import navMenuItems from "@/layouts/components/vertical-nav-menu/navMenuItems.js";
 
 export default {
   data() {
     return {
       email: "",
-      password: "",
+      password: ""
     };
   },
   computed: {},

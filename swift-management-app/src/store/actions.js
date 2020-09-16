@@ -80,49 +80,6 @@ const actions = {
 
     });
   },
-  loadDashboard({
-    commit,
-    dispatch
-  }, payload) {
-    dispatch("analytics/dashboardActiveOrderCount", {
-      authKey: payload.authKey,
-      restaurantId: payload.restaurantId
-    });
-    dispatch("analytics/dashboardOrderHistory", {
-      authKey: payload.authKey,
-      restaurantId: payload.restaurantId
-    });
-    dispatch("analytics/dashboardActiveCustomerCount", {
-      authKey: payload.authKey,
-      restaurantId: payload.restaurantId
-    });
-    dispatch("analytics/dashboardActiveCustomerHistory", {
-      authKey: payload.authKey,
-      restaurantId: payload.restaurantId
-    });
-    dispatch("analytics/dashboardActiveWaiters", {
-      authKey: payload.authKey,
-      restaurantId: payload.restaurantId
-    });
-    dispatch("analytics/dashboardAvailableTables", {
-      authKey: payload.authKey,
-      restaurantId: payload.restaurantId
-    });
-    dispatch("analytics/dashboardTableOccupancyHistory", {
-      authKey: payload.authKey,
-      restaurantId: payload.restaurantId
-    });
-    dispatch("analytics/dashboardTopMenuItems", {
-      authKey: payload.authKey,
-      restaurantId: payload.restaurantId,
-      startPeriod: 999999,
-    });
-    dispatch("analytics/dashboardTopMenus", {
-      authKey: payload.authKey,
-      restaurantId: payload.restaurantId,
-      startPeriod: 999999,
-    });
-  },
 }
 
 export default actions

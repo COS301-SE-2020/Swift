@@ -32,7 +32,6 @@
           </vs-dropdown-menu>
         </vs-dropdown>
 
-        <search-bar />
         <vs-spacer />
 
         <profile-drop-down />
@@ -121,12 +120,7 @@ export default {
     this.$store.dispatch("retrieveMyRestaurants", {
       authKey: this.getAuthToken(),
       currentRestaurantName: this.getCurrentRestaurantName(),
-    });
-    this.$store.dispatch("loadDashboard", {
-      authKey: this.getAuthToken(),
-      restaurantId: this.getCurrentRestaurantId(),
-    });
-    
+    });    
   },
 };
 </script>

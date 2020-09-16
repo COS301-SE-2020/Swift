@@ -28,38 +28,49 @@ export default {
     },
     SET_CUSTOMER_HISTORY(state, customerHistory) {
         state.currentCustomers.series[0].data = [];
-        var customerCount = 0;
+        var count = 0;
 
         //Counter (date filtering)
-        for (var i = 0; i < customerHistory.length; i++) {
-            // if(new Date(customerHistory[i][0]) > new Date().setHours(0,0,0,0)) //today
-            if (customerHistory[i][1] === "checkin")
-                customerCount++;
-            else if (customerHistory[i][1] === "checkout")
-                customerCount--;
+        state.currentCustomers.series[0].data.push(count)
 
-            state.currentCustomers.series[0].data.push(customerCount)
+        var today = new Date().setHours(0, 0, 0, 0);
+        for (var i = 0; i < customerHistory.length-1; i++) {
+            var dataPointDate = new Date(customerHistory[i][0]) 
+            if ((today < dataPointDate)) {
+                if (customerHistory[i][1] === "checkin")
+                count += customerHistory[i][2];
+                else if (customerHistory[i][1] === "checkout")
+                count -= customerHistory[i][2];
+
+                if (count < 0) count = 0;
+                state.currentCustomers.series[0].data.push(count)
+            }
         }
+        //ensure current count reflects on graph
+        state.currentCustomers.series[0].data.push(state.currentCustomers.analyticsData.count)
 
-        var checkInCount = 0;
-        var checkOutCount = 0;
 
+        //Graph (no date filtering)
         state.customerCount.series[0].data = [];
         state.customerCount.series[1].data = [];
         state.customerCount.series[2].data = [];
 
-        //Graph (no date filtering)
         for (var i = 0; i < customerHistory.length; i++) {
+            var checkInCount = 0;
+            var checkOutCount = 0;
+            var dataPointDate = new Date(customerHistory[i][0]);
+
             if (customerHistory[i][1] === "checkin")
-                checkInCount++;
+                checkInCount += customerHistory[i][2]
             else if (customerHistory[i][1] === "checkout")
-                checkOutCount--;
+                checkOutCount -= customerHistory[i][2];
 
             state.customerCount.series[0].data.push(checkInCount);
             state.customerCount.series[1].data.push(checkOutCount);
-            state.customerCount.series[2].data.push(checkInCount - checkOutCount);
+            state.customerCount.series[2].data.push(checkInCount-checkOutCount);
+            state.customerCount.chartOptions.xaxis.categories.push(dataPointDate.toISOString())
         }
-
+        console.log(state.customerCount)
     },
     SET_ACTIVE_WAITER_COUNT(state, activeWaiterCount) {
         state.activeWaiters.analyticsData.count = activeWaiterCount;
@@ -70,8 +81,10 @@ export default {
     SET_TABLE_OCUPANCY_HISTORY(state, tableHistory) {
         state.availableTables.series[0].data = [];
         for (var i = 0; i < tableHistory.length; i++) {
-            var tableOccupancyCount = tableHistory[i][2] - tableHistory[i][3];
-            state.availableTables.series[0].data.push(tableOccupancyCount);
+            if (new Date(tableHistory[i][0]) > new Date().setHours(0, 0, 0, 0)) {
+                var tableOccupancyCount = tableHistory[i][2] - tableHistory[i][3];
+                state.availableTables.series[0].data.push(tableOccupancyCount);
+            }
         }
     },
     SET_TOP_MENU_ITEMS(state, topMenuItems) {

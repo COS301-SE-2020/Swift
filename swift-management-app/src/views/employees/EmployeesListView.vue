@@ -4,8 +4,54 @@
       <div class="content-area__heading pr-4">
         <h2 class="mb-1">Employees</h2>
       </div>
-      <vs-button @click="addEmployeeActive = true">Add Employee</vs-button>
     </div>
+
+    <vs-table ref="table" search :data="employees">
+      <div slot="header" class="flex flex-wrap-reverse items-center flex-grow justify-between">
+        <vs-button type="border" @click="addEmployeeActive = true">Add Employee</vs-button>
+      </div>
+
+      <template slot="thead">
+        <vs-th>Profile Image</vs-th>
+        <vs-th>Name</vs-th>
+        <vs-th>Rating</vs-th>
+        <vs-th>Role</vs-th>
+        <vs-th>Action</vs-th>
+      </template>
+
+      <template slot-scope="{data}">
+        <tbody>
+          <vs-tr :data="tr" :key="indextr" v-for="(tr, indextr) in data">
+            <vs-td>
+              <vs-avatar size="large" :src="tr.profileImage" />
+            </vs-td>
+
+            <vs-td>
+              <p class="font-medium truncate">{{ tr.name }} {{ tr.surname }}</p>
+              <p>{{ tr.email }}</p>
+            </vs-td>
+
+            <vs-td>
+              <vs-chip :color="getRatingColor(tr.averageRating)">{{ getRating(tr.averageRating) }}</vs-chip>
+            </vs-td>
+
+            <vs-td>
+              <p>{{ tr.role }}</p>
+            </vs-td>
+
+            <vs-td class="whitespace-no-wrap">
+              <feather-icon icon="EditIcon" svgClasses="w-5 h-5 hover:text-primary stroke-current" />
+              <feather-icon
+                icon="TrashIcon"
+                svgClasses="w-5 h-5 hover:text-danger stroke-current"
+                class="ml-2"
+                @click.stop="deleteData(tr.employeeId)"
+              />
+            </vs-td>
+          </vs-tr>
+        </tbody>
+      </template>
+    </vs-table>
 
     <vs-popup class="text-center" title="Add Employee" :active.sync="addEmployeeActive">
       <h5 class="mb-2 mt-4">Employee Details</h5>
@@ -53,6 +99,7 @@ import employeesDataList from "@/store/employees/employeesDataList.js";
 export default {
   data() {
     return {
+      itemsPerPage: 10,
       addEmployeeActive: false,
       newEmployeeEmail: "",
       newEmployeeRole: "",
@@ -71,8 +118,21 @@ export default {
     },
   },
   methods: {
+    getRating(rating) {
+      if (rating === 0) return "Unrated";
+      else return rating.toString() + "/5";
+    },
+    getRatingColor(rating) {
+      if (rating === "Unrated") return "primary";
+      if (rating > 3.5) return "success";
+      if (rating > 2.5) return "warning";
+      if (rating <= 2.5) return "danger";
+    },
     listEmployees() {
-      return;
+      this.$store.dispatch("employeesData/listEmployees", {
+        authKey: this.getAuthToken(),
+        restaurantId: this.getCurrentRestaurantId(),
+      });
     },
     listAccessRights() {
       this.$store.dispatch("employeesData/getAccessRights", {
@@ -96,6 +156,7 @@ export default {
           authKey: this.getAuthToken(),
         })
         .then((res) => {
+          this.listEmployees();
           if (res.status == 405) {
             this.$vs.notify({
               time: 6000,
@@ -124,9 +185,8 @@ export default {
         employeesDataList.isRegistered = true;
       }
 
-      if (this.employees == null)
-        // this.$vs.loading();
-        this.listEmployees();
+      if (this.employees == null) this.$vs.loading();
+      this.listEmployees();
       this.listAccessRights();
     }
   },
@@ -141,13 +201,5 @@ export default {
     },
   },
 };
-
-/* "requestType": "addEmployee",
-  "token": "eyJlbmMiOiJBMTI4Q0JDLUhTMjU2IiwiYWxnIjoiRUN",
-  "restaurantId": 1,
-  "email": "john@gmail.com",
-  "role": "Waiter",
-  "priviliges": [1,3]
-  */
 </script>
 
