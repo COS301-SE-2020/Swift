@@ -141,6 +141,48 @@ export default {
       console.log(result)
     });
   },
+  statsRevenue({
+    commit
+  }, payload) {
+    return new Promise((resolve, reject) => {
+      axios.post(process.env.VUE_APP_MLURL, {
+        "requestType": "statsRevenue",
+        "restaurantId": payload.restaurantId,
+        "token": payload.authKey,
+      }).then(result => {
+        commit('SET_REVENUE_DATA', {
+          obj: result.data,
+          month: payload.month,
+          chart: payload.chart
+        });
+        resolve(result);
+      }).catch(({
+        result
+      }) => {
+        console.log(result)
+      });
+    });
+  },
+  statsTopMenuItems({
+    commit
+  }, payload) {
+    return new Promise((resolve, reject) => {
+      axios.post(process.env.VUE_APP_MLURL, {
+        "requestType": "statsTopMenuItems",
+        "startPeriod": payload.startPeriod,
+        "endPeriod": payload.endPeriod,
+        "restaurantId": payload.restaurantId,
+        "token": payload.authKey,
+      }).then(result => {
+        commit('SET_TOP_REVENUE_MENU_ITEMS', result.data);
+        resolve(result);
+      }).catch(({
+        result
+      }) => {
+        console.log(result)
+      });
+    });
+  },
 
 
 
