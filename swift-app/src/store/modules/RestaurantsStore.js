@@ -77,17 +77,19 @@ const actions = {
       "token": sessionStorage.getItem('authToken'),
     }
     ).then(result => {
+      console.log(result.data)
       this.dispatch('RestaurantsStore/retrieveSuggestedMenuItemsFromRatings', result.data.menuItemIds);
     }).catch(({ response }) => {
 
     });
   },
 
-  retrieveSuggestedMenuItemsFromRatings({commit}, menuItemIdList) {
+  retrieveSuggestedMenuItemsFromRatings({commit}, data) {
+    console.log(data)
     return axios.post('https://api.swiftapp.ml', 
     {
       "requestType": "suggestedMenuItems",
-      "menuItems": [65, 16, 43],
+      "menuItems": data,
       "token": sessionStorage.getItem('authToken'),
     }
     ).then(result => {
