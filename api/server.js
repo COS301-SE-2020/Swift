@@ -1,6 +1,7 @@
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const express = require('express');
+const { validateToken, tokenState } = require('./api/helper/tokenHandler');
 
 const app = express();
 const DEFAULT_PORT = 3264;
@@ -47,12 +48,30 @@ if (typeof process.env.NODE_ENV !== 'undefined' && process.env.NODE_ENV.trim() =
 }
 
 // Check for valid tokens before going any further
-// eslint-disable-next-line arrow-body-style
-app.use((req, res, next) => {
-  // TODO: Check tokens in req.body
-  // GitHub issue #40
+const tokenValidator = (req, res, next) => {
+  if (Object.prototype.hasOwnProperty.call(req.body, 'requestType')
+  && Object.prototype.hasOwnProperty.call(req.body, 'token')) {
+    if (req.body.requestType === 'checkUAToken') {
+      // proceed to endpoint
+      return next();
+    }
+
+    const userToken = validateToken(req.body.token, false);
+    if (userToken.state === tokenState.VALID) {
+      return next();
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return res.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return res.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  }
+
+  // no token in request, proceed
   return next();
-});
+};
 
 // loader.io verification
 app.get('/loaderio-21bdd85acb704aa0a54e22ecb385713b.txt', require('./api/api'));
@@ -60,7 +79,7 @@ app.get('/loaderio-21bdd85acb704aa0a54e22ecb385713b.txt', require('./api/api'));
 // API handle requests
 app.delete('/', require('./api/api'));
 app.get('/', require('./api/api'));
-app.post('/', require('./api/api'));
+app.post('/', tokenValidator, require('./api/api'));
 app.put('/', require('./api/api'));
 
 // Assets
