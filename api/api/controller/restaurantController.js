@@ -278,7 +278,7 @@ module.exports = {
     // Check token validity
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
-      return db.query(
+      return dbw.query(
         'UPDATE public.person SET checkedin = $1::text WHERE userid = $2::integer;',
         [null, userToken.data.userId]
       )
