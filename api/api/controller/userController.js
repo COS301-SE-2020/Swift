@@ -307,7 +307,7 @@ module.exports = {
     // Check token validity
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
-      return db.query(
+      return dbw.query(
         'DELETE FROM public.favourite WHERE menuitemid = $1::integer AND userid = $2::integer;',
         [reqBody.menuItemId, userToken.data.userId]
       )

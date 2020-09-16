@@ -949,4 +949,42 @@ module.exports = {
       console.error('Query Error [Promotions - Get Restaurant Promotions]', err.stack);
       return Promise.reject(err);
     }),
+  getActivePromotions: () => db.query(
+    'SELECT * FROM public.promotion'
+    + ' WHERE promotion.enddatetime > NOW() ORDER BY promotionid DESC'
+  ).then((res) => {
+    const restaurantPromotions = [];
+    res.rows.forEach((promotion) => {
+      restaurantPromotions.push(getPromoDays(promotion.promotionid)
+        .then(async (dayArr) => {
+          const promotionItem = {};
+          promotionItem.promotionId = promotion.promotionid;
+          promotionItem.restaurantId = promotion.restaurantid;
+          promotionItem.message = promotion.promotionalmessage;
+          promotionItem.image = promotion.promotionalimage;
+          promotionItem.startDate = promotion.startdatetime;
+          promotionItem.endDate = promotion.enddatetime;
+          promotionItem.value = promotion.promotionvalue;
+          promotionItem.type = promotion.promotiontype;
+          promotionItem.days = dayArr;
+          promotionItem.promotions = [];
+
+          const promotionsPromise = await getPromotionGroups(promotion.promotionid);
+
+          await Promise.all(promotionsPromise)
+            .then((group) => {
+              group.forEach((groupItems) => {
+                promotionItem.promotions.push(groupItems);
+              });
+            });
+
+          return promotionItem;
+        }));
+    });
+    return restaurantPromotions;
+  })
+    .catch((err) => {
+      console.error('Query Error [Promotions - Get Restaurant Promotions]', err.stack);
+      return Promise.reject(err);
+    }),
 };

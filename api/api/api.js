@@ -158,6 +158,10 @@ router.post('/', (req, res) => {
         restaurantAdminController.editRestaurant(req.body, res);
         break;
       }
+      case 'getActivePromotions': {
+        restaurantController.getAllActivePromotions(req.body, res);
+        break;
+      }
       case 'checkin': {
         restaurantController.checkIn(req.body, res);
         break;
@@ -236,6 +240,10 @@ router.post('/', (req, res) => {
       }
       case 'handleGoogle': {
         authController.handleGoogleCallback(req.body, res);
+        break;
+      }
+      case 'suggestedMenuItems': {
+        restaurantController.getSuggestedMenuItems(req.body, res);
         break;
       }
       default: {

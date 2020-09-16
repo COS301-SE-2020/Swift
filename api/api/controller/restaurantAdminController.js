@@ -18,6 +18,7 @@ const {
   // getOrderHistory,
   // getOrderItems
 } = require('../helper/objectBuilder');
+const { employSignInEmail, employRegisEmail } = require('../helper/notifications/sendEmail');
 
 module.exports = {
   createRestaurant: async (reqBody, response) => {
@@ -1058,12 +1059,11 @@ module.exports = {
             + ' WHERE restaurantemployee.userid = $1::integer AND restaurantemployee.restaurantid = $2::integer AND LOWER(accessright.description) = $3::text',
             [userToken.data.userId, reqBody.restaurantId, permission]
           );
-
           if (permRes.rows.length === 0) {
             // Access denied
             return response.status(403).send({ status: 403, reason: 'Access Denied' });
           }
-
+          const { email, role } = reqBody;
           // check if user registered
           const empRes = await client.query(
             'SELECT person.userid FROM public.person WHERE person.email = $1::text',
@@ -1072,6 +1072,8 @@ module.exports = {
 
           if (empRes.rows.length === 0) {
             // Access denied
+            // send email
+            employRegisEmail(email);
             return response.status(405).send({ status: 405, reason: 'Employee must be registered on the system' });
           }
 
@@ -1100,7 +1102,10 @@ module.exports = {
               employeeNumber
             ]
           );
-
+          const emailData = {};
+          emailData.email = email;
+          emailData.role = role;
+          employSignInEmail(emailData); // sends email
           reqBody.priviliges.forEach(async (right) => {
             await client.query(
               'INSERT INTO public.employeeaccessright (employeeid, permissionid)'
@@ -1108,7 +1113,6 @@ module.exports = {
               [empId.rows[0].employeeid, right]
             );
           });
-
           // commit changes and end transaction
           await client.query('COMMIT');
 
@@ -1118,7 +1122,6 @@ module.exports = {
             + ' WHERE restaurantemployee.restaurantid = $1::integer',
             [reqBody.restaurantId]
           );
-
           const employeeList = [];
           employees.rows.forEach((emp) => {
             const employee = {};
