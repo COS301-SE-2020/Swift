@@ -246,7 +246,6 @@ def revenueByMenu(restaurantId):
             INNER JOIN customerorder
             ON customerorder.orderid = itemordered.orderid
             WHERE menucategory.restaurantid = %s
-            AND menucategory.categorytype = 'primary'
             GROUP BY 1,2
             ORDER BY OrderTime ASC;"""
     cursor.execute(qry, [restaurantId])
