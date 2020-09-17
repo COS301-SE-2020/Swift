@@ -2117,7 +2117,7 @@ module.exports = {
               // eslint-disable-next-line no-await-in-loop
               await client.query(
                 'INSERT INTO public.promotionitem (promogroupid, menuitemid, attributeid, attributevalue)'
-                + ' VALUES ($1::integer, $2::integer, $3::integer, $4::text)',
+                + ' VALUES ($1::integer, $2::integer, $3::text, $4::text)',
                 [groupRes.rows[0].promogroupid, promotion[y].itemId,
                   attributeId, attributeVal]
               );
@@ -2138,6 +2138,181 @@ module.exports = {
       })()
         .catch((err) => {
           console.error('Query Error [Restaurant - Add Promotion]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  editPromotion: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'promotionId')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'message')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'image')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'startDate')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'endDate')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'days')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'value')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'type')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'promotions')
+      || Object.keys(reqBody).length !== 11) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    const userToken = validateToken(reqBody.token, true);
+
+    if (userToken.state === tokenState.VALID) {
+      return (async () => {
+        const client = await dbw.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+
+          // check if promotion exists
+          const cRes = await client.query(
+            'SELECT restaurantid FROM public.promotion WHERE promotionid = $1::integer',
+            [reqBody.promotionId]
+          );
+
+          if (cRes.rows.length === 0) {
+            // promotion does not exist
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          // check user permissions
+          const requiredRole = 'admin';
+          const permRes = await client.query(
+            'SELECT employeerole FROM public.restaurantemployee'
+            + ' WHERE userid = $1::integer AND restaurantid = $2::integer AND LOWER(employeerole) = $3::text',
+            [userToken.data.userId, cRes.rows[0].restaurantid, requiredRole]
+          );
+
+          if (permRes.rows.length === 0) {
+            // Access denied
+            return response.status(403).send({ status: 403, reason: 'Access Denied' });
+          }
+
+          // check if any menu items in promotion not in the restaurant
+          // eslint-disable-next-line consistent-return
+          for (let i = 0; i < reqBody.promotions.length; i++) {
+            const promo = reqBody.promotions[i].items;
+            for (let y = 0; y < promo.length; y++) {
+              // eslint-disable-next-line no-await-in-loop
+              const promoItem = await client.query(
+                'SELECT menuitemid FROM public.menuitem'
+                + ' INNER JOIN public.menucategory ON menucategory.categoryid = menuitem.categoryid'
+                + ' WHERE menuitem.menuitemid = $1::integer and menucategory.restaurantid = $2::integer',
+                [promo[y].itemId, cRes.rows[0].restaurantid]
+              );
+
+              if (promoItem.rows.length === 0) {
+                // menu item does not exist in given restaurant
+                return response.status(405).send({ status: 405, reason: 'Not Found' });
+              }
+            }
+          }
+
+          // update promotion
+          await client.query(
+            'UPDATE public.promotion'
+            + ' SET promotionalmessage = $1::text, promotionalimage = $2::text, startdatetime = $3::timestamp, enddatetime = $4::timestamp, promotionvalue = $5::real, promotiontype = $6::text'
+            + ' WHERE promotionid = $7::integer',
+            [
+              reqBody.message,
+              reqBody.image,
+              reqBody.startDate,
+              reqBody.endDate,
+              reqBody.value,
+              reqBody.type,
+              reqBody.promotionId
+            ]
+          );
+
+          await client.query(
+            'DELETE FROM public.dayvalid WHERE promotionid = $1::integer',
+            [reqBody.promotionId]
+          );
+
+          const promogroups = await client.query(
+            'SELECT promogroupid FROM public.promogroup WHERE promotionid = $1::integer',
+            [reqBody.promotionId]
+          );
+
+          promogroups.rows.forEach(async (group) => {
+            await client.query(
+              'DELETE FROM public.promotionitem WHERE promogroupid = $1::integer',
+              [group.promogroupid]
+            );
+          });
+
+          await client.query(
+            'DELETE FROM public.promogroup WHERE promotionid = $1::integer',
+            [reqBody.promotionId]
+          );
+
+          for (let i = 0; i < reqBody.days.length; i++) {
+            // eslint-disable-next-line no-await-in-loop
+            const dayId = await client.query(
+              'SELECT dayid FROM public.dayofweek WHERE description = $1::text',
+              [reqBody.days[i]]
+            );
+
+            // eslint-disable-next-line no-await-in-loop
+            await client.query(
+              'INSERT INTO public.dayvalid (promotionid, dayid)'
+              + ' VALUES ($1::integer, $2::integer)',
+              [reqBody.promotionId, dayId.rows[0].dayid]
+            );
+          }
+
+          for (let i = 0; i < reqBody.promotions.length; i++) {
+            const promotion = reqBody.promotions[i].items;
+            // eslint-disable-next-line no-await-in-loop
+            const groupRes = await client.query(
+              'INSERT INTO public.promogroup (promotionid)'
+              + ' VALUES ($1::integer)'
+              + ' RETURNING promogroupid',
+              [reqBody.promotionId]
+            );
+
+            for (let y = 0; y < promotion.length; y++) {
+              let attributeVal = null;
+              let attributeId = null;
+              if (Object.keys(promotion[y].attribute).length !== 0) {
+                attributeVal = promotion[y].attribute.value;
+                attributeId = promotion[y].attribute.attributeId;
+              }
+
+              // eslint-disable-next-line no-await-in-loop
+              await client.query(
+                'INSERT INTO public.promotionitem (promogroupid, menuitemid, attributeid, attributevalue)'
+                + ' VALUES ($1::integer, $2::integer, $3::text, $4::text)',
+                [groupRes.rows[0].promogroupid, promotion[y].itemId,
+                  attributeId, attributeVal]
+              );
+            }
+          }
+
+          // commit changes and end transaction
+          await client.query('COMMIT');
+
+          // return newly created promotion id
+          return response.status(201).send({ promotionId: reqBody.promotionId });
+        } catch (err) {
+          await client.query('ROLLBACK');
+          throw err;
+        } finally {
+          client.release();
+        }
+      })()
+        .catch((err) => {
+          console.error('Query Error [Restaurant - Edit Promotion]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }
