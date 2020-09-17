@@ -31,7 +31,7 @@
               >Branch: {{ business.branch }}</vs-chip>
               <div class="newRestaurantDescription mb-4">{{ business.description }}</div>
 
-              <vs-button @click="editRestaurant()" type="border">
+              <vs-button @click="editRestaurant(business)" type="border">
                 <span class="flex items-center">
                   <feather-icon icon="EditIcon" svgClasses="h-4 w-4 mr-1" />
                   <span>Edit</span>
@@ -95,10 +95,20 @@
             <vs-textarea label="Description" v-model="newRestaurantDesc" />
           </vs-col>
         </vs-row>
+        <p class="vs-input--label mb-2">Target Sales (per day)</p>
+        <vs-input
+          style="margin: 0 auto"
+          type="number"
+          min="1"
+          placeholder="Sales Per Day Goal"
+          v-model="salesPerDay"
+          class="mb-4 text-center"
+        ></vs-input>
 
         <label class="vs-input--label">Select (up to 3) Restaurant Categories</label>
         <div style="margin: auto" class="vx-row mt-4">
           <vx-card
+            :ref="'categoryCard'+category.categoryId"
             style="pointer-events: all;cursor: pointer;"
             @click="selectCategory($event, category.categoryId)"
             class="categoryOptionCards mr-2 ml-2 mb-6 md:w-1/6 lg:w-1/6 xl:w-1/6"
@@ -145,6 +155,7 @@ import { required, minLength, between } from "vuelidate/lib/validators";
 export default {
   data() {
     return {
+      salesPerDay: 0,
       restaurantPopupAction: "",
       restaurantPopupTitle: "",
       restaurantPopupButton: "",
@@ -169,7 +180,7 @@ export default {
   methods: {
     addFirstItemPrompt() {
       this.newPopupCount++;
-      if(this.newPopupCount > 1) return;
+      if (this.newPopupCount > 1) return;
       this.$vs.dialog({
         color: "primary",
         title: "Let's create your Business!",
@@ -196,9 +207,7 @@ export default {
     },
     updateImage() {
       var reader = new FileReader();
-      reader.readAsDataURL(
-        document.getElementById("uploadImageInput").files[0]
-      );
+      reader.readAsDataURL(this.$refs.uploadImageInputRef.files[0]);
       reader.onload = () => {
         this.setnewRestaurantImage(reader.result);
       };
@@ -211,10 +220,23 @@ export default {
       document.getElementById("restaurantCoverUploadPreview").style.display =
         "block";
     },
-    editRestaurant() {
+    editRestaurant(business) {
       this.restaurantPopupAction = "edit";
       this.restaurantPopupTitle = "Edit Restaurant";
       this.restaurantPopupButton = "Save Restaurant";
+      //set fields to business being edited
+      this.salesPerDay = business.serviceGoal;
+      this.newRestaurantName = business.name;
+      this.newRestaurantDesc = business.description;
+      this.newRestaurantBranch = business.branch;
+      this.setnewRestaurantImage(business.image);
+      if (business.restaurantCategories)
+        for (var i = 0; i < business.restaurantCategories.length; i++) {
+          this.$refs[
+            "categoryCard" + business.restaurantCategories[i]
+          ][0].$el.click();
+        }
+      //show popup
       this.restaurantPopupActive = true;
     },
     addRestaurant() {
@@ -231,11 +253,33 @@ export default {
           restaurantBranch: this.newRestaurantBranch,
           restaurantImage: this.newRestaurantImage,
           restaurantCategories: JSON.stringify(this.newRestaurantCategories),
+          restaurantSalesGoal: this.salesPerDay,
           authKey: this.getAuthToken(),
         });
         this.restaurantPopupActive = false;
       } else if (this.restaurantPopupAction == "edit") {
-        this.restaurantPopupActive;
+        this.$store
+          .dispatch("mybusinessData/editRestaurant", {
+            restaurantName: this.newRestaurantName,
+            restaurantDesc: this.newRestaurantDesc,
+            restaurantBranch: this.newRestaurantBranch,
+            restaurantImage: this.newRestaurantImage,
+            restaurantCategories: JSON.stringify(this.newRestaurantCategories),
+            restaurantId: this.getCurrentRestaurantId(),
+            restaurantSalesGoal: this.salesPerDay,
+            authKey: this.getAuthToken(),
+          })
+          .then((res) => {
+            if (res.status == 201) {
+              this.listMyRestaurants();
+              this.$vs.notify({
+                title: "Restaurant edit successful",
+                text: "Restaurant information has been updated.",
+                color: "success",
+              });
+            }
+          });
+        this.restaurantPopupActive = false;
       }
     },
     listMyRestaurants() {

@@ -46,6 +46,16 @@ const router = new Router({
           component: () => import('./views/menu/AddMenuItemView.vue')
         },
         {
+          path: 'menu/edit/:menuItemId',
+          name: 'edit-menu-item',
+          component: () => import('./views/menu/EditMenuItemView.vue')
+        },
+        {
+          path: '/promotions',
+          name: 'promotions',
+          component: () => import('./views/promotions/PromotionsView.vue')
+        },
+        {
           path: '/employees',
           name: 'employees',
           component: () => import('./views/employees/EmployeesListView.vue')

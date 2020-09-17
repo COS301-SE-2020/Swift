@@ -42,16 +42,16 @@ module.exports = {
         link: '/user-manual/'
       },
       {
-        text: 'API',
-        link: '/api/'
-      },
-      {
         text: 'Installation Manual',
         link: '/installation-manual/'
       },
       {
         text: 'Coding Standards',
         link: '/coding-standards/'
+      },
+      {
+        text: 'Testing Policy',
+        link: '/testing-policy/'
       },
       {
         text: 'GitHub',
@@ -73,15 +73,7 @@ module.exports = {
             'use-cases',
             'domain-model',
             'traceability-matrix',
-          ]
-        }
-      ],
-      '/api/': [
-        {
-          title: 'API',
-          collapsable: false,
-          children: [
-            '',
+            'technology-requirements',
           ]
         }
       ],

@@ -6,7 +6,7 @@
     </div>
     <v-container v-show="!isLoading" class="pb-0">
       <div class="backgroundImage" style="margin-top: 0px">
-        <v-row style="margin-top: -12px; margin-bottom: 10px"> 
+        <v-row style="margin-top: -12px; margin-bottom: 0px"> 
             <v-col cols="12" class="pt-0 px-0 pb-0">
               <v-carousel height="200px" :show-arrows="false" hide-delimiter cycle hide-delimiters continuous>
                 <v-carousel-item gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.4)" :src="menu.image">
@@ -27,20 +27,51 @@
               <v-btn width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 20px; left: 15px;">
                 <v-icon>mdi-chevron-left</v-icon>
               </v-btn>
-              <v-btn v-if="checkedIn()" width="30px" height="30px" @click="callWaiterPressed()" :key="activeCall.icon" :color="activeCall.color" absolute small fab style="top: 20px; right: 10px;">
+              <!-- <v-btn v-if="checkedIn()" width="30px" height="30px" @click="callWaiterPressed()" :key="activeCall.icon" :color="activeCall.color" absolute small fab style="top: 20px; right: 10px;">
                 <v-icon class="callWaiter" :style="called ? { 'animation-name': 'callWaiterAnimation', 'animation-duration': '5s' } : { 'transform': 'rotate(0deg)' }">{{ activeCall.icon }}</v-icon>
-              </v-btn>
+              </v-btn> -->
             </v-col>
           </v-row>
         </div>
     </v-container>
-    <v-container v-show="!isLoading" class="px-0 overflow-x-hidden" transition="slide-x-transition">
-      <v-row style="max-width: 400px" class="overflow-y-auto">
-        <v-col cols="12" class="pt-0">
-          <div class="title pl-3">Categories</div>
-        </v-col>
-      </v-row>
 
+    <v-container v-show="!isLoading && filterPromotionItems(promotionItems).length != 0" class="mt-0 pt-0 d-flex flex-column" style="padding-bottom: 0;">
+      <v-row v-show="!isLoading && filterPromotionItems(promotionItems).length != 0" class="overflow-y-auto pt-2" >
+        <v-col cols="12" class="py-0 mb-0">
+          <div class="subtitle">Suggested for you</div>
+        </v-col>
+      </v-row>        
+      <v-row v-show="!isLoading" class="mx-0 px-0 d-flex align-baseline">
+        <v-carousel class="promotionalMaterial mt-0 pt-0 mb-2" v-show="!isLoading && filterPromotionItems(promotionItems).length != 0" v-model="carouselIndex" :continuous="true" :cycle="true" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="160px">
+          <v-carousel-item v-for="(promotionItem, i) in filterPromotionItems(promotionItems).slice(0, 5)" :key="i">
+            <v-sheet :color="(i % 2 === 0) ? 'secondary' : 'accent'" height="150px" flat tile style="border-radius: 10px !important" class="mt-2">
+              <v-row @click="goToMenuItem(promotionItem.menuItemId)"  class="d-flex justify-space-between px-0 py-0">
+                <v-col cols="6" class="py-3 pr-0">
+                  <v-layout column justify-space-between fill-height>
+                    <div class="px-3">
+                      <span class="specialsText font-weight-light">{{ promotionItem.menuItemName }}</span>
+                      <div class="mt-1 specialsDate">{{ promotionItem.menuItemDescription }}</div>
+                      <v-rating background-color="white" readonly size="11" dense color="yellow darken-3" :value="parseInt(promotionItem.rating)"></v-rating>
+                    </div>
+                    <div class="px-3">
+                      <span class="subtitle-1">R{{ (promotionItem.price).toFixed(2) }}</span>
+                    </div>
+                  </v-layout>
+                </v-col>
+                <v-col cols="6" class="py-0">
+                  <v-layout column >
+                    <v-img class="mt-0 pt-0 promoImage" height="150px" v-if="promotionItem.images.length !=  0" :src="promotionItem.images[0]"/>
+                    <v-img class="mt-0 pt-0 promoImage" height="150px" v-else src="../../assets/menuItemImages/item-placeholder.png"/>
+                  </v-layout>
+                </v-col>
+              </v-row>
+            </v-sheet>
+          </v-carousel-item>
+        </v-carousel>
+      </v-row>
+    </v-container> 
+
+    <v-container v-show="!isLoading" class="px-0 pt-0 overflow-x-hidden" transition="slide-x-transition">
       <v-tabs v-model="secondaryCategoryTab" background-color="secondary" color="primary" dark>
         <v-tab v-for="(category, index) in primaryCategoryList" :key="index">
           {{ category.categoryName }}
@@ -52,8 +83,8 @@
           <div v-if="category.menuItems.length == 0">
             <v-list v-for="(secondary, i) in secondaryCategoryList(category.categoryId)" :key="i" class="py-0">
               <div class="ml-2 mt-2">{{secondary.categoryName}}</div>
-              <v-list v-for="(menuItem, i) in secondary.menuItems" :key="i" class="py-0">
-                <v-list-item @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1 ">
+              <v-list  v-for="(menuItem, i) in secondary.menuItems" :key="i" class="py-0">
+                <v-list-item v-if="menuItem.availability" style="opacity: 1" @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1">
                   <v-list-item-avatar tile  style="border-radius: 4px" size="45" >
                     <img v-if="menuItem.images.length != 0" :src="menuItem.images[0]">
                     <img v-else src="../../assets/menuItemImages/item-placeholder.png">
@@ -62,7 +93,18 @@
                     <v-list-item-title v-html="menuItem.menuItemName"></v-list-item-title>
                     <v-list-item-subtitle v-html="menuItem.menuItemDescription"></v-list-item-subtitle>
                   </v-list-item-content>
-                  <v-list-item-action-text class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</v-list-item-action-text>
+                  <span class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</span>
+                </v-list-item>
+                <v-list-item v-else style="opacity: 0.3" @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1">
+                  <v-list-item-avatar tile  style="border-radius: 4px" size="45" >
+                    <img v-if="menuItem.images.length != 0" :src="menuItem.images[0]">
+                    <img v-else src="../../assets/menuItemImages/item-placeholder.png">
+                  </v-list-item-avatar>
+                  <v-list-item-content>
+                    <v-list-item-title v-html="menuItem.menuItemName"></v-list-item-title>
+                    <v-list-item-subtitle v-html="menuItem.menuItemDescription"></v-list-item-subtitle>
+                  </v-list-item-content>
+                  <span class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</span>
                 </v-list-item>
                 <v-divider divider class="ml-3" width="93%"></v-divider>
               </v-list>
@@ -81,8 +123,9 @@
                   <v-list-item-subtitle class="mt-2" v-html="menuItem.menuItemDescription"></v-list-item-subtitle>
                 </v-list-item-content>
                 <div class="d-flex flex-column justify-content-end">
-                  <v-list-item-action-text class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</v-list-item-action-text>
                   <v-rating readonly size="14" dense color="yellow darken-3" background-color="secondary" :value="parseInt(menuItem.rating)"></v-rating>
+                  <!-- <v-list-item-action-text class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</v-list-item-action-text> -->
+                  <span class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</span>
                 </div>                
               </v-list-item>
               <v-divider divider class="ml-3" width="93%"></v-divider>
@@ -90,6 +133,10 @@
           </div>
         </v-tab-item>
       </v-tabs-items>
+
+      <!-- <div v-for="(suggestedItem, i) in filteredSuggestions(suggestedItems)" :key="i">
+        
+      </div> -->
 
     </v-container>
     <!-- <v-snackbar :v-if=checkedIn id="notification" :timeout="2000" centered color="primary" elevation="24" v-model="snackbar">You have been checked-in to {{menu.name}}</v-snackbar> -->
@@ -122,63 +169,10 @@ export default {
     search: '',
     primaryCategoryTab: null,
     secondaryCategoryTab: null,
-    items: [
-      { tab: 'Coffee and Tea', content: 'Tab 1 Content' },
-      { tab: 'Soft Drinks', content: 'Tab 2 Content' },
-      { tab: 'Alcohol', content: 'Tab 3 Content' },
-    ],
-
-    restaurantImages: [
-      { img: "https://source.unsplash.com/800x800/?fruit" },
-      { img: "https://source.unsplash.com/800x800/?salad" },
-      { img: "https://source.unsplash.com/800x800/?spaghetti" },
-      { img: "https://source.unsplash.com/800x800/?sandwich" }
-    ],
-    categories: [
-      { img: "https://source.unsplash.com/800x800/?tea", name: "Drinks" },
-      { img: "https://source.unsplash.com/800x800/?salad", name: "Starters" },
-      { img: "https://source.unsplash.com/800x800/?spaghetti", name: "Meals" },
-      {
-        img: "https://source.unsplash.com/800x800/?sandwich",
-        name: "Sandwiches"
-      },
-      { img: "https://source.unsplash.com/800x800/?dessert", name: "Desserts" },
-      { img: "https://source.unsplash.com/800x800/?alcohol", name: "Alcohol" },
-      {
-        img: "https://source.unsplash.com/800x800/?hamburger",
-        name: "Burgers"
-      },
-      { img: "https://source.unsplash.com/800x800/?cake", name: "Cakes" }
-    ],
-    popularDrinks: [
-      {
-        title: "Filter Coffee",
-        price: "R82.00",
-        rating: 5,
-        src: "https://source.unsplash.com/800x800/?coffee"
-      },
-      {
-        title: "Boxed Water",
-        price: "R52.00",
-        rating: 5,
-        src: "https://source.unsplash.com/800x800/?boxedwater"
-      },
-      {
-        title: "Tea",
-        price: "R62.00",
-        rating: 4,
-        src: "https://source.unsplash.com/800x800/?tea"
-      },
-      {
-        title: "Juice",
-        price: "R87.00",
-        rating: 3,
-        src: "https://source.unsplash.com/800x800/?juice"
-      }
-    ],
     called: false,
     favourited: false,
     snackbar: true,
+    carouselIndex: 0
   }),
   methods: {
     goToMenuItem(id) {
@@ -190,6 +184,7 @@ export default {
     backNavigation () {
       this.$router.push('/')
     },
+    
     async callWaiterPressed() {
       // var tableId = localStorage.getItem('checkedInTableId');
       // await this.callWaiter(checkedInTableId)
@@ -228,20 +223,79 @@ export default {
         }
         return false
       }
-    }
+    },
+    filterPromotionItems(promotionItems) {
+      var promotionItemsList = [];
+
+      for (let i = 0; i < promotionItems.length; i++) {
+        var tempList = [];
+        for (let j = 0; j < promotionItems[i].antecedents.length; j++) {
+          tempList.push(promotionItems[i].antecedents[j])
+          
+          var tempList2 = [];
+          for (let k = 0; k < this.orderHistory.length; k++) {
+            for (let l = 0; l < this.orderHistory[k].items.length; l++) {
+              if (promotionItems[i].antecedents[j] === this.orderHistory[k].items[l].menuItemId) {
+                tempList2.push(promotionItems[i].antecedents[j])
+              }
+            }
+          }
+
+          if (tempList.length == tempList2.length) {
+            for (let k = 0; k < promotionItems[i].consequents.length; k++)
+              promotionItemsList.push(promotionItems[i].consequents[k])
+          }
+        }
+      }
+     
+      var uniquePromotionItems = [];
+
+      $.each(promotionItemsList, function(i, el){
+        if($.inArray(el, uniquePromotionItems) === -1) uniquePromotionItems.push(el);
+      });
+      
+      var promotionMenuItems = [];
+
+      for (let i = 0; i < uniquePromotionItems.length; i++) {
+        var menuItem = this.retrievMenuItem(uniquePromotionItems[i])
+        if (menuItem != undefined)
+          promotionMenuItems.push(menuItem);        
+      }
+
+      return promotionMenuItems;
+    },
+    retrievMenuItem(menuId) {
+      if (this.findCategory(menuId) != undefined)
+        return this.findCategory(menuId).menuItems.find(menuItem => menuItem.menuItemId === menuId )
+    },
+    findCategory(menuId) {
+      if (this.menu.categories != undefined) {
+        return  this.menu.categories.find(
+          (category) => {
+            if (category.menuItems != undefined)
+              return category.menuItems.find(menuItem => menuItem.menuItemId === menuId )
+          }
+        )
+      } 
+    },
   },
   async mounted() {
+    this.clearItem;
     if (this.displayNotification) {
       document.getElementById("notification").style.display = "block";
       this.updateDisplayNotification(false);
     }
 
-    var menuObj = await this.menu;
-
-    if (Object.keys(menuObj).length == 0 || Object.keys(menuObj).length == undefined) { 
+    // var menuObj = await this.menu;
+    
+    if (Object.keys(this.menu).length == 0 || Object.keys(this.menu).length == undefined) { 
       this.isLoading = !this.isLoading;
-      var response = await this.$store.dispatch('MenuStore/retrieveMenu', this.$route.params.menuId);
-      if (response)
+      var menuResponse = await this.$store.dispatch('MenuStore/retrieveMenu', this.$route.params.menuId);
+      
+      if (this.promotionItems.length == 0)
+        await this.$store.dispatch('MenuStore/retrieveSuggestedPromotions', this.$route.params.menuId);
+      
+      if (menuResponse)
         this.isLoading = !this.isLoading;
     }
   },
@@ -253,9 +307,13 @@ export default {
         return { color: "primary", icon: "mdi-heart" };
       }
     },
+    carouselTab () {
+      return 'mdi-checkbox-blank-circle';
+    },
     ...mapActions({
       retrieveMenu: 'MenuStore/retrieveMenu',
-      callWaiter: 'CustomerStore/callWaiter'
+      callWaiter: 'CustomerStore/callWaiter',
+      clearItem: "MenuItemsStore/clearItem",
     }),
     ...mapGetters({
       menu: "MenuStore/getMenu",
@@ -263,6 +321,8 @@ export default {
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
       checkedInTableId: 'CustomerStore/getCheckedInTableId',
+      promotionItems: 'MenuStore/getPromotionItems',
+      orderHistory: 'CustomerStore/getCustomerOrderHistory',
     }),
     activeCall() {
       if (!this.called) {
@@ -278,6 +338,9 @@ export default {
         })
       }
     },
+    filteredSuggestions(promotionItems) {
+
+    },
     primaryCategoryList() {
       if (this.menu.categories != undefined) {
         var list = this.menu.categories.filter(category => {
@@ -288,7 +351,7 @@ export default {
       }
     },
     
-  }
+  },
 };
 </script>
 
@@ -327,6 +390,11 @@ label {
   background: rgba(0, 0, 0, 0.06) !important;
   caret-color: #343434 !important;
   color: #343434 !important;
+}
+
+.promoImage {
+  border-top-right-radius: 13px;
+  border-bottom-right-radius: 13px;
 }
 
 @keyframes callWaiterAnimation {
