@@ -138,6 +138,14 @@ router.post('/', (req, res) => {
         restaurantAdminController.addEmployee(req.body, res);
         break;
       }
+      case 'editEmployee': {
+        restaurantAdminController.editEmployee(req.body, res);
+        break;
+      }
+      case 'removeEmployee': {
+        restaurantAdminController.removeEmployee(req.body, res);
+        break;
+      }
       case 'editMenuItem': {
         restaurantAdminController.editMenuItem(req.body, res);
         break;

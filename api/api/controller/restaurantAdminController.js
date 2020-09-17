@@ -56,7 +56,7 @@ module.exports = {
               reqBody.location,
               reqBody.coverImageURL,
               (Object.prototype.hasOwnProperty.call(reqBody, 'serviceGoal'))
-                ? reqBody.serviceGoal : 0,
+                ? reqBody.serviceGoal : null,
               (Object.prototype.hasOwnProperty.call(reqBody, 'inBusiness'))
                 ? reqBody.inBusiness : true
             ]
@@ -1157,6 +1157,201 @@ module.exports = {
       })()
         .catch((err) => {
           console.error('Query Error [Restaurant - Add Employee]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  editEmployee: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'employeeId')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'role')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'priviliges')
+      || !Array.isArray(reqBody.priviliges)
+      || Object.keys(reqBody).length !== 5) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    const userToken = validateToken(reqBody.token, true);
+
+    if (userToken.state === tokenState.VALID) {
+      return (async () => {
+        const client = await dbw.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+
+          // check if employee exists
+          const cRes = await client.query(
+            'SELECT restaurantId FROM public.restaurantemployee WHERE employeeid = $1::integer',
+            [reqBody.employeeId]
+          );
+
+          if (cRes.rows.length === 0) {
+            // employee does not exist
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          // check user permissions
+          const permission = 'employees';
+          const permRes = await client.query(
+            'SELECT employeeaccessright.permissionid FROM public.employeeaccessright'
+            + ' INNER JOIN public.accessright ON accessright.permissionid = employeeaccessright.permissionid'
+            + ' INNER JOIN public.restaurantemployee ON restaurantemployee.employeeid = employeeaccessright.employeeid'
+            + ' WHERE restaurantemployee.userid = $1::integer AND restaurantemployee.restaurantid = $2::integer AND LOWER(accessright.description) = $3::text',
+            [userToken.data.userId, cRes.rows[0].restaurantid, permission]
+          );
+          if (permRes.rows.length === 0) {
+            // Access denied
+            return response.status(403).send({ status: 403, reason: 'Access Denied' });
+          }
+
+          // update employee info
+          await client.query(
+            'UPDATE public.restaurantemployee SET employeerole = $1::text'
+            + ' WHERE employeeid = $2::integer',
+            [
+              reqBody.role,
+              reqBody.employeeId
+            ]
+          );
+
+          await client.query(
+            'DELETE FROM employeeaccessright'
+            + ' WHERE employeeid = $1::integer',
+            [
+              reqBody.employeeId
+            ]
+          );
+
+          reqBody.priviliges.forEach(async (right) => {
+            await client.query(
+              'INSERT INTO public.employeeaccessright (employeeid, permissionid)'
+              + ' VALUES ($1::integer, $2::integer)',
+              [reqBody.employeeId, right]
+            );
+          });
+
+          // commit changes and end transaction
+          await client.query('COMMIT');
+
+          const emp = await client.query(
+            'SELECT person.userid, person.name, person.surname, person.email, person.profileimageurl, restaurantemployee.employeeid, restaurantemployee.employeerole, restaurantemployee.employeenumber FROM public.person'
+            + ' INNER JOIN public.restaurantemployee ON restaurantemployee.userid = person.userid'
+            + ' WHERE restaurantemployee.employeeid = $1::integer',
+            [reqBody.employeeId]
+          );
+
+          const employee = {};
+          employee.userId = emp.rows[0].userid;
+          employee.employeeId = emp.rows[0].employeeid;
+          employee.name = emp.rows[0].name;
+          employee.surname = emp.rows[0].surname;
+          employee.email = emp.rows[0].email;
+          employee.profileImage = emp.rows[0].profileimageurl;
+          employee.role = emp.rows[0].employeerole;
+          employee.employeeNumber = emp.rows[0].employeenumber;
+
+          return response.status(201).send(employee);
+        } catch (err) {
+          await client.query('ROLLBACK');
+          throw err;
+        } finally {
+          client.release();
+        }
+      })()
+        .catch((err) => {
+          console.error('Query Error [Restaurant - Edit Employee]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  removeEmployee: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'employeeId')
+      || Object.keys(reqBody).length !== 3) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    const userToken = validateToken(reqBody.token, true);
+
+    if (userToken.state === tokenState.VALID) {
+      return (async () => {
+        const client = await dbw.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+
+          // check if employee exists
+          const cRes = await client.query(
+            'SELECT restaurantId FROM public.restaurantemployee WHERE employeeid = $1::integer',
+            [reqBody.employeeId]
+          );
+
+          if (cRes.rows.length === 0) {
+            // employee does not exist
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          // check user permissions
+          const permission = 'employees';
+          const permRes = await client.query(
+            'SELECT employeeaccessright.permissionid FROM public.employeeaccessright'
+            + ' INNER JOIN public.accessright ON accessright.permissionid = employeeaccessright.permissionid'
+            + ' INNER JOIN public.restaurantemployee ON restaurantemployee.employeeid = employeeaccessright.employeeid'
+            + ' WHERE restaurantemployee.userid = $1::integer AND restaurantemployee.restaurantid = $2::integer AND LOWER(accessright.description) = $3::text',
+            [userToken.data.userId, cRes.rows[0].restaurantid, permission]
+          );
+          if (permRes.rows.length === 0) {
+            // Access denied
+            return response.status(403).send({ status: 403, reason: 'Access Denied' });
+          }
+
+          // remove employee
+          await client.query(
+            'DELETE FROM employeeaccessright'
+            + ' WHERE employeeid = $1::integer',
+            [
+              reqBody.employeeId
+            ]
+          );
+
+          await client.query(
+            'DELETE FROM restaurantemployee'
+            + ' WHERE employeeid = $1::integer',
+            [
+              reqBody.employeeId
+            ]
+          );
+
+          // commit changes and end transaction
+          await client.query('COMMIT');
+
+          return response.status(201).send({ status: 'Employee deleted' });
+        } catch (err) {
+          await client.query('ROLLBACK');
+          throw err;
+        } finally {
+          client.release();
+        }
+      })()
+        .catch((err) => {
+          console.error('Query Error [Restaurant - Remove Employee]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }
