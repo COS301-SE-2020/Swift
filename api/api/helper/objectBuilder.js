@@ -497,6 +497,36 @@ module.exports = {
       console.error('Query Error [Favourites - Get User Favourites]', err.stack);
       return [];
     }),
+  getLikedComments: (userId = 0) => (async () => {
+    const client = await db.connect();
+    try {
+      // begin transaction
+      await client.query('BEGIN');
+      const res = await client.query(
+        'SELECT reviewid FROM public.likedreview'
+          + ' WHERE userid = $1::integer;',
+        [userId]
+      );
+
+      const reviews = [];
+      for (let f = 0; f < res.rows.length; f++) {
+        reviews.push(res.rows[f].reviewid);
+      }
+
+      // commit and return liked reviews array
+      await client.query('COMMIT');
+      return reviews;
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
+  })()
+    .catch((err) => {
+      console.error('Query Error [Liked Reviews - Get User Liked Reviews]', err.stack);
+      return [];
+    }),
   getEmployeeData: (userId = 0) => (async () => {
     const client = await db.connect();
     try {

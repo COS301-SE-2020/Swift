@@ -8,7 +8,12 @@ const dbw = require('../db').poolw;
 const { registrationEmail, passResetEmail } = require('../helper/notifications/sendEmail');
 const { getCode, validateCode } = require('../helper/notifications/resetHandler');
 const { generateToken, validateToken, tokenState } = require('../helper/tokenHandler');
-const { getFavourites, getOrderHistory, getEmployeeData } = require('../helper/objectBuilder');
+const {
+  getFavourites,
+  getLikedComments,
+  getOrderHistory,
+  getEmployeeData
+} = require('../helper/objectBuilder');
 const phImg = require('../helper/assets/placeholderImage.json');
 
 const BC_SALT_ROUNDS = 10;
@@ -87,6 +92,10 @@ module.exports = {
 
           loginPromises.push(getFavourites(res.rows[0].userid).then((favourites) => {
             loginResponse.favourites = favourites;
+          }));
+
+          loginPromises.push(getLikedComments(res.rows[0].userid).then((comments) => {
+            loginResponse.likedComments = comments;
           }));
 
           loginPromises.push(new Promise((resolve, reject) => {
@@ -319,6 +328,91 @@ module.exports = {
           }))
         .catch((err) => {
           console.error('Query Error [Favourite - Remove Favourite Item]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  addLikedComment: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+    || !Object.prototype.hasOwnProperty.call(reqBody, 'reviewId')
+    || Object.keys(reqBody).length !== 3) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token validity
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      return db.query(
+        'SELECT reviewid FROM public.review WHERE reviewid = $1::integer;',
+        [reqBody.reviewId]
+      )
+        .then((res) => {
+          if (res.rows.length === 0) {
+            // Review does not exist
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          // add liked review if it has not already been added
+          return dbw.query(
+            'INSERT INTO public.likedreview (reviewid, userid)'
+            + ' SELECT $1::integer, $2::integer WHERE NOT EXISTS'
+            + ' (SELECT 1 FROM public.likedreview WHERE'
+            + ' reviewid = $1::integer AND userid = $2::integer);',
+            [reqBody.reviewId, userToken.data.userId]
+          )
+            .then(() => getLikedComments(userToken.data.userId)
+              .then((comments) => response.status(200).send({ comments }))
+              .catch((err) => {
+                console.error('Helper Error [Liked Reviews - Get Liked Reviews Object]', err.stack);
+                return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+              }))
+            .catch((err) => {
+              console.error('Query Error [Liked Reviews - Add Liked Reviews Item]', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
+        })
+        .catch((err) => {
+          console.error('Query Error [Liked Reviews - Check Review Item]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  removeLikedComment: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+    || !Object.prototype.hasOwnProperty.call(reqBody, 'reviewId')
+    || Object.keys(reqBody).length !== 3) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token validity
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      return dbw.query(
+        'DELETE FROM public.likedreview WHERE reviewid = $1::integer AND userid = $2::integer;',
+        [reqBody.reviewId, userToken.data.userId]
+      )
+        .then(() => getLikedComments(userToken.data.userId)
+          .then((comments) => response.status(200).send({ comments }))
+          .catch((err) => {
+            console.error('Helper Error [Liked Reviews - Get Liked Reviews Object]', err.stack);
+            return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+          }))
+        .catch((err) => {
+          console.error('Query Error [Liked Reviews - Remove Liked Reviews Item]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }

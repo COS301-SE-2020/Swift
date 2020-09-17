@@ -90,6 +90,14 @@ router.post('/', (req, res) => {
         userController.addFavourite(req.body, res);
         break;
       }
+      case 'addLikedComment': {
+        userController.addLikedComment(req.body, res);
+        break;
+      }
+      case 'removeLikedComment': {
+        userController.removeLikedComment(req.body, res);
+        break;
+      }
       case 'removeFavourite': {
         userController.removeFavourite(req.body, res);
         break;
