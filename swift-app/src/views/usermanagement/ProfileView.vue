@@ -12,16 +12,10 @@
     </v-row>
     <v-row class="mt-0 pt-4" align="center">
       <v-col cols="12" class="pt-0" align="center">
-        <image-input v-model="avatar">
-          <div slot="activator">
-            <v-avatar height="120" width="120" v-ripple v-if="!avatar"  class="grey lighten-3 mb-3">
-              <v-img :src="customerInfo.profileimageurl" cover alt="avatar"></v-img>
-            </v-avatar>
-            <v-avatar height="120" width="120" v-ripple v-else class="mb-3">
-              <v-img :src="avatar.imageURL" cover alt="avatar"></v-img>
-            </v-avatar>
-          </div>
-        </image-input>
+        <v-avatar height="120" width="120" v-ripple v-if="!avatar"  class="grey lighten-3 mb-3">
+          <v-img :src="customerInfo.profileimageurl" cover alt="avatar"></v-img>
+        </v-avatar>
+        
       </v-col>
     </v-row>
     <v-row>
@@ -136,6 +130,7 @@ import NavBar from '@/components/layout/NavBar';
 import store from '@/store/store.js';
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import ImageInput from '../../components/imageUploader/imageInput.vue'
+import PictureInput from 'vue-picture-input'
 
 export default {
   data: () => ({
@@ -151,11 +146,12 @@ export default {
     saving: false,
     saved: false,
     darkMode: null,
-    photo: null
+    photo: null,
+    image: ''
   }),
   components: {
     'NavBar': NavBar,
-    ImageInput: ImageInput
+    PictureInput
   },
   watch:{
     avatar: {
@@ -180,6 +176,41 @@ export default {
       // `files` is always an array because the file input may be in multiple mode
       this.photo = event.target.files[0];
       console.log(this.photo)
+    },
+    onChanged() {
+      console.log("New picture loaded");
+      if (this.$refs.pictureInput.file) {
+        this.image = this.$refs.pictureInput.file;
+      } else {
+        console.log("Old browser. No support for Filereader API");
+      }
+    },
+    onRemoved() {
+      this.image = '';
+    },
+    async attemptUpload() {
+
+      var profileObj = {
+        name: this.customerInfo.name,
+        surname: this.customerInfo.surname,
+        profileImage: this.image,
+        theme: this.customerInfo.theme
+      }
+
+      await this.$store.dispatch('CustomerStore/editProfile', profileObj);
+      
+      /* if (this.image){
+        FormDataPost('http://localhost:8001/user/picture', this.image)
+          .then(response=>{
+            if (response.data.success){
+              this.image = '';
+              console.log("Image uploaded successfully ✨");
+            }
+          })
+          .catch(err=>{
+            console.error(err);
+          });
+      } */
     },
     async darkModeUpdate() {
       this.darkMode = !this.darkMode;

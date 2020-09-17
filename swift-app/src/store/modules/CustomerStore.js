@@ -10,7 +10,7 @@ const initialState = () => ({
   checkedInQRCode: null,
   checkedInRestaurantId: null,
   checkedInTableId: null,
-  fetchedOrderHistory: {}
+  fetchedOrderHistory: null
 });
 
 const state = initialState();

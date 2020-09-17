@@ -261,9 +261,7 @@ const actions = {
 // Mutations
 const mutations = {
   SET_ORDER_HISTORY(state, orderHistory) {
-    console.log(orderHistory)
     state.orderHistory = orderHistory;
-    console.log(orderHistory)
 
     var maxid = 0;
     var maxobj = null;
@@ -289,9 +287,6 @@ const mutations = {
         };
         itemsOrdered[i] = data;
       }
-
-      // console.log("table")
-      // console.log(this.getters['CustomerStore/getCheckedInTableId'])
 
       let data = {
         // "orderInfo": {
