@@ -40,7 +40,7 @@
     </vs-row>
     <div class="flex flex-wrap">
       <vs-card
-        class="text-center mb-4 mt-4 ml-4 mr-4 w-full sm:w-full md:w-full lg:w-1/2 xl:w-1/4 ml-auto mr-auto"
+        class="text-center mb-4 mt-4 w-full sm:w-full md:w-full lg:w-1/2 xl:w-1/4 mr-4 ml-4"
         v-for="promo in promos"
         :key="promo.promotionId"
       >

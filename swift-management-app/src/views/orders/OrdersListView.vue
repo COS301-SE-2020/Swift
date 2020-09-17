@@ -94,7 +94,7 @@ export default {
   data() {
     return {
       isMounted: false,
-      showAll: true,
+      showAll: false,
     };
   },
   computed: {
