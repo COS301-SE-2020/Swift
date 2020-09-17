@@ -174,7 +174,6 @@ def topMenus(restaurantId, start):
             INNER JOIN customerorder
             ON customerorder.orderid = itemordered.orderid
             WHERE menucategory.restaurantid = %s
-            AND menucategory.categorytype = 'primary'
             AND customerorder.orderdatetime > NOW() - (%s::TEXT || ' DAYS')::INTERVAL
             GROUP BY 1;"""
     cursor.execute(qry, [restaurantId, start])
