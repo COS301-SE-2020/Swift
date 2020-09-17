@@ -744,7 +744,7 @@ module.exports = {
             'SELECT customerorder.orderstatus, customerorder.orderid, customerorder.progress,'
             + ' customerorder.ordertotal, person.userid FROM public.customerorder'
             + ' INNER JOIN public.restauranttable ON customerorder.tableid = restauranttable.tableid'
-            + ' INNER JOIN public.person ON customerorder.customerid = person.userid'
+            + ' INNER JOIN public.person ON person.userid = customerorder.customerid'
             + ' WHERE customerorder.orderid = $1::integer AND person.userid = $2::integer',
             [reqBody.orderId, userToken.data.userId]
           );
