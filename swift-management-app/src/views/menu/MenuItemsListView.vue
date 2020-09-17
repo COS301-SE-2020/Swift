@@ -30,43 +30,8 @@
         </span>
       </vs-button>
     </div>
-    <vs-table
-      ref="table"
-      multiple
-      v-model="selected"
-      pagination
-      :max-items="itemsPerPage"
-      search
-      :data="menuItems"
-    >
-      <div slot="header" class="flex flex-wrap-reverse items-center flex-grow justify-between">
-        <div class="flex flex-wrap-reverse items-center data-list-btn-container">
-          <vs-dropdown vs-trigger-click class="dd-actions cursor-pointer mr-4 mb-4">
-            <div
-              class="p-4 shadow-drop rounded-lg d-theme-dark-bg cursor-pointer flex items-center justify-center text-lg font-medium w-32 w-full"
-            >
-              <span class="mr-2">Bulk Actions</span>
-              <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
-            </div>
-
-            <vs-dropdown-menu>
-              <vs-dropdown-item>
-                <span class="flex items-center">
-                  <feather-icon icon="TrashIcon" svgClasses="h-4 w-4" class="mr-2" />
-                  <span>Delete</span>
-                </span>
-              </vs-dropdown-item>
-
-              <vs-dropdown-item>
-                <span class="flex items-center">
-                  <feather-icon icon="SaveIcon" svgClasses="h-4 w-4" class="mr-2" />
-                  <span>Export</span>
-                </span>
-              </vs-dropdown-item>
-            </vs-dropdown-menu>
-          </vs-dropdown>
-        </div>
-
+    <vs-table ref="table" pagination :max-items="itemsPerPage" search :data="menuItems">
+      <div slot="header" class="flex flex-wrap items-center flex-grow justify-between">
         <vs-dropdown vs-trigger-click class="cursor-pointer mb-4 mr-4 items-per-page-handler">
           <div
             class="p-4 border border-solid d-theme-border-grey-light rounded-full d-theme-dark-bg cursor-pointer flex items-center justify-between font-medium"
@@ -178,7 +143,6 @@ export default {
             this.$store.state.myRestaurants[i].restaurantId ==
             this.getCurrentRestaurantId()
           ) {
-            this.addPromoButtonDisabled = false;
             return this.$store.state.myRestaurants[i];
           }
       } else {

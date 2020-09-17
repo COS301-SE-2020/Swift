@@ -110,13 +110,13 @@
       </div>
 
       <div class="vx-col w-full md:w-1/3 mb-base">
-        <vx-card title="Orders Completed Goal">
-          <!-- CHART -->
+        <vx-card title="Orders Completed Goal" subtitle="This Year">
           <template slot="no-body">
             <div class="mt-10">
               <vue-apex-charts
                 type="radialBar"
                 height="240"
+                ref="orderGoal"
                 :options="goalOverviewRadialBar.chartOptions"
                 :series="goalOverviewRadialBar.series"
               />
@@ -214,6 +214,22 @@ export default {
         return this.$store.state.analytics.goalOverviewRadialBar;
       } else return null;
     },
+    restaurantObject() {
+      //if restaurant has been loaded before menu - use that
+      if (this.$store.state.menuList)
+        return this.$store.state.menuList.restaurantObject;
+      else if (this.$store.state.myRestaurants) {
+        for (var i = 0; i < this.$store.state.myRestaurants.length; i++)
+          if (
+            this.$store.state.myRestaurants[i].restaurantId ==
+            this.getCurrentRestaurantId()
+          ) {
+            return this.$store.state.myRestaurants[i];
+          }
+      } else {
+        return null;
+      }
+    },
   },
   methods: {
     getActiveWaiterCount(activeWaiters) {
@@ -240,7 +256,7 @@ export default {
           authKey: this.getAuthToken(),
           restaurantId: this.getCurrentRestaurantId(),
         })
-        .then(() => {
+        .then((response) => {
           this.$refs.counterCurrentOrders.$refs.apexChart.updateSeries(
             this.$store.state.analytics.currentOrders.series
           );

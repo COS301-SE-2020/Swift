@@ -274,8 +274,8 @@ export default {
       this.listTables();
 
       setInterval(() => {
-        //   this.listTables();
-      }, 4000);
+        this.listTables();
+      }, 5000);
     }
   },
   mounted() {

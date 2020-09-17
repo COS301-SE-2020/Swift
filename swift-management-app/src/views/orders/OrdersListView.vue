@@ -37,7 +37,11 @@
 
           <vs-divider border-style="solid" color="white"></vs-divider>
           <p>Order Progress:</p>
-          <vs-progress :height="8" :percent="parseInt(order.orderProgress)" :color="getStatusColor(order.orderProgress)"></vs-progress>
+          <vs-progress
+            :height="8"
+            :percent="parseInt(order.orderProgress)"
+            :color="getStatusColor(order.orderProgress)"
+          ></vs-progress>
           <vs-list>
             <vs-list-header :title="'Order Total: R'+order.orderTotal"></vs-list-header>
             <div
@@ -192,6 +196,10 @@ export default {
       if (this.orders == null) this.$vs.loading();
 
       this.listOrders();
+
+      setInterval(() => {
+        this.listOrders();
+      }, 5000);
     }
   },
   mounted() {

@@ -80,6 +80,37 @@ const actions = {
 
     });
   },
+  editProfile({
+    commit, dispatch
+  }, payload) {
+    return new Promise((resolve, reject) => {
+      axios.post(process.env.VUE_APP_BASEURL, {
+        "requestType": "editProfile",
+        "token": payload.token,
+        "name": payload.name,
+        "surname": payload.surname,
+        "profileImage": payload.profileImage,
+        "theme": "light"
+      }).then(result => {
+
+        dispatch("updateUserInfo", {
+          displayName: payload.name + ' ' + payload.surname
+        });
+        dispatch("updateUserInfo", {
+          photoURL: payload.profileImage
+        });
+
+        resolve(result);
+
+      }).catch(({
+        response
+      }) => {
+        resolve(response);
+        console.log(response)
+      });
+
+    });
+  },
 }
 
 export default actions
