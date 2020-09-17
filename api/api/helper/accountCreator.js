@@ -1,9 +1,10 @@
-const db = require('../db');
+// const db = require('../db').poolr;
+const dbw = require('../db').poolw;
 
 // TODO: Delete File
 
 module.exports = {
-  createCustomer: (customerData) => db.query(
+  createCustomer: (customerData) => dbw.query(
     'INSERT INTO public.customer (name, surname, email, password, refreshtoken, theme)'
       + ' VALUES ($1::text, $2::text, $3::text, $4::text, $5::text, $6::text);',
     [
@@ -15,7 +16,7 @@ module.exports = {
       customerData.userTheme
     ]
   ),
-  createAdmin: (adminData) => db.query(
+  createAdmin: (adminData) => dbw.query(
     'INSERT INTO public.adminuser (name, surname, email, password, refreshtoken, restaurantid)'
       + ' VALUES ($1::text, $2::text, $3::text, $4::text, $5::text, $6::integer);',
     [
@@ -27,7 +28,7 @@ module.exports = {
       adminData.restaurantId
     ]
   ),
-  createEmployee: (employeeData) => db.query(
+  createEmployee: (employeeData) => dbw.query(
     'INSERT INTO public.adminuser (name, surname, email, password, refreshtoken, employeerole, restaurantid, employeenumber)'
       + ' VALUES ($1::text, $2::text, $3::text, $4::text, $5::text, $6::text, $7::integer, $8::text);',
     [

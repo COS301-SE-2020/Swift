@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const validator = require('email-validator');
-const db = require('../db');
+const db = require('../db').poolr;
+const dbw = require('../db').poolw;
 const accCreator = require('../helper/accountCreator');
 const sendEmail = require('../helper/notifications/sendEmail');
 const { generateToken } = require('../helper/tokenHandler');
@@ -52,7 +53,7 @@ module.exports = {
           loginResponse.restaurantIds = [];
 
           // Update token in DB - async
-          db.query(
+          dbw.query(
             'UPDATE public.person SET refreshtoken = $1::text WHERE userid = $2::integer;',
             [bcrypt.hashSync(newTokenPair.refreshToken, BC_SALT_ROUNDS), res.rows[0].userid]
           )

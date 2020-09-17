@@ -1,9 +1,19 @@
+/* eslint-disable linebreak-style */
+/* eslint-disable no-console */
+/* eslint-disable linebreak-style */
 const bcrypt = require('bcrypt');
 const validator = require('email-validator');
-const db = require('../db');
+const db = require('../db').poolr;
+const dbw = require('../db').poolw;
 const { registrationEmail, passResetEmail } = require('../helper/notifications/sendEmail');
+const { getCode, validateCode } = require('../helper/notifications/resetHandler');
 const { generateToken, validateToken, tokenState } = require('../helper/tokenHandler');
-const { getFavourites, getOrderHistory } = require('../helper/objectBuilder');
+const {
+  getFavourites,
+  getLikedComments,
+  getOrderHistory,
+  getEmployeeData
+} = require('../helper/objectBuilder');
 const phImg = require('../helper/assets/placeholderImage.json');
 
 const BC_SALT_ROUNDS = 10;
@@ -28,7 +38,7 @@ module.exports = {
     // Check if user exists
     // TODO: Check if account is active
     return db.query(
-      'SELECT userid, name, surname, email, password, theme, checkedin'
+      'SELECT userid, name, surname, email, profileimageurl, password, theme, checkedin'
       + ' FROM public.person WHERE person.email = $1::text',
       [email]
     )
@@ -49,12 +59,13 @@ module.exports = {
           loginResponse.name = res.rows[0].name;
           loginResponse.surname = res.rows[0].surname;
           loginResponse.email = res.rows[0].email;
+          loginResponse.profileimageurl = res.rows[0].profileimageurl;
           loginResponse.checkedIn = res.rows[0].checkedin;
           loginResponse.theme = res.rows[0].theme;
 
           // Update token in DB - async
           const loginPromises = [];
-          loginPromises.push(db.query(
+          loginPromises.push(dbw.query(
             'UPDATE public.person SET refreshtoken = $1::text WHERE userid = $2::integer;',
             [bcrypt.hashSync(newTokenPair.refreshToken, BC_SALT_ROUNDS), res.rows[0].userid]
           )
@@ -63,8 +74,28 @@ module.exports = {
               return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
             }));
 
+          loginPromises.push(new Promise((resolve, reject) => {
+            loginPromises.push(getEmployeeData(res.rows[0].userid).then((employeeDataPromise) => {
+              loginResponse.employeeData = [];
+              Promise.all(employeeDataPromise)
+                .then((dataItems) => {
+                  dataItems.forEach((item) => {
+                    loginResponse.employeeData.push(item);
+                  });
+                  resolve();
+                })
+                .catch((err) => {
+                  reject(err);
+                });
+            }));
+          }));
+
           loginPromises.push(getFavourites(res.rows[0].userid).then((favourites) => {
             loginResponse.favourites = favourites;
+          }));
+
+          loginPromises.push(getLikedComments(res.rows[0].userid).then((comments) => {
+            loginResponse.likedComments = comments;
           }));
 
           loginPromises.push(new Promise((resolve, reject) => {
@@ -99,7 +130,6 @@ module.exports = {
       });
   },
   resetPassword: (reqBody, response) => {
-    // Check all keys are in place - no need to check request type at this point
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'email')
     || Object.keys(reqBody).length !== 2) { //  request type
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
@@ -123,18 +153,15 @@ module.exports = {
         }
         if (res.rows.length > 0) {
           // get a token
-          const newTokenPair = generateToken(res.rows[0].userid);
-          const LongToken = newTokenPair.token;
-          const value = LongToken.substring(8, 12); // get first 4 digits
-          value.trim();
+          const Code = getCode();
+          const val = Code.code;
           const sendData = {
-            ShortToken: value,
+            val,
             email
           };
-
-          if (sendData.ShortToken.length !== 0) { // Check if short token was received
+          if (sendData.val.length !== 0) { // Check if code was received
             passResetEmail(sendData);
-            return response.status(200).send(LongToken);
+            return response.status(200).send({ status: 200, reason: 'Code sent' });
           }
         } else {
           return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
@@ -148,28 +175,43 @@ module.exports = {
   // eslint-disable-next-line consistent-return
   verifyToken: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
-    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
-     || !Object.prototype.hasOwnProperty.call(reqBody, 'code') // shortToken - 4 digit pin
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'code') // 4- digit pin
+     || !Object.prototype.hasOwnProperty.call(reqBody, 'email')
      || Object.keys(reqBody).length !== 3) { // request type
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
-    // check if full token is valid
-    const userToken = validateToken(reqBody.token, true);
-    if (userToken.state === tokenState.VALID) {
-      const value = reqBody.token.substring(8, 12); /// confrim this-randomize this
-      value.trim();
-
-      if (value === reqBody.code) {
-        return response.status(201).send({ status: 201, reason: 'Valid verification Token' });
-      }
-
-      return response.status(403).send({ status: 403, reason: 'Invalid verification Token ' });
+    // check if the code belongs to the correct user
+    // check if the 4-digit pin is valid
+    const { email, code } = reqBody;
+    if (!validator.validate(email)) {
+      // invalid email
+      return response.status(400).send({ status: 400, reason: 'Invalid Email' });
     }
 
-    if (userToken.state === tokenState.INVALID) {
-      // Invalid token
-      return response.status(403).send({ status: 403, reason: 'Invalid Token Pair' });
-    }
+    // Check if user exists
+    return db.query(
+      'SELECT userid, name, surname, email, password, theme, checkedin'
+      + ' FROM public.person WHERE person.email = $1::text',
+      [email]
+    )
+      // eslint-disable-next-line consistent-return
+      .then((res) => {
+        if (res.rows.length === 0) {
+          // user does not exist
+          return response.status(404).send({ status: 404, reason: 'Not Found' });
+        }
+        // check code because we know the user exists
+        const resetCode = validateCode(code);
+        if (resetCode.status === true) {
+          return response.status(201).send({ status: 201, reason: 'Valid verification Token' });
+        }
+        if (resetCode.status === false) {
+          return response.status(403).send({ status: 403, reason: 'Invalid verification Token ' });
+        }
+      }).catch((err) => {
+        console.error('Query Error [user email  - Check Account Existence]', err.stack);
+        return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+      });
   },
   updatePassword: (reqBody, response) => {
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'email')
@@ -197,7 +239,7 @@ module.exports = {
           return response.status(404).send({ status: 404, reason: 'Not Found' });
         }
 
-        return db.query(
+        return dbw.query(
           'UPDATE public.person SET password = $1::text WHERE email = $2::text;',
           [bcrypt.hashSync(reqBody.password, BC_SALT_ROUNDS), reqBody.email]
         )
@@ -233,7 +275,7 @@ module.exports = {
           }
 
           // add favourite if it has not already been added
-          return db.query(
+          return dbw.query(
             'INSERT INTO public.favourite (menuitemid, userid)'
             + ' SELECT $1::integer, $2::integer WHERE NOT EXISTS'
             + ' (SELECT 1 FROM public.favourite WHERE'
@@ -274,7 +316,7 @@ module.exports = {
     // Check token validity
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
-      return db.query(
+      return dbw.query(
         'DELETE FROM public.favourite WHERE menuitemid = $1::integer AND userid = $2::integer;',
         [reqBody.menuItemId, userToken.data.userId]
       )
@@ -286,6 +328,91 @@ module.exports = {
           }))
         .catch((err) => {
           console.error('Query Error [Favourite - Remove Favourite Item]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  addLikedComment: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+    || !Object.prototype.hasOwnProperty.call(reqBody, 'reviewId')
+    || Object.keys(reqBody).length !== 3) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token validity
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      return db.query(
+        'SELECT reviewid FROM public.review WHERE reviewid = $1::integer;',
+        [reqBody.reviewId]
+      )
+        .then((res) => {
+          if (res.rows.length === 0) {
+            // Review does not exist
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          // add liked review if it has not already been added
+          return dbw.query(
+            'INSERT INTO public.likedreview (reviewid, userid)'
+            + ' SELECT $1::integer, $2::integer WHERE NOT EXISTS'
+            + ' (SELECT 1 FROM public.likedreview WHERE'
+            + ' reviewid = $1::integer AND userid = $2::integer);',
+            [reqBody.reviewId, userToken.data.userId]
+          )
+            .then(() => getLikedComments(userToken.data.userId)
+              .then((comments) => response.status(200).send({ comments }))
+              .catch((err) => {
+                console.error('Helper Error [Liked Reviews - Get Liked Reviews Object]', err.stack);
+                return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+              }))
+            .catch((err) => {
+              console.error('Query Error [Liked Reviews - Add Liked Reviews Item]', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
+        })
+        .catch((err) => {
+          console.error('Query Error [Liked Reviews - Check Review Item]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  removeLikedComment: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+    || !Object.prototype.hasOwnProperty.call(reqBody, 'reviewId')
+    || Object.keys(reqBody).length !== 3) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token validity
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      return dbw.query(
+        'DELETE FROM public.likedreview WHERE reviewid = $1::integer AND userid = $2::integer;',
+        [reqBody.reviewId, userToken.data.userId]
+      )
+        .then(() => getLikedComments(userToken.data.userId)
+          .then((comments) => response.status(200).send({ comments }))
+          .catch((err) => {
+            console.error('Helper Error [Liked Reviews - Get Liked Reviews Object]', err.stack);
+            return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+          }))
+        .catch((err) => {
+          console.error('Query Error [Liked Reviews - Remove Liked Reviews Item]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }
@@ -341,7 +468,7 @@ module.exports = {
         const newTokenPair = generateToken(userToken.data.userId);
 
         // Update DB
-        return db.query(
+        return dbw.query(
           'UPDATE public.person SET refreshtoken = $1::text WHERE userid = $2::integer;',
           [bcrypt.hashSync(newTokenPair.refreshToken, BC_SALT_ROUNDS), userToken.data.userId]
         )
@@ -402,7 +529,7 @@ module.exports = {
 
         // Create new account
         // TODO: Generate and send user account activation email-DONE
-        return db.query(
+        return dbw.query(
           'INSERT INTO public.person (name, surname, email, password, profileimageurl, refreshtoken, theme)'
             + ' VALUES ($1::text, $2::text, $3::text, $4::text, $5::text, $6::text, $7::text);',
           [
@@ -442,5 +569,118 @@ module.exports = {
 
         return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
       });
-  }
+  },
+  orderHistory: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+    || Object.keys(reqBody).length !== 2) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token validity
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      const orderHistoryPromises = [];
+      const orderHistoryResponse = {};
+      const id = userToken.data.userId;
+
+      orderHistoryPromises.push(new Promise((resolve, reject) => {
+        orderHistoryPromises.push(getOrderHistory(id).then((orderHistoryPromise) => {
+          orderHistoryResponse.orderHistory = [];
+          Promise.all(orderHistoryPromise)
+            .then((orderHistoryItem) => {
+              orderHistoryItem.forEach((ordHistItem) => {
+                orderHistoryResponse.orderHistory.push(ordHistItem);
+              });
+              resolve();
+            })
+            .catch((err) => {
+              reject(err);
+            });
+        }));
+      }));
+
+      Promise.all(orderHistoryPromises).then(() => response.status(200).send(orderHistoryResponse))
+        .catch((err) => {
+          console.error('Login Promise Error', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+    return true;
+  },
+  editProfile: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+    || Object.keys(reqBody).length !== 6) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token validity
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      const id = userToken.data.userId;
+      return dbw.query(
+        'UPDATE public.person SET name = $1::text, surname = $2::text, profileimageurl = $3::text, theme = $4::text  WHERE userid = $5::integer;',
+        [reqBody.name, reqBody.surname, reqBody.profileImage, reqBody.theme, id]
+      )
+        .then(() => response.status(201).send({
+          profileInfo: {
+            name: reqBody.name,
+            surname: reqBody.surname,
+            profileImage: reqBody.profileImage,
+            theme: reqBody.theme
+          }
+        }))
+        .catch((err) => {
+          console.error('Query Error [Profile update error]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+    return true;
+  },
+  addCommentLike: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+    || !Object.prototype.hasOwnProperty.call(reqBody, 'reviewId')
+    || Object.keys(reqBody).length !== 3) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token validity
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      return db.query(
+        'SELECT reviewId FROM public.review WHERE reviewId = $1::integer;',
+        [reqBody.reviewId]
+      )
+        .then((res) => {
+          if (res.rows.length === 0) {
+            // Review does not exist
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          // add review like if it has not already been added
+          return dbw.query(
+            'INSERT INTO public.likedreview (reviewId, userid)'
+            + ' SELECT $1::integer, $2::integer WHERE NOT EXISTS'
+            + ' (SELECT 1 FROM public.likedreview WHERE'
+            + ' reviewId = $1::integer AND userid = $2::integer);',
+            [reqBody.reviewId, userToken.data.userId]
+          )
+            .then(() => response.status(201).send({ status: 201, reason: 'Comment liked successfully' }))
+            .catch((err) => {
+              console.error('Query Error [Review - Add Review Item]', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
+        })
+        .catch((err) => {
+          console.error('Query Error [Review - Check Review]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
 };
