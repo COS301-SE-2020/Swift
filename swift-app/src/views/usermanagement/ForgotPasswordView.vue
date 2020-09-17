@@ -201,7 +201,7 @@ export default {
         this.sendEmail()
         //console.log("user")
         //console.log(user)
-        //this.step = this.step + 1;
+        this.step = this.step + 1;
       }
 
       
