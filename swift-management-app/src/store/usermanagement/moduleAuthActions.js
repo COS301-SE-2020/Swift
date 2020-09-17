@@ -12,9 +12,18 @@ export default {
         "email": data.userDetails.email,
         "password": data.userDetails.password
       }).then(result => {
+
         commit('SAVE_TOKEN', result.data.token);
         commit('SAVE_USER', result.data);
         commit('SET_AUTHENTICATION', true);
+
+        console.log("USER",result.data)
+
+        dispatch("updateUserInfo", {
+          employeeData: result.data.employeeData
+        }, {
+          root: true
+        });
 
         dispatch("updateUserInfo", {
           displayName: result.data.name + ' ' + result.data.surname
@@ -25,12 +34,11 @@ export default {
           root: true
         });
         dispatch("updateUserInfo", {
-          photoURL: null
+          photoURL: result.data.profileimageurl
         }, {
           root: true
         });
 
-        console.log(result);
         resolve(result);
       }).catch(({
         response

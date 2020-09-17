@@ -6,7 +6,10 @@ const initialState = () => ({
   tableNumber: "",
   checkedIn: false,
   displayNotification: false,
-  exploreCategories: {}
+  exploreCategories: {},
+  suggestedItemsIds: {},
+  suggestedItemsFromRatings: {},
+  allActiveRestaurantPromotions: {}
 });
 
 const state = initialState();
@@ -27,6 +30,15 @@ const getters = {
   },
   getExploreCategories(state) {
     return state.exploreCategories;
+  },
+  getSuggestedItemsIds(state) {
+    return state.suggestedItemsIds;
+  },
+  getSuggestedItemsFromRatings(state) {
+    return state.suggestedItemsFromRatings;
+  },
+  getAllActiveRestaurantPromotions(state) {
+    return state.allActiveRestaurantPromotions;
   },
 }
 
@@ -59,6 +71,49 @@ const actions = {
       commit('SAVE_ALL_EXPLORE_CATEGORIES', result.data.categories);
       return true;
     }).catch(({ response }) => {
+    });
+  },
+
+  retrieveSuggestedMenuItemIds({commit}) {
+    return axios.post('https://ml.api.swiftapp.ml', 
+    {
+      "requestType": "suggestFromRatings",
+      "token": sessionStorage.getItem('authToken'),
+    }
+    ).then(result => {
+      console.log(result.data)
+      this.dispatch('RestaurantsStore/retrieveSuggestedMenuItemsFromRatings', result.data.menuItemIds);
+    }).catch(({ response }) => {
+
+    });
+  },
+
+  retrieveSuggestedMenuItemsFromRatings({commit}, data) {
+    console.log(data)
+    return axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "suggestedMenuItems",
+      "menuItems": data,
+      "token": sessionStorage.getItem('authToken'),
+    }
+    ).then(result => {
+      commit('SAVE_SUGGESTED_ITEMS', result.data);
+    }).catch(({ response }) => {
+
+    });
+  },
+
+  retrieveActivePromotions({commit}) {
+    return axios.post('https://api.swiftapp.ml', 
+    {
+      "requestType": "getActivePromotions",
+      "token": sessionStorage.getItem('authToken'),
+    }
+    ).then(result => {
+      console.log(result.data)
+      commit('SAVE_ACTIVE_PROMOTIONS', result.data);
+    }).catch(({ response }) => {
+
     });
   },
 
@@ -96,6 +151,14 @@ const mutations = {
 
   SAVE_ALL_EXPLORE_CATEGORIES(state, categories) {
     state.exploreCategories = categories;
+  },
+
+  SAVE_SUGGESTED_ITEMS(state, suggestedItems) {
+    state.suggestedItemsFromRatings = suggestedItems;
+  },
+
+  SAVE_ACTIVE_PROMOTIONS(state, promotions) {
+    state.allActiveRestaurantPromotions = promotions;
   },
 
   updateCheckInFlag(state, data) {

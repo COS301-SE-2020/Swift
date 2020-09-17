@@ -30,43 +30,8 @@
         </span>
       </vs-button>
     </div>
-    <vs-table
-      ref="table"
-      multiple
-      v-model="selected"
-      pagination
-      :max-items="itemsPerPage"
-      search
-      :data="menuItems"
-    >
-      <div slot="header" class="flex flex-wrap-reverse items-center flex-grow justify-between">
-        <div class="flex flex-wrap-reverse items-center data-list-btn-container">
-          <vs-dropdown vs-trigger-click class="dd-actions cursor-pointer mr-4 mb-4">
-            <div
-              class="p-4 shadow-drop rounded-lg d-theme-dark-bg cursor-pointer flex items-center justify-center text-lg font-medium w-32 w-full"
-            >
-              <span class="mr-2">Bulk Actions</span>
-              <feather-icon icon="ChevronDownIcon" svgClasses="h-4 w-4" />
-            </div>
-
-            <vs-dropdown-menu>
-              <vs-dropdown-item>
-                <span class="flex items-center">
-                  <feather-icon icon="TrashIcon" svgClasses="h-4 w-4" class="mr-2" />
-                  <span>Delete</span>
-                </span>
-              </vs-dropdown-item>
-
-              <vs-dropdown-item>
-                <span class="flex items-center">
-                  <feather-icon icon="SaveIcon" svgClasses="h-4 w-4" class="mr-2" />
-                  <span>Export</span>
-                </span>
-              </vs-dropdown-item>
-            </vs-dropdown-menu>
-          </vs-dropdown>
-        </div>
-
+    <vs-table ref="table" pagination :max-items="itemsPerPage" search :data="menuItems">
+      <div slot="header" class="flex flex-wrap items-center flex-grow justify-between">
         <vs-dropdown vs-trigger-click class="cursor-pointer mb-4 mr-4 items-per-page-handler">
           <div
             class="p-4 border border-solid d-theme-border-grey-light rounded-full d-theme-dark-bg cursor-pointer flex items-center justify-between font-medium"
@@ -116,8 +81,8 @@
 
             <vs-td>
               <vs-progress
-                :percent="Number(getPopularity())"
-                :color="getPopularityColor(100)"
+                :percent="Number(tr.popularity)"
+                :color="getPopularityColor(tr.popularity)"
                 class="shadow-md"
               />
             </vs-td>
@@ -137,7 +102,7 @@
               <feather-icon
                 icon="EditIcon"
                 svgClasses="w-5 h-5 hover:text-primary stroke-current"
-                @click.stop="editData(tr)"
+                @click.stop="$router.push({name: 'edit-menu-item', params: { menuItemId: tr.menuItemId }})"
               />
               <feather-icon
                 icon="TrashIcon"
@@ -169,9 +134,20 @@ export default {
   },
   computed: {
     restaurantObject() {
+      //if restaurant has been loaded before menu - use that
       if (this.$store.state.menuList)
         return this.$store.state.menuList.restaurantObject;
-      else return null;
+      else if (this.$store.state.myRestaurants) {
+        for (var i = 0; i < this.$store.state.myRestaurants.length; i++)
+          if (
+            this.$store.state.myRestaurants[i].restaurantId ==
+            this.getCurrentRestaurantId()
+          ) {
+            return this.$store.state.myRestaurants[i];
+          }
+      } else {
+        return null;
+      }
     },
     currentPage() {
       if (this.isMounted) {
@@ -217,9 +193,6 @@ export default {
     },
   },
   methods: {
-    getPopularity() {
-      return Math.floor(Math.random() * 100) + 15;
-    },
     addFirstItemPrompt() {
       this.$vs.dialog({
         color: "primary",
@@ -248,10 +221,9 @@ export default {
       return "primary";
     },
     getPopularityColor(num) {
-      if (num > 90) return "success";
-      if (num > 70) return "primary";
-      if (num >= 50) return "warning";
-      if (num < 50) return "danger";
+      if (num > 60) return "success";
+      if (num >= 30) return "warning";
+      if (num < 30) return "danger";
       return "primary";
     },
     listMenuItems() {

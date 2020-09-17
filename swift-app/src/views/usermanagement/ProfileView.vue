@@ -1,22 +1,33 @@
 <template>
-  <v-card flat max-width="600" class="mx-auto">
-    <v-img src="https://cdn.vuetifyjs.com/images/lists/ali.png" height="250px" >
-      <v-row class="fill-height">
-        <v-card-title>
-          <v-btn width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 10px; left: 10px;">
-            <v-icon>mdi-chevron-left</v-icon>
-          </v-btn>
-           <v-btn width="30px" height="30px" @click="editProfile" color="secondary" absolute small fab style="top: 10px; right: 10px;">
-            <v-icon>mdi-pencil</v-icon>
-          </v-btn>
-        </v-card-title>
-        <v-card-title class="white--text pl-12 pt-12">
-          <div class="display-1 pl-12 pt-12">{{customerInfo.username}}</div>
-        </v-card-title>
-      </v-row>
-    </v-img>
+  <v-container class="pa-0" style="overflow-x: hidden">
+    <v-row class="mt-2">
+      <v-col cols="12" class="pb-0" align="center">
+        <span style="font-size: 24px">My Profile</span>
+      </v-col>
+      <!-- <v-col cols="2">
+        <v-btn width="30px" height="30px" @click="editProfile" color="secondary" absolute small fab style="top: 20px; right: 15px;">
+          <v-icon>mdi-pencil</v-icon>
+        </v-btn>
+      </v-col> -->
+    </v-row>
+    <v-row class="mt-0 pt-4" align="center">
+      <v-col cols="12" class="pt-0" align="center">
+        <v-avatar height="120" width="120" v-ripple v-if="!avatar"  class="grey lighten-3 mb-3">
+          <v-img :src="customerInfo.profileimageurl" cover alt="avatar"></v-img>
+        </v-avatar>
+        
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col cols="12" class="py-0" align="center">
+        <span style="font-size: 20px">{{customerInfo.name}} {{customerInfo.surname}}</span>
+      </v-col>
+      <v-col cols="12" class="py-0" align="center">
+        <span style="font-size: 16px">{{customerInfo.email}}</span>
+      </v-col>
+    </v-row>
 
-    <v-tabs height="60px" v-model="tab" background-color="white" grow>
+    <v-tabs class="mt-2" height="60px" v-model="tab" background-color="white" grow>
       <v-tab>
         Profile Info
       </v-tab>
@@ -27,22 +38,47 @@
 
     <v-tabs-items v-model="tab">
       <v-tab-item>
-        <v-list subheader>
-          <v-list-item @click=signOut(item.title) v-for="item in items" :key="item.title" v-ripple>
+        <v-list subheader class="pt-2">
+          <v-list-item  v-ripple>
             <v-list-item-avatar>
-              <v-icon :class="[item.iconClass]" v-text="item.icon"></v-icon>
+              <v-icon class="grey lighten-2 secondary--text" >mdi-theme-light-dark</v-icon>
             </v-list-item-avatar>
-
             <v-list-item-content>
-              <v-list-item-title v-text="item.title"></v-list-item-title>
+              <v-list-item-title>Dark Mode</v-list-item-title>
             </v-list-item-content>
-
+            <v-list-item-action>
+              <v-btn icon>
+                <v-switch @click="darkModeUpdate" color="secondary" :input-value="darkMode" hide-details></v-switch>
+              </v-btn>
+            </v-list-item-action>
+          </v-list-item>
+          <v-list-item @click=profilePaymentInformation() v-ripple>
+            <v-list-item-avatar>
+              <v-icon class="grey lighten-2 secondary--text" >mdi-credit-card-outline</v-icon>
+            </v-list-item-avatar>
+            <v-list-item-content>
+              <v-list-item-title>Payment Information</v-list-item-title>
+            </v-list-item-content>
             <v-list-item-action>
               <v-btn icon>
                 <v-icon color="secondary">mdi-chevron-right</v-icon>
               </v-btn>
             </v-list-item-action>
           </v-list-item>
+          <v-list-item @click=signOut() v-ripple>
+            <v-list-item-avatar>
+              <v-icon class="grey lighten-2 secondary--text" >mdi-logout</v-icon>
+            </v-list-item-avatar>
+            <v-list-item-content>
+              <v-list-item-title>Logout</v-list-item-title>
+            </v-list-item-content>
+            <v-list-item-action>
+              <v-btn icon>
+                <v-icon color="secondary">mdi-chevron-right</v-icon>
+              </v-btn>
+            </v-list-item-action>
+          </v-list-item>
+          
         </v-list>
         <!-- Test check out -->
         <v-list subheader>
@@ -64,23 +100,28 @@
 
       </v-tab-item>
       <v-tab-item>
-        <v-card flat>
-          <v-card-text>No settings yet</v-card-text>
-        </v-card>
+        <v-list subheader>
+          <v-list-item @click=removeAccount()  v-ripple>
+            <v-list-item-avatar class="grey lighten-2 secondary--text">
+              <v-icon>mdi-account-remove</v-icon>
+            </v-list-item-avatar>
+            <v-list-item-content>
+              <v-list-item-title >Remove Account</v-list-item-title>
+            </v-list-item-content>
+            <v-list-item-action>
+              <v-btn icon>
+                <v-icon color="secondary">mdi-chevron-right</v-icon>
+              </v-btn>
+            </v-list-item-action>
+          </v-list-item>
+        </v-list>
       </v-tab-item>
     </v-tabs-items>
-
+    <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
+      <v-icon>mdi-cart-outline</v-icon>
+    </v-btn>
     <NavBar></NavBar>
-  </v-card>
-  <!-- <div class="profile">
-    <h1>Profile</h1>
-    <p>name: {{customerProfile.name}}</p>
-    <p>username: {{customerProfile.username}}</p>
-    <p>email: {{customerProfile.email}}</p>
-    <v-btn @click=populateCustomer>Load Profile</v-btn>
-    <v-btn @click=signOut>Sign Out</v-btn>
-    <NavBar></NavBar>
-  </div> -->
+  </v-container>
 
 </template>
 
@@ -88,32 +129,111 @@
 import NavBar from '@/components/layout/NavBar';
 import store from '@/store/store.js';
 import { mapActions, mapGetters, mapMutations } from 'vuex'
+import ImageInput from '../../components/imageUploader/imageInput.vue'
+import PictureInput from 'vue-picture-input'
 
 export default {
   data: () => ({
     items: [
-      { icon: 'mdi-bell', iconClass: 'grey lighten-2 secondary--text', title: 'Notifications', route: '', },
-      { icon: 'mdi-format-list-bulleted', iconClass: 'grey lighten-2 secondary--text', title: 'Order History', route: '', },
+      // { icon: 'mdi-bell', iconClass: 'grey lighten-2 secondary--text', title: 'Notifications', route: '', },
+      // { icon: 'mdi-format-list-bulleted', iconClass: 'grey lighten-2 secondary--text', title: 'Order History', route: '', },
       { icon: 'mdi-theme-light-dark', iconClass: 'grey lighten-2 secondary--text', title: 'Theme Settings', route: '', },
       { icon: 'mdi-credit-card-outline', iconClass: 'grey lighten-2 secondary--text', title: 'Payment Information', route: '', },
       { icon: 'mdi-logout', iconClass: 'grey lighten-2 secondary--text', title: 'Logout', route: '', },
     ],
     tab: null,
+    avatar: null,
+    saving: false,
+    saved: false,
+    darkMode: null,
+    photo: null,
+    image: ''
   }),
   components: {
-    'NavBar': NavBar
+    'NavBar': NavBar,
+    PictureInput
+  },
+  watch:{
+    avatar: {
+      handler: function() {
+        this.saved = false
+      },
+      deep: true
+    }
   },
   methods: {
-    signOut (title) {
-      if (title == 'Logout') {
-        this.reset
-        this.$router.push('/login')
-      }
+    signOut () {
+      this.reset
+      this.$router.push('/login')
     },
     backNavigation () {
       this.$router.back()
     },
-    editProfile () {
+    profilePaymentInformation() {
+      this.$router.push('/profilePaymentInformation')
+    },
+    selectFile(event) {
+      // `files` is always an array because the file input may be in multiple mode
+      this.photo = event.target.files[0];
+      console.log(this.photo)
+    },
+    onChanged() {
+      console.log("New picture loaded");
+      if (this.$refs.pictureInput.file) {
+        this.image = this.$refs.pictureInput.file;
+      } else {
+        console.log("Old browser. No support for Filereader API");
+      }
+    },
+    onRemoved() {
+      this.image = '';
+    },
+    async attemptUpload() {
+
+      var profileObj = {
+        name: this.customerInfo.name,
+        surname: this.customerInfo.surname,
+        profileImage: this.image,
+        theme: this.customerInfo.theme
+      }
+
+      await this.$store.dispatch('CustomerStore/editProfile', profileObj);
+      
+      /* if (this.image){
+        FormDataPost('http://localhost:8001/user/picture', this.image)
+          .then(response=>{
+            if (response.data.success){
+              this.image = '';
+              console.log("Image uploaded successfully ✨");
+            }
+          })
+          .catch(err=>{
+            console.error(err);
+          });
+      } */
+    },
+    async darkModeUpdate() {
+      this.darkMode = !this.darkMode;
+      let themeSettings = ''
+      if (this.darkMode === true)
+       themeSettings = 'dark'
+      else 
+        themeSettings = 'light'
+
+      var profileObj = {
+        name: this.customerInfo.name,
+        surname: this.customerInfo.surname,
+        profileImage: this.customerInfo.profileimageurl,
+        theme: themeSettings
+      }
+
+      await this.$store.dispatch('CustomerStore/editProfile', profileObj);
+
+      if (this.darkMode) {
+        this.$vuetify.theme.dark = true;
+      } else if (!this.darkMode) {
+        this.$vuetify.theme.dark = false;
+      }
     },
     async checkOut() {
       await this.checkout
@@ -127,14 +247,50 @@ export default {
       setCheckedInRestaurantId : 'CustomerStore/SET_CHECKED_IN_RESTAURANT_ID',
       setCheckedInTableId : 'CustomerStore/SET_CHECKED_IN_TABLE_ID',
     }),
+    checkedIn() {
+      let checkedInVal = this.checkedInQRCode;
+      let checkedInRestaurantId = this.checkedInRestaurantId;
+
+      if (checkedInVal != null && checkedInRestaurantId != null) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    goToCart() {
+      this.$router.push('/cart')
+    },
+  },
+  watch: {
+    async avatar(AvatarObj) {
+      // var base64Img = "data:image/jpg;base64," + btoa(AvatarObj.imageURL);
+
+      var profileObj = {
+        name: this.customerInfo.name,
+        surname: this.customerInfo.surname,
+        profileImage: "data:image/jpg;base64," + btoa(AvatarObj.imageFile.name),
+        theme: this.customerInfo.theme
+      }
+
+      await this.$store.dispatch('CustomerStore/editProfile', profileObj);
+    }
+  },
+  mounted() {
+    if (this.customerInfo.theme === 'light') {
+      this.darkMode = false
+    } else if (this.customerInfo.theme === 'dark') {
+      this.darkMode = true
+    }
   },
   computed: {
     ...mapGetters({
       customerInfo: 'CustomerStore/getCustomerProfile',
+      checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
+      checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
     }),
     ...mapActions({
       loadCustomer: 'CustomerStore/loadCustomer',
-      checkout: 'CustomerStore/checkOutCustomer', 
+      checkout: 'CustomerStore/checkOutCustomer',
     }),
     
   }

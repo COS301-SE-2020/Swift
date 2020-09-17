@@ -1,11 +1,17 @@
-const db = require('../db');
+/* eslint-disable linebreak-style */
+/* eslint-disable no-console */
+const axios = require('axios');
+const db = require('../db').poolr;
+const dbw = require('../db').poolw;
 const paymentEmail = require('../helper/notifications/sendEmail');
+const { mlApiURL } = require('../config/config-ml-api.json');
 const { validateToken, tokenState } = require('../helper/tokenHandler');
 const {
   getReviews,
   getRatingPhrasesObj,
   getMenuCategories,
   getOrderHistory,
+  getActivePromotions,
   getOrderItems
 } = require('../helper/objectBuilder');
 
@@ -27,7 +33,7 @@ module.exports = {
           await client.query('BEGIN');
 
           const res = await client.query(
-            'SELECT restaurantid,restaurantname,location,branch,coverimageurl FROM public.restaurant'
+            'SELECT restaurantid,restaurantname,location,branch,coverimageurl FROM public.restaurant ORDER BY restaurantid ASC'
           );
 
           const restaurantResponse = {};
@@ -55,12 +61,14 @@ module.exports = {
             const ratingPhraseFetchLimit = 2;
             // eslint-disable-next-line no-await-in-loop
             const ratePhraseQ = await client.query(
-              'SELECT ratingphrase.phrasedescription, customerphraserating.ratingscore'
+              'SELECT ratingphrase.phrasedescription, AVG(customerphraserating.ratingscore) as "avgScore" '
               + ' FROM public.customerphraserating'
-              + ' INNER JOIN public.review ON customerphraserating.reviewid = review.reviewid'
-              + ' INNER JOIN public.ratingphrase ON customerphraserating.phraseid = ratingphrase.phraseid'
-              + ' ORDER BY customerphraserating.ratingscore DESC LIMIT $1::integer',
-              [ratingPhraseFetchLimit]
+              + ' INNER JOIN public.ratingphrase ON customerphraserating.phraseid = ratingphrase.phraseid '
+              + ' INNER JOIN public.review ON customerphraserating.reviewid = review.reviewid '
+              + " WHERE LOWER(ratingphrase.type) = 'restaurant' AND review.restaurantId = $1::integer "
+              + ' GROUP BY ratingphrase.phrasedescription '
+              + ' ORDER BY "avgScore" DESC LIMIT $2::integer',
+              [res.rows[r].restaurantid, ratingPhraseFetchLimit]
             );
 
             ratePhraseQ.rows.forEach((ratePhrase) => {
@@ -116,7 +124,7 @@ module.exports = {
 
     if (userToken.state === tokenState.VALID) {
       return db.query(
-        'SELECT categoryid, categoryname, categoryimage FROM public.category'
+        'SELECT categoryid, categoryname, categoryimage, categoryicon FROM public.category'
       )
         .then((res) => {
           const categoryResponse = {};
@@ -126,6 +134,7 @@ module.exports = {
             categoryResponse.categories[c].categoryId = res.rows[c].categoryid;
             categoryResponse.categories[c].categoryName = res.rows[c].categoryname;
             categoryResponse.categories[c].categoryImage = res.rows[c].categoryimage;
+            categoryResponse.categories[c].categoryicon = res.rows[c].categoryicon;
           }
 
           // return categories
@@ -213,7 +222,7 @@ module.exports = {
             .then((cRes) => {
               if (cRes.rows[0].checkedin == null) {
                 // check in user
-                return db.query(
+                return dbw.query(
                   'UPDATE public.person SET checkedin = $1::text WHERE userid = $2::integer;',
                   [reqBody.qrcode, userToken.data.userId]
                 )
@@ -272,7 +281,7 @@ module.exports = {
     // Check token validity
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
-      return db.query(
+      return dbw.query(
         'UPDATE public.person SET checkedin = $1::text WHERE userid = $2::integer;',
         [null, userToken.data.userId]
       )
@@ -364,8 +373,11 @@ module.exports = {
     }
 
     // Check token
-    const userToken = validateToken(reqBody.token);
+    const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
+      // eslint-disable-next-line no-console
+      // console.log(userToken);
+
       return (async () => {
         const client = await db.connect();
         try {
@@ -479,7 +491,7 @@ module.exports = {
 
       // eslint-disable-next-line consistent-return
       return (async () => {
-        const client = await db.connect();
+        const client = await dbw.connect();
         try {
           // begin transaction
           await client.query('BEGIN');
@@ -568,6 +580,17 @@ module.exports = {
               orderHistoryItem.forEach((ordHistItem) => {
                 orderResponse.orderHistory.push(ordHistItem);
               });
+
+              // refresh ML API cache
+              axios.post(mlApiURL,
+                {
+                  requestType: 'clearOrdersCache',
+                  token: reqBody.token
+                }).catch((err) => {
+                console.error('ML API Orders Cache Reset -', err.stack);
+              });
+
+              // send response
               return response.status(201).send(orderResponse);
             })
             .catch((err) => {
@@ -598,7 +621,7 @@ module.exports = {
     // Invalid token
     return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
   },
-  listOrders: async (reqBody, response) => {
+  listOrders: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
       || !Object.prototype.hasOwnProperty.call(reqBody, 'restaurantId')
@@ -610,16 +633,24 @@ module.exports = {
     // Check token
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
-      return db.query(
-        'SELECT restaurantname FROM public.restaurant WHERE restaurant.restaurantid = $1::integer',
-        [reqBody.restaurantId]
-      )
-        .then((resCheck) => {
+      return (async () => {
+        const client = await db.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+
+          // check if restaurant exits
+          const resCheck = await client.query(
+            'SELECT restaurantname FROM public.restaurant WHERE restaurant.restaurantid = $1::integer',
+            [reqBody.restaurantId]
+          );
+
           if (resCheck.rows.length === 0) {
             // restaurant does not exist
             return response.status(404).send({ status: 404, reason: 'Not Found' });
           }
 
+          // get orders
           let oQuery = 'SELECT customerorder.orderid, customerorder.orderstatus,'
             + ' restauranttable.tableid, restauranttable.tablenumber,'
             + ' person.userid AS "employeeid", restaurantemployee.employeenumber,'
@@ -636,36 +667,42 @@ module.exports = {
             oQuery += " AND NOT (LOWER(orderstatus) = 'paid' OR LOWER(orderstatus) = 'rated')";
           }
 
-          return db.query(oQuery, [reqBody.restaurantId])
-            .then(async (res) => {
-              const orderResponse = {};
-              orderResponse.orders = [];
-              await Promise.all(res.rows.map(async (orderItem) => {
-                const orderDetails = {};
-                orderDetails.orderId = orderItem.orderid;
-                orderDetails.orderStatus = orderItem.orderstatus;
-                orderDetails.orderDateTime = orderItem.orderdatetime;
-                orderDetails.orderCompletionTime = orderItem.ordercompletiontime;
-                orderDetails.orderTotal = orderItem.ordertotal;
-                orderDetails.orderProgress = orderItem.progress;
-                orderDetails.tableId = orderItem.tableid;
-                orderDetails.tableNumber = orderItem.tablenumber;
-                orderDetails.employeeId = orderItem.employeeid;
-                orderDetails.employeeNumber = orderItem.employeenumber;
-                orderDetails.employeeName = orderItem.ename;
-                orderDetails.employeeSurname = orderItem.esurname;
-                orderDetails.orderDetails = await getOrderItems(orderItem.orderid);
-                orderResponse.orders.push(orderDetails);
-              }));
-              return response.status(200).send(orderResponse);
-            })
-            .catch((err) => {
-              console.error('Query Error [List Orders - Get Orders]', err.stack);
-              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
-            });
-        })
+          // get order details
+          const res = await client.query(oQuery, [reqBody.restaurantId]);
+          const orderResponse = {};
+          orderResponse.orders = [];
+          for (let ord = 0; ord < res.rows.length; ord++) {
+            const orderDetails = {};
+            orderDetails.orderId = res.rows[ord].orderid;
+            orderDetails.orderStatus = res.rows[ord].orderstatus;
+            orderDetails.orderDateTime = res.rows[ord].orderdatetime;
+            orderDetails.orderCompletionTime = res.rows[ord].ordercompletiontime;
+            orderDetails.orderTotal = res.rows[ord].ordertotal;
+            orderDetails.orderProgress = res.rows[ord].progress;
+            orderDetails.tableId = res.rows[ord].tableid;
+            orderDetails.tableNumber = res.rows[ord].tablenumber;
+            orderDetails.employeeId = res.rows[ord].employeeid;
+            orderDetails.employeeNumber = res.rows[ord].employeenumber;
+            orderDetails.employeeName = res.rows[ord].ename;
+            orderDetails.employeeSurname = res.rows[ord].esurname;
+            // eslint-disable-next-line no-await-in-loop
+            orderDetails.orderDetails = await getOrderItems(res.rows[ord].orderid);
+            orderResponse.orders.push(orderDetails);
+          }
+
+          // commit and return response
+          await client.query('COMMIT');
+          return response.status(200).send(orderResponse);
+        } catch (err) {
+          // roll back changes
+          await client.query('ROLLBACK');
+          throw err;
+        } finally {
+          client.release();
+        }
+      })()
         .catch((err) => {
-          console.error('Query Error [List Orders - Check Restaurant Existence]', err.stack);
+          console.error('Query Error [List Orders - Get Orders]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }
@@ -685,7 +722,6 @@ module.exports = {
       || Object.keys(reqBody).length !== 4) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
-
     // Check token
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
@@ -698,7 +734,7 @@ module.exports = {
 
       // eslint-disable-next-line consistent-return
       return (async () => {
-        const client = await db.connect();
+        const client = await dbw.connect();
         try {
           // begin transaction
           await client.query('BEGIN');
@@ -708,11 +744,10 @@ module.exports = {
             'SELECT customerorder.orderstatus, customerorder.orderid, customerorder.progress,'
             + ' customerorder.ordertotal, person.userid FROM public.customerorder'
             + ' INNER JOIN public.restauranttable ON customerorder.tableid = restauranttable.tableid'
-            + ' INNER JOIN public.person ON restauranttable.qrcode = person.checkedin'
+            + ' INNER JOIN public.person ON person.userid = customerorder.customerid'
             + ' WHERE customerorder.orderid = $1::integer AND person.userid = $2::integer',
             [reqBody.orderId, userToken.data.userId]
           );
-
           if (res.rows.length === 0) {
             // restaurant and/or table does not exist
             return response.status(404).send({ status: 404, reason: 'Not Found' });
@@ -772,7 +807,6 @@ module.exports = {
                 ]
               );
             }
-
             orderTotal += parseFloat(reqBody.orderItems[oi].itemTotal);
           }
 
@@ -806,6 +840,17 @@ module.exports = {
               orderHistoryItem.forEach((ordHistItem) => {
                 orderResponse.orderHistory.push(ordHistItem);
               });
+
+              // refresh ML API cache
+              axios.post(mlApiURL,
+                {
+                  requestType: 'clearOrdersCache',
+                  token: reqBody.token
+                }).catch((err) => {
+                console.error('ML API Orders Cache Reset -', err.stack);
+              });
+
+              // send response
               return response.status(201).send(orderResponse);
             })
             .catch((err) => {
@@ -989,12 +1034,12 @@ module.exports = {
           // pay for order
           const newOrderStatus = 'Paid';
 
-          return db.query(
+          return dbw.query(
             'INSERT INTO public.payment (orderid, paymentmethod, paymentamount, paymentdatetime)'
             + ' VALUES ($1::integer, $2::text, $3::real, NOW());',
             [reqBody.orderId, reqBody.paymentMethod, reqBody.amountPaid]
           )
-            .then(() => db.query(
+            .then(() => dbw.query(
               'UPDATE public.customerorder SET orderstatus = $1::text WHERE orderid = $2::integer',
               [newOrderStatus, reqBody.orderId]
             )
@@ -1087,6 +1132,7 @@ module.exports = {
 
               // rate order
               let rQuery = 'INSERT INTO public.review';
+              let isMenuItemReview = false;
               rQuery += ' (orderid, reviewdatetime, ratingscore, comment, public, ';
               switch (reqBody.type.toLowerCase()) {
                 case 'restaurant':
@@ -1097,13 +1143,14 @@ module.exports = {
                   break;
                 default:
                   rQuery += 'menuitemid';
+                  isMenuItemReview = true;
                   break;
               }
 
               rQuery += ') VALUES ';
               rQuery += '($1::integer, NOW(), $2::real, $3::text, $4::boolean, $5::integer)';
               rQuery += ' RETURNING reviewid;';
-              return db.query(rQuery, [
+              return dbw.query(rQuery, [
                 reqBody.orderId,
                 reqBody.ratingScore,
                 reqBody.comment === '' ? null : reqBody.comment,
@@ -1113,7 +1160,7 @@ module.exports = {
                 .then((rRes) => {
                   // add phrases
                   reqBody.phrases.forEach((rPhrase) => {
-                    Promise.resolve(db.query(
+                    Promise.resolve(dbw.query(
                       'INSERT INTO public.customerphraserating (reviewid, phraseid, ratingscore)'
                       + ' VALUES ($1::integer, $2::integer, $3::real);',
                       [rRes.rows[0].reviewid, rPhrase.phraseId, rPhrase.phraseScore]
@@ -1121,11 +1168,24 @@ module.exports = {
                   });
 
                   // Update order status
-                  return db.query(
+                  return dbw.query(
                     'UPDATE public.customerorder SET orderstatus = $1::text WHERE orderid = $2::integer',
                     ['Rated', reqBody.orderId]
                   )
-                    .then(() => response.status(201).send({ status: 201, reason: 'Reivew Recorded' }))
+                    .then(() => {
+                      if (isMenuItemReview) {
+                        // refresh ML API cache
+                        axios.post(mlApiURL,
+                          {
+                            requestType: 'clearRatingsCache',
+                            token: reqBody.token
+                          }).catch((err) => {
+                          console.error('ML API Ratings Cache Reset -', err.stack);
+                        });
+                      }
+
+                      return response.status(201).send({ status: 201, reason: 'Reivew Recorded' });
+                    })
                     .catch((err) => {
                       console.error('Query Error [Order Review - Update Order Status]', err.stack);
                       return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
@@ -1153,5 +1213,113 @@ module.exports = {
 
     // Invalid token
     return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
-  }
+  },
+  // eslint-disable-next-line consistent-return
+  getSuggestedMenuItems: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || Object.keys(reqBody).length !== 3) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      const menuItemsList = [];
+      const menuItemPromises = [];
+
+      reqBody.menuItems.forEach((menuItem) => {
+        menuItemPromises.push(new Promise((resolve, reject) => {
+          Promise.all(menuItemPromises)
+            .then(async () => {
+              const menuItemObj = {};
+              const res = await db.query(
+                'SELECT menuitemid, restaurantid, menuitemname, menuitemdescription, price, estimatedwaitingtime,'
+                + ' menuitem.attributes, arasset, availability FROM public.menuitem'
+                + ' WHERE menuitemid = $1::integer ORDER BY menuitemid ASC;',
+                [menuItem]
+              );
+
+              menuItemObj.menuItemInfo = {};
+
+              for (let r = 0; r < res.rows.length; r++) {
+                menuItemObj.menuItemInfo = res.rows[r];
+              }
+
+              const res2 = await db.query(
+                'SELECT imageurl FROM public.menuitemimages'
+                + ' WHERE menuitemid = $1::integer ORDER BY menuitemid ASC;',
+                [menuItem]
+              );
+
+              menuItemObj.menuItemInfo.images = [];
+
+              for (let i = 0; i < res2.rows.length; i++) {
+                menuItemObj.menuItemInfo.images.push(res2.rows[i]);
+              }
+
+              menuItemsList.push(menuItemObj);
+              resolve();
+            })
+            .catch((err) => {
+              reject(err);
+            });
+        }));
+      });
+
+      Promise.all(menuItemPromises).then(() => response.status(200).send(menuItemsList));
+    }
+  },
+  getAllActivePromotions: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || Object.keys(reqBody).length !== 2) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    const userToken = validateToken(reqBody.token, true);
+
+    if (userToken.state === tokenState.VALID) {
+      // eslint-disable-next-line consistent-return
+      return (async () => {
+        const client = await db.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+
+          const resObj = {};
+          const resPromise = await getActivePromotions(reqBody.restaurantId);
+          resObj.restaurantPromo = [];
+
+          Promise.all(resPromise)
+            .then((group) => {
+              group.forEach((groupItems) => {
+                resObj.restaurantPromo.push(groupItems);
+              });
+              return response.status(201).send(resObj);
+            })
+            .catch((err) => {
+              console.error('Add Review Promise Error', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
+        } catch (err) {
+          // rollback changes
+          await client.query('ROLLBACK');
+          throw err;
+        } finally {
+          client.release();
+        }
+      })()
+        .catch((err) => {
+          console.error('Query Error [Restaurant - Get Promotion List]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
 };

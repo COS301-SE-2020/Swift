@@ -1,7 +1,9 @@
 {
     "user": "db_user",
-    "host": "db_host",
+    "hostw": "db0_host",
+    "hostr": "db1_host",
     "database": "db_name",
     "password": "db_pass",
-    "port": 5432
+    "portw": 5432,
+    "portr": 6432
 }
