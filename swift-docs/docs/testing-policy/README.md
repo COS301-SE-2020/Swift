@@ -53,4 +53,4 @@ For the usability and availability testing, we use **[Datadog's Synthetic Tests]
 We run API tests which monitor uptime and availability, as well as browser tests which are **End to End Integration Tests** that monitor the key use cases for our application. They
 create a step by step recording of each use case to ensure that the correct data is retrieved and that all the components of the application are loaded. All of the tests are scheduled and run on a continuous basis once a day.
 
-![Datadog Synthetic Test](../../assets/datadog.png)
+![Datadog Synthetic Test](../../assets/datadog.jpg)
