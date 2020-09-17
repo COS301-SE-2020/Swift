@@ -30,6 +30,12 @@ export default [
     icon: "EditIcon",
   },
   {
+    url: "/promotions",
+    name: "Promotions",
+    slug: "promotions",
+    icon: "GiftIcon",
+  },
+  {
     url: "/employees",
     name: "Employees",
     slug: "employees",

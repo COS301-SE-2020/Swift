@@ -1,12 +1,16 @@
 const axios = require('axios');
-const db = require('../db');
+const db = require('../db').poolr;
+const dbw = require('../db').poolw;
+const configDB = require('../config/config-db.json');
 
 module.exports = {
   getServiceStatus: async (res) => {
     const serviceStatus = {};
     serviceStatus.timestamp = `${new Date().toLocaleString('en-US', { timeZone: 'UTC' })} (UTC)`;
     serviceStatus.API = {};
-    serviceStatus.DB = {};
+    serviceStatus.MLAPI = {};
+    serviceStatus.DB0 = {};
+    serviceStatus.DB1 = {};
     serviceStatus.docs = {};
     serviceStatus.ManagementWebApp = {};
     serviceStatus.UserWebApp = {};
@@ -27,13 +31,108 @@ module.exports = {
         serviceStatus.API.detail = 'API is offline';
       });
 
+    await axios.get('https://ml.api.swiftapp.ml')
+      .then((ares) => {
+        if (ares.status === 200) {
+          serviceStatus.MLAPI.status = 200;
+          serviceStatus.MLAPI.detail = 'ML API is online';
+        } else {
+          serviceStatus.MLAPI.status = 503;
+          serviceStatus.MLAPI.detail = 'ML API is offline';
+        }
+      })
+      .catch(() => {
+        serviceStatus.MLAPI.status = 503;
+        serviceStatus.MLAPI.detail = 'ML API is offline';
+      });
+
     // Check DB availability
-    if (db != null && db.options.database === 'swift') {
-      serviceStatus.DB.status = 200;
-      serviceStatus.DB.detail = 'Database is online';
+    // DB-0
+    if (dbw != null && dbw.options.database === (process.env.DB_NAME || configDB.database)) {
+      await (async () => {
+        const client = await dbw.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+
+          // check if DB is responding to queries
+          const db0Stat = await client.query('SELECT 1 AS "Online"');
+
+          if (db0Stat.rows.length === 0) {
+            // db error
+            serviceStatus.DB0.status = 503;
+            serviceStatus.DB0.detail = 'Database-0 is offline';
+          }
+
+          // commit changes
+          client.query('COMMIT');
+
+          // db1 is online
+          serviceStatus.DB0.status = 200;
+          serviceStatus.DB0.detail = 'Database-0 is online';
+        } catch (err) {
+          // rollback changes
+          await client.query('ROLLBACK');
+
+          // throw error for async catch
+          throw err;
+        } finally {
+          // close connection
+          client.release();
+        }
+      })()
+        .catch((err) => {
+          console.error('Query Error [Healthcheck - Test DB0]', err.stack);
+          serviceStatus.DB0.status = 503;
+          serviceStatus.DB0.detail = 'Database-0 is offline';
+        });
     } else {
-      serviceStatus.DB.status = 503;
-      serviceStatus.DB.detail = 'Database is offline';
+      serviceStatus.DB0.status = 503;
+      serviceStatus.DB0.detail = 'Database-0 is offline';
+    }
+
+    // DB-1
+    if (db != null && db.options.database === (process.env.DB_NAME || configDB.database)) {
+      await (async () => {
+        const client = await db.connect();
+        try {
+          // begin transaction
+          await client.query('BEGIN');
+
+          // check if DB is responding to queries
+          const db1Stat = await client.query('SELECT 1 AS "Online"');
+
+          if (db1Stat.rows.length === 0) {
+            // db error
+            serviceStatus.DB1.status = 503;
+            serviceStatus.DB1.detail = 'Database-1 is offline';
+          }
+
+          // commit changes
+          client.query('COMMIT');
+
+          // db1 is online
+          serviceStatus.DB1.status = 200;
+          serviceStatus.DB1.detail = 'Database-1 is online';
+        } catch (err) {
+          // rollback changes
+          await client.query('ROLLBACK');
+
+          // throw error for async catch
+          throw err;
+        } finally {
+          // close connection
+          client.release();
+        }
+      })()
+        .catch((err) => {
+          console.error('Query Error [Healthcheck - Test DB1]', err.stack);
+          serviceStatus.DB1.status = 503;
+          serviceStatus.DB1.detail = 'Database-1 is offline';
+        });
+    } else {
+      serviceStatus.DB1.status = 503;
+      serviceStatus.DB1.detail = 'Database-1 is offline';
     }
 
     // Check user apps

@@ -145,7 +145,6 @@
       </v-alert>
     </v-overlay>
 
-    <NavBar></NavBar>
   </v-container>
 </template>
 

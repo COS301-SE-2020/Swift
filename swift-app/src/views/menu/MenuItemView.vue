@@ -46,6 +46,18 @@
         </v-col>
       </v-row>
       <div class="justify">{{newMenuItem.menuItemDescription}}</div>
+      <!-- <v-row>
+        <v-col v-for="(dietaryLabel, i) in newMenuItem.dietaryLabels" :key="i" cols="4" class="py-0">
+          <v-chip x-small class="mt-2 pb-0">
+          {{dietaryLabel.name}}
+        </v-chip>
+        </v-col>
+      </v-row> -->
+      <div v-show="newMenuItem.dietaryLabels.length != 0" v-for="(dietaryLabel, i) in newMenuItem.dietaryLabels" :key="i" style="display: inline;">
+        <v-chip small class="mt-2 pb-0 mr-1" >
+          {{dietaryLabel.name}}
+        </v-chip>
+      </div>
     </v-card-text>
 
     
@@ -54,7 +66,7 @@
         Details
       </v-tab>
       <v-tab>
-        Reviews ({{ comments.length }})
+        Reviews ({{ newMenuItem.reviews.length  }})
       </v-tab>
     </v-tabs>
     
@@ -75,9 +87,10 @@
                   </v-list-item-action>
                 </template>
 
-                <v-list-item-group  class="pl-2" :multiple="(parseInt(attribute.max) > 1) ? true : false" :mandatory="(attribute.min == '1') ? true : false" v-model="model[i]">
+                <!-- <v-list-item-group  class="pl-2" :multiple="(parseInt(attribute.max) > 1) ? true : false" :mandatory="(attribute.min == '1') ? true : false" v-model="model[i]"> -->
+                <v-list-item-group  class="pl-2" :multiple="(parseInt(attribute.max) > 1) ? true : false" :mandatory="(parseInt(attribute.min) != 0) ? true : false" :max="parseInt(attribute.max)"  v-model="model[i]">
                   <template v-for="(value, j) in attribute.values">
-                    <v-list-item @click="checkInput(i, j, value)" ref="attributeVal" class="px-2 attributeValues" :key="`item-${j}`" :value="value.name">
+                    <v-list-item @click="checkInput(i, j, attribute)" ref="attributeVal" class="px-2 attributeValues" :key="`item-${j}`" :value="j">
                       <template v-slot:default="{ active }">
                         <v-row>
                           <v-col cols="8">
@@ -118,7 +131,8 @@
                 </v-btn> -->
               </v-col>
               <v-col cols="7" class="d-flex justify-center px-0">
-                <v-btn @click="addToOrder" style="border-radius: 13px; color: white" height="45px" color="accent">R {{total.toFixed(2)}} | Add to order</v-btn>
+                <v-btn v-if="item == null" @click="addToOrder" style="border-radius: 13px; color: white" height="45px" color="accent">R {{total.toFixed(2)}} | Add to order</v-btn>
+                <v-btn v-else @click="editMenuItem" style="border-radius: 13px; color: white" height="45px" color="accent">R {{total.toFixed(2)}} | Edit Item</v-btn>
               </v-col>
             </v-row>
 
@@ -128,7 +142,7 @@
       </v-tab-item>
       <v-tab-item class="overflow-x-hidden">
         <v-card flat class="mt-2 mb-5">
-          <v-row v-for="phrase in ratingPhrases" :key="phrase.phrase">
+          <v-row v-for="phrase in newMenuItem.ratingPhrases" :key="phrase.phrase">
             <v-card-text class="pb-0 pt-1 mt-0 ml-5">
               <v-row class="mx-0 pb-0 pt-1">
                 <v-col cols="8" class="pt-0 pl-0 pb-0">
@@ -143,35 +157,36 @@
         </v-card>
         <v-divider style="opacity: 0.6"></v-divider>
         <v-card flat class="mt-2 mb-5">
-          <v-row v-for="(comment, index) in comments" :key="comment.commentDate">
+          <v-row v-for="(comment, index) in newMenuItem.reviews" :key="index">
             <v-card-text class="pb-0 pt-1 mt-0">
+              <!-- <v-row v-if="comment.public == true" class="mx-0 pb-0 pt-3"> only show public reviews --> 
               <v-row class="mx-0 pb-0 pt-3">
                 <v-col cols="3" class="mr-0 pb-0 pt-1">
                   <v-avatar color="grey" size="50px">
-                    <img :src=comment.profileImage alt="">
+                    <v-img :src="comment.customerImage" cover ></v-img>
                   </v-avatar>
                 </v-col>
                 <v-col cols="9" class="pl-1 pb-0 pt-1">
                   <v-row class="pt-0">
                     <v-col cols="6" class="pt-0 pl-0 pb-0">
-                      <span class="black--text" style="font-size: 15px">{{comment.name}} {{comment.surname}}</span>
+                      <span class="black--text" style="font-size: 15px">{{comment.customerName}} {{comment.customerSurname}}</span>
                     </v-col>
                     <v-col cols="6" class="pt-0 pl-0 pb-0" style="text-align: right">
-                      <span style="font-size: 12px; text-align: right">{{comment.commentDate}}</span>
+                      <span style="font-size: 12px; text-align: right">{{getDate(comment.reviewDateTime)}}</span>
                     </v-col>
                   </v-row>
                   <v-row class="pt-0">
                     <v-col cols="8" class="py-0 pt-0 pl-0 pb-0">
-                      <v-rating readonly size="18" dense color="yellow darken-3" background-color="secondary" :value="parseInt(comment.rating)"></v-rating>
+                      <v-rating readonly size="18" dense color="yellow darken-3" background-color="secondary" :value="parseInt(comment.ratingScore)"></v-rating>
                     </v-col>
-                    <v-col cols="4" class="py-0 pt-0 pl-0 pb-0" style="text-align: right">
+                    <!-- <v-col cols="4" class="py-0 pt-0 pl-0 pb-0" style="text-align: right">
                         <v-btn @click="changeFavouriteComment(comment)" :color="activateFavouriteComment(comment).color" class="pl-0 pr-1" text small min-width="0">
                           <v-icon>{{ activateFavouriteComment(comment).icon }}</v-icon>
                         </v-btn>
-                        <div v-if="comment.likes != '0'" style="display: inline">
-                          {{comment.likes}}
+                        <div v-if="comment.totalLikes != 0" style="display: inline">
+                          {{comment.totalLikes}}
                         </div>
-                    </v-col>
+                    </v-col> -->
                   </v-row>
                   <v-row class="pt-0 pr-2 mt-3">
                     <v-col cols="12" class="py-0 pt-0 pl-0 pb-0 mr-0">
@@ -183,19 +198,23 @@
                       </v-btn>
                     </v-col>
                   </v-row>
-                  <v-row class="mt-2" v-if="comment.adminName != ''">
+                  <v-row class="mt-2" v-if="comment.response != null">
                     <v-col cols="3" class="mr-0 ml-0 pl-0 pb-0 pt-1">
-                      <v-avatar color="grey" size="50px">
-                        <img :src=comment.adminProfileImage alt="">
+                      <v-avatar v-if="comment.adminImage != null" color="grey" size="50px">
+                        <v-img :src="comment.adminImage" cover ></v-img>
+                      </v-avatar>
+                      <v-avatar v-else color="grey" size="50px">
+                        <v-img :src="menu.image" cover ></v-img>
                       </v-avatar>
                     </v-col>
                     <v-col cols="9" class="pl-1 pb-0 pt-1">
                       <v-row class="pt-0">
                         <v-col cols="12" class="pt-0 pl-0 pb-0">
-                          <span class="black--text" style="font-size: 15px">{{comment.adminName}}</span>
+                          <span v-if="comment.adminName != null" class="black--text" style="font-size: 15px">{{comment.adminName}} {{comment.adminSurname}}</span>
+                          <span v-else class="black--text" style="font-size: 15px">{{menu.name}}</span>
                         </v-col>
                         <v-col cols="12" class="pt-0 pl-0 pb-0">
-                          <span style="font-size: 12px;">{{comment.responseDate}}</span>
+                          <span style="font-size: 12px;">{{getDate(comment.responseDate)}}</span>
                         </v-col>
                       </v-row>
                       <v-row class="pt-0 pr-2 mt-3">
@@ -209,6 +228,7 @@
               </v-row>
             </v-card-text>
           </v-row>
+
         </v-card>
       </v-tab-item>
     </v-tabs-items>
@@ -253,13 +273,14 @@
 import store from '@/store/store.js';
 import { mapActions, mapGetters, mapMutations } from "vuex";
 import $ from 'jquery';
+import moment from 'moment'
 
 $('.commentInfo').text($('.commentInfo').text().substring(0,200))
 
 export default {
   data() {
     return {
-      model: [],
+      model: [[],[]],
       total: 0,
       addOns: 0,
       valid: true,
@@ -277,6 +298,7 @@ export default {
       selected: ['John'],
       text: 'small',
       selection: 0,
+      prevVal: 0,
       prices: ['low-high', 'high-low', 'R0-R49', 'R50-100'],
       comments: [
         {
@@ -342,6 +364,7 @@ export default {
   },
   methods: {
     backNavigation () {
+      this.clearItem
       this.$router.go(-1)
     },
     detractPrice() {
@@ -353,14 +376,17 @@ export default {
       this.quantity++;
       this.changeTotal;
     },
+    getDate(date) {
+      return moment(String(date.slice(0, 10))).format('DD MMM YYYY')
+    },
     
     changeFavouriteComment: function (comment) {
-      comment.liked = !comment.liked
-      if (comment.liked)
-        comment.likes = (Number(comment.likes) + 1).toString()
+      this.liked = !this.liked
+      if (this.liked)
+        comment.totalLikes = (Number(comment.totalLikes) + 1).toString()
       else 
-        if (comment.likes != '0')
-          comment.likes = (Number(comment.likes) - 1).toString()
+        if (comment.totalLikes != null)
+          comment.totalLikes = (Number(comment.totalLikes) - 1).toString()
     },
     activateFavouriteComment: function (comment) {
       if (!comment.liked) {
@@ -369,17 +395,24 @@ export default {
         return { color: 'primary', icon: 'mdi-heart' }
       }
     },
-    checkInput(i, j, value) {
+    checkInput(i, j, attribute) {
       // console.log($(".attributeElements").eq(i).find(".v-radio i").html());
+      let values = attribute.values;
       $(".attributeElements").eq(i).find(".v-radio i").removeClass("mdi-radiobox-marked");
-      $("#" + i + j + (value.name).replace(/\s+/g, '')).parent().children("i").addClass("mdi-radiobox-marked");
-
+      $("#" + i + j + (values[j].name).replace(/\s+/g, '')).parent().children("i").addClass("mdi-radiobox-marked");
+      let radio = attribute.max == '1' && attribute.min == '1';
       let checked = $(".attributeElements").eq(i).find(".attributeValues").eq(j).hasClass("v-item--active v-list-item--active");
-
-      if ('price' in value && checked) {
-        this.addOns -= value.price
-      } else if ('price' in value && !checked) {
-        this.addOns += value.price
+      
+      if (radio) {
+        this.addOns -= this.prevVal
+        this.addOns += values[j].price
+        this.prevVal = values[j].price
+      } else {
+        if (checked) {
+          this.addOns -= values[j].price
+        } else {
+          this.addOns += values[j].price
+        }
       }
       this.changeTotal;
     },
@@ -431,11 +464,19 @@ export default {
       let selectionValues = [];
       if(this.newMenuItem.attributes != null) {
         for (let i = 0; i < this.newMenuItem.attributes.attributes.length; i++) {
-          let data = {
-            "name": $('.label').eq(i).text(),
-            "values": this.model[i]
-          };
-          selectionValues[i] = data;
+          if (this.model[i].length != 0) {
+            let values = [];
+            for (let j = 0; j < this.model[i].length; j++)
+              values.push(this.newMenuItem.attributes.attributes[i].values[this.model[i][j]].name)
+            let data = {
+              "name": $('.label').eq(i).text(),
+              "values": (this.model[i].length > 1) ? values 
+                : this.newMenuItem.attributes.attributes[i].values[this.model[i]].name
+            };
+            selectionValues[i] = data;
+          }
+
+          
         }
       }
 
@@ -461,6 +502,38 @@ export default {
       this.addItemToOrder(data)
       this.$router.push("/cart");
     },
+    editMenuItem() {;
+      let selectionValues = [];
+      if(this.newMenuItem.attributes != null) {
+        for (let i = 0; i < this.newMenuItem.attributes.attributes.length; i++) {
+          if (this.model[i].length != 0) {
+            let values = [];
+            for (let j = 0; j < this.model[i].length; j++)
+              values.push(this.newMenuItem.attributes.attributes[i].values[this.model[i][j]].name)
+            let data = {
+              "name": $('.label').eq(i).text(),
+              "values": (this.model[i].length > 1) ? values 
+                : this.newMenuItem.attributes.attributes[i].values[this.model[i]].name
+            };
+            selectionValues[i] = data;
+          }
+
+          
+        }
+      }
+
+      let data = {
+        "menuItemId": this.newMenuItem.menuItemId,
+        "itemTotal": this.total,
+        "quantity": this.quantity,
+        "orderSelections": {
+          "selections": selectionValues
+        }
+      }
+      
+      this.editOrder(data);
+      this.$router.push("/cart");
+    },
     changeFavourite () {
       let data = {
         menuItemId: this.menuItemId
@@ -470,7 +543,9 @@ export default {
     ...mapActions({
       addFavourite: "CustomerStore/addFavourite",
       removeFavourite: "CustomerStore/removeFavourite",
-      addItemToOrder: "OrderStore/addItemToOrder"
+      addItemToOrder: "OrderStore/addItemToOrder",
+      editOrder: "OrderStore/editOrder",
+      clearItem: "MenuItemsStore/clearItem",
     }),
     checkedIn() {
       let checkedInVal = this.checkedInQRCode;
@@ -531,6 +606,7 @@ export default {
     ...mapGetters({
       menu: "MenuStore/getMenu",
       customer: "CustomerStore/getCustomerProfile",
+      item: "MenuItemsStore/getMenuItem",
       // itemToEdit: "OrderStore/getItemToEdit",
       checkedInTableId: "CustomerStore/getCheckedInTableId",
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
@@ -539,12 +615,53 @@ export default {
     }),
   },
   mounted: function() {
-    // console.log($(".attributeElements").find(".attributeValues").html())
-    console.log(this.$refs.attributeVal);
     this.total = this.newMenuItem.price
-    
-    // $(".attributeValues.v-item--active.v-list-item--active").find("i").addClass("mdi-radiobox-marked");
-    // this.itemTotal = this.newMenuItem.price
+    if (this.item != null) {
+      this.quantity = this.item.quantity
+      // console.log(this.item)
+    }
+
+    for (let i = 0; i < this.newMenuItem.attributes.attributes.length; i++) {
+      console.log(this.newMenuItem.attributes.attributes[i].max)
+      if (this.newMenuItem.attributes.attributes[i].max == 1) {
+        var item = 0;
+        this.newMenuItem.attributes.attributes[i].values.find((val, index) => {
+          item = index
+          if (this.item == null || this.item.orderSelections.selections[i] == undefined)
+            return val.selectedByDefault 
+          else {
+            return val.name == this.item.orderSelections.selections[i].values
+          } 
+        });
+
+        this.model[i] = item;
+      }
+      else {
+        var item = [];
+        if (this.item == null || this.item.orderSelections.selections[i] == undefined) {
+          this.newMenuItem.attributes.attributes[i].values.filter((val, index) => {
+            if (val.selectedByDefault)
+              item.push(index);
+            return val.selectedByDefault 
+          });
+        } else {
+          this.newMenuItem.attributes.attributes[i].values.filter((val, index) => {
+            // console.log(this.item.orderSelections.selections[i].values)
+            if (Array.isArray(this.item.orderSelections.selections[i].values)) {
+              if (val.name == this.item.orderSelections.selections[i].values[index])
+                item.push(index);
+              return val.name == this.item.orderSelections.selections[i].values[index]
+            } else {
+              if (val.name == this.item.orderSelections.selections[i].values)
+                item.push(index);
+              return val.name == this.item.orderSelections.selections[i].values
+            }
+          });
+        }
+
+        this.model[i] = item;
+      }
+    }
   }
 }
 </script>

@@ -10,6 +10,7 @@ import CheckInView from '../views/home/CheckInView.vue'
 import ExploreView from '../views/home/ExploreView.vue'
 
 import ProfileView from '../views/usermanagement/ProfileView.vue'
+import ProfilePaymentInformation from '../views/usermanagement/ProfilePaymentInformation.vue'
 import LoginView from '../views/usermanagement/LoginView.vue'
 import RegisterView from '../views/usermanagement/RegisterView.vue'
 import LocationView from '../views/usermanagement/LocationView.vue'
@@ -42,6 +43,7 @@ const routes = [
   { path: '/rating', name: 'rating', component: RatingView },
   { path: '/forgotPassword', name: 'forgotPassword', component: ForgotPasswordView },
   { path: '/paymentInformation', name: 'paymentInformation', component: PaymentInformationView },
+  { path: '/profilePaymentInformation', name: 'profilePaymentInformation', component: ProfilePaymentInformation },
   { path: '/addCard', name: 'addCard', component: AddCardView },
   // { path: '/notifications', name: 'notifications', component: NotificationsView },
 ]

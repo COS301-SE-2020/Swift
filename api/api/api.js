@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 const express = require('express');
 const adminController = require('./controller/adminController');
 const authController = require('./controller/authController');
@@ -22,6 +23,12 @@ router.get('/', (req, res) => {
     whoami: 'Swift API :)',
   };
   res.status(200).send(jsonResponse);
+});
+
+// loader.io verification
+router.get('/loaderio-21bdd85acb704aa0a54e22ecb385713b.txt', (req, res) => {
+  const response = 'loaderio-21bdd85acb704aa0a54e22ecb385713b';
+  res.status(200).send(response);
 });
 
 // Health Check
@@ -75,12 +82,36 @@ router.post('/', (req, res) => {
         userController.refreshToken(req.body, res);
         break;
       }
+      case 'checkUAToken': {
+        authController.checkUAToken(req.body, res);
+        break;
+      }
       case 'addFavourite': {
         userController.addFavourite(req.body, res);
         break;
       }
+      case 'addLikedComment': {
+        userController.addLikedComment(req.body, res);
+        break;
+      }
+      case 'removeLikedComment': {
+        userController.removeLikedComment(req.body, res);
+        break;
+      }
       case 'removeFavourite': {
         userController.removeFavourite(req.body, res);
+        break;
+      }
+      case 'orderHistory': {
+        userController.orderHistory(req.body, res);
+        break;
+      }
+      case 'editProfile': {
+        userController.editProfile(req.body, res);
+        break;
+      }
+      case 'addCommentLike': {
+        userController.addCommentLike(req.body, res);
         break;
       }
       case 'allRestaurants': {
@@ -91,20 +122,64 @@ router.post('/', (req, res) => {
         restaurantController.getRestaurantCategories(req.body, res);
         break;
       }
+      case 'getRestaurantEmployees': {
+        restaurantAdminController.getRestaurantEmployees(req.body, res);
+        break;
+      }
+      case 'getEmployee': {
+        restaurantAdminController.getEmployee(req.body, res);
+        break;
+      }
       case 'addMenuCategory': {
         restaurantAdminController.addMenuCategory(req.body, res);
+        break;
+      }
+      case 'editMenuCategory': {
+        restaurantAdminController.editMenuCategory(req.body, res);
         break;
       }
       case 'addMenuItem': {
         restaurantAdminController.addMenuItem(req.body, res);
         break;
       }
+      case 'addEmployee': {
+        restaurantAdminController.addEmployee(req.body, res);
+        break;
+      }
+      case 'editEmployee': {
+        restaurantAdminController.editEmployee(req.body, res);
+        break;
+      }
+      case 'removeEmployee': {
+        restaurantAdminController.removeEmployee(req.body, res);
+        break;
+      }
+      case 'editMenuItem': {
+        restaurantAdminController.editMenuItem(req.body, res);
+        break;
+      }
       case 'listAdminRestaurants': {
         restaurantAdminController.getRestaurantList(req.body, res);
         break;
       }
+      case 'listRestaurantPromotions': {
+        restaurantAdminController.getRestaurantPromotions(req.body, res);
+        break;
+      }
+      case 'getRestaurantReviews': {
+        restaurantAdminController.getRestaurantReviews(req.body, res);
+        break;
+      }
       case 'createRestaurant': {
         restaurantAdminController.createRestaurant(req.body, res);
+        break;
+      }
+      case 'editRestaurant': {
+        restaurantAdminController.editRestaurant(req.body, res);
+        break;
+      }
+      case 'getActivePromotions': {
+        restaurantController.getAllActivePromotions(req.body, res);
         break;
       }
       case 'checkin': {
@@ -123,8 +198,24 @@ router.post('/', (req, res) => {
         restaurantController.getMenu(req.body, res);
         break;
       }
+      case 'replyToComment': {
+        restaurantAdminController.replyToComment(req.body, res);
+        break;
+      }
       case 'createTable': {
         restaurantAdminController.createTable(req.body, res);
+        break;
+      }
+      case 'editTable': {
+        restaurantAdminController.editTable(req.body, res);
+        break;
+      }
+      case 'addPromotion': {
+        restaurantAdminController.addPromotion(req.body, res);
+        break;
+      }
+      case 'editPromotion': {
+        restaurantAdminController.editPromotion(req.body, res);
         break;
       }
       case 'getTableQR': {
@@ -133,6 +224,10 @@ router.post('/', (req, res) => {
       }
       case 'getTableStatus': {
         restaurantAdminController.getTableStatus(req.body, res);
+        break;
+      }
+      case 'getAllAccessRights': {
+        restaurantAdminController.getAllAccessRights(req.body, res);
         break;
       }
       case 'addOrder': {
@@ -165,6 +260,14 @@ router.post('/', (req, res) => {
       }
       case 'ratingPhrases': {
         restaurantController.getRatingPhrases(req.body, res);
+        break;
+      }
+      case 'handleGoogle': {
+        authController.handleGoogleCallback(req.body, res);
+        break;
+      }
+      case 'suggestedMenuItems': {
+        restaurantController.getSuggestedMenuItems(req.body, res);
         break;
       }
       default: {
