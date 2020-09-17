@@ -176,12 +176,14 @@ export default {
     }
   },
   async mounted() {
-    // await this.$store.dispatch('CustomerStore/fetchOrderHistory');
+    
+    
+    // await this.$store.commit('CustomerStore/RESET_FETCHED_ORDER_HISTORY');
 
-    var length = await this.orderHistory.length;
-    if (length == undefined) {
+    if (Object.keys(this.fetchedOrderHistory).length == 0) {
       this.isLoading = !this.isLoading;
       await this.$store.dispatch('MenuStore/retrieveMenu', this.checkedInRestaurantId);
+      await this.$store.dispatch('CustomerStore/fetchOrderHistory');
       var response = await this.orderHistory;
       if (response)
         this.isLoading = !this.isLoading;

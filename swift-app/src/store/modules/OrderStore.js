@@ -196,6 +196,11 @@ const actions = {
     commit('SET_ORDER_HISTORY', orderHistory);
   },
 
+  setOrderHistory({commit}, fetchedOrderHistory) {
+    var orderHistory = fetchedOrderHistory
+    commit('SET_ORDER_HISTORY', orderHistory);
+  },
+
   addItemToOrder({commit,}, orderItemInfo) {
     commit('ADD_ITEM_TO_ORDER', orderItemInfo);
   },
@@ -256,6 +261,7 @@ const actions = {
 // Mutations
 const mutations = {
   SET_ORDER_HISTORY(state, orderHistory) {
+    console.log(orderHistory)
     state.orderHistory = orderHistory;
     console.log(orderHistory)
 

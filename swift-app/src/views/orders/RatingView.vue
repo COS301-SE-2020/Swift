@@ -206,7 +206,7 @@ export default {
       ratingValue: [],
       ratingValueMenuItem: [],
       phraseRating: [],
-      phraseRatingMenuItem: [[],[]],
+      phraseRatingMenuItem: [],
       comment: [],
       commentMenuItem: [],
       publicValue: [],
@@ -273,25 +273,15 @@ export default {
       currentTab = index;
     },
     submitRating () {
-      console.log(this.ratingValue);
-      console.log(this.ratingValueMenuItem);
-
-      console.log(this.phraseRating);
-      console.log(this.phraseRatingMenuItem);
-
-      console.log(this.comment);
-      console.log(this.commentMenuItem);
-
-      console.log(this.publicValue);
-      console.log(this.publicValueMenuItem);
 
       let ratings = [];
 
       for (let i = 0; i < this.itemToRate().rating.length; i++) {
-        let data = {}
+
         if (!Array.isArray(this.itemToRate().rating[i].info)) {
           let phrases = [];
           for (let j = 0; j < this.itemToRate().rating[i].ratingPhrases.length; j++) {
+
             let phrase = {
               "phraseId": this.itemToRate().rating[i].ratingPhrases[j].phraseId,
               "phraseScore": (this.phraseRating[j] != undefined) ? this.phraseRating[j] : 0
@@ -299,7 +289,7 @@ export default {
             phrases.push(phrase)
           }
 
-          data = {
+          let data = {
             "type": "restaurant",
             "itemId": this.itemToRate().rating[i].info.itemId,
             "orderId": this.itemToRate().orderId,
@@ -308,8 +298,10 @@ export default {
             "public": (this.publicValue[i] != undefined) ? this.publicValue[i] : false,
             "phrases": phrases
           }
+
           ratings.push(data)
         } else {
+            console.log("blah4")
             for (let j = 0; j < this.itemToRate().rating[i].info.length; j++) {
               let phrases = [];
               for (let y = 0; y < this.itemToRate().rating[i].ratingPhrases.length; y++) {
@@ -319,8 +311,8 @@ export default {
                 }
                 phrases.push(phrase)
               }
-
-              data = {
+              
+              let data = {
                 "type": "menuItem",
                 "itemId": this.itemToRate().rating[i].info[j].itemId,
                 "orderId": this.itemToRate().orderId,
@@ -329,22 +321,15 @@ export default {
                 "public": (this.publicValueMenuItem[j] != undefined) ? this.publicValueMenuItem[j] : false,
                 "phrases": phrases
               }
+
               ratings.push(data)
             }
         }
-
-        
       }
+
       let rate = {
         "ratings": ratings
       }
-
-      console.log(rate)
-
-      // console.log("restaurant")
-      // console.log(ratings)
-      // console.log("item")
-      // console.log(this.rating1I)
 
       this.submitRatingVals(rate)
       this.$router.push("/orders");
@@ -411,8 +396,9 @@ export default {
     
   },
   mounted: function () {
-    // this.rating[0].info.name = this.filteredList(16).restaurantName
-    // this.rating[2].info.name = this.filteredList(16).orderEmployeeName + ' ' + this.filteredList(16).orderEmployeeSurname
+    for(let i = 0; i < this.itemToRate().rating[1].info.length; i++) {
+      this.phraseRatingMenuItem[i] = [];
+    }
   }
 };
 </script>
