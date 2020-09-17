@@ -34,11 +34,11 @@ Vue.config.productionTip = false
 Vue.mixin({
   methods: {
     getAuthToken() {
-      if (localStorage.getItem('authToken') != "null") {
-        return localStorage.getItem('authToken');
-      } else {
+      if (localStorage.getItem('authToken') === "null" || localStorage.getItem('authToken') === null) {
         this.$router.push('/login');
         return null;
+      } else {
+        return localStorage.getItem('authToken');
       }
     },
     getCurrentRestaurantId() {

@@ -64,26 +64,33 @@
 
 
             <v-list v-for="(orderMenuItem,j) in orderInfo().orderItems" :key="j" class="py-2" width="100%">
-              <v-card  @click="editItem(orderMenuItem)" width="100%">
+              <v-card   width="100%">
                 <v-list-item class="pt-1">
-                  <v-list-item-content>
-                    <v-row>
-                      <v-col cols="9">
+                  <v-list-item-content >
+                    <v-row @click="editItem(orderMenuItem)">
+                      <v-col cols="8">
                         <v-list-item-title>{{ getItemName(orderMenuItem.menuItemId) }}</v-list-item-title>
                       </v-col>
-                      <v-col cols="3 d-flex justify-end">
+                      <v-col cols="4 d-flex justify-end">
                         <div>
                           <v-list-item-title><span style="color: #f75564; font-size: 14px" class="pr-1">{{orderMenuItem.quantity}}x</span> R{{((orderMenuItem.itemTotal != null) ? orderMenuItem.itemTotal : (0)).toFixed(2)}}</v-list-item-title>
                         </div>
                       </v-col>
                     </v-row>
                     <v-row >
-                      <v-col cols="8" class="py-0">
+                      <v-col cols="8" class="py-0" @click="editItem(orderMenuItem)">
                         <div v-if="(orderMenuItem.orderSelections != undefined)">
                           <div v-for="(orderItem, index) in orderMenuItem.orderSelections.selections" :key="index">
                             <v-list-item-subtitle v-if="!Array.isArray(orderItem.values)">- {{orderItem.name}}: {{orderItem.values}}</v-list-item-subtitle>
                             <v-list-item-subtitle v-else>- {{orderItem.name}}: {{(orderItem.values).join(', ')}}</v-list-item-subtitle>
                           </div>
+                        </div>
+                      </v-col>
+                      <v-col @click="removeCartItem(orderMenuItem)" cols="4" class="py-0 d-flex justify-end  px-0">
+                        <div >
+                          <v-list-item-icon  class="mb-0 mt-1 mr-2" >
+                            <v-icon color="primary">mdi-delete-outline</v-icon>
+                          </v-list-item-icon>
                         </div>
                       </v-col>
                       <!-- <v-col cols="4" class="py-0 d-flex justify-end">
@@ -180,7 +187,10 @@
       </v-alert>
     </v-overlay>
 
-    <!-- <NavBar></NavBar> -->
+    <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
+      <v-icon>mdi-cart-outline</v-icon>
+    </v-btn>
+    <NavBar></NavBar>
   </v-container>
 </template>
 
@@ -234,9 +244,15 @@ export default {
       }
     },
     editItem(item) {
-      // console.log(item)
-      // this.addItemToEdit(item)
-      // this.$router.push("/menuItem/" + item.menuItemId);
+      // console.log("pressed")
+      this.addItemToEdit(item)
+      this.$router.push("/menuItem/" + item.menuItemId);
+    },
+    removeCartItem(item) {
+      this.removeItem(item.menuItemId)
+    },
+    goToCart() {
+      // this.$router.push('/cart')
     },
     checkedIn() {
       let checkedInVal = this.checkedInQRCode;
@@ -260,14 +276,27 @@ export default {
       item.itemTotal += parseFloat(singlePrice)
       this.subtotal += parseFloat(singlePrice)
     },
+    checkedIn() {
+      let checkedInVal = this.checkedInQRCode;
+      let checkedInRestaurantId = this.checkedInRestaurantId;
+
+      if (checkedInVal != null && checkedInRestaurantId != null) {
+        return true;
+      } else {
+        return false;
+      }
+    },
     ...mapActions({
       updateOrderFlag: 'OrderStore/updateOrderFlag',
-      // addItemToEdit: 'OrderStore/addItemToEdit',
+      addItemToEdit: 'MenuItemsStore/addItemToEdit',
+      removeItem: 'OrderStore/removeItem',
       submitOrder: 'OrderStore/submitOrder',
+      // clearItem: "MenuItemsStore/clearItem",
     }),
     ...mapGetters({
       menu: "MenuStore/getMenu",
       orderInfo: "OrderStore/getOrderInfo",
+      orderedItemsInfo: "OrderStore/getOrderedItems",
       orderedItems: "OrderStore/getOrderedItems",
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
@@ -290,12 +319,16 @@ export default {
     },
   },
   mounted: function() {
-    // console.log("order");
-    // console.log(this.orderInfo());
+    // this.clearItem;
     if (Object.keys(this.orderInfo()).length != 0) {
       for (let i = 0; i < this.orderInfo().orderItems.length; i++) {
         this.subtotal += (this.orderInfo().orderItems[i].itemTotal != null) ? parseFloat(this.orderInfo().orderItems[i].itemTotal): 0;
         this.quantity[i] = parseFloat(this.orderInfo().orderItems[i].quantity)
+      }
+    }
+    if (Object.keys(this.orderedItemsInfo()).length != 0) {
+      for (let i = 0; i < this.orderedItemsInfo().orderItems.length; i++) {
+        this.subtotal += (this.orderedItemsInfo().orderItems[i].itemTotal != null) ? parseFloat(this.orderedItemsInfo().orderItems[i].itemTotal): 0;
       }
     }
   }

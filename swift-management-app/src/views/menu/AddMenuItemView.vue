@@ -345,7 +345,19 @@ export default {
   },
   computed: {
     restaurantObject() {
-      return this.$store.state.menuList.restaurantObject;
+       if (this.$store.state.menuList)
+        return this.$store.state.menuList.restaurantObject;
+      else if (this.$store.state.myRestaurants) {
+        for (var i = 0; i < this.$store.state.myRestaurants.length; i++)
+          if (
+            this.$store.state.myRestaurants[i].restaurantId ==
+            this.getCurrentRestaurantId()
+          ) {
+            return this.$store.state.myRestaurants[i];
+          }
+      } else {
+        return null;
+      }
     },
     itemCategoryTitle() {
       if (this.itemCategoryName) return this.itemCategoryName;
@@ -393,7 +405,7 @@ export default {
       this.$refs.uploadImageInputRef.click();
     },
     updateItemImage() {
-      var file = document.getElementById("uploadImageInput").files[0];
+      var file =  this.$refs.uploadImageInputRef.files[0];
       var reader = new FileReader();
 
       if (file && file.type.match("image.*")) {

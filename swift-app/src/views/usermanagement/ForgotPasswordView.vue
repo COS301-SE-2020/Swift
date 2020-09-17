@@ -199,14 +199,15 @@ export default {
       } else {
         
         this.sendEmail()
-        // console.log("user")
-        // console.log(user)
-        // this.step = this.step + 1;
+        //console.log("user")
+        //console.log(user)
+        this.step = this.step + 1;
       }
 
       
     },
     async confirmCode () {
+      //console.log("user")
       this.codeErrorMssg = ''
       let incomplete = false
       for (let i = 0; i < this.codeLength; i++) {
@@ -220,7 +221,7 @@ export default {
       } else {
         console.log(this.digits.join(""))
         let data = {
-          "token": this.token,
+          "email": this.email,
           "code": this.digits.join("")
         }
 

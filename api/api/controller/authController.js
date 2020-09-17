@@ -4,8 +4,9 @@ const { google } = require('googleapis');
 const path = require('path');
 const configFacebook = require('../config/config-facebook-oauth.json');
 const configGoogle = require('../config/config-google-oauth.json');
-const db = require('../db');
-const { generateToken } = require('../helper/tokenHandler');
+const db = require('../db').poolr;
+const dbw = require('../db').poolw;
+const { generateToken, validateToken, tokenState } = require('../helper/tokenHandler');
 const { getFavourites, getOrderHistory } = require('../helper/objectBuilder');
 const { registerUser } = require('./userController');
 
@@ -64,7 +65,7 @@ const loginUser = (userEmail, userName, response) => db.query(
 
     // Update token in DB - async
     const loginPromises = [];
-    loginPromises.push(db.query(
+    loginPromises.push(dbw.query(
       'UPDATE public.person SET refreshtoken = $1::text WHERE userid = $2::integer;',
       [bcrypt.hashSync(newTokenPair.refreshToken, BC_SALT_ROUNDS), res.rows[0].userid]
     )
@@ -105,6 +106,19 @@ const loginUser = (userEmail, userName, response) => db.query(
   });
 
 module.exports = {
+  checkUAToken: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || Object.keys(reqBody).length !== 2) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token
+    const userToken = validateToken(reqBody.token, true);
+    return response.status(200).send({
+      tokenValid: (userToken.state === tokenState.VALID),
+      userId: (userToken.state === tokenState.VALID) ? userToken.data.userId : 0
+    });
+  },
   getFacebookLoginURL: (reqBody, response) => {
     // Generate Facebook authentication URL
     let fbLoginURL = `https://www.facebook.com/${configFacebook.apiVersion}/dialog/oauth`;
@@ -162,9 +176,14 @@ module.exports = {
         return response.status(400).send({ status: 400, reason: 'Bad Request' });
       });
   },
-  handleGoogleCallback: async (urlParams, response) => {
+
+  handleGoogleCallback: async (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'code')
+    || Object.keys(reqBody).length !== 2) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
     try {
-      const { tokens } = await Oauth2Client.getToken(urlParams.code);
+      const { tokens } = await Oauth2Client.getToken(reqBody.code);
       Oauth2Client.setCredentials(tokens);
       const userInfo = await oauth2.userinfo.get({ auth: Oauth2Client });
       return loginUser(userInfo.data.email, userInfo.data.name, response);

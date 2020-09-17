@@ -1,0 +1,17 @@
+# [START gae_deployment_yaml]
+runtime: python38
+service: ml-api
+entrypoint: python api.py
+
+env_variables:
+  DB_HOST: $DB_HOST
+  DB_NAME: $DB_NAME
+  DB_PASS: $DB_PASS
+  DB_PORT: $DB_PORT
+  DB_USER: $DB_USER
+
+handlers:
+  - url: /.*
+    secure: optional
+    script: auto
+# [END gae_deployment_yaml]
