@@ -15,6 +15,13 @@ Swift aims to create a convenient, flexible, and scalable interface suitable for
 * :computer: [User Web App](https://app.swiftapp.ml)
 * :computer: [Management Web App](https://manage.swiftapp.ml)
 * :books: [Swift Documentation](https://docs.swiftapp.ml)
+* <details><summary>Expand Documentation Sections</summary>
+  :book: <a href="https://docs.swiftapp.ml/documentation/" target="_blank">SRS Documentation</a><br>
+  :book: <a href="https://docs.swiftapp.ml/coding-standards/" target="_blank">Coding Standards Document</a><br>
+  :book: <a href="https://docs.swiftapp.ml/testing-policy/" target="_blank">Testing Policy Document</a><br>
+  :book: <a href="https://docs.swiftapp.ml/user-manual/" target="_blank">User Manual</a><br>
+  :book: <a href="https://docs.swiftapp.ml/installation-manual/" target="_blank">Technical Installation Manual</a>
+</details>
 
 ---
 
