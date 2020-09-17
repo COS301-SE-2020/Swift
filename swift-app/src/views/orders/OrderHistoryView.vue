@@ -178,7 +178,7 @@ export default {
   async mounted() {
     // await this.$store.commit('CustomerStore/RESET_FETCHED_ORDER_HISTORY'); 
 
-    if (Object.keys(this.orderHistory).length == 0) {
+    if (Object.keys(this.orderHistory).length === 0) {
       this.isLoading = !this.isLoading;
       await this.$store.dispatch('MenuStore/retrieveMenu', this.checkedInRestaurantId);
       // await this.$store.dispatch('CustomerStore/fetchOrderHistory');
@@ -198,9 +198,11 @@ export default {
       // this.addOrder(item)
     },
     orderActive(arr) {
-      for (let i = 0; i < arr.length; i++) {
-        if (parseInt(arr[i].progress) < 100)
-          return true
+      if (arr != undefined) {
+        for (let i = 0; i < arr.length; i++) {
+          if (parseInt(arr[i].progress) < 100)
+            return true
+        }
       }
       return false
     },
