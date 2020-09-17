@@ -12,7 +12,8 @@ const initialState = () => ({
   
   orderHistory: {},
   orderTotal: 0,
-  orderFlag: false
+  orderFlag: false,
+  ratingPhrases: {}
 });
 
 const state = initialState();
@@ -34,12 +35,8 @@ const getters = {
   },
 
   getItemToRate(state) {
-    console.log("FETCH DATA")
-    console.log(state.itemToRate)
     return state.itemToRate;
   },
-
-
 
   getItemsInCart(state) {
     return state.itemsInCart;
@@ -55,6 +52,10 @@ const getters = {
 
   getOrderHistory(state) {
     return state.orderHistory;
+  },
+
+  getRatingPhrases(state) {
+    return state.ratingPhrases;
   }
 
   
@@ -73,19 +74,6 @@ const actions = {
           "orderInfo": this.getters['OrderStore/getOrderInfo']
         }
       ).then(result => {
-
-        var maxid = 0;
-        var maxobj;
-
-        result.data.orderHistory.map(obj => {  
-            if (obj.orderId > maxid) maxid = obj.orderId;    
-        });
-
-        result.data.orderHistory.map(obj => {   
-            if (obj.orderId == maxid) maxobj = obj;    
-        });
-
-        state.currentId = maxobj.orderId;
         commit('UPDATE_ORDER_HISTORY', result.data.orderHistory);
       }).catch(({ response }) => {
       });
@@ -94,11 +82,10 @@ const actions = {
         {
           "requestType": "updateOrder",
           "token": sessionStorage.getItem('authToken'),
-          "orderId": state.currentId,
+          "orderId": state.orderHistory[0].orderId,
           "orderItems": this.getters['OrderStore/getOrderInfo'].orderItems
         }
       ).then(result => {
-        // console.log("IN HERE NOW")
         commit('UPDATE_ORDER_HISTORY', result.data.orderHistory);
       }).catch(({ response }) => {
       });
@@ -112,13 +99,48 @@ const actions = {
           "token": sessionStorage.getItem('authToken')
         }
       ).then(result => {
+        commit('SET_RATING_PHRASES', result.data);
+        console.log(result.data)
         return result.data
       }).catch(({ response }) => {
       });
   },
 
+  submitRating({commit}, ratingObject) {
+    for (let i = 0; i < ratingObject.ratings.length; i++) {
+      axios.post('https://api.swiftapp.ml', 
+          {
+            "requestType": "addReview",
+            "token": sessionStorage.getItem('authToken'),
+            "type": ratingObject.ratings[i].type,
+            "itemId": ratingObject.ratings[i].itemId,
+            "orderId": ratingObject.ratings[i].orderId,
+            "ratingScore": ratingObject.ratings[i].ratingScore,
+            "comment": ratingObject.ratings[i].comment,
+            "public": ratingObject.ratings[i].public,
+            "phrases": ratingObject.ratings[i].phrases,
+          }
+        ).then(result => {
+        }).catch(({ response }) => {
+        });
+    }
+  },
+
   submitPayment({commit}) {
-    console.log(data)
+    let data = {
+      "requestType": "payment",
+        "token": sessionStorage.getItem('authToken'),
+        "orderId": this.getters['OrderStore/getPaymentInfo'].orderId,
+        "paymentMethod": this.getters['OrderStore/getPaymentInfo'].paymentMethod,
+        "amountPaid": this.getters['OrderStore/getPaymentInfo'].amountPaid,
+        "restaurantName": this.getters['OrderStore/getPaymentInfo'].restaurantName,
+        "menuItemName": this.getters['OrderStore/getPaymentInfo'].menuItemName,
+        "name": this.getters['CustomerStore/getCustomerProfile'].name,
+        "email": this.getters['CustomerStore/getCustomerProfile'].email,
+        "waiterTip": this.getters['OrderStore/getPaymentInfo'].waiterTip,
+        "orderTax": this.getters['OrderStore/getPaymentInfo'].orderTax
+    }
+    
     axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "payment",
@@ -127,7 +149,7 @@ const actions = {
         "paymentMethod": this.getters['OrderStore/getPaymentInfo'].paymentMethod,
         "amountPaid": this.getters['OrderStore/getPaymentInfo'].amountPaid,
         "restaurantName": this.getters['OrderStore/getPaymentInfo'].restaurantName,
-        "menuItemName": this.getters['OrderStore/getPaymentInfo'].menuItemName,
+        "menuitemname": this.getters['OrderStore/getPaymentInfo'].menuItemName,
         "name": this.getters['CustomerStore/getCustomerProfile'].name,
         "email": this.getters['CustomerStore/getCustomerProfile'].email,
         "waiterTip": this.getters['OrderStore/getPaymentInfo'].waiterTip,
@@ -141,6 +163,12 @@ const actions = {
 
   initOrderHistory({commit, state}) {
     var orderHistory = this.getters['CustomerStore/getCustomerOrderHistory']
+    // var orderHistory = this.getters['CustomerStore/getFetchedOrderHistory']
+    commit('SET_ORDER_HISTORY', orderHistory);
+  },
+
+  setOrderHistory({commit}, fetchedOrderHistory) {
+    var orderHistory = fetchedOrderHistory
     commit('SET_ORDER_HISTORY', orderHistory);
   },
 
@@ -148,6 +176,14 @@ const actions = {
     commit('ADD_ITEM_TO_ORDER', orderItemInfo);
   },
 
+  editOrder({commit,}, orderItemInfo) {
+    commit('EDIT_ORDER', orderItemInfo);
+  },
+
+  removeItem({commit,}, itemId) {
+    commit('REMOVE_ITEM', itemId);
+  },
+  
   addItemToRate({commit,}, itemInfo) {
     commit('ADD_ITEM_TO_RATE', itemInfo);
   },
@@ -162,7 +198,6 @@ const actions = {
 
   retrieveOrderStatus({commit}, data) {
     var orderId = data.orderId;
-    // console.log(orderId)
     axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "orderStatus",
@@ -172,8 +207,10 @@ const actions = {
     ).then(result => {
       var data = {
         "orderId": orderId,
-        "orderProgress": result.data.orderProgress 
+        "orderProgress": result.data.orderProgress,
+        "itemProgress": result.data.itemProgress
       }
+      // console.log(result.data.itemProgress)
       commit('UPDATE_ORDER_STATUS', data);
     }).catch(({ response }) => {
     });
@@ -196,6 +233,36 @@ const actions = {
 const mutations = {
   SET_ORDER_HISTORY(state, orderHistory) {
     state.orderHistory = orderHistory;
+
+    if (orderHistory.length != 0 && orderHistory[0].orderStatus == 'Received') {
+      let itemsOrdered = [];
+      for (let i = 0; i < orderHistory[0].items.length; i++) {
+        let data = {
+          "menuItemId": orderHistory[0].items[i].menuItemId,
+          "itemTotal": orderHistory[0].items[i].itemTotal,
+          "quantity": orderHistory[0].items[i].quantity,
+          "orderSelections": {
+            "selections": orderHistory[0].items[i].orderSelections
+          }
+        };
+        itemsOrdered[i] = data;
+      }
+
+      let data = {
+        // "orderInfo": {
+          "restaurantId": orderHistory[0].restaurantId,
+          "tableId": this.getters['CustomerStore/getCheckedInTableId'],
+          "employeeId": 6,
+          "waiterTip": 0,
+          "orderItems": itemsOrdered
+        // }
+      }
+
+      state.orderedItems = data;
+
+    }
+    
+
   },
 
   CLEAR_ORDER(state) {
@@ -215,6 +282,27 @@ const mutations = {
       state.orderInfo = orderItemInfo.orderInfo;
   },
 
+  EDIT_ORDER(state, orderItemInfo) {
+    let menuItem = state.orderInfo.orderItems.find((item) => {
+      return item.menuItemId == orderItemInfo.menuItemId
+    });
+
+    menuItem.itemTotal = orderItemInfo.itemTotal;
+    menuItem.quantity = orderItemInfo.quantity;
+    menuItem.orderSelections = orderItemInfo.orderSelections;
+  },
+
+  REMOVE_ITEM(state, itemId) {
+    let itemIndex = -1;
+    state.orderInfo.orderItems.find((item, index) => {
+      itemIndex = index;
+      return item.menuItemId == itemId
+    });
+
+    if (itemIndex != -1)
+      state.orderInfo.orderItems.splice(itemIndex, 1);
+  },
+
   ADD_PAYMENT(state, orderPaymentinfo) {
     state.paymentInfo = orderPaymentinfo;
   },
@@ -222,6 +310,10 @@ const mutations = {
   CLEAR_ITEMS(state) {
     state.orderInfo = {}
     state.orderedItems = {}
+  },
+
+  SET_RATING_PHRASES(state, ratingPhrases) {
+    state.ratingPhrases = ratingPhrases
   },
 
   ADD_ITEM_TO_RATE(state, itemInfo) {
@@ -236,25 +328,26 @@ const mutations = {
     )
 
     item.progress = data.orderProgress;
+
+    for (let i = 0; i < data.itemProgress.length; i++) {
+      var obj = item.items.find(mItem => 
+        mItem.menuitemid == data.itemProgress[i].menuItemId
+      )
+      obj.progress = data.itemProgress[i].progress
+    }
+
+    
   },
 
   UPDATE_ORDER_HISTORY(state, orderInformation) {
-    console.log("hello")
     let empty = Object.keys(state.orderedItems).length === 0 && state.orderedItems.constructor === Object
     if (!empty) {
-      console.log("blah")
       for (let i = 0; i < state.orderInfo.orderItems.length; i++)
         state.orderedItems.orderItems.push(state.orderInfo.orderItems[i])
     } else {
-      console.log("two")
       state.orderedItems = state.orderInfo;
     }
     state.orderInfo = {}
-
-    console.log("orderinfo")
-    console.log(this.getters['OrderStore/getOrderInfo'])
-    console.log("ordered")
-    console.log(this.getters['OrderStore/getOrderedItems'])
 
     this.getters['CustomerStore/getCustomer'].orderHistory = orderInformation;
 

@@ -5,19 +5,24 @@ export default {
     commit,
     state
   }, payload) {
-    axios.post(process.env.VUE_APP_BASEURL, {
-      "requestType": "restaurantMenu",
-      "restaurantId": payload.currentRestaurantId,
-      "disableFields": ["image", "ratingPhrases", "reviews"],
-      "token": payload.authKey,
-    }).then(result => {
-      console.log(result);
+    return new Promise((resolve, reject) => {
+      axios.post(process.env.VUE_APP_BASEURL, {
+        "requestType": "restaurantMenu",
+        "restaurantId": payload.currentRestaurantId,
+        "disableFields": ["image", "ratingPhrases", "reviews"],
+        "token": payload.authKey,
+      }).then(result => {
+        console.log(result);
 
-      commit('SET_RESTAURANT_OBJECT', result.data);
+        commit('SET_RESTAURANT_OBJECT', result.data);
+        resolve(result);
 
-    }).catch(({
-      response
-    }) => {});
+      }).catch(({
+        response
+      }) => {
+        console.log(response)
+      });
+    });
   },
   addMenuCategory({
     dispatch
@@ -42,6 +47,38 @@ export default {
     }).catch(({
       response
     }) => {});
+  },
+  editMenuItem({
+    dispatch
+  }, payload) {
+    return new Promise((resolve, reject) => {
+      axios.post(process.env.VUE_APP_BASEURL, {
+        "requestType": "editMenuItem",
+        "token": payload.authKey,
+        "menuItemId": payload.itemId,
+        "categoryId": payload.categoryId,
+        "itemName": payload.itemName,
+        "itemDescription": payload.itemDescription,
+        "price": payload.itemPrice,
+        "waitingTime": payload.itemWaitingTime,
+        "attributes": payload.itemAttributes,
+        "arAsset": payload.arAsset,
+        "available": payload.available,
+        "images": payload.itemImages,
+      }).then(result => {
+
+        dispatch("listMenuItems", {
+          currentRestaurantId: payload.currentRestaurantId,
+          authKey: payload.authKey
+        });
+        console.log(result);
+        resolve(result);
+      }).catch(({
+        response
+      }) => {
+        reject(response)
+      });
+    });
   },
   addMenuItem({
     dispatch
