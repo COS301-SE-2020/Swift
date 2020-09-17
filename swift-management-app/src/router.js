@@ -5,7 +5,7 @@ Vue.use(Router)
 
 const router = new Router({
   mode: 'history',
-  base: process.env.BASE_URL,
+  base: '',
   scrollBehavior() {
     return {
       x: 0,
@@ -73,17 +73,17 @@ const router = new Router({
       path: '',
       component: () => import('@/layouts/full-page/FullPage.vue'),
       children: [
-       //TODO: login will come here
-       {
-        path: '/login',
-        name: 'login',
-        component: () => import('./views/usermanagement/UMView.vue')
-      },
-      {
-        path: '/reset-password',
-        name: 'reset-password',
-        component: () => import('./views/usermanagement/UMResetPasswordView.vue')
-      },
+        //TODO: login will come here
+        {
+          path: '/login',
+          name: 'login',
+          component: () => import('./views/usermanagement/UMView.vue')
+        },
+        {
+          path: '/reset-password',
+          name: 'reset-password',
+          component: () => import('./views/usermanagement/UMResetPasswordView.vue')
+        },
       ]
     },
     //404 redirects to home for now
@@ -93,6 +93,17 @@ const router = new Router({
     }
   ],
 })
+
+/*
+router.beforeEach((to, from, next) => {
+  if (!localStorage.getItem("authToken") && ) {
+    next({
+      path: '/login',
+    })
+  } else {
+    next()
+  } 
+}); */
 
 router.afterEach(() => {
 

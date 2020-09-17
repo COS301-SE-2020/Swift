@@ -39,16 +39,17 @@ module.exports.registrationEmail = (req, res) => {
 // eslint-disable-next-line no-unused-vars
 module.exports.paymentEmail = (req, res) => {
   const { orderId } = req;
-  // const order= req.details;
+  const resName = req.restaurantName;
+  const MenuItemName = req.menuitemname;
   const tip = req.waiterTip;
   const tax = req.orderTax;
-  const total = req.orderTotal;
   const { name } = req;
   const amount = req.amountPaid;
   const { paymentMethod } = req;
+  const total = amount + tip + tax;
 
   ejs.renderFile(`${__dirname}/PaymentEmail.ejs`, {
-    orderId, name, tip, tax, total, amount, paymentMethod
+    orderId, name, tip, tax, total, amount, paymentMethod, resName, MenuItemName
   }, (err, data) => {
     const mailOptions = {
       from: process.env.MG_EMAIL_FROM || config.emailFrom,
@@ -63,6 +64,26 @@ module.exports.paymentEmail = (req, res) => {
         console.error(`error occurs : ${error}`);
       } else {
         // eslint-disable-next-line no-console
+        console.log(`Email successfully sent to: ${info.response}`);
+      }
+    });
+  });
+};
+
+/** *****Password reset Email ******** */
+// eslint-disable-next-line no-unused-vars
+module.exports.passResetEmail = (req, res) => {
+  ejs.renderFile(`${__dirname}/PasswordResetTemp.ejs`, { token: req.ShortToken }, (err, data) => {
+    const mailOptions = {
+      from: process.env.MG_EMAIL_FROM || config.emailFrom,
+      to: req.email,
+      subject: 'Swift-app Password Reset',
+      html: data
+    };
+    apiTransporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error(`error occurs : ${error}`);
+      } else { // eslint-disable-next-line no-console
         console.log(`Email successfully sent to: ${info.response}`);
       }
     });
