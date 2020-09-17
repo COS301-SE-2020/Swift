@@ -1,0 +1,5 @@
+cron:
+  - description: "ping - stay awake"
+    url: /
+    schedule: every 5 minutes
+    target: ml-api

@@ -34,13 +34,13 @@ jobs:
         AUTH_FACEBOOK_CLIENT_ID: ${{ secrets.AUTH_FACEBOOK_CLIENT_ID }}
         AUTH_GOOGLE_CLIENT_ID: ${{ secrets.AUTH_GOOGLE_CLIENT_ID }}
         AUTH_GOOGLE_CLIENT_SECRET: ${{ secrets.AUTH_GOOGLE_CLIENT_SECRET }}
-        DB_HOST: ${{ secrets.DB_HOST }}
+        DB_HOSTR: ${{ secrets.DB_HOSTR }}
+        DB_HOSTW: ${{ secrets.DB_HOSTW }}
         DB_NAME: ${{ secrets.DB_NAME }}
         DB_PASS: ${{ secrets.DB_PASS }}
-        DB_PORT: ${{ secrets.DB_PORT }}
+        DB_PORTR: ${{ secrets.DB_PORTR }}
+        DB_PORTW: ${{ secrets.DB_PORTW }}
         DB_USER: ${{ secrets.DB_USER }}
-        EMAIL_USER: ${{ secrets.EMAIL_USERNAME }}
-        EMAIL_PASS: ${{ secrets.EMAIL_PASSWORD }}
         MG_API_KEY: ${{ secrets.MAILGUN_API_KEY }}
         MG_DOMAIN_FROM: ${{ secrets.MAILGUN_DOMAIN_FROM }}
         MG_EMAIL_FROM: ${{ secrets.MAILGUN_EMAIL_FROM }}
@@ -49,7 +49,6 @@ jobs:
     - name: Setup gcloud CLI
       uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
       with:
-        version: '304.0.0'
         project_id: ${{ secrets.GCP_PROJECT_ID }}
         service_account_key: ${{ secrets.GAE_CREDENTIALS }}
 

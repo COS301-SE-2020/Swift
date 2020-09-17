@@ -9,8 +9,8 @@ features:
   details: An SRS document of the system
 - title: User Manual
   details: A manual of how to use the system
-- title: API
-  details: An API of all the requests for the system
+- title: Testing Policy
+  details: A document explaining how all testing is done
 - title: Installation Manual
   details: A step by step guide to running and installing the 3 components of the systems
 - title: Coding Standards

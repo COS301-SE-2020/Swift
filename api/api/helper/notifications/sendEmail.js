@@ -73,11 +73,59 @@ module.exports.paymentEmail = (req, res) => {
 /** *****Password reset Email ******** */
 // eslint-disable-next-line no-unused-vars
 module.exports.passResetEmail = (req, res) => {
-  ejs.renderFile(`${__dirname}/PasswordResetTemp.ejs`, { token: req.ShortToken }, (err, data) => {
+  ejs.renderFile(`${__dirname}/PasswordResetTemp.ejs`, { token: req.val }, (err, data) => {
     const mailOptions = {
       from: process.env.MG_EMAIL_FROM || config.emailFrom,
       to: req.email,
       subject: 'Swift-app Password Reset',
+      html: data
+    };
+    apiTransporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error(`error occurs : ${error}`);
+      } else { // eslint-disable-next-line no-console
+        console.log(`Email successfully sent to: ${info.response}`);
+      }
+    });
+  });
+};
+
+/** *****Employee sign in Email ******** */
+// eslint-disable-next-line no-unused-vars
+module.exports.employSignInEmail = (req, res) => {
+  // const { restaurantname } = req;
+  // const { waiterName } = req;
+  const restaurantName = 'jollies';
+  const waiterName = 'John';
+  const { role } = req;
+  ejs.renderFile(`${__dirname}/employeeSignIn.ejs`, { restaurantName, waiterName, role }, (err, data) => {
+    const mailOptions = {
+      from: process.env.MG_EMAIL_FROM || config.emailFrom,
+      to: req.email,
+      subject: 'Employee Sign in',
+      html: data
+    };
+    apiTransporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error(`error occurs : ${error}`);
+      } else { // eslint-disable-next-line no-console
+        console.log(`Email successfully sent to: ${info.response}`);
+      }
+    });
+  });
+};
+
+/** *****Employee registration Email ******** */
+// eslint-disable-next-line no-unused-vars
+module.exports.employRegisEmail = (email, res) => {
+  const resName = 'Papa Giovanni';
+  // const { email } = req;
+
+  ejs.renderFile(`${__dirname}/employeeRegi.ejs`, { restaurantName: resName }, (err, data) => {
+    const mailOptions = {
+      from: process.env.MG_EMAIL_FROM || config.emailFrom,
+      to: email,
+      subject: 'Employee Registration',
       html: data
     };
     apiTransporter.sendMail(mailOptions, (error, info) => {

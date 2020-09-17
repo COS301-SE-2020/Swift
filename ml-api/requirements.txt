@@ -1,0 +1,10 @@
+mlxtend==0.17.3
+Flask==1.1.2
+flask_cors==3.0.9
+pandas==1.1.0
+matplotlib==3.3.0
+psycopg2_binary==2.8.5
+Flask_RESTful==0.3.8
+networkx==2.5
+numpy==1.18.5
+psycopg2==2.8.6
