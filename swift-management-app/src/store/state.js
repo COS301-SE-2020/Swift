@@ -11,7 +11,8 @@ var userDefaults = {
   about: "I am a driven entrepreneur & third year student at the University or Pretoria studying BSc Information and Knowledge Systems.",
   photoURL: require("@/assets/images/portrait/small/avatar-s-10.jpg"), // From Auth
   status: "online",
-  userRole: "admin"
+  userRole: "",
+  employeeData: null
 }
 
 // /////////////////////////////////////////////

@@ -6,6 +6,31 @@
       </div>
       <vs-button @click="addPromo()" :disabled="addPromoButtonDisabled">Add Promo</vs-button>
     </div>
+    <vs-card
+      class="mb-4 mt-4 ml-4 mr-4 w-full sm:w-full md:w-full lg:w-1/2 xl:w-1/2 ml-auto mr-auto"
+    >
+      <h3 class="mb-2 mt-2 ml-2">Recommended Promos</h3>
+      <p
+        class="ml-2"
+        style="font-size: 14px"
+      >These items are frequently bought together. Grouping them together in a promo could lead to great sales!</p>
+      <div class="flex flex-wrap">
+        <div
+          v-for="item in recommendedPromoItems"
+          :key="item.menuItemId"
+          class="mb-1 ml-1 mr-1 sm:w-full md:w-1/4 lg:w-1/4 xl:w-1/4 ml-auto mr-auto"
+        >
+          <vs-card
+            type="border"
+            class="miniMenuItem mediumSize largeSize"
+            :style="'background:linear-gradient(120deg ,rgba(0,0,0,.6), rgba(0,0,0,0.1)),url('+item.images[0]+')'"
+          >
+            <p style="color:white;">{{ item.menuItemName }}</p>
+          </vs-card>
+        </div>
+      </div>
+    </vs-card>
+
     <vs-row v-if="promoCount <= 0" vs-type="flex" vs-justify="center" vs-align="center" vs-w="12">
       <vs-col class="mt-20" vs-sm="12" vs-lg="6">
         <vx-card>
@@ -15,7 +40,7 @@
     </vs-row>
     <div class="flex flex-wrap">
       <vs-card
-        class="text-center mb-4 mt-4 ml-4 mr-4 w-full sm:w-full md:w-full lg:w-1/4 xl:w-1/4 ml-auto mr-auto"
+        class="text-center mb-4 mt-4 w-full sm:w-full md:w-full lg:w-1/2 xl:w-1/4 mr-4 ml-4"
         v-for="promo in promos"
         :key="promo.promotionId"
       >
@@ -166,6 +191,7 @@
           accept="image/*"
         />
         <div
+          ref="promoImageUploadPreview"
           id="promoImageUploadPreview"
           hidden
           class="mt-4 rounded-lg"
@@ -221,9 +247,37 @@ export default {
     };
   },
   computed: {
+    recommendedPromoItems() {
+      if (!this.restaurantObject) return [];
+      return [
+        this.restaurantObject.categories[3].menuItems[1],
+        this.restaurantObject.categories[5].menuItems[1],
+        this.restaurantObject.categories[2].menuItems[1],
+      ];
+      var menuList = [];
+      this.recommendedPromos.forEach((id) => {
+        for (var i = 0; i < this.restaurantObject.categories.length; i++)
+          for (
+            var j = 0;
+            j < this.restaurantObject.categories[i].menuItems.length;
+            j++
+          ) {
+            var item = this.restaurantObject.categories[i].menuItems[j];
+            if (id == item.menuItemId) {
+              menuList.push(item);
+            }
+          }
+      });
+      return menuList;
+    },
     promos() {
       if (this.$store.state.promoData) {
         return this.$store.state.promoData.promos;
+      } else return null;
+    },
+    recommendedPromos() {
+      if (this.$store.state.promoData) {
+        return this.$store.state.promoData.recommendedPromos;
       } else return null;
     },
     restaurantObject() {
@@ -250,6 +304,8 @@ export default {
       return new Date(date).toDateString();
     },
     menuItemsByIds(idList) {
+      if (!idList) return [];
+      if (!this.restaurantObject) return [];
       var menuList = [];
       idList.forEach((id) => {
         for (var i = 0; i < this.restaurantObject.categories.length; i++)
@@ -286,14 +342,13 @@ export default {
     },
     setnewPromoImage(image) {
       this.newPromoImage = image;
-      document.getElementById("promoImageUploadPreview").style.display =
-        "block";
+      this.$refs.promoImageUploadPreview.style.display = "block";
     },
     addPromo() {
-      this.createMenuItemsFilterList();
       this.addPromoActive = true;
     },
     createMenuItemsFilterList() {
+      if (!this.restaurantObject) return;
       this.menuItems = [];
       this.menuItemNames = [];
       if (this.restaurantObject.categories)
@@ -339,6 +394,11 @@ export default {
       this.addPromoActive = false;
     },
     listPromos() {
+      /*  this.$store.dispatch("promoData/listRecommendedPromo", {
+        authKey: this.getAuthToken(),
+        restaurantId: this.getCurrentRestaurantId(),
+      }); */
+
       this.$store.dispatch("promoData/listPromos", {
         authKey: this.getAuthToken(),
         restaurantId: this.getCurrentRestaurantId(),
@@ -351,12 +411,14 @@ export default {
         this.$store.registerModule("promoData", promoDataList);
         promoDataList.isRegistered = true;
       }
-
       if (this.promos == null) this.$vs.loading();
       this.listPromos();
     }
   },
   watch: {
+    restaurantObject: function () {
+      this.createMenuItemsFilterList();
+    },
     chosenItem: function (val) {
       if (this.menuItemNames.includes(val)) {
         var exists = false;
@@ -406,6 +468,9 @@ export default {
 .mediumSize {
   margin: 20px !important;
 }
+.largeSize {
+  width: 120px !important;
+}
 #promoImageUploadPreview {
   height: 200px;
   width: 100%;
@@ -418,8 +483,8 @@ export default {
   font-size: 12px;
 }
 .existingPromoImage {
-  max-width: 300px;
-  max-height: 200px;
+  width: 90%;
+  height: auto;
   margin: 20px;
   border-radius: 10px;
 }

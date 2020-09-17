@@ -11,9 +11,9 @@
             <div class="pl-1 pt-0 customerName">{{customerInfo.name}} {{customerInfo.surname}}</div>
           </v-col>
           <v-col cols="4" class="d-flex justify-end align-center">
-            <v-btn class="mr-4" elevation="2" width="35px" height="35px" @click="callWaiter" :key="activeCall.icon" :color="activeCall.color" small fab>
+            <!-- <v-btn class="mr-4" elevation="2" width="35px" height="35px" @click="callWaiter" :key="activeCall.icon" :color="activeCall.color" small fab>
               <v-icon size="23px" :style="called ? { 'transform': 'rotate(45deg)' } : { 'transform': 'rotate(0deg)' }">{{ activeCall.icon }}</v-icon>
-            </v-btn>
+            </v-btn> -->
             <!-- <v-btn v-if="checkedIn()" @click="goToCart" elevation="2" width="35px" height="35px" small fab>
               <v-icon size="23px">mdi-cart-outline</v-icon>
             </v-btn> -->

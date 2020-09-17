@@ -352,7 +352,6 @@ export default {
             this.$store.state.myRestaurants[i].restaurantId ==
             this.getCurrentRestaurantId()
           ) {
-            this.addPromoButtonDisabled = false;
             return this.$store.state.myRestaurants[i];
           }
       } else {

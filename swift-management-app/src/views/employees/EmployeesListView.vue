@@ -8,7 +8,7 @@
 
     <vs-table ref="table" search :data="employees">
       <div slot="header" class="flex flex-wrap-reverse items-center flex-grow justify-between">
-        <vs-button type="border" @click="addEmployeeActive = true">Add Employee</vs-button>
+        <vs-button type="border" @click="addEmployee()">Add Employee</vs-button>
       </div>
 
       <template slot="thead">
@@ -40,12 +40,16 @@
             </vs-td>
 
             <vs-td class="whitespace-no-wrap">
-              <feather-icon icon="EditIcon" svgClasses="w-5 h-5 hover:text-primary stroke-current" />
               <feather-icon
+                icon="EditIcon"
+                @click="editEmployee(tr)"
+                svgClasses="w-5 h-5 hover:text-primary stroke-current"
+              />
+              <feather-icon
+                @click="removeEmployee(tr)"
                 icon="TrashIcon"
                 svgClasses="w-5 h-5 hover:text-danger stroke-current"
                 class="ml-2"
-                @click.stop="deleteData(tr.employeeId)"
               />
             </vs-td>
           </vs-tr>
@@ -53,7 +57,7 @@
       </template>
     </vs-table>
 
-    <vs-popup class="text-center" title="Add Employee" :active.sync="addEmployeeActive">
+    <vs-popup class="text-center" :title="popupTitle" :active.sync="popupEmployeeActive">
       <h5 class="mb-2 mt-4">Employee Details</h5>
       <div class="flex flex-wrap">
         <vs-input
@@ -89,7 +93,7 @@
           <vs-checkbox v-model="right.value">{{ right.description }}</vs-checkbox>
         </li>
       </ul>
-      <vs-button type="border" @click="submitNewEmployee">Add Employee</vs-button>
+      <vs-button type="border" @click="submitNewEmployee">{{ popupTitle }}</vs-button>
     </vs-popup>
   </div>
 </template>
@@ -99,10 +103,13 @@ import employeesDataList from "@/store/employees/employeesDataList.js";
 export default {
   data() {
     return {
+      popupTitle: "Add Employee",
       itemsPerPage: 10,
-      addEmployeeActive: false,
+      popupEmployeeActive: false,
       newEmployeeEmail: "",
       newEmployeeRole: "",
+      PopupOperation: "add",
+      editEmpId: 0,
     };
   },
   computed: {
@@ -118,6 +125,49 @@ export default {
     },
   },
   methods: {
+    acceptEmpRemoveAlert() {
+      this.$store
+        .dispatch("employeesData/removeEmployee", {
+          empId: this.editEmpId,
+          restaurantId: this.getCurrentRestaurantId(),
+          authKey: this.getAuthToken(),
+        })
+        .then((res) => {
+          this.listEmployees();
+          if (res.status == 201 || res.status == 200) {
+            //this.listEmployees();
+            this.$vs.notify({
+              title: "Employee removed",
+              text: "Good bye",
+              color: "warning",
+            });
+          }
+        });
+    },
+    removeEmployee(emp) {
+      this.editEmpId = emp.employeeId;
+      this.$vs.dialog({
+        color: "danger",
+        title: "Confirm deletion of: " + emp.name + " " + emp.surname,
+        text: "Please confirm that this is what you which to do?.",
+        accept: this.acceptEmpRemoveAlert
+      });
+    },
+    addEmployee() {
+      this.PopupOperation = "add";
+      this.newEmployeeEmail = "";
+      this.newEmployeeRole = "";
+      this.popupTitle = "Add Employee";
+      this.popupEmployeeActive = true;
+    },
+    editEmployee(emp) {
+      this.editEmpId = emp.employeeId;
+      this.PopupOperation = "edit";
+      this.newEmployeeEmail = emp.email;
+      this.newEmployeeRole = emp.role;
+      this.popupTitle = "Edit Employee";
+      this.popupEmployeeActive = true;
+    },
     getRating(rating) {
       if (rating === 0) return "Unrated";
       else return rating.toString() + "/5";
@@ -140,42 +190,70 @@ export default {
       });
     },
     submitNewEmployee() {
-      var newEmployeePriviliges = [];
+      if (this.PopupOperation === "add") {
+        var newEmployeePriviliges = [];
 
-      this.accessRights.forEach((right) => {
-        if (right.value) newEmployeePriviliges.push(right.permissionId);
-        //reset rights for next addition
-        right.value = false;
-      });
-      this.$store
-        .dispatch("employeesData/addNewEmployee", {
-          email: this.newEmployeeEmail,
-          role: this.newEmployeeRole,
-          priviliges: newEmployeePriviliges,
-          restaurantId: this.getCurrentRestaurantId(),
-          authKey: this.getAuthToken(),
-        })
-        .then((res) => {
-          this.listEmployees();
-          if (res.status == 405) {
-            this.$vs.notify({
-              time: 6000,
-              title: "The employee does not yet have a Swift account",
-              text:
-                "Please register the employee first: <a style='color:white; text-decoration:underline' href='https://app.swiftapp.ml/#/register'>Register</a>",
-              color: "warning",
-            });
-          }
-          if (res.status == 201 || res.status == 200) {
-            //this.listEmployees();
-            this.$vs.notify({
-              title: "Employee successfully created!",
-              text: "Wohoo!",
-              color: "success",
-            });
-          }
+        this.accessRights.forEach((right) => {
+          if (right.value) newEmployeePriviliges.push(right.permissionId);
+          //reset rights for next addition
+          right.value = false;
         });
-      this.addEmployeeActive = false;
+        this.$store
+          .dispatch("employeesData/addNewEmployee", {
+            email: this.newEmployeeEmail,
+            role: this.newEmployeeRole,
+            priviliges: newEmployeePriviliges,
+            restaurantId: this.getCurrentRestaurantId(),
+            authKey: this.getAuthToken(),
+          })
+          .then((res) => {
+            this.listEmployees();
+            if (res.status == 405) {
+              this.$vs.notify({
+                time: 6000,
+                title: "The employee does not yet have a Swift account",
+                text:
+                  "Please register the employee first: <a style='color:white; text-decoration:underline' href='https://app.swiftapp.ml/#/register'>Register</a>",
+                color: "warning",
+              });
+            }
+            if (res.status == 201 || res.status == 200) {
+              //this.listEmployees();
+              this.$vs.notify({
+                title: "Employee successfully created!",
+                text: "Wohoo!",
+                color: "success",
+              });
+            }
+          });
+      } else {
+        var newEmployeePriviliges = [];
+
+        this.accessRights.forEach((right) => {
+          if (right.value) newEmployeePriviliges.push(right.permissionId);
+          //reset rights for next addition
+          right.value = false;
+        });
+        this.$store
+          .dispatch("employeesData/editEmployee", {
+            role: this.newEmployeeRole,
+            priviliges: newEmployeePriviliges,
+            empId: this.editEmpId,
+            authKey: this.getAuthToken(),
+          })
+          .then((res) => {
+            this.listEmployees();
+            if (res.status == 201 || res.status == 200) {
+              //this.listEmployees();
+              this.$vs.notify({
+                title: "Employee has been modified.",
+                text: "Wohoo!",
+                color: "success",
+              });
+            }
+          });
+      }
+      this.popupEmployeeActive = false;
     },
   },
   created() {

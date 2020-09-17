@@ -74,44 +74,15 @@ const actions = {
           "orderInfo": this.getters['OrderStore/getOrderInfo']
         }
       ).then(result => {
-
-        var maxid = 0;
-        var maxobj;
-
-        result.data.orderHistory.map(obj => {  
-            if (obj.orderId > maxid) maxid = obj.orderId;    
-        });
-
-        result.data.orderHistory.map(obj => {   
-            if (obj.orderId == maxid) maxobj = obj;    
-        });
-
-        state.currentId = maxobj.orderId;
         commit('UPDATE_ORDER_HISTORY', result.data.orderHistory);
       }).catch(({ response }) => {
       });
     } else {
-      let id = state.currentId;
-      if (state.currentId == -1) {
-        var maxid = 0;
-        var maxobj;
-
-        state.orderHistory.map(obj => {  
-            if (obj.orderId > maxid) maxid = obj.orderId;    
-        });
-
-        state.orderHistory.map(obj => {   
-            if (obj.orderId == maxid) maxobj = obj;    
-        });
-
-        id = maxobj.orderId;
-      }
-
       axios.post('https://api.swiftapp.ml', 
         {
           "requestType": "updateOrder",
           "token": sessionStorage.getItem('authToken'),
-          "orderId": id,
+          "orderId": state.orderHistory[0].orderId,
           "orderItems": this.getters['OrderStore/getOrderInfo'].orderItems
         }
       ).then(result => {
@@ -261,41 +232,25 @@ const actions = {
 // Mutations
 const mutations = {
   SET_ORDER_HISTORY(state, orderHistory) {
-    console.log(orderHistory)
     state.orderHistory = orderHistory;
-    console.log(orderHistory)
 
-    var maxid = 0;
-    var maxobj = null;
-
-    orderHistory.map(obj => {  
-        if (obj.orderId > maxid && obj.orderStatus == "Received") maxid = obj.orderId;    
-    });
-
-    orderHistory.map(obj => {   
-        if (obj.orderId == maxid) maxobj = obj;    
-    });
-
-    if (maxobj != null) {
+    if (orderHistory.length != 0 && orderHistory[0].orderStatus == 'Received') {
       let itemsOrdered = [];
-      for (let i = 0; i < maxobj.items.length; i++) {
+      for (let i = 0; i < orderHistory[0].items.length; i++) {
         let data = {
-          "menuItemId": maxobj.items[i].menuItemId,
-          "itemTotal": maxobj.items[i].itemTotal,
-          "quantity": maxobj.items[i].quantity,
+          "menuItemId": orderHistory[0].items[i].menuItemId,
+          "itemTotal": orderHistory[0].items[i].itemTotal,
+          "quantity": orderHistory[0].items[i].quantity,
           "orderSelections": {
-            "selections": maxobj.items[i].orderSelections
+            "selections": orderHistory[0].items[i].orderSelections
           }
         };
         itemsOrdered[i] = data;
       }
 
-      // console.log("table")
-      // console.log(this.getters['CustomerStore/getCheckedInTableId'])
-
       let data = {
         // "orderInfo": {
-          "restaurantId": maxobj.restaurantId,
+          "restaurantId": orderHistory[0].restaurantId,
           "tableId": this.getters['CustomerStore/getCheckedInTableId'],
           "employeeId": 6,
           "waiterTip": 0,
@@ -344,9 +299,6 @@ const mutations = {
       return item.menuItemId == itemId
     });
 
-    // console.log("info")
-    // console.log(state.orderInfo.orderItems)
-    // console.log(itemIndex)
     if (itemIndex != -1)
       state.orderInfo.orderItems.splice(itemIndex, 1);
   },

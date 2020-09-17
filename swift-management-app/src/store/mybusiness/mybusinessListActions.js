@@ -29,7 +29,8 @@ export default {
         "branch": payload.restaurantBranch,
         "location": "Centurion",
         "categories": JSON.parse(payload.restaurantCategories),
-        "coverImageURL": payload.restaurantImage
+        "coverImageURL": payload.restaurantImage,
+        "serviceGoal": payload.restaurantSalesGoal
       }
     }).then(result => {
 
@@ -72,7 +73,8 @@ export default {
         "branch": payload.restaurantBranch,
         "location": "Centurion",
         "categories": JSON.parse(payload.restaurantCategories),
-        "coverImageURL": payload.restaurantImage
+        "coverImageURL": payload.restaurantImage,
+        "serviceGoal": payload.restaurantSalesGoal
       }
     }).then(result => {
       console.log(result);

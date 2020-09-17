@@ -95,6 +95,15 @@
             <vs-textarea label="Description" v-model="newRestaurantDesc" />
           </vs-col>
         </vs-row>
+        <p class="vs-input--label mb-2">Target Sales (per day)</p>
+        <vs-input
+          style="margin: 0 auto"
+          type="number"
+          min="1"
+          placeholder="Sales Per Day Goal"
+          v-model="salesPerDay"
+          class="mb-4 text-center"
+        ></vs-input>
 
         <label class="vs-input--label">Select (up to 3) Restaurant Categories</label>
         <div style="margin: auto" class="vx-row mt-4">
@@ -146,6 +155,7 @@ import { required, minLength, between } from "vuelidate/lib/validators";
 export default {
   data() {
     return {
+      salesPerDay: 0,
       restaurantPopupAction: "",
       restaurantPopupTitle: "",
       restaurantPopupButton: "",
@@ -215,6 +225,7 @@ export default {
       this.restaurantPopupTitle = "Edit Restaurant";
       this.restaurantPopupButton = "Save Restaurant";
       //set fields to business being edited
+      this.salesPerDay = business.serviceGoal;
       this.newRestaurantName = business.name;
       this.newRestaurantDesc = business.description;
       this.newRestaurantBranch = business.branch;
@@ -242,6 +253,7 @@ export default {
           restaurantBranch: this.newRestaurantBranch,
           restaurantImage: this.newRestaurantImage,
           restaurantCategories: JSON.stringify(this.newRestaurantCategories),
+          restaurantSalesGoal: this.salesPerDay,
           authKey: this.getAuthToken(),
         });
         this.restaurantPopupActive = false;
@@ -254,6 +266,7 @@ export default {
             restaurantImage: this.newRestaurantImage,
             restaurantCategories: JSON.stringify(this.newRestaurantCategories),
             restaurantId: this.getCurrentRestaurantId(),
+            restaurantSalesGoal: this.salesPerDay,
             authKey: this.getAuthToken(),
           })
           .then((res) => {

@@ -55,4 +55,47 @@ export default {
     });
   });
   },
+  editEmployee({
+    commit
+  }, payload) {
+    return new Promise((resolve, reject) => {
+    axios.post(process.env.VUE_APP_BASEURL, {
+      "requestType": "editEmployee",
+      "employeeId": payload.empId,
+      "role": payload.role,
+      "priviliges": payload.priviliges,
+      "token": payload.authKey,
+    }).then(response => {
+      console.log(response);
+      resolve(response)
+    }).catch(({
+      response
+    }) => {
+      resolve(response)
+      console.log(response)
+    });
+  });
+  },
+  removeEmployee({
+    commit
+  }, payload) {
+    return new Promise((resolve, reject) => {
+    axios.post(process.env.VUE_APP_BASEURL, {
+      "requestType": "removeEmployee",
+      "employeeId": payload.empId,
+      "token": payload.authKey,
+    }).then(response => {
+      console.log(response);
+      resolve(response)
+    }).catch(({
+      response
+    }) => {
+      resolve(response)
+      console.log(response)
+    });
+  });
+  },
+
+
+  
 }

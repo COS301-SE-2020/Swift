@@ -48,5 +48,40 @@ export default {
         console.log(response)
       });
     });
+  },
+  listRecommendedPromo({
+    commit
+  }, payload) {
+    return new Promise((resolve, reject) => {
+      axios.post(process.env.VUE_APP_MLURL, {
+        "requestType": "promoSuggest",
+        "token": payload.authKey,
+        "restaurantId": parseInt(payload.restaurantId),
+      }).then(result => {
+        console.log(result);
+
+        if (result.data) {
+          var firstGroup = [];
+          for (var i = 0; i < result.data[0].antecedents.length; i++) {
+            firstGroup.push(result.data[0].antecedents[i]);
+          }
+
+          for (var i = 0; i < result.data[0].consequents.length; i++) {
+            firstGroup.push(result.data[0].consequents[i]);
+          }
+          commit('SET_RECOMMENDED_OBJECT', firstGroup);
+        }
+
+
+
+
+        resolve(result);
+      }).catch(({
+        response
+      }) => {
+        resolve(response);
+        console.log(response)
+      });
+    });
   }
 }
