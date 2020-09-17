@@ -33,3 +33,17 @@ jobs:
     - name: Deploy To Google App Engine
       run: |
         gcloud app deploy ./ml-api/swift-ml-api.yaml --quiet --promote
+
+  # Warm-up API
+  warmup:
+    name: ML API Warm-up
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+    - name: Warm-up ML API
+      uses: fjogeleit/http-request-action@master
+      with:
+        url: '${{ secrets.ML_API_URL }}'
+        method: 'GET'
+        timeout: 30000
+        preventFailureOnNoResponse: true
