@@ -234,9 +234,11 @@ export default {
           
           var tempList2 = [];
           for (let k = 0; k < this.orderHistory.length; k++) {
-            for (let l = 0; l < this.orderHistory[k].items.length; l++) {
-              if (promotionItems[i].antecedents[j] === this.orderHistory[k].items[l].menuItemId) {
-                tempList2.push(promotionItems[i].antecedents[j])
+            if (this.orderHistory[k].items != undefined) {
+              for (let l = 0; l < this.orderHistory[k].items.length; l++) {
+                if (promotionItems[i].antecedents[j] === this.orderHistory[k].items[l].menuItemId) {
+                  tempList2.push(promotionItems[i].antecedents[j])
+                }
               }
             }
           }
