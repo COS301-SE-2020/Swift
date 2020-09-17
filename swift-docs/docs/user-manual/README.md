@@ -8,6 +8,9 @@ Version 1:
 Version 2: 
 <usermanual2/>
 
+Version 3: 
+<usermanual3/>
+
 
 The user manual gives a walkthrough of how to use the customer application components such as:
 * Registration & Login
