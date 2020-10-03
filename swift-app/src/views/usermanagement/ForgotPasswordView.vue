@@ -66,11 +66,11 @@
               <span  style="font-size: 25px">Verify your email</span>
             </v-row>
             <v-row justify="center" class="mt-4 mb-6">
-              <span style="font-size: 16px; text-align: center; opacity: 0.9" class="font-weight-light">Please enter the 4 digit code sent to {{email}}</span>
+              <span style="font-size: 16px; text-align: center; opacity: 0.9" class="font-weight-light enterCodeMssg">Please enter the 4 digit code sent to {{email}}</span>
             </v-row>
             <v-row justify="center" class="mt-4 mb-6" style="text-align:center">
               <v-col cols="2" class="pl-1 pr-1" style="text-align: center" v-for="i in codeLength" :key='i'>
-                <v-textarea v-model="digits[i-1]" maxlength="1" class="centered-input text--darken-3 mt-3 digits" height="4" solo single-line outlined></v-textarea>
+                <v-textarea @input="changeFocus(i)" v-model="digits[i-1]" no-resize maxlength="1" class="centered-input text--darken-3 mt-3 digits" height="4" solo single-line outlined></v-textarea>
               </v-col>              
             </v-row>
             <v-row class="d-flex justify-center">
@@ -106,11 +106,11 @@
         <v-card flat tile>
           <v-card class="mx-auto" flat>
             <v-row justify="center" class="mt-1">
-              <v-avatar size="180px" color="#F5F5F5" justify="center">
+              <v-avatar size="180px" color="#F5F5F5" justify="center" >
+                <v-icon color="primary" class="lockIcon pr-0" size="25" style="width: 27px" v-for="asterisk in 4" :key="asterisk">mdi-asterisk</v-icon>
+                <!-- <v-icon color="primary" class="lockIcon pr-0" size="25" style="width: 27px">mdi-asterisk</v-icon>
                 <v-icon color="primary" class="lockIcon pr-0" size="25" style="width: 27px">mdi-asterisk</v-icon>
-                <v-icon color="primary" class="lockIcon pr-0" size="25" style="width: 27px">mdi-asterisk</v-icon>
-                <v-icon color="primary" class="lockIcon pr-0" size="25" style="width: 27px">mdi-asterisk</v-icon>
-                <v-icon color="primary" class="lockIcon pr-0" size="25" style="width: 27px">mdi-asterisk</v-icon>
+                <v-icon color="primary" class="lockIcon pr-0" size="25" style="width: 27px">mdi-asterisk</v-icon> -->
               </v-avatar>
             </v-row>
             <v-row class="mt-12" justify="center">
@@ -135,6 +135,7 @@
           <v-col cols="11" class="pt-0 mb-10" width="100%" style="position: absolute; bottom: 0;">
            <div class="row d-flex flex-column align-center mx-8">
               <v-btn @click="submitPass" block rounded class="py-5 body-2 font-weight-light" color="primary" style="font-size: 17px !important">Submit Password</v-btn>
+              <v-progress-circular v-show=isLoading indeterminate color="primary mt-1"></v-progress-circular>
            </div>
           </v-col>
         </v-row>
@@ -197,21 +198,25 @@ export default {
         this.$v.$touch()
         this.isLoading = false
       } else {
-        
         this.sendEmail()
-        //console.log("user")
-        //console.log(user)
-        this.step = this.step + 1;
+        // this.step = this.step + 1;
       }
-
+      // this.isLoading = false
       
     },
+    changeFocus(index) {
+      var inputVal = $(".digits textarea").eq(index-1).val();
+      if (inputVal != '') {
+        var inputField = $(".digits textarea").eq(index);
+        if (inputField)
+          inputField.focus();
+          inputField.select();
+      }
+    },
     async confirmCode () {
-      //console.log("user")
       this.codeErrorMssg = ''
       let incomplete = false
       for (let i = 0; i < this.codeLength; i++) {
-        console.log(this.digits[i])
         if (this.digits[i] == undefined)
           incomplete = true;
       }
@@ -219,7 +224,6 @@ export default {
       if (incomplete) {
         this.codeErrorMssg = 'You must fill in the 4 digit code'
       } else {
-        console.log(this.digits.join(""))
         let data = {
           "email": this.email,
           "code": this.digits.join("")
@@ -241,9 +245,9 @@ export default {
       this.isLoading = true
       if (this.passwordErrors.length > 0  || this.password.length < 8) {
         this.$v.$touch()
-        this.isLoading = false
+        // this.isLoading = false
       } else {
-        this.isLoading = false
+        
         let data = {
           "email": this.email,
           "password": this.password
@@ -257,6 +261,7 @@ export default {
           }
         })
       }
+      this.isLoading = false
     },
     async sendEmail () {
       
@@ -264,19 +269,17 @@ export default {
         "email": this.email
       }
 
-        // console.log()
       await this.validateEmail(data).then(result => {
-        if (typeof result == 'string') {
-          this.token = result
-          this.errorMssg = ''
+        // console.log(result)
+        if (result.status == 200) {
+          this.token = result;
+          this.errorMssg = '';
           this.step = this.step + 1;
         } else {
-          this.errorMssg = result.data.reason
+          this.errorMssg = result.data.reason;
         }
-        
-        this.isLoading = false
-
       })
+      this.isLoading = false;
     },
     goToLogin() {
       this.alert = false;
@@ -317,13 +320,13 @@ export default {
     transform: rotate(180deg) scaleY(-1);
 }
 
-.digits {
+.digits{
   border-radius:5px !important;
   font-size: 30px;
 }
-
-.digits .v-application--is-ltr .v-textarea.v-text-field--enclosed .v-text-field__slot textarea {
+.digits textarea {
   text-align: center;
   line-height: 40px;
 }
+
 </style>
