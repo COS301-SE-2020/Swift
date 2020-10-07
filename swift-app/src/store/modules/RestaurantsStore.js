@@ -89,7 +89,7 @@ const actions = {
   },
 
   retrieveSuggestedMenuItemsFromRatings({commit}, data) {
-    console.log(data)
+    // console.log(data)
     return axios.post('https://api.swiftapp.ml', 
     {
       "requestType": "suggestedMenuItems",

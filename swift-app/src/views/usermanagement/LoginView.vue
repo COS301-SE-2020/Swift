@@ -91,9 +91,9 @@ export default {
           this.loginFailed = true
 
        }
-       else{
-        console.log("got error");
-       }
+      //  else{
+      //   console.log("got error");
+      //  }
     },
     goToRegister () {
       this.$router.push('/register')

@@ -1,11 +1,11 @@
 <template>
   <v-app>
-    <v-content v-if="isMobile">
+    <v-main v-if="isMobile">
       <router-view></router-view>
-    </v-content>
-    <v-content style="width: 20%; margin: auto;" v-if="!isMobile">
+    </v-main>
+    <v-main style="width: 20%; margin: auto;" v-if="!isMobile">
       <router-view></router-view>
-    </v-content>
+    </v-main>
   </v-app>
 </template>
 
