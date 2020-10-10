@@ -1,5 +1,5 @@
 <template>
-  <v-container id="signinup-form" class="fill-height">
+  <v-container id="signinup-form" class="fill-height hello">
     <v-row align="center" justify="center" no-gutters>
       <v-col cols="12" sm="8" md="8" class="">
         <v-card class="evelation-12 card">
@@ -81,7 +81,7 @@
                   </v-row>
                   <v-row justify="center" class="mt-4 mb-6" style="text-align:center">
                     <v-col cols="2" class="pl-1 pr-1" style="text-align: center" v-for="i in codeLength" :key='i'>
-                      <v-textarea @input="changeFocus(i)" v-model="digits[i-1]" no-resize maxlength="1" class="centered-input mt-3 digits" height="4" solo single-line outlined></v-textarea>
+                      <v-textarea @input="changeFocus(i)" @focus="selectVal(i-1)" v-model="digits[i-1]" no-resize maxlength="1" class="centered-input mt-3 digits" height="4" solo single-line outlined></v-textarea>
                     </v-col>              
                   </v-row>
                   <v-row class="d-flex justify-center">
@@ -232,6 +232,11 @@ export default {
           inputField.select();
       }
     },
+    selectVal(index) {
+      var inputVal = $(".digits textarea").eq(index);
+      if (inputVal.val() != '')
+        inputVal.select();
+    },
     async confirmCode () {
       this.codeErrorMssg = ''
       let incomplete = false
@@ -335,6 +340,9 @@ export default {
 </script>
 
 <style scoped lang="scss">
+.container {
+  min-height: 100% !important;
+}
 .v-input__icon--double .v-input__icon {
   margin-left: -4.25rem !important;
 }

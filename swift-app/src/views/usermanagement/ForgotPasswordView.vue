@@ -1,6 +1,6 @@
 <template>
-  <v-container>
-    <v-container v-if="!isMobile" class="fill-height">
+  <v-container class="fill-height d-flex align-start">
+    <v-container v-if="!isMobile" class="fill-height d-flex align-center">
       <DesktopForgetPassword></DesktopForgetPassword>
     </v-container>
     <v-container fluid class="pa-0">
