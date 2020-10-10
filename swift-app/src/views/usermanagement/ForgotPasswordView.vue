@@ -1,6 +1,10 @@
 <template>
-  <v-container fluid>
-      <v-container v-show="step == 1">
+  <v-container>
+    <v-container v-if="!isMobile" class="fill-height">
+      <DesktopForgetPassword></DesktopForgetPassword>
+    </v-container>
+    <v-container fluid class="pa-0">
+      <v-container v-if="isMobile" v-show="step == 1">
         <v-card class="mx-auto" flat>
           <v-row class="mt-3">
             <v-col cols="3" class="mt-0 pt-0 pr-0 pl-0">
@@ -45,7 +49,7 @@
         </v-row>
       </v-container>
 
-      <v-container v-show="step == 2">
+      <v-container v-if="isMobile" v-show="step == 2">
         <v-card class="mx-auto" flat>
           <v-row class="mt-3">
             <v-col cols="3" class="mt-0 pt-0 pr-0 pl-0">
@@ -93,7 +97,7 @@
         </v-row>
       </v-container>
 
-      <v-container v-show="step == 3">
+      <v-container v-if="isMobile" v-show="step == 3">
         <v-card class="mx-auto" flat>
           <v-row class="mt-3">
             <v-col cols="3" class="mt-0 pt-0 pr-0 pl-0">
@@ -140,18 +144,19 @@
           </v-col>
         </v-row>
       </v-container>
+    </v-container>
 
-      <v-overlay relative opacity="0.25" :value="alert" z-index="10">
-      <v-avatar elevation="3" color="accent" class="pl-0 pr-0" absolute style="position: absolute; z-index: 12">
-        <v-icon size="33px" color="white" v-text="'mdi-lock-reset'"></v-icon>
-      </v-avatar>
-      <v-alert color="white" transition="scale-transition" class="alert" align="center" style="margin-top: 20px">
-        <div style="font-size: 22px !important; color: #343434" class="pl-8 pr-8 mt-8">Password updated</div>
-        <div class="mt-2" style="font-size: 16px !important; color: #343434">Your password was successfully updated</div>
-        <v-btn text @click="goToLogin" class="mt-6 mb-1">
-          <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline">Login</div>
-        </v-btn>
-      </v-alert>
+      <v-overlay v-if="isMobile" relative opacity="0.25" :value="alert" z-index="10">
+        <v-avatar elevation="3" color="accent" class="pl-0 pr-0" absolute style="position: absolute; z-index: 12">
+          <v-icon size="33px" color="white" v-text="'mdi-lock-reset'"></v-icon>
+        </v-avatar>
+        <v-alert color="white" transition="scale-transition" class="alert" align="center" style="margin-top: 20px">
+          <div style="font-size: 22px !important; color: #343434" class="pl-8 pr-8 mt-8">Password updated</div>
+          <div class="mt-2" style="font-size: 16px !important; color: #343434">Your password was successfully updated</div>
+          <v-btn text @click="goToLogin" class="mt-6 mb-1">
+            <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline">Login</div>
+          </v-btn>
+        </v-alert>
     </v-overlay>
   </v-container>
 </template>
@@ -161,12 +166,16 @@ import { mapActions, mapGetters, mapMutations } from "vuex";
 import { validationMixin } from 'vuelidate'
 import { required, minLength, email } from 'vuelidate/lib/validators'
 import $ from 'jquery';
+import DesktopForgetPassword from "../../components/usermanagement/DesktopForgetPassword.vue"
 
 export default {
   mixins: [validationMixin],
   validations: {
     email: { required, email },
     password: { required, minLength: minLength(8) },
+  },
+  components: {
+    DesktopForgetPassword
   },
   data() {
     return {
@@ -183,7 +192,12 @@ export default {
      errorMsg: '',
      password: '',
      isLoading: false,
+     isMobile: false,
     }
+  },
+  mounted:function(){
+    this.onResize()
+    window.addEventListener('resize', this.onResize, { passive: true })
   },
   methods: {
     backNavigation () {
@@ -191,6 +205,9 @@ export default {
         this.$router.go(-1) 
       else 
         this.step = this.step - 1;
+    },
+    onResize () {
+      this.isMobile = window.innerWidth < 600
     },
     resetPass () {
       this.isLoading = true

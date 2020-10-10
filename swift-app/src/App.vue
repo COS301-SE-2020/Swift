@@ -3,7 +3,7 @@
     <v-main v-if="isMobile">
       <router-view></router-view>
     </v-main>
-    <v-main style="width: 20%; margin: auto;" v-if="!isMobile">
+    <v-main v-if="!isMobile">
       <router-view></router-view>
     </v-main>
   </v-app>
