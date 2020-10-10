@@ -10,7 +10,6 @@
         @load="iframeLoad()"
       ></iframe>
     </div>
-    <NavBar></NavBar>
   </div>
 </template>
 

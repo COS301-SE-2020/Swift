@@ -1,7 +1,7 @@
 <template>
   <v-container class="pa-0" style="overflow-x: hidden">
-    <DesktopProfile v-if="!isMobile"></DesktopProfile>
-    <v-container v-if="isMobile" class="pa-0">
+    <DesktopNavbar v-show="!isLoading"></DesktopNavbar>
+    <v-container style="padding-left: 70px; padding-right: 70px;">
       <v-row class="mt-2">
         <v-col cols="12" class="pb-0" align="center">
           <span style="font-size: 24px">My Profile</span>
@@ -122,24 +122,22 @@
       <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
         <v-icon>mdi-cart-outline</v-icon>
       </v-btn>
-      <NavBar></NavBar>
     </v-container>
   </v-container>
 
 </template>
 
 <script>
-import NavBar from '@/components/layout/NavBar';
+import DesktopNavbar from '@/components/layout/DesktopNavbar';
 import store from '@/store/store.js';
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import ImageInput from '../../components/imageUploader/imageInput.vue'
 import PictureInput from 'vue-picture-input'
-import DesktopProfile from "../../components/usermanagement/DesktopProfileView"
 
 export default {
+  name: 'DesktopProfile',
   components: {
-    'DesktopProfile': DesktopProfile,
-    'NavBar': NavBar,
+    'DesktopNavbar': DesktopNavbar,
     PictureInput
   },
   data: () => ({
@@ -156,8 +154,7 @@ export default {
     saved: false,
     darkMode: null,
     photo: null,
-    image: '',
-    isMobile: false,
+    image: ''
   }),
   watch:{
     avatar: {
@@ -266,9 +263,6 @@ export default {
     goToCart() {
       this.$router.push('/cart')
     },
-    onResize () {
-      this.isMobile = window.innerWidth < 600
-    },
   },
   watch: {
     async avatar(AvatarObj) {
@@ -285,9 +279,6 @@ export default {
     }
   },
   mounted() {
-    this.onResize()
-    window.addEventListener('resize', this.onResize, { passive: true })
-
     if (this.customerInfo.theme === 'light') {
       this.darkMode = false
     } else if (this.customerInfo.theme === 'dark') {

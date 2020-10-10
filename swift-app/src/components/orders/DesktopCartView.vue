@@ -1,7 +1,5 @@
 <template>
 <v-container fill-height class="pa-0 cartOrders overflow-x-hidden" fluid>
-  <DesktopCart v-if="!isMobile"></DesktopCart>
-  <v-container v-if="isMobile" class="pa-0">
     <v-toolbar elevation='2' class="cartHeader">
       <v-container>
         <v-row>
@@ -174,20 +172,15 @@
     <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
       <v-icon>mdi-cart-outline</v-icon>
     </v-btn>
-    <NavBar></NavBar>
   </v-container>
-</v-container>
 </template>
 
 <script>
 import { mapActions, mapGetters, mapMutations } from "vuex";
 import NavBar from '@/components/layout/NavBar';
-import DesktopCart from "../../components/orders/DesktopCartView"
 
 export default {
-  components: {
-    'DesktopCart': DesktopCart,
-  },
+  name: 'DesktopCart',
   data () {
     return {
       subtotal: 0,
@@ -200,8 +193,10 @@ export default {
         { img: 'https://source.unsplash.com/uVPV_nV17Tw/800x800/', name: 'Buttermilk Chicken Burger', price: '95.00'},
         { img: 'https://source.unsplash.com/2NaeHe0-p1I/800x800/', name: 'Fruit Salad', price: '85.00'}
       ],
-      isMobile: false,
     }
+  },
+  components: {
+    'NavBar': NavBar
   },
   methods: {
     goBack () {
@@ -217,10 +212,7 @@ export default {
       this.$router.push('/orders')
     },
     toggleAlert() {
-      this.paymentMade = !this.paymentMade
-    },
-    onResize () {
-      this.isMobile = window.innerWidth < 600
+        this.paymentMade = !this.paymentMade
     },
     async goToPayment () {
       let orderId;
@@ -343,9 +335,6 @@ export default {
     }
   },
   mounted: function() {
-    this.onResize()
-    window.addEventListener('resize', this.onResize, { passive: true })
-
     // this.clearItem;
     if (Object.keys(this.orderInfo()).length != 0) {
       this.tip = (this.subtotal * 0.1).toFixed(2);
