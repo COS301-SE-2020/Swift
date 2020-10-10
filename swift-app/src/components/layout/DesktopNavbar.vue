@@ -1,0 +1,39 @@
+<template>
+  <v-card flat height="70px">
+    <v-toolbar >
+      <v-toolbar-title>Swift</v-toolbar-title>
+      <v-btn v-for="link in links" class="align-center nav-btn" color="white" :key="link.text" router :to="link.route" min-height="56px">
+        <span>{{ link.text }}</span>
+        <v-icon color="secondary">{{ link.icon }}</v-icon>
+      </v-btn>
+      <v-spacer></v-spacer>
+    </v-toolbar>
+  </v-card>
+</template>
+
+<script>
+  export default {
+    data() {
+      return {
+        links: [
+          { icon: 'mdi-home-variant-outline', text: 'Explore', route: '/' },
+          { icon: 'mdi-file-document-outline', text: 'Orders', route: '/orders' },
+          { icon: 'mdi-heart-outline', text: 'Favourites', route: '/favourites' },
+          { icon: 'mdi-account-outline', text: 'Profile', route: '/profile' }
+        ]
+      };
+    }
+  }
+</script>
+<style scoped>
+.nav-btn {
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+.nav-btn:focus {
+  border: none;
+}
+
+</style>

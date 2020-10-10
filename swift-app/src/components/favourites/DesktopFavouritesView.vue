@@ -1,9 +1,9 @@
 <template>
   <v-container class="pa-0 ma-0">
-    <DesktopFavourites v-if="!isMobile"></DesktopFavourites>
-    <v-container v-if="isMobile" class="pa-0">
-      <v-row class="mt-0 pt-0" align="center">
-        <v-col cols="12"  align="center">
+    <DesktopNavbar v-show="!isLoading"></DesktopNavbar>
+    <v-container style="padding-left: 70px; padding-right: 70px;">
+      <v-row class="mt-0 pt-0" align="start">
+        <v-col cols="12"  align="start">
           <span style="font-size: 24px">My Favourites</span>
         </v-col>
       </v-row>
@@ -42,23 +42,21 @@
       <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
         <v-icon>mdi-cart-outline</v-icon>
       </v-btn>
-      <NavBar></NavBar>
     </v-container>
   </v-container>
 
 </template>
 
 <script>
-import NavBar from '@/components/layout/NavBar';
 import store from '@/store/store.js';
 import { mapActions, mapGetters } from 'vuex'
 import $ from 'jquery';
-import DesktopFavourites from "../../components/favourites/DesktopFavouritesView"
+import DesktopNavbar from '@/components/layout/DesktopNavbar';
 
 export default {
+  name: 'DesktopFavourites',
   components: {
-    'DesktopFavourites': DesktopFavourites,
-    'NavBar': NavBar
+    'DesktopNavbar': DesktopNavbar,
   },
   data () {
     return {
@@ -70,13 +68,9 @@ export default {
       ],
       favourites: [],
       isLoading: false,
-      isMobile: false,
     }
   },
   async mounted() {
-    this.onResize()
-    window.addEventListener('resize', this.onResize, { passive: true })
-
     var length = await this.customerInfo.favourites.length;
     if (length == undefined) {
       this.isLoading = !this.isLoading;
@@ -104,9 +98,6 @@ export default {
       })
 
       return list
-    },
-    onResize () {
-      this.isMobile = window.innerWidth < 600
     },
     goToCart() {
       this.$router.push('/cart')
