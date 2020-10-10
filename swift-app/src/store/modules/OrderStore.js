@@ -253,7 +253,7 @@ const mutations = {
           "restaurantId": orderHistory[0].restaurantId,
           "tableId": this.getters['CustomerStore/getCheckedInTableId'],
           "employeeId": 6,
-          "waiterTip": 0,
+          "waiterTip": orderHistory[0].waiterTip,
           "orderItems": itemsOrdered
         // }
       }
