@@ -126,10 +126,30 @@
         <v-col cols="12" class="pr-0 pt-1 pb-0" align="center">
           <div style="font-size: 27px; text-align: center" class="mt-1">Total: R{{calculateTotal()}}</div>
           <v-btn @click="requestReceipt" v-if="type == 'Cash'" class="mt-6 subtitle-1" height="50px" width="180px" rounded large color="accent">Request Bill</v-btn>
-          <v-btn @click="goToPayment" v-else class="mt-6 subtitle-1" height="50px" width="180px" rounded large color="accent">Pay Now</v-btn>
+          <v-btn @click="toggleAlert" v-else class="mt-6 subtitle-1" height="50px" width="180px" rounded large color="accent">Pay Now</v-btn>
         </v-col>
       </v-row>
     </v-card>
+
+    <v-overlay relative opacity="0.25" :value="paymentMade" z-index="10">
+      <v-avatar elevation="3" color="accent" class="pl-0 pr-0" absolute style="position: absolute; z-index: 12">
+          <v-icon size="33px" color="white" v-text="'mdi-check'"></v-icon>
+      </v-avatar>
+      <v-alert color="white" transition="scale-transition" class="alert" align="center" style="margin-top: 20px;">
+        <div style="font-size: 22px !important; color: #343434;" class="pl-8 pr-8 mt-8">Proceed with payment?</div>
+        <div class="mt-2" style="font-size: 16px !important; color: #343434">Please note that once you make payment, <br/>you will be checked out of the system.</div>
+        <v-row justify="center">
+          <v-col cols="12" class="d-flex justify-space-around" flat>
+            <v-btn text @click="toggleAlert" class="mt-6 mb-1">
+              <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline; text-align: center">Cancel</div>
+            </v-btn>
+            <v-btn text @click="goToPayment" class="mt-6 mb-1">
+              <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline; text-align: center">Continue</div>
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-alert>
+    </v-overlay>
 
     <v-overlay relative opacity="0.25" :value="showPopUp()" z-index="10">
       <v-avatar elevation="3" color="accent" class="pl-0 pr-0" absolute style="position: absolute; z-index: 12">
@@ -197,6 +217,9 @@ export default {
     requestReceipt () {
 
     },
+    toggleAlert() {
+        this.paymentMade = !this.paymentMade
+    },
     changeType: function(newType) {
       this.type = newType
     },
@@ -230,21 +253,28 @@ export default {
       console.log(this.orderFlag())
       return this.orderFlag()
     },
-    goToPayment (){
+    async goToPayment (){
+      await this.checkout
+      await this.setCheckedInQRCode (null)
+      await this.setCheckedInRestaurantId (null)
+      await this.setCheckedInTableId (null)
       this.setTotal(this.calculateTotal())
-      // this.paymentMade = !this.paymentMade
       this.$router.push('pay')
     },
     ...mapMutations({
-      setTotal : 'OrderStore/setOrderTotal'
+      setTotal : 'OrderStore/setOrderTotal',
+      setCheckedInTableId : 'CustomerStore/SET_CHECKED_IN_TABLE_ID',
+      setCheckedInQRCode : 'CustomerStore/SET_CHECKED_IN_CODE',
+      setCheckedInRestaurantId : 'CustomerStore/SET_CHECKED_IN_RESTAURANT_ID',
     }),
     ...mapActions({
       submitPayment: 'OrderStore/submitPayment',
       updateOrderFlag: 'OrderStore/updateOrderFlag',
+      checkout: 'CustomerStore/checkOutCustomer',
     }),
     ...mapGetters({
       paymentInfo: 'OrderStore/getPaymentInfo',
-      orderFlag: 'OrderStore/getOrderFlag'
+      orderFlag: 'OrderStore/getOrderFlag',
     }),
   },
   computed: {

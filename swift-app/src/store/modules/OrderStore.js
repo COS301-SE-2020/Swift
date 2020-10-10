@@ -67,7 +67,7 @@ const actions = {
     state.orderInfo.waiterTip = data.tip
     if(Object.keys(state.orderedItems).length === 0) {
       
-      axios.post('https://api.swiftapp.ml', 
+      return axios.post('https://api.swiftapp.ml', 
         {
           "requestType": "addOrder",
           "token": sessionStorage.getItem('authToken'),
@@ -75,6 +75,7 @@ const actions = {
         }
       ).then(result => {
         commit('UPDATE_ORDER_HISTORY', result.data.orderHistory);
+        return result.data.orderHistory[0].orderId;
       }).catch(({ response }) => {
       });
     } else {

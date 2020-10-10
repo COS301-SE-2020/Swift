@@ -128,7 +128,7 @@
                 </v-row>
                 <v-row>
                   <v-col cols="9" class="pb-0">
-                    <div class="body-1 secondary--text">Tax(14% VAT included)</div>
+                    <div class="body-1 secondary--text">Tax(14% VAT)</div>
                   </v-col>
                   <v-col cols="3" class="pb-0 px-0">
                     <div class="body-1 secondary--text d-flex justify-end">R {{(subtotal  * 0.14).toFixed(2)}}</div>
@@ -159,33 +159,15 @@
         </v-row>
         <v-row class="d-flex justify-space-around mt-5 mb-3" >
           <v-col cols="5" class="pa-0">
-              <v-btn rounded color="primary" elevation="2" class="body-2" width="100%" @click="goToOrder">Order Now, Pay Later</v-btn>
+              <v-btn v-show="Object.keys(orderInfo()).length != 0" rounded color="primary" elevation="2" class="body-2" width="100%" @click="goToOrder">Order Now, Pay Later</v-btn>
           </v-col>
           <v-col cols="5" class="pa-0">
-              <v-btn rounded color="accent" elevation="2" class="body-2" width="100%" @click="toggleAlert">Pay Now</v-btn>
+              <v-btn rounded color="accent" elevation="2" class="body-2" width="100%" @click="goToPayment">Pay Now</v-btn>
           </v-col>
         </v-row>
       </div>
     </v-container>
-    <v-overlay relative opacity="0.25" :value="paymentMade" z-index="10">
-      <v-avatar elevation="3" color="accent" class="pl-0 pr-0" absolute style="position: absolute; z-index: 12">
-          <v-icon size="33px" color="white" v-text="'mdi-check'"></v-icon>
-      </v-avatar>
-      <v-alert color="white" transition="scale-transition" class="alert" align="center" style="margin-top: 20px;">
-        <div style="font-size: 22px !important; color: #343434;" class="pl-8 pr-8 mt-8">Proceed with payment?</div>
-        <div class="mt-2" style="font-size: 16px !important; color: #343434">Please note that once you make payment, <br/>you will be checked out of the system.</div>
-        <v-row justify="center">
-          <v-col cols="12" class="d-flex justify-space-around" flat>
-            <v-btn text @click="toggleAlert" class="mt-6 mb-1">
-              <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline; text-align: center">Cancel</div>
-            </v-btn>
-            <v-btn text @click="goToPayment" class="mt-6 mb-1">
-              <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline; text-align: center">Continue</div>
-            </v-btn>
-          </v-col>
-        </v-row>
-      </v-alert>
-    </v-overlay>
+    
 
     <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
       <v-icon>mdi-cart-outline</v-icon>
@@ -205,7 +187,7 @@ export default {
       tip: 0,
       quantity: [],
       tab: null,
-      paymentMade: false,
+      
       idVal: 0,
       items: [
         { img: 'https://source.unsplash.com/uVPV_nV17Tw/800x800/', name: 'Buttermilk Chicken Burger', price: '95.00'},
@@ -232,8 +214,33 @@ export default {
     toggleAlert() {
         this.paymentMade = !this.paymentMade
     },
-    goToPayment () {
-        this.$router.push('/paymentInformation')
+    async goToPayment () {
+      let orderId;
+      if (Object.keys(this.orderInfo()).length != 0) {
+        this.updateOrderFlag(true);
+        // console.log("ADD ITEM")
+        let data = {
+          "tip": this.tip
+        }
+        orderId = await this.submitOrder(data);
+      } else {
+        orderId = await this.orderHistory()[0].orderId
+      }
+
+      let data = {
+        "orderId": orderId,
+        "paymentMethod": "Card",
+        "restaurantName": this.getRestaurantName(Object.keys(this.orderedItems()).length != 0 ? this.orderedItems().restaurantId : this.orderInfo().restaurantId),
+        "menuItemName": this.getItemName((Object.keys(this.orderedItems()).length != 0 && this.orderedItems().orderItems.length > 0) ? this.orderedItems().orderItems[0].menuItemId : this.orderInfo().orderItems[0].menuItemId),
+        "amountPaid": parseFloat(this.calculateTotal()),
+        "waiterTip": parseFloat(this.tip),
+        "orderTax": parseFloat(this.subtotal * 0.14)
+      }
+
+      // console.log(data)
+
+      this.addPaymentInfo(data);
+      this.$router.push("/paymentinformation");
     },
     decreaseQuantity(item) {
       // console.log(item)
@@ -292,13 +299,16 @@ export default {
       addItemToEdit: 'MenuItemsStore/addItemToEdit',
       removeItem: 'OrderStore/removeItem',
       submitOrder: 'OrderStore/submitOrder',
+      addPaymentInfo: "OrderStore/addPaymentInfo",
       // clearItem: "MenuItemsStore/clearItem",
     }),
     ...mapGetters({
       menu: "MenuStore/getMenu",
+      allRestaurants: 'RestaurantsStore/getAllRestaurants',
       orderInfo: "OrderStore/getOrderInfo",
       orderedItemsInfo: "OrderStore/getOrderedItems",
       orderedItems: "OrderStore/getOrderedItems",
+      orderHistory: 'CustomerStore/getCustomerOrderHistory',
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
     }),
@@ -318,6 +328,11 @@ export default {
       let item = category.menuItems.find(menuItem => menuItem.menuItemId === id )
       return item.menuItemName;
     },
+    getRestaurantName(id) {
+      return this.allRestaurants().find(
+        restaurant => restaurant.restaurantId === id
+      ).name
+    }
   },
   mounted: function() {
     // this.clearItem;
