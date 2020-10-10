@@ -74,7 +74,7 @@
             </v-row>
             <v-row justify="center" class="mt-4 mb-6" style="text-align:center">
               <v-col cols="2" class="pl-1 pr-1" style="text-align: center" v-for="i in codeLength" :key='i'>
-                <v-textarea @input="changeFocus(i)" v-model="digits[i-1]" no-resize maxlength="1" class="centered-input text--darken-3 mt-3 digits" height="4" solo single-line outlined></v-textarea>
+                <v-textarea @input="changeFocus(i)" @focus="selectVal(i-1)" v-model="digits[i-1]" no-resize maxlength="1" class="centered-input text--darken-3 mt-3 digits" height="4" solo single-line outlined></v-textarea>
               </v-col>              
             </v-row>
             <v-row class="d-flex justify-center">
@@ -225,10 +225,15 @@ export default {
       var inputVal = $(".digits textarea").eq(index-1).val();
       if (inputVal != '') {
         var inputField = $(".digits textarea").eq(index);
-        if (inputField)
+        if (inputField) {
           inputField.focus();
-          inputField.select();
-      }
+        }
+      } 
+    },
+    selectVal(index) {
+      var inputVal = $(".digits textarea").eq(index);
+      if (inputVal.val() != '')
+        inputVal.select();
     },
     async confirmCode () {
       this.codeErrorMssg = ''

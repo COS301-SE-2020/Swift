@@ -489,7 +489,7 @@ export default {
           "orderItems": [
             {
               "menuItemId": this.newMenuItem.menuItemId,
-              "itemTotal": this.total,
+              "itemTotal": this.total / this.quantity,
               "quantity": this.quantity,
               "orderSelections": {
                 "selections": selectionValues
@@ -524,7 +524,7 @@ export default {
 
       let data = {
         "menuItemId": this.newMenuItem.menuItemId,
-        "itemTotal": this.total,
+        "itemTotal": this.total / this.quantity,
         "quantity": this.quantity,
         "orderSelections": {
           "selections": selectionValues
@@ -618,6 +618,7 @@ export default {
     this.total = this.newMenuItem.price
     if (this.item != null) {
       this.quantity = this.item.quantity
+      this.total = this.total * this.quantity
       // console.log(this.item)
     }
 

@@ -139,7 +139,7 @@
                     <div class="body-1 secondary--text">Waiter Tip</div>
                   </v-col>
                   <v-col cols="3" class="px-0">
-                    <div class="body-1 secondary--text d-flex justify-end">R {{(subtotal * 0.1).toFixed(2)}}</div>
+                    <div class="body-1 secondary--text d-flex justify-end">R {{tip.toFixed(2)}}</div>
                   </v-col>
                 </v-row>
                 <v-row>
@@ -202,6 +202,7 @@ export default {
   data () {
     return {
       subtotal: 0,
+      tip: 0,
       quantity: [],
       tab: null,
       paymentMade: false,
@@ -223,7 +224,7 @@ export default {
       this.updateOrderFlag(true);
       console.log("ADD ITEM")
       let data = {
-        "tip": this.subtotal * 0.1
+        "tip": this.tip
       }
       this.submitOrder(data);
       this.$router.push('/orders')
@@ -303,8 +304,8 @@ export default {
     }),
     calculateTotal() {
       let tax = (this.subtotal * 0.14).toFixed(2);
-      let tip = (this.subtotal * 0.1).toFixed(2);
-      return (parseFloat(this.subtotal) + parseFloat(tax) + parseFloat(tip)).toFixed(2);
+      // let tip = (Object.keys(this.orderedItemsInfo()).length != 0) ? this.orderedItemsInfo().waiterTip : (this.subtotal * 0.1).toFixed(2);
+      return (parseFloat(this.subtotal) + parseFloat(tax) + parseFloat(this.tip)).toFixed(2);
     },
     getItemName(id) {
       // console.log("here")
@@ -321,14 +322,17 @@ export default {
   mounted: function() {
     // this.clearItem;
     if (Object.keys(this.orderInfo()).length != 0) {
+      this.tip = (this.subtotal * 0.1).toFixed(2);
       for (let i = 0; i < this.orderInfo().orderItems.length; i++) {
-        this.subtotal += (this.orderInfo().orderItems[i].itemTotal != null) ? parseFloat(this.orderInfo().orderItems[i].itemTotal): 0;
+        this.subtotal += (this.orderInfo().orderItems[i].itemTotal != null) ? parseFloat(this.orderInfo().orderItems[i].itemTotal) * parseFloat(this.orderInfo().orderItems[i].quantity) : 0;
         this.quantity[i] = parseFloat(this.orderInfo().orderItems[i].quantity)
       }
     }
     if (Object.keys(this.orderedItemsInfo()).length != 0) {
+      this.tip = this.orderedItemsInfo().waiterTip;
       for (let i = 0; i < this.orderedItemsInfo().orderItems.length; i++) {
-        this.subtotal += (this.orderedItemsInfo().orderItems[i].itemTotal != null) ? parseFloat(this.orderedItemsInfo().orderItems[i].itemTotal): 0;
+        this.subtotal += (this.orderedItemsInfo().orderItems[i].itemTotal != null) ? parseFloat(this.orderedItemsInfo().orderItems[i].itemTotal) * parseFloat(this.orderedItemsInfo().orderItems[i].quantity) : 0;
+        this.quantity[i] = parseFloat(this.orderedItemsInfo().orderItems[i].quantity)
       }
     }
   }

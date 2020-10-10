@@ -216,7 +216,7 @@ export default {
       let total = 0;
       if (item.items != undefined) {
         for (let i = 0; i < item.items.length; i++) {
-          total += parseFloat((item.items[i].itemTotal != null) ? item.items[i].itemTotal : 0);
+          total += parseFloat((item.items[i].itemTotal != null) ? item.items[i].itemTotal * item.items[i].quantity : 0);
         }
       }
       return parseFloat(total).toFixed(2);
