@@ -508,7 +508,7 @@ export default {
 
 .statusItems {
   min-width: 0px !important;
-  width: 10px !important;
+  width: 20px !important;
   height: 20px;
   padding-left: 0;
   padding-right: 0;

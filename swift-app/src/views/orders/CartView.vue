@@ -1,211 +1,211 @@
 <template>
-<v-container fill-height class="pa-0 cartOrders overflow-x-hidden" fluid>
+<v-container class="pa-0 ma-0" fill-height>
   <DesktopCart v-if="!isMobile"></DesktopCart>
-  <v-container v-if="isMobile" class="pa-0">
-    <v-toolbar elevation='2' class="cartHeader">
-      <v-container>
-        <v-row>
-          <v-col cols='1' class="pl-0">
-            <v-btn icon @click="goBack">
-              <v-icon>mdi-chevron-left</v-icon>
-            </v-btn>
-          </v-col>
-          <v-col cols='11' class="pl-0 d-flex justify-center align-self-center">
-            <v-toolbar-title >Your Order</v-toolbar-title>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-toolbar>
-    <v-container v-if="Object.keys(orderInfo()).length === 0 && Object.keys(orderedItems()).length === 0" py-0 fill-height>
-      <div class="row d-flex flex-column align-stretch align-self-stretch">
-        <v-container fluid fill-height class="pa-0">
-          <div class="row d-flex flex-column align-self-center align-center">
-            <v-avatar class="mb-8" height="140px" width="140px" fab color="primary">
-              <v-icon size="65px" class="font-weight-light" color="white">mdi-cart-outline</v-icon>
-            </v-avatar>
-            <div class="headline mb-3 mt-12 secondary--text">Order Empty</div>
-            <div class="subtitle-1 secondary--text">Order some food or drinks here</div>
-            <v-btn @click="goToRestaurantMenu" class="mt-6" height="45px" width="130px" large color="primary" style="border-radius: 10px">Menu</v-btn>
-          </div>
+  <v-container v-else fill-height class="pa-0 cartOrders overflow-x-hidden" fluid>
+      <v-toolbar elevation='2' class="cartHeader">
+        <v-container>
+          <v-row>
+            <v-col cols='1' class="pl-0">
+              <v-btn icon @click="goBack">
+                <v-icon>mdi-chevron-left</v-icon>
+              </v-btn>
+            </v-col>
+            <v-col cols='11' class="pl-0 d-flex justify-center align-self-center">
+              <v-toolbar-title >Your Order</v-toolbar-title>
+            </v-col>
+          </v-row>
         </v-container>
-      </div>
-    </v-container>
-    <v-container v-else class="orderDetailsCart d-flex align-content-space-between flex-wrap">
-      <!-- <template> -->
-        <div style="width: 100%">
-          <!-- <v-card v-for="(item,i) in orderInfo()" :key="i" flat> -->
-            <v-list v-for="(orderMenuItem,j) in orderedItems().orderItems" :key="j" class="py-2">
-              <v-card disabled >
-                <v-list-item class="pt-1">
-                  <v-list-item-content>
-                    <v-row>
-                      <v-col cols="9">
-                        <v-list-item-title>{{ getItemName(orderMenuItem.menuItemId) }}</v-list-item-title>
-                      </v-col>
-                      <v-col cols="3 d-flex justify-end">
-                        <div>
-                          <v-list-item-title><span style="color: #f75564; font-size: 14px" class="pr-1">{{orderMenuItem.quantity}}x</span> R{{((orderMenuItem.itemTotal != null) ? orderMenuItem.itemTotal : (0)).toFixed(2)}}</v-list-item-title>
-                        </div>
-                      </v-col>
-                    </v-row>
-                    <v-row >
-                      <v-col cols="8" class="py-0">
-                        <div v-if="(orderMenuItem.orderSelections != undefined)">
-                          <div v-for="(orderItem, index) in orderMenuItem.orderSelections.selections" :key="index">
-                            <v-list-item-subtitle v-if="!Array.isArray(orderItem.values)">- {{orderItem.name}}: {{orderItem.values}}</v-list-item-subtitle>
-                            <v-list-item-subtitle v-else>- {{orderItem.name}}: {{(orderItem.values).join(', ')}}</v-list-item-subtitle>
-                          </div>
-                        </div>
-                      </v-col>
-                    </v-row>
-                  </v-list-item-content>
-                  
-                </v-list-item>
-              </v-card>
-            </v-list>
-
-
-            <v-list v-for="(orderMenuItem,j) in orderInfo().orderItems" :key="j" class="py-2" width="100%">
-              <v-card   width="100%">
-                <v-list-item class="pt-1">
-                  <v-list-item-content >
-                    <v-row @click="editItem(orderMenuItem)">
-                      <v-col cols="8">
-                        <v-list-item-title>{{ getItemName(orderMenuItem.menuItemId) }}</v-list-item-title>
-                      </v-col>
-                      <v-col cols="4 d-flex justify-end">
-                        <div>
-                          <v-list-item-title><span style="color: #f75564; font-size: 14px" class="pr-1">{{orderMenuItem.quantity}}x</span> R{{((orderMenuItem.itemTotal != null) ? orderMenuItem.itemTotal : (0)).toFixed(2)}}</v-list-item-title>
-                        </div>
-                      </v-col>
-                    </v-row>
-                    <v-row >
-                      <v-col cols="8" class="py-0" @click="editItem(orderMenuItem)">
-                        <div v-if="(orderMenuItem.orderSelections != undefined)">
-                          <div v-for="(orderItem, index) in orderMenuItem.orderSelections.selections" :key="index">
-                            <v-list-item-subtitle v-if="!Array.isArray(orderItem.values)">- {{orderItem.name}}: {{orderItem.values}}</v-list-item-subtitle>
-                            <v-list-item-subtitle v-else>- {{orderItem.name}}: {{(orderItem.values).join(', ')}}</v-list-item-subtitle>
-                          </div>
-                        </div>
-                      </v-col>
-                      <v-col @click="removeCartItem(orderMenuItem)" cols="4" class="py-0 d-flex justify-end  px-0">
-                        <div >
-                          <v-list-item-icon  class="mb-0 mt-1 mr-2" >
-                            <v-icon color="primary">mdi-delete-outline</v-icon>
-                          </v-list-item-icon>
-                        </div>
-                      </v-col>
-                      <!-- <v-col cols="4" class="py-0 d-flex justify-end">
-                        <div v-if="checkedIn()">
-                          <v-btn @click="decreaseQuantity(orderMenuItem)" fab elevation="2" width="22px" height="22px" class="mr-2">
-                            <v-icon size="15px">mdi-minus</v-icon>
-                          </v-btn>
-                          <div class="body-2 secondary--text" style="display: inline;">{{orderMenuItem.quantity}}</div>
-                          <v-btn @click="increaseQuantity(orderMenuItem)" fab elevation="2" width="22px" height="22px" class="ml-2" color="primary">
-                            <v-icon size="15px">mdi-plus</v-icon>
-                          </v-btn>
-                        </div>
-                      </v-col> -->
-                    </v-row>
-                  </v-list-item-content>
-                  
-                </v-list-item>
-              </v-card>
-            </v-list>
-          <!-- </v-card> -->
+      </v-toolbar>
+      <v-container v-if="Object.keys(orderInfo()).length === 0 && Object.keys(orderedItems()).length === 0" py-0 fill-height>
+        <div class="row d-flex flex-column align-stretch align-self-stretch">
+          <v-container fluid fill-height class="pa-0">
+            <div class="row d-flex flex-column align-self-center align-center">
+              <v-avatar class="mb-8" height="140px" width="140px" fab color="primary">
+                <v-icon size="65px" class="font-weight-light" color="white">mdi-cart-outline</v-icon>
+              </v-avatar>
+              <div class="headline mb-3 mt-12 secondary--text">Order Empty</div>
+              <div class="subtitle-1 secondary--text">Order some food or drinks here</div>
+              <v-btn @click="goToRestaurantMenu" class="mt-6" height="45px" width="130px" large color="primary" style="border-radius: 10px">Menu</v-btn>
+            </div>
+          </v-container>
         </div>
-      <!-- </template> -->
-      <div class="ma-0 pa-0 pt-4" style="width: 100%">
-        <v-row class="d-flex justify-space-between">
-          <v-col cols="auto" class="pb-0">
-            <span style="font-weight:bold">Tip:</span>
-          </v-col>
-          <v-col class="pb-0 pl-0" v-for="(tip, index) in tipOptions" :key="index">
-            <v-chip v-model="selected" style="min-width: 100%;" class="justify-center" :outlined="selected != index" @click="changeTip(index)" label color="primary">{{tip}}</v-chip>
-          </v-col>
-        </v-row>
-        <v-row>
-          <v-col class="d-flex justify-center pb-1">
-            <v-card width="100%" class="pa-1 pr-2">
-              <v-container py-0>
-                <v-row>
-                  <v-col cols="9" class="pb-0">
-                    <div class="body-1 secondary--text">Subtotal</div>
-                  </v-col>
-                  <v-col cols="3" class="pb-0 px-0"> 
-                    <div class="body-1 secondary--text d-flex justify-end">R {{subtotal.toFixed(2)}}</div>
-                  </v-col>
-                </v-row>
-                <v-row>
-                  <v-col cols="9" class="pb-0">
-                    <div class="body-1 secondary--text">Tax(14% VAT)</div>
-                  </v-col>
-                  <v-col cols="3" class="pb-0 px-0">
-                    <div class="body-1 secondary--text d-flex justify-end">R {{(subtotal  * 0.14).toFixed(2)}}</div>
-                  </v-col>
-                </v-row>
-                <v-row>
-                  <v-col cols="9">
-                    <div class="body-1 secondary--text">Waiter Tip</div>
-                  </v-col>
-                  <v-col cols="3" class="px-0">
-                    <div class="body-1 secondary--text d-flex justify-end">R {{tip.toFixed(2)}}</div>
-                  </v-col>
-                </v-row>
-                <v-row>
-                  <v-divider></v-divider>
-                </v-row>
-                <v-row>
-                  <v-col cols="9">
-                    <div class="body-1 secondary--text font-weight-bold">Total</div>
-                  </v-col>
-                  <v-col cols="3" class="px-0">
-                    <div class="body-1 secondary--text d-flex justify-end font-weight-bold">R {{calculateTotal()}}</div>
-                  </v-col>
-                </v-row>
-              </v-container>
-            </v-card>
-          </v-col>
-        </v-row>
-        <v-row class="d-flex justify-space-around mt-5 mb-3" >
-          <v-col v-show="Object.keys(orderInfo()).length != 0" cols="5" class="pa-0">
-              <v-btn rounded color="primary" elevation="2" class="body-2" width="100%" @click="goToOrder">Order Now, Pay Later</v-btn>
-          </v-col>
-          <v-col :cols="Object.keys(orderInfo()).length != 0 ? 5 : 7" class="pa-0">
-              <v-btn :rounded="Object.keys(orderInfo()).length != 0" color="accent" elevation="2" class="body-2" width="100%" @click="goToPayment">Pay Now</v-btn>
-          </v-col>
-        </v-row>
-      </div>
+      </v-container>
+      <v-container v-else class="orderDetailsCart d-flex align-content-space-between flex-wrap">
+        <!-- <template> -->
+          <div style="width: 100%">
+            <!-- <v-card v-for="(item,i) in orderInfo()" :key="i" flat> -->
+              <v-list v-for="(orderMenuItem,j) in orderedItems().orderItems" :key="j" class="py-2">
+                <v-card disabled >
+                  <v-list-item class="pt-1">
+                    <v-list-item-content>
+                      <v-row>
+                        <v-col cols="9">
+                          <v-list-item-title>{{ getItemName(orderMenuItem.menuItemId) }}</v-list-item-title>
+                        </v-col>
+                        <v-col cols="3 d-flex justify-end">
+                          <div>
+                            <v-list-item-title><span style="color: #f75564; font-size: 14px" class="pr-1">{{orderMenuItem.quantity}}x</span> R{{((orderMenuItem.itemTotal != null) ? orderMenuItem.itemTotal : (0)).toFixed(2)}}</v-list-item-title>
+                          </div>
+                        </v-col>
+                      </v-row>
+                      <v-row >
+                        <v-col cols="8" class="py-0">
+                          <div v-if="(orderMenuItem.orderSelections != undefined)">
+                            <div v-for="(orderItem, index) in orderMenuItem.orderSelections.selections" :key="index">
+                              <v-list-item-subtitle v-if="!Array.isArray(orderItem.values)">- {{orderItem.name}}: {{orderItem.values}}</v-list-item-subtitle>
+                              <v-list-item-subtitle v-else>- {{orderItem.name}}: {{(orderItem.values).join(', ')}}</v-list-item-subtitle>
+                            </div>
+                          </div>
+                        </v-col>
+                      </v-row>
+                    </v-list-item-content>
+                    
+                  </v-list-item>
+                </v-card>
+              </v-list>
+
+
+              <v-list v-for="(orderMenuItem,j) in orderInfo().orderItems" :key="j" class="py-2" width="100%">
+                <v-card   width="100%">
+                  <v-list-item class="pt-1">
+                    <v-list-item-content >
+                      <v-row @click="editItem(orderMenuItem)">
+                        <v-col cols="8">
+                          <v-list-item-title>{{ getItemName(orderMenuItem.menuItemId) }}</v-list-item-title>
+                        </v-col>
+                        <v-col cols="4 d-flex justify-end">
+                          <div>
+                            <v-list-item-title><span style="color: #f75564; font-size: 14px" class="pr-1">{{orderMenuItem.quantity}}x</span> R{{((orderMenuItem.itemTotal != null) ? orderMenuItem.itemTotal : (0)).toFixed(2)}}</v-list-item-title>
+                          </div>
+                        </v-col>
+                      </v-row>
+                      <v-row >
+                        <v-col cols="8" class="py-0" @click="editItem(orderMenuItem)">
+                          <div v-if="(orderMenuItem.orderSelections != undefined)">
+                            <div v-for="(orderItem, index) in orderMenuItem.orderSelections.selections" :key="index">
+                              <v-list-item-subtitle v-if="!Array.isArray(orderItem.values)">- {{orderItem.name}}: {{orderItem.values}}</v-list-item-subtitle>
+                              <v-list-item-subtitle v-else>- {{orderItem.name}}: {{(orderItem.values).join(', ')}}</v-list-item-subtitle>
+                            </div>
+                          </div>
+                        </v-col>
+                        <v-col @click="removeCartItem(orderMenuItem)" cols="4" class="py-0 d-flex justify-end  px-0">
+                          <div >
+                            <v-list-item-icon  class="mb-0 mt-1 mr-2" >
+                              <v-icon color="primary">mdi-delete-outline</v-icon>
+                            </v-list-item-icon>
+                          </div>
+                        </v-col>
+                        <!-- <v-col cols="4" class="py-0 d-flex justify-end">
+                          <div v-if="checkedIn()">
+                            <v-btn @click="decreaseQuantity(orderMenuItem)" fab elevation="2" width="22px" height="22px" class="mr-2">
+                              <v-icon size="15px">mdi-minus</v-icon>
+                            </v-btn>
+                            <div class="body-2 secondary--text" style="display: inline;">{{orderMenuItem.quantity}}</div>
+                            <v-btn @click="increaseQuantity(orderMenuItem)" fab elevation="2" width="22px" height="22px" class="ml-2" color="primary">
+                              <v-icon size="15px">mdi-plus</v-icon>
+                            </v-btn>
+                          </div>
+                        </v-col> -->
+                      </v-row>
+                    </v-list-item-content>
+                    
+                  </v-list-item>
+                </v-card>
+              </v-list>
+            <!-- </v-card> -->
+          </div>
+        <!-- </template> -->
+        <div class="ma-0 pa-0 pt-4" style="width: 100%">
+          <v-row class="d-flex justify-space-between">
+            <v-col cols="auto" class="pb-0">
+              <span style="font-weight:bold">Tip:</span>
+            </v-col>
+            <v-col class="pb-0 pl-0" v-for="(tip, index) in tipOptions" :key="index">
+              <v-chip v-model="selected" style="min-width: 100%;" class="justify-center" :outlined="selected != index" @click="changeTip(index)" label color="primary">{{tip}}</v-chip>
+            </v-col>
+          </v-row>
+          <v-row>
+            <v-col class="d-flex justify-center pb-1">
+              <v-card width="100%" class="pa-1 pr-2">
+                <v-container py-0>
+                  <v-row>
+                    <v-col cols="9" class="pb-0">
+                      <div class="body-1 secondary--text">Subtotal</div>
+                    </v-col>
+                    <v-col cols="3" class="pb-0 px-0"> 
+                      <div class="body-1 secondary--text d-flex justify-end">R {{subtotal.toFixed(2)}}</div>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col cols="9" class="pb-0">
+                      <div class="body-1 secondary--text">Tax(14% VAT)</div>
+                    </v-col>
+                    <v-col cols="3" class="pb-0 px-0">
+                      <div class="body-1 secondary--text d-flex justify-end">R {{(subtotal  * 0.14).toFixed(2)}}</div>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col cols="9">
+                      <div class="body-1 secondary--text">Waiter Tip</div>
+                    </v-col>
+                    <v-col cols="3" class="px-0">
+                      <div class="body-1 secondary--text d-flex justify-end">R {{tip.toFixed(2)}}</div>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-divider></v-divider>
+                  </v-row>
+                  <v-row>
+                    <v-col cols="9">
+                      <div class="body-1 secondary--text font-weight-bold">Total</div>
+                    </v-col>
+                    <v-col cols="3" class="px-0">
+                      <div class="body-1 secondary--text d-flex justify-end font-weight-bold">R {{calculateTotal()}}</div>
+                    </v-col>
+                  </v-row>
+                </v-container>
+              </v-card>
+            </v-col>
+          </v-row>
+          <v-row class="d-flex justify-space-around mt-5 mb-3" >
+            <v-col v-show="Object.keys(orderInfo()).length != 0" cols="5" class="pa-0">
+                <v-btn rounded color="primary" elevation="2" class="body-2" width="100%" @click="goToOrder">Order Now, Pay Later</v-btn>
+            </v-col>
+            <v-col :cols="Object.keys(orderInfo()).length != 0 ? 5 : 7" class="pa-0">
+                <v-btn :rounded="Object.keys(orderInfo()).length != 0" color="accent" elevation="2" class="body-2" width="100%" @click="goToPayment">Pay Now</v-btn>
+            </v-col>
+          </v-row>
+        </div>
+      </v-container>
+
+      <v-overlay relative opacity="0.25" :value="editTip" z-index="10">
+        <v-avatar elevation="3" color="accent" class="pl-0 pr-0" absolute style="position: absolute; z-index: 12">
+            <v-icon size="30px" color="white" v-text="'mdi-cash-multiple'"></v-icon>
+        </v-avatar>
+        <v-alert color="white" transition="scale-transition" class="alert" align="center" width="300px" style="margin-top: 20px;">
+          <div style="font-size: 22px !important; color: #343434;" class="pl-8 pr-8 mt-8">Enter amount</div>
+          <!-- <div class="mt-2" style="font-size: 16px !important; color: #343434">Please note that once you make payment, <br/>you will be checked out of the system.</div> -->
+          <v-text-field v-model="tipVal" class="tipSlot mt-3" color="primary" label="Tip amount"></v-text-field>
+          <v-row justify="center" class="d-flex align-content-center" style="max-height: 60px">
+            <v-col cols="12" class="d-flex justify-space-around pt-0" flat>
+              <v-btn text @click="toggleTipAlert" class="mt-6 mb-1">
+                <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline; text-align: center">Cancel</div>
+              </v-btn>
+              <v-btn text @click="changeTipManual" class="mt-6 mb-1">
+                <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline; text-align: center">Continue</div>
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-alert>
+      </v-overlay>
+      
+
+      <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
+        <v-icon>mdi-cart-outline</v-icon>
+      </v-btn>
+      <NavBar></NavBar>
     </v-container>
-
-    <v-overlay relative opacity="0.25" :value="editTip" z-index="10">
-      <v-avatar elevation="3" color="accent" class="pl-0 pr-0" absolute style="position: absolute; z-index: 12">
-          <v-icon size="30px" color="white" v-text="'mdi-cash-multiple'"></v-icon>
-      </v-avatar>
-      <v-alert color="white" transition="scale-transition" class="alert" align="center" width="300px" style="margin-top: 20px;">
-        <div style="font-size: 22px !important; color: #343434;" class="pl-8 pr-8 mt-8">Enter amount</div>
-        <!-- <div class="mt-2" style="font-size: 16px !important; color: #343434">Please note that once you make payment, <br/>you will be checked out of the system.</div> -->
-        <v-text-field v-model="tipVal" class="tipSlot mt-3" color="primary" label="Tip amount"></v-text-field>
-        <v-row justify="center" class="d-flex align-content-center" style="max-height: 60px">
-          <v-col cols="12" class="d-flex justify-space-around pt-0" flat>
-            <v-btn text @click="toggleTipAlert" class="mt-6 mb-1">
-              <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline; text-align: center">Cancel</div>
-            </v-btn>
-            <v-btn text @click="changeTipManual" class="mt-6 mb-1">
-              <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline; text-align: center">Continue</div>
-            </v-btn>
-          </v-col>
-        </v-row>
-      </v-alert>
-    </v-overlay>
-    
-
-    <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
-      <v-icon>mdi-cart-outline</v-icon>
-    </v-btn>
-    <NavBar></NavBar>
   </v-container>
-</v-container>
 </template>
 
 <script>
@@ -216,6 +216,7 @@ import DesktopCart from "../../components/orders/DesktopCartView"
 export default {
   components: {
     'DesktopCart': DesktopCart,
+    'NavBar': NavBar
   },
   data () {
     return {
@@ -273,6 +274,9 @@ export default {
     toggleTipAlert() {
       this.editTip = !this.editTip
     },
+    onResize () {
+      this.isMobile = window.innerWidth < 600
+    },
     goToOrder () {
       this.updateOrderFlag(true);
       console.log("ADD ITEM")
@@ -283,10 +287,7 @@ export default {
       this.$router.push('/orders')
     },
     toggleAlert() {
-      this.paymentMade = !this.paymentMade
-    },
-    onResize () {
-      this.isMobile = window.innerWidth < 600
+        this.paymentMade = !this.paymentMade
     },
     async goToPayment () {
       let orderId;
@@ -412,7 +413,6 @@ export default {
   mounted: function() {
     this.onResize()
     window.addEventListener('resize', this.onResize, { passive: true })
-
     // this.clearItem;
     if (Object.keys(this.orderInfo()).length != 0) {
       for (let i = 0; i < this.orderInfo().orderItems.length; i++) {
@@ -492,6 +492,7 @@ export default {
   .cartHeader {
     max-height: 56px !important;
     flex: 0 1 auto;
+    width: 100%;
   }
 
 </style>
