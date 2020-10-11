@@ -248,9 +248,14 @@ export default {
     backNavigation () {
       this.$router.go(-1)
     },
-    hideAlert () {
-      this.submitPayment()
-      this.updateOrderFlag(false);
+    async hideAlert () {
+      await this.submitPayment()
+      await this.updateOrderFlag(false);
+      
+      await this.checkout
+      await this.setCheckedInQRCode (null)
+      await this.setCheckedInRestaurantId (null)
+      await this.setCheckedInTableId (null)
       this.$router.push('/orders')
     },
     calculateTotal() {
@@ -262,11 +267,7 @@ export default {
       console.log(this.orderFlag())
       return this.orderFlag()
     },
-    async goToPayment (){
-      await this.checkout
-      await this.setCheckedInQRCode (null)
-      await this.setCheckedInRestaurantId (null)
-      await this.setCheckedInTableId (null)
+    goToPayment (){
       this.setTotal(this.calculateTotal())
       this.$router.push('pay')
     },

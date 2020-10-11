@@ -8,6 +8,7 @@ const initialState = () => ({
   itemToRate: {},
   paymentInfo: {},
   currentId: -1,
+  waiterTip: {},
   
   
   orderHistory: {},
@@ -24,6 +25,10 @@ const state = initialState();
 const getters = {
   getOrderInfo(state) {
     return state.orderInfo;
+  },
+
+  getWaiterTip(state) {
+    return state.waiterTip;
   },
 
   getOrderedItems(state) {
@@ -173,6 +178,10 @@ const actions = {
     commit('SET_ORDER_HISTORY', orderHistory);
   },
 
+  setWaiterTip({commit}, tip) {
+    commit('SET_WAITER_TIP', tip);
+  },
+
   addItemToOrder({commit,}, orderItemInfo) {
     commit('ADD_ITEM_TO_ORDER', orderItemInfo);
   },
@@ -238,14 +247,13 @@ const mutations = {
     if (orderHistory.length != 0 && orderHistory[0].orderStatus == 'Received') {
       let itemsOrdered = [];
       for (let i = 0; i < orderHistory[0].items.length; i++) {
+        // console.log(orderHistory[0].items[i].orderSelections)
         let data = {
           "menuItemId": orderHistory[0].items[i].menuItemId,
           "itemTotal": orderHistory[0].items[i].itemTotal,
           "quantity": orderHistory[0].items[i].quantity,
-          "orderSelections": {
-            "selections": orderHistory[0].items[i].orderSelections
-          }
-        };
+          "orderSelections": orderHistory[0].items[i].orderselections
+        }
         itemsOrdered[i] = data;
       }
 
@@ -296,7 +304,8 @@ const mutations = {
   REMOVE_ITEM(state, itemId) {
     let itemIndex = -1;
     state.orderInfo.orderItems.find((item, index) => {
-      itemIndex = index;
+      if (item.menuItemId == itemId)
+        itemIndex = index;
       return item.menuItemId == itemId
     });
 
@@ -315,6 +324,10 @@ const mutations = {
 
   SET_RATING_PHRASES(state, ratingPhrases) {
     state.ratingPhrases = ratingPhrases
+  },
+
+  SET_WAITER_TIP(state, tip) {
+    state.waiterTip = tip
   },
 
   ADD_ITEM_TO_RATE(state, itemInfo) {
@@ -348,6 +361,10 @@ const mutations = {
     } else {
       state.orderedItems = state.orderInfo;
     }
+    // console.log("Order")
+    // console.log(state.orderInfo)
+    // console.log("Ordered")
+    // console.log(state.orderedItems)
     state.orderInfo = {}
 
     this.getters['CustomerStore/getCustomer'].orderHistory = orderInformation;

@@ -116,6 +116,14 @@
         </div>
       <!-- </template> -->
       <div class="ma-0 pa-0 pt-4" style="width: 100%">
+        <v-row class="d-flex justify-space-between">
+          <v-col cols="auto" class="pb-0">
+            <span style="font-weight:bold">Tip:</span>
+          </v-col>
+          <v-col class="pb-0 pl-0" v-for="(tip, index) in tipOptions" :key="index">
+            <v-chip v-model="selected" style="min-width: 100%;" class="justify-center" :outlined="selected != index" @click="changeTip(index)" label color="primary">{{tip}}</v-chip>
+          </v-col>
+        </v-row>
         <v-row>
           <v-col class="d-flex justify-center pb-1">
             <v-card width="100%" class="pa-1 pr-2">
@@ -160,15 +168,36 @@
           </v-col>
         </v-row>
         <v-row class="d-flex justify-space-around mt-5 mb-3" >
-          <v-col cols="5" class="pa-0">
-              <v-btn v-show="Object.keys(orderInfo()).length != 0" rounded color="primary" elevation="2" class="body-2" width="100%" @click="goToOrder">Order Now, Pay Later</v-btn>
+          <v-col v-show="Object.keys(orderInfo()).length != 0" cols="5" class="pa-0">
+              <v-btn rounded color="primary" elevation="2" class="body-2" width="100%" @click="goToOrder">Order Now, Pay Later</v-btn>
           </v-col>
-          <v-col cols="5" class="pa-0">
-              <v-btn rounded color="accent" elevation="2" class="body-2" width="100%" @click="goToPayment">Pay Now</v-btn>
+          <v-col :cols="Object.keys(orderInfo()).length != 0 ? 5 : 7" class="pa-0">
+              <v-btn :rounded="Object.keys(orderInfo()).length != 0" color="accent" elevation="2" class="body-2" width="100%" @click="goToPayment">Pay Now</v-btn>
           </v-col>
         </v-row>
       </div>
     </v-container>
+
+    <v-overlay relative opacity="0.25" :value="editTip" z-index="10">
+      <v-avatar elevation="3" color="accent" class="pl-0 pr-0" absolute style="position: absolute; z-index: 12">
+          <v-icon size="30px" color="white" v-text="'mdi-cash-multiple'"></v-icon>
+      </v-avatar>
+      <v-alert color="white" transition="scale-transition" class="alert" align="center" width="300px" style="margin-top: 20px;">
+        <div style="font-size: 22px !important; color: #343434;" class="pl-8 pr-8 mt-8">Enter amount</div>
+        <!-- <div class="mt-2" style="font-size: 16px !important; color: #343434">Please note that once you make payment, <br/>you will be checked out of the system.</div> -->
+        <v-text-field v-model="tipVal" class="tipSlot mt-3" color="primary" label="Tip amount"></v-text-field>
+        <v-row justify="center" class="d-flex align-content-center" style="max-height: 60px">
+          <v-col cols="12" class="d-flex justify-space-around pt-0" flat>
+            <v-btn text @click="toggleTipAlert" class="mt-6 mb-1">
+              <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline; text-align: center">Cancel</div>
+            </v-btn>
+            <v-btn text @click="changeTipManual" class="mt-6 mb-1">
+              <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline; text-align: center">Continue</div>
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-alert>
+    </v-overlay>
     
 
     <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
@@ -190,11 +219,16 @@ export default {
   },
   data () {
     return {
+      editTip: false,
       subtotal: 0,
+      tipVal: '',
+      selected: 1,
       tip: 0,
       quantity: [],
+      tipOptions: [
+        '0%', '10%', '15%', 'Other'
+      ],
       tab: null,
-      
       idVal: 0,
       items: [
         { img: 'https://source.unsplash.com/uVPV_nV17Tw/800x800/', name: 'Buttermilk Chicken Burger', price: '95.00'},
@@ -206,6 +240,38 @@ export default {
   methods: {
     goBack () {
       this.$router.go(-1)
+    },
+    changeTip(index) {
+      // console.log(index === this.tipOptions.length - 1)
+      if (index != this.tipOptions.length - 1) {
+        this.selected = index;
+        let percent = this.tipOptions[index].slice(0,-1)
+        this.tip = this.subtotal * parseInt(percent) / 100
+
+        let data = {
+          "tip": this.tip,
+          "index": this.selected
+        }
+        this.setTip(data)
+      } else {
+        if (this.selected != this.tipOptions.length - 1)
+          this.tipVal = ''
+        this.toggleTipAlert()
+      }      
+    },
+    changeTipManual () {
+        this.tip = parseInt(this.tipVal)
+        this.selected = this.tipOptions.length - 1;
+        this.toggleTipAlert()
+
+        let data = {
+          "tip": this.tip,
+          "index": this.selected
+        }
+        this.setTip(data)
+    },
+    toggleTipAlert() {
+      this.editTip = !this.editTip
     },
     goToOrder () {
       this.updateOrderFlag(true);
@@ -283,7 +349,7 @@ export default {
       }
     },
     goToRestaurantMenu() {
-      console.log(this.checkedInRestaurantId)
+      // console.log(this.checkedInRestaurantId)
       this.$router.push("/menu/" + this.checkedInRestaurantId());
     },
     increaseQuantity(item) {
@@ -307,6 +373,7 @@ export default {
       addItemToEdit: 'MenuItemsStore/addItemToEdit',
       removeItem: 'OrderStore/removeItem',
       submitOrder: 'OrderStore/submitOrder',
+      setTip: 'OrderStore/setWaiterTip',
       addPaymentInfo: "OrderStore/addPaymentInfo",
       // clearItem: "MenuItemsStore/clearItem",
     }),
@@ -314,15 +381,15 @@ export default {
       menu: "MenuStore/getMenu",
       allRestaurants: 'RestaurantsStore/getAllRestaurants',
       orderInfo: "OrderStore/getOrderInfo",
-      orderedItemsInfo: "OrderStore/getOrderedItems",
       orderedItems: "OrderStore/getOrderedItems",
       orderHistory: 'CustomerStore/getCustomerOrderHistory',
+      wTip: 'OrderStore/getWaiterTip',
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
     }),
     calculateTotal() {
       let tax = (this.subtotal * 0.14).toFixed(2);
-      // let tip = (Object.keys(this.orderedItemsInfo()).length != 0) ? this.orderedItemsInfo().waiterTip : (this.subtotal * 0.1).toFixed(2);
+      // let tip = (Object.keys(this.orderedItems()).length != 0) ? this.orderedItems().waiterTip : (this.subtotal * 0.1).toFixed(2);
       return (parseFloat(this.subtotal) + parseFloat(tax) + parseFloat(this.tip)).toFixed(2);
     },
     getItemName(id) {
@@ -348,19 +415,52 @@ export default {
 
     // this.clearItem;
     if (Object.keys(this.orderInfo()).length != 0) {
-      this.tip = (this.subtotal * 0.1).toFixed(2);
       for (let i = 0; i < this.orderInfo().orderItems.length; i++) {
         this.subtotal += (this.orderInfo().orderItems[i].itemTotal != null) ? parseFloat(this.orderInfo().orderItems[i].itemTotal) * parseFloat(this.orderInfo().orderItems[i].quantity) : 0;
         this.quantity[i] = parseFloat(this.orderInfo().orderItems[i].quantity)
       }
     }
-    if (Object.keys(this.orderedItemsInfo()).length != 0) {
-      this.tip = this.orderedItemsInfo().waiterTip;
-      for (let i = 0; i < this.orderedItemsInfo().orderItems.length; i++) {
-        this.subtotal += (this.orderedItemsInfo().orderItems[i].itemTotal != null) ? parseFloat(this.orderedItemsInfo().orderItems[i].itemTotal) * parseFloat(this.orderedItemsInfo().orderItems[i].quantity) : 0;
-        this.quantity[i] = parseFloat(this.orderedItemsInfo().orderItems[i].quantity)
+    if (Object.keys(this.orderedItems()).length != 0) {
+      for (let i = 0; i < this.orderedItems().orderItems.length; i++) {
+        this.subtotal += (this.orderedItems().orderItems[i].itemTotal != null) ? parseFloat(this.orderedItems().orderItems[i].itemTotal) * parseFloat(this.orderedItems().orderItems[i].quantity) : 0;
+        this.quantity[i] = parseFloat(this.orderedItems().orderItems[i].quantity)
       }
     }
+
+    this.tip = this.subtotal * 0.1;
+    if (Object.keys(this.wTip()).length != 0) {
+      this.tip = this.wTip().tip;
+      this.selected = this.wTip().index;
+      if (this.wTip().index === this.tipOptions.length - 1)
+        this.tipVal = (this.wTip().tip).toString()
+    } else if (Object.keys(this.orderedItems()).length != 0) {
+      // console.log(this.orderedItems().waiterTip)
+      let total = 0;
+      if (this.orderedItems().orderItems.length > 0) {
+        for (let i = 0; i < this.orderedItems().orderItems.length; i++) {
+          total += this.orderedItems().orderItems[i].itemTotal * this.orderedItems().orderItems[i].quantity
+        }
+      }
+
+      let itemIndex = -1;
+      this.tipOptions.find((item, index) => {
+        if (index != this.tipOptions.length - 1) {
+          if ((total * parseFloat(parseInt(this.tipOptions[index].slice(0,-1)) / 100)) === parseFloat(this.orderedItems().waiterTip))
+            itemIndex = index;
+          return (total * parseFloat(parseInt(this.tipOptions[index].slice(0,-1)) / 100)) === parseFloat(this.orderedItems().waiterTip)
+        } 
+      });
+
+      if (itemIndex != -1) {
+        this.selected = itemIndex;
+        this.tip = this.subtotal * parseInt(this.tipOptions[itemIndex].slice(0,-1)) / 100
+      } else {
+        this.selected = this.tipOptions.length - 1
+        this.tip = parseFloat(this.orderedItems().waiterTip)
+        this.tipVal = (this.orderedItems().waiterTip).toString()
+      }
+    }
+    
   }
 }
 </script>
@@ -381,9 +481,23 @@ export default {
     flex: 1 1 auto;
   }
 
+  .tipSlot.theme--dark.v-text-field:not(.v-input--has-state):hover > .v-input__control > .v-input__slot:before {
+    border: 1px solid #f75564 ;
+  }
+  
+  .tipSlot.v-text-field > .v-input__control > .v-input__slot:after {
+    border: 1px solid #f75564 ;
+  }
+
   .cartHeader {
     max-height: 56px !important;
     flex: 0 1 auto;
   }
 
+</style>
+
+<style>
+  .tipSlot.v-text-field > .v-input__control > .v-input__slot {
+    border-bottom: 1px solid #f75564 !important;
+  }
 </style>

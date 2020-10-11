@@ -21,6 +21,7 @@ const getters = {
     return state.customer;
   },
   getCustomerOrderHistory( state ) {
+    // console.log(state.customer.orderHistory)
     return state.customer.orderHistory;
   },
   getToken( state ) {
