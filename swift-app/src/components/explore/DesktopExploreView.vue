@@ -1,5 +1,16 @@
 <template>
   <v-container class="pa-0 ma-0">
+    <div style="position: absolute; z-index: 100; right: 80px; top: 15px;">
+      <v-btn class="mr-3" elevation="2" width="35px" height="35px" @click="getNotifications" color="secondary" small fab>
+        <v-icon size="23px">mdi-email-outline</v-icon>
+      </v-btn>
+      <v-btn class="mr-3" v-show="!isLoading" v-if="checkedIn()" @click="goToCart" app color="primary" width="35px" height="35px" dark  elevation="1"  fab>
+        <v-icon>mdi-cart-outline</v-icon>
+      </v-btn>
+      <v-btn v-show="!isLoading" v-if="checkedIn()" @click="goToRestaurant(checkedInRestaurantId)" app color="accent" width="35px" height="35px" dark  elevation="1"  fab>
+        <v-icon>mdi-table-furniture</v-icon>
+      </v-btn>
+    </div>
     <DesktopNavbar v-show="!isLoading"></DesktopNavbar>
     <v-container style="padding-left: 70px; padding-right: 70px;">
       <div v-show="isLoading" style="display: flex; align-items: center; justify-content: center;">
@@ -8,7 +19,7 @@
       <v-container v-show="!isLoading" py-0>
         <v-card flat tile>
           <v-row class="d-flex justify-space-between">
-            <v-col cols="7">
+            <v-col cols="8">
               <span class="pl-1 welcome font-weight-light">Welcome, </span>
               <span class="pl-1 pt-0 customerName">{{customerInfo.name}} {{customerInfo.surname}}</span>
             </v-col>
@@ -20,45 +31,20 @@
               </v-btn> -->
             </v-col>
             <v-col cols="1" >
-              <v-btn class="mr-4" elevation="2" width="35px" height="35px" @click="getNotifications" color="secondary" small fab>
-                <v-icon size="23px">mdi-email-outline</v-icon>
-              </v-btn>
-              <v-btn v-show="!isLoading" v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="35px" height="35px" dark  elevation="1"  fab>
-                <v-icon>mdi-cart-outline</v-icon>
-              </v-btn>
+              
             </v-col>
-            
           </v-row>
-
-          
         </v-card>
       </v-container>
       <v-container v-show="!isLoading" class="px-0 py-0" v-if="search == ''">
         <v-container py-0>
           <v-row class="d-flex justify-center">
-            <!-- <v-col cols="2">
-              <v-card v-show="checkedIn()" @click="goToRestaurant(checkedInRestaurantId)" color="accent" height="80px" flat tile style="border-radius: 13px !important" class="mt-2 mb-5">
-                <v-row class="d-flex justify-space-between specialsInfo">
-                  <v-col cols="10" class="d-flex justify-center px-0">
-                    <div style="text-align: center" class="checkedInBannerText">
-                      <div class="specialsText font-weight-light">You are checked-in to</div>
-                      <div class="specialsText checkedRestaurant font-weight-light">{{getCheckedInRestaurantName(checkedInRestaurantId)}}</div>
-                    </div>
-                  </v-col>
-                  <v-col cols="2" class="d-flex align-center px-0">
-                    <v-btn small icon color="white">
-                      <v-icon size="32px">mdi-chevron-right</v-icon>
-                    </v-btn>
-                  </v-col>
-                </v-row>
-              </v-card>
-            </v-col> -->
             <v-col cols="6" class="py-0">
-              <v-carousel v-model="carouselIndex" class="promotionalMaterial" :continuous="true" :cycle="false" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="180px">
+              <v-carousel v-model="carouselIndex" class="promotionalMaterial" :continuous="true" :cycle="true" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="180px">
                 <v-carousel-item v-for="(promotion, i) in activePromotions.restaurantPromo" :key="i">
                   <v-sheet @click="goToRestaurant(promotion.restaurantId)" :color="(i == 3) ? 'primary' : 'secondary'" height="150px" flat tile style="border-radius: 10px !important" class="mt-5">
                     <v-row class="d-flex justify-space-between px-0 py-0">
-                      <v-col cols="6" class="py-3 pr-0">
+                      <v-col cols="6" class="p-3 pr-0">
                         <v-layout column justify-space-between fill-height>
                           <div class="px-3">
                             <!-- <span class="specialsText font-weight-light">30%</span> <span class="specialsText discount font-weight-light">discount</span> <span class="specialsText font-weight-light">on all pizza slices</span> -->

@@ -1,10 +1,10 @@
 <template>
   <v-card flat height="70px">
-    <v-toolbar >
-      <v-toolbar-title>Swift</v-toolbar-title>
+    <v-toolbar>
+      <v-toolbar-title class="ml-16 mr-10" style="font-size: 26px;">Swift</v-toolbar-title>
       <v-btn v-for="link in links" class="align-center nav-btn" color="white" :key="link.text" router :to="link.route" min-height="56px">
-        <span>{{ link.text }}</span>
         <v-icon color="secondary">{{ link.icon }}</v-icon>
+        <span class="pl-1">{{ link.text }}</span>
       </v-btn>
       <v-spacer></v-spacer>
     </v-toolbar>
