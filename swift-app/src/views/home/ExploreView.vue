@@ -252,7 +252,7 @@ import store from '@/store/store.js';
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import $ from 'jquery'
 import moment from 'moment'
-import DesktopExplore from "../../components/explore/DesktopExploreView"
+import DesktopExplore from "../../components/explore2/DesktopExploreView"
 
 export default {
   components: {
