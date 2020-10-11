@@ -1,7 +1,7 @@
 <template>
   <v-container class="pa-0 ma-0">
     <DesktopExplore v-if="!isMobile"></DesktopExplore>
-    <v-container v-if="isMobile" class="pa-0">
+    <v-container v-else class="pa-0">
       <div v-show="isLoading" style="display: flex; align-items: center; justify-content: center;">
         <v-progress-circular style="height: 400px" indeterminate color="primary"></v-progress-circular>
       </div>
@@ -252,7 +252,7 @@ import store from '@/store/store.js';
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import $ from 'jquery'
 import moment from 'moment'
-import DesktopExplore from "../../components/explore2/DesktopExploreView"
+import DesktopExplore from "../../components/explore/DesktopExploreView"
 
 export default {
   components: {
@@ -361,16 +361,17 @@ export default {
         return arr2.every(el => arr1.includes(el));
       return true;
     },
-    onResize () {
-      this.isMobile = window.innerWidth < 600
-    },
+    onResize () { 
+      this.isMobile = window.innerWidth < 600 
+    }
   },
   ...mapActions({
     checkInCustomer: 'CustomerStore/checkInCustomer',
   }),
   async mounted() {
-    this.onResize()
+    this.onResize() 
     window.addEventListener('resize', this.onResize, { passive: true })
+
     this.clearItem;
     if (this.customerInfo.theme === 'light') {
       this.$vuetify.theme.dark = false;

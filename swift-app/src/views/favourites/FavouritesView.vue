@@ -1,20 +1,20 @@
 <template>
   <v-container class="pa-0 ma-0">
     <DesktopFavourites v-if="!isMobile"></DesktopFavourites>
-    <v-container v-if="isMobile" class="pa-0">
+    <v-container v-else>
       <v-row class="mt-0 pt-0" align="center">
         <v-col cols="12"  align="center">
           <span style="font-size: 24px">My Favourites</span>
         </v-col>
       </v-row>
       <div>
-        <v-text-field class="searchBarBg" v-model="search" rounded clearable flat solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search for an item..."></v-text-field>
+        <v-text-field class="searchBarBg ml-2" v-model="search" rounded clearable flat solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search for an item..."></v-text-field>
       </div>
       <template v-if="!isLoading && customerInfo.favourites.length != 0">
-        <v-list v-for="(restaurantName, index) in restaurantFilteredList" :key="index" class="py-0">
+        <v-list v-for="(restaurantName, index) in restaurantFilteredList" :key="index" class="py-0 px-1">
           <v-subheader v-show="filteredList(restaurantName).length > 0" style="height: 20px" class="mt-3 mb-1 pl-1">{{ restaurantName }}</v-subheader>
           <v-list v-for="item in filteredList(restaurantName)" :key="item.menuItemName" class="py-0">
-            <v-list-item class="py-1 pr-0">
+            <v-list-item class="py-1 px-0">
               <v-list-item-avatar @click="goToMenuItem(item.menuItemId)" tile  style="border-radius: 4px" size="45" >
                 <v-img v-if="item.images.length !=  0" :src="item.images[0]"/>
                 <v-img v-else src="../../assets/menuItemImages/item-placeholder.png"/>
@@ -152,5 +152,6 @@ export default {
   background: rgba(0, 0, 0, 0.06) !important;
   caret-color: #343434 !important;
   color: #343434 !important;
+  width: 100% !important;
 }
 </style>
