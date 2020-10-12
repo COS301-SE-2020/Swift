@@ -1,7 +1,10 @@
 <template>
   <v-container class="pa-0 ma-0">
+    <v-btn style="position: absolute; top: 15px; right: 50px; z-index: 100;" class="mr-3" v-show="!isLoading" v-if="checkedIn()" @click="goToCart" app color="primary" width="35px" height="35px" dark  elevation="1"  fab>
+      <v-icon>mdi-cart-outline</v-icon>
+    </v-btn>
     <DesktopNavbar v-show="!isLoading"></DesktopNavbar>
-    <v-container style="padding-left: 70px; padding-right: 70px;">
+    <v-container style="padding-left: 100px; padding-right: 120px;">
       <v-row class="mt-0 pt-0" align="start">
         <v-col cols="12"  align="start">
           <span style="font-size: 24px">My Favourites</span>
@@ -39,9 +42,9 @@
       <div v-if="isLoading" style="display: flex; align-items: center; justify-content: center; margin-top: 10px">
         <v-progress-circular indeterminate color="primary"></v-progress-circular>
       </div>
-      <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
+      <!-- <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
         <v-icon>mdi-cart-outline</v-icon>
-      </v-btn>
+      </v-btn> -->
     </v-container>
   </v-container>
 

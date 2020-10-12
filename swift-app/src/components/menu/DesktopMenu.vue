@@ -10,23 +10,24 @@
             <v-col cols="12" class="pt-0 px-0 pb-0">
               <v-carousel height="200px" :show-arrows="false" hide-delimiter cycle hide-delimiters continuous>
                 <v-carousel-item gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.4)" :src="menu.image">
-                  <v-row  align="center" justify="center" class="mt-6">
-                    <div v-if="checkedIn()" class="white--text display-1">Welcome to<br/> {{menu.name}}</div>
-                    <div v-if="!checkedIn()" class="white--text display-1">{{menu.name}}</div>
-                    <v-col cols="9" class="mt-3">
+                  <v-row class="d-flex justify-center mt-6">
+                    <v-col cols="3">
+                      <div v-if="checkedIn()" class="white--text display-1">Welcome to {{menu.name}}</div>
+                      <div v-if="!checkedIn()" class="white--text display-1">{{menu.name}}</div>
+                    </v-col>
+                  </v-row>
+                  <v-row class="d-flex justify-center">
+                    <v-col cols="5" class="mt-3">
                       <v-text-field background-color="white" class="menuItemSearchbar"  v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search..."></v-text-field>
                     </v-col>
-                    <v-col cols="1" class="d-flex align-center px-0 mt-3">
+                    <!-- <v-col cols="1" class="d-flex align-center px-0 mt-3">
                       <v-btn small icon color="white">
                         <v-icon size="24px">mdi-filter-variant</v-icon> 
                       </v-btn>
-                    </v-col>
+                    </v-col> -->
                   </v-row>
                 </v-carousel-item>
               </v-carousel>
-              <v-btn width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 20px; left: 15px;">
-                <v-icon>mdi-chevron-left</v-icon>
-              </v-btn>
               <!-- <v-btn v-if="checkedIn()" width="30px" height="30px" @click="callWaiterPressed()" :key="activeCall.icon" :color="activeCall.color" absolute small fab style="top: 20px; right: 10px;">
                 <v-icon class="callWaiter" :style="called ? { 'animation-name': 'callWaiterAnimation', 'animation-duration': '5s' } : { 'transform': 'rotate(0deg)' }">{{ activeCall.icon }}</v-icon>
               </v-btn> -->
@@ -35,13 +36,13 @@
         </div>
     </v-container>
 
-    <v-container v-show="!isLoading && filterPromotionItems(promotionItems).length != 0" class="mt-0 pt-0 d-flex flex-column" style="padding-bottom: 0;">
+    <v-container v-show="!isLoading && filterPromotionItems(promotionItems).length != 0" class="mt-0 pt-0 d-flex flex-column" style="padding-bottom: 0; padding-left: 70px; padding-right: 70px;">
       <v-row v-show="!isLoading && filterPromotionItems(promotionItems).length != 0" class="overflow-y-auto pt-2" >
         <v-col cols="12" class="py-0 mb-0">
           <div class="subtitle">Suggested for you</div>
         </v-col>
       </v-row>        
-      <v-row v-show="!isLoading" class="mx-0 px-0 d-flex align-baseline">
+      <v-row v-show="!isLoading" class="mx-0  d-flex align-baseline">
         <v-carousel class="promotionalMaterial mt-0 pt-0 mb-2" v-show="!isLoading && filterPromotionItems(promotionItems).length != 0" v-model="carouselIndex" :continuous="true" :cycle="true" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="160px">
           <v-carousel-item v-for="(promotionItem, i) in filterPromotionItems(promotionItems).slice(0, 5)" :key="i">
             <v-sheet :color="(i % 2 === 0) ? 'secondary' : 'accent'" height="150px" flat tile style="border-radius: 10px !important" class="mt-2">
@@ -72,14 +73,14 @@
     </v-container> 
 
     <v-container v-show="!isLoading" class="px-0 pt-0 overflow-x-hidden" transition="slide-x-transition">
-      <v-tabs v-model="secondaryCategoryTab" background-color="secondary" color="primary" dark>
-        <v-tab v-for="(category, index) in primaryCategoryList" :key="index">
+      <v-tabs v-model="secondaryCategoryTab" background-color="secondary" color="primary" dark >
+        <v-tab v-for="(category, index) in primaryCategoryList" :key="index" style="padding-left: 70px; padding-right: 70px;">
           {{ category.categoryName }}
         </v-tab>
       </v-tabs>
 
       <v-tabs-items v-model="secondaryCategoryTab">
-        <v-tab-item v-for="(category, index) in primaryCategoryList" :key="index">
+        <v-tab-item v-for="(category, index) in primaryCategoryList" :key="index" style="padding-left: 100px; padding-right: 100px;">
           <div v-if="category.menuItems.length == 0">
             <v-list v-for="(secondary, i) in secondaryCategoryList(category.categoryId)" :key="i" class="py-0">
               <div class="ml-2 mt-2">{{secondary.categoryName}}</div>

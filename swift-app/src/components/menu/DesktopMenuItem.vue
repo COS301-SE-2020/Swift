@@ -13,9 +13,9 @@
     <v-carousel v-if="!arActive && newMenuItem.images.length == 0" height="200px" :show-arrows="false" hide-delimiter-background continuous>
       <v-carousel-item v-for="(imageSrc,i) in newMenuItem.images" :key="i" src="../../assets/menuItemImages/item-placeholder.png"></v-carousel-item>
     </v-carousel>
-    <v-btn v-if="!arActive" width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 20px; left: 15px">
+    <!-- <v-btn v-if="!arActive" width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 20px; left: 15px">
       <v-icon>mdi-chevron-left</v-icon>
-    </v-btn>
+    </v-btn> -->
     <v-btn v-if="!arActive && (newMenuItem.arAsset != '')" @click="openARScanner" color="secondary" absolute small fab style="top: 175px; right: 65px;">
       <v-icon>mdi-cube-scan</v-icon>
     </v-btn>
@@ -25,7 +25,7 @@
       </v-btn>
     </v-fab-transition>
 
-    <v-card-text v-if="!arActive" class="pb-0 pt-3">
+    <v-card-text v-if="!arActive" class="pb-0 pt-3" style="padding-left: 70px; padding-right: 100px;">
       <v-row class="mx-0">
         <v-col cols="8" class="pl-0 pb-0">
           <span class="title black--text">{{newMenuItem.menuItemName}}</span>
@@ -36,7 +36,7 @@
       </v-row>
     </v-card-text>
 
-    <v-card-text v-if="!arActive" class="pt-0" >
+    <v-card-text v-if="!arActive" class="pt-0" style="padding-left: 70px; padding-right: 100px;">
       <v-row align="center" class="mx-0 my-4" >
         <v-col cols="8" class="px-0 py-0">
           <v-rating readonly size="18" dense color="yellow darken-3" background-color="secondary" :value="newMenuItem.rating"></v-rating>
@@ -53,7 +53,7 @@
         </v-chip>
         </v-col>
       </v-row> -->
-      <div v-show="newMenuItem.dietaryLabels.length != 0" v-for="(dietaryLabel, i) in newMenuItem.dietaryLabels" :key="i" style="display: inline;">
+      <div  v-show="newMenuItem.dietaryLabels.length != 0" v-for="(dietaryLabel, i) in newMenuItem.dietaryLabels" :key="i" style="display: inline;">
         <v-chip small class="mt-2 pb-0 mr-1" >
           {{dietaryLabel.name}}
         </v-chip>
@@ -72,7 +72,7 @@
     
 
     <v-tabs-items v-if="!arActive" v-model="tab">
-      <v-tab-item v-if="checkedIn()">
+      <v-tab-item v-if="checkedIn()" style="padding-left: 56px; padding-right: 120px;">
         <v-card flat>
           <v-card-title v-if="newMenuItem.attributes != null" class="pb-0 pt-4">Customise Order</v-card-title>
           <v-container>

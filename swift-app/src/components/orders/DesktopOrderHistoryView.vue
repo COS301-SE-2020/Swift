@@ -1,7 +1,7 @@
 <template>
-  <v-container class="orders" py-0 px-0>
+  <v-container class="orders pa-0">
     <DesktopNavbar v-show="!isLoading"></DesktopNavbar>
-    <v-container style="padding-left: 70px; padding-right: 70px;">
+    <v-container >
       <div v-show="isLoadingCartItem" style="display: flex; align-items: center; justify-content: center;">
         <v-progress-circular style="height: 400px" indeterminate color="primary"></v-progress-circular>
       </div>
@@ -18,9 +18,9 @@
         </v-card>
       </v-container>
 
-      <v-container v-show="!isLoadingCartItem" py-0 px-0>
+      <v-container v-show="!isLoadingCartItem" py-0 px-0 >
         <v-tabs-items v-model="tab">
-          <v-tab-item>
+          <v-tab-item style="padding-left: 70px; padding-right: 70px;">
             <div class="orderSearchBar mx-0 px-0 d-flex align-center  justify-center">
               <v-row class="mx-0 px-0 d-flex justify-center">
                 <v-col class="px-0" cols="11">

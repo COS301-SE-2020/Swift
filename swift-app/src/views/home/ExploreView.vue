@@ -362,7 +362,7 @@ export default {
       return true;
     },
     onResize () { 
-      this.isMobile = window.innerWidth < 600 
+      this.isMobile = $(window).width() < 600
     }
   },
   ...mapActions({

@@ -1,7 +1,7 @@
 <template>
   <v-container class="pa-0 ma-0">
     <div style="position: absolute; z-index: 100; right: 80px; top: 15px;">
-      <v-btn class="mr-3" elevation="2" width="35px" height="35px" @click="getNotifications" color="secondary" small fab>
+      <v-btn v-show="!isLoading" class="mr-3" elevation="2" width="35px" height="35px" @click="getNotifications" color="secondary" small fab>
         <v-icon size="23px">mdi-email-outline</v-icon>
       </v-btn>
       <v-btn class="mr-3" v-show="!isLoading" v-if="checkedIn()" @click="goToCart" app color="primary" width="35px" height="35px" dark  elevation="1"  fab>
@@ -24,7 +24,6 @@
               <span class="pl-1 pt-0 customerName">{{customerInfo.name}} {{customerInfo.surname}}</span>
             </v-col>
             <v-col cols="4" class="d-flex justify-end align-center">
-              
               <v-text-field class="searchBarBg" background-color="red" v-model="search" rounded solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search for a restaurant..."></v-text-field>
               <!-- <v-btn v-if="checkedIn()" @click="goToCart" elevation="2" width="35px" height="35px" small fab>
                 <v-icon size="23px">mdi-cart-outline</v-icon>
