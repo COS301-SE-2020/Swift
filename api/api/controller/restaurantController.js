@@ -890,12 +890,13 @@ module.exports = {
               // eslint-disable-next-line no-await-in-loop
               await client.query(
                 'UPDATE public.itemordered SET quantity = $1::integer, progress = $2::integer'
-                + ' WHERE orderid = $3::integer AND menuitemid = $4::integer',
+                + ' WHERE orderid = $3::integer AND menuitemid = $4::integer AND CAST(orderselections AS TEXT) = CAST($5::json AS TEXT)',
                 [
                   reqBody.orderItems[oi].quantity + itemOrdered.rows[0].quantity,
                   orderProgressReset,
                   reqBody.orderId,
-                  reqBody.orderItems[oi].menuItemId
+                  reqBody.orderItems[oi].menuItemId,
+                  reqBody.orderItems[oi].orderSelections
                 ]
               );
             }
