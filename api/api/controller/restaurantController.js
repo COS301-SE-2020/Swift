@@ -398,6 +398,7 @@ module.exports = {
 
           // get menu
           const menuResponse = {};
+          menuResponse.id = reqBody.restaurantId;
           menuResponse.name = res.rows[0].restaurantname;
           menuResponse.location = res.rows[0].location;
 
