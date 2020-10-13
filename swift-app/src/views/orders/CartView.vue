@@ -352,8 +352,12 @@ export default {
       this.addItemToEdit(item)
       this.$router.push("/menuItem/" + item.menuItemId);
     },
-    removeCartItem(item) {
-      this.removeItem(item.menuItemId)
+    async removeCartItem(item) {
+      await this.removeItem(item.menuItemId)
+      this.subtotal = 0;
+      this.quantity = [];
+      this.calculateCartTotal(this.orderInfo())
+      this.calculateCartTotal(this.orderedItems())
     },
     goToCart() {
       // this.$router.push('/cart')
@@ -374,6 +378,15 @@ export default {
       // console.log(this.checkedInRestaurantId)
       this.$router.push("/menu/" + this.checkedInRestaurantId());
     },
+    calculateCartTotal(arr) {
+      if (Object.keys(arr).length != 0) {
+        for (let i = 0; i < arr.orderItems.length; i++) {
+          let price = this.discounts.some(promo => promo.index == i) ? this.discounts.find(promo => promo.index == i).newPrice : arr.orderItems[i].itemTotal
+          this.subtotal += (price != null) ? parseFloat(price) * parseFloat(arr.orderItems[i].quantity) : 0;
+          this.quantity[i] = parseFloat(arr.orderItems[i].quantity)
+        }
+      }
+    },
     applyPromotionsToCart(arr) {
       let applyPromo = true;
       let promoArr = [];
@@ -385,7 +398,7 @@ export default {
             for (let y = 0; y < group.items.length; y++) {
               let item = group.items[y];
               let itemIndex = -1;
-              let addedToCart = this.orderInfo().orderItems.find((orderItem, index) => {
+              let addedToCart = arr.orderItems.find((orderItem, index) => {
                 if (item.attributeId != null) {
                   if (orderItem.menuItemId === item.itemId && orderItem.orderSelections.selections.some(selection => selection.id == item.attributeId && selection.values == item.attributeVal)) 
                     itemIndex = index
@@ -524,20 +537,8 @@ export default {
     this.applyPromotionsToCart(this.orderedItems())
 
     // this.clearItem;
-    if (Object.keys(this.orderInfo()).length != 0) {
-      for (let i = 0; i < this.orderInfo().orderItems.length; i++) {
-        let price = this.discounts.some(promo => promo.index == i) ? this.discounts.find(promo => promo.index == i).newPrice : this.orderInfo().orderItems[i].itemTotal
-        this.subtotal += (price != null) ? parseFloat(price) * parseFloat(this.orderInfo().orderItems[i].quantity) : 0;
-        this.quantity[i] = parseFloat(this.orderInfo().orderItems[i].quantity)
-      }
-    }
-    if (Object.keys(this.orderedItems()).length != 0) {
-      for (let i = 0; i < this.orderedItems().orderItems.length; i++) {
-        let price = this.discounts.some(promo => promo.index == i) ? this.discounts.find(promo => promo.index == i).newPrice : this.orderedItems().orderItems[i].itemTotal
-        this.subtotal += (price != null) ? parseFloat(price) * parseFloat(this.orderedItems().orderItems[i].quantity) : 0;
-        this.quantity[i] = parseFloat(this.orderedItems().orderItems[i].quantity)
-      }
-    }
+    this.calculateCartTotal(this.orderInfo())
+    this.calculateCartTotal(this.orderedItems())
 
     this.tip = this.subtotal * 0.1;
     if (Object.keys(this.wTip()).length != 0) {
