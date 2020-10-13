@@ -309,7 +309,9 @@ module.exports = {
                   .then(() => response.status(200).send({
                     restaurantId: res.rows[0].restaurantid,
                     tableId: res.rows[0].tableid,
-                    tableNumber: res.rows[0].tablenumber
+                    tableNumber: res.rows[0].tablenumber,
+                    qrCode: res.rows[0].qrcode,
+                    code: reqBody.code
                   }))
                   .catch((err) => {
                     console.error('Query Error [Restaurant - Update User CheckIn Status]', err.stack);
@@ -319,14 +321,16 @@ module.exports = {
 
               // user already checked in
               return db.query(
-                'SELECT tableid, tablenumber, restaurantid, numseats FROM public.restauranttable'
+                'SELECT tableid, tablenumber, restaurantid, numseats, qrcode FROM public.restauranttable'
                 + ' WHERE qrcode = $1::text;',
                 [cRes.rows[0].checkedin]
               )
                 .then((checkedInRes) => response.status(205).send({
                   restaurantId: checkedInRes.rows[0].restaurantid,
                   tableId: checkedInRes.rows[0].tableid,
-                  tableNumber: checkedInRes.rows[0].tablenumber
+                  tableNumber: checkedInRes.rows[0].tablenumber,
+                  qrCode: checkedInRes.rows[0].qrcode,
+                  code: reqBody.code
                 }))
                 .catch((err) => {
                   console.error('Query Error [Restaurant - Get Already CheckIn Details]', err.stack);
@@ -625,8 +629,8 @@ module.exports = {
             // add items to order
             // eslint-disable-next-line no-await-in-loop
             await client.query(
-              'INSERT INTO public.itemordered (orderid, menuitemid, quantity, orderselections, progress, itemtotal)'
-              + ' VALUES ($1::integer, $2::integer, $3::integer, $4::json, $5::integer, $6::real)',
+              'INSERT INTO public.itemordered (orderid, menuitemid, quantity, orderselections, progress, itemtotal, promoprice)'
+              + ' VALUES ($1::integer, $2::integer, $3::integer, $4::json, $5::integer, $6::real, $7::real)',
               [
                 resOrderId.rows[0].orderid,
                 orderInfo.orderItems[oi].menuItemId,
@@ -635,7 +639,8 @@ module.exports = {
                 Object.keys(orderInfo.orderItems[oi].orderSelections).length === 0
                   ? null : orderInfo.orderItems[oi].orderSelections,
                 initialProgress,
-                orderInfo.orderItems[oi].itemTotal
+                orderInfo.orderItems[oi].itemTotal,
+                orderInfo.orderItems[oi].promoPrice
               ]
             );
 
@@ -850,7 +855,7 @@ module.exports = {
             // add items to order
             // eslint-disable-next-line no-await-in-loop
             const itemOrdered = await client.query(
-              'SELECT quantity, itemtotal FROM public.itemordered'
+              'SELECT quantity, itemtotal, promoprice FROM public.itemordered'
               + ' WHERE orderid = $1::integer AND menuitemid = $2::integer',
               [reqBody.orderId, reqBody.orderItems[oi].menuItemId]
             );
@@ -859,8 +864,8 @@ module.exports = {
               // add item
               // eslint-disable-next-line no-await-in-loop
               await client.query(
-                'INSERT INTO public.itemordered (orderid, menuitemid, quantity, orderselections, progress, itemtotal)'
-              + ' VALUES ($1::integer, $2::integer, $3::integer, $4::json, $5::integer, $6::real)',
+                'INSERT INTO public.itemordered (orderid, menuitemid, quantity, orderselections, progress, itemtotal, promoprice)'
+              + ' VALUES ($1::integer, $2::integer, $3::integer, $4::json, $5::integer, $6::real, $7::real)',
                 [
                   reqBody.orderId,
                   reqBody.orderItems[oi].menuItemId,
@@ -869,7 +874,8 @@ module.exports = {
                   Object.keys(reqBody.orderItems[oi].orderSelections).length === 0
                     ? null : reqBody.orderItems[oi].orderSelections,
                   initialProgress,
-                  reqBody.orderItems[oi].itemTotal
+                  reqBody.orderItems[oi].itemTotal,
+                  reqBody.orderItems[oi].promoPrice
                 ]
               );
             } else {
@@ -878,11 +884,10 @@ module.exports = {
               // eslint-disable-next-line no-await-in-loop
               await client.query(
                 'UPDATE public.itemordered SET quantity = $1::integer, progress = $2::integer,'
-                + ' itemtotal = $3::real WHERE orderid = $4::integer AND menuitemid = $5::integer',
+                + ' WHERE orderid = $3::integer AND menuitemid = $4::integer',
                 [
                   reqBody.orderItems[oi].quantity + itemOrdered.rows[0].quantity,
                   orderProgressReset,
-                  reqBody.orderItems[oi].itemTotal + itemOrdered.rows[0].itemtotal,
                   reqBody.orderId,
                   reqBody.orderItems[oi].menuItemId
                 ]

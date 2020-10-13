@@ -5,7 +5,7 @@ const db = require('../db').poolr;
 // helper to get individual order items
 const getOrderItems = async (oid = 0) => db.query(
   'SELECT menuitem.menuitemid, menuitem.menuitemname, menuitem.menuitemdescription,'
-    + ' itemordered.itemtotal, itemordered.quantity, itemordered.orderselections,'
+    + ' itemordered.itemtotal, itemordered.promoprice, itemordered.quantity, itemordered.orderselections,'
     + ' itemordered.progress FROM public.itemordered'
     + ' INNER JOIN public.menuitem ON menuitem.menuitemid = itemordered.menuitemid'
     + ' WHERE itemordered.orderid = $1::integer;',
@@ -20,6 +20,7 @@ const getOrderItems = async (oid = 0) => db.query(
       orderItem.menuItemName = ordItem.menuitemname;
       orderItem.menuItemDescription = ordItem.menuitemdescription;
       orderItem.itemTotal = ordItem.itemtotal;
+      orderItem.promoPrice = ordItem.promoprice;
       orderItem.quantity = ordItem.quantity;
       orderItem.progress = ordItem.progress;
       orderItem.orderselections = ordItem.orderselections;
