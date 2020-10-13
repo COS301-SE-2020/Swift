@@ -77,16 +77,18 @@ module.exports = {
 
             // eslint-disable-next-line no-await-in-loop
             const ratingRes = await client.query(
-              'SELECT AVG(ratingscore) AS "rating" FROM public.review'
+              'SELECT AVG(ratingscore) AS "rating", COUNT(ratingscore) AS "numRated" FROM public.review'
               + ' WHERE restaurantid = $1::integer AND ratingscore IS NOT NULL;',
               [res.rows[r].restaurantid]
             );
 
             if (ratingRes.rows[0].rating != null) {
               restaurantResponse.restaurants[r].rating = ratingRes.rows[0].rating;
+              restaurantResponse.restaurants[r].numRated = ratingRes.rows[0].numRated;
             } else {
               // no rating available
               restaurantResponse.restaurants[r].rating = 0.0;
+              restaurantResponse.restaurants[r].numRated = 0;
             }
           }
 

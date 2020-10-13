@@ -297,15 +297,17 @@ const getMenuItems = (categoryId) => {
         // get menu item rating
         // eslint-disable-next-line no-await-in-loop
         const rtRes = await client.query(
-          'SELECT AVG(ratingscore) AS "rating" FROM public.review'
+          'SELECT AVG(ratingscore) AS "rating", COUNT(ratingscore) AS "numRated" FROM public.review'
           + ' WHERE menuitemid = $1::integer AND ratingscore IS NOT NULL;',
           [resMenuItem.menuitemid]
         );
 
         if (rtRes.rows.length === 0) {
           menuItem.rating = 0.0;
+          menuItem.numRated = 0;
         } else {
           menuItem.rating = parseFloat(rtRes.rows[0].rating);
+          menuItem.numRated = parseFloat(rtRes.rows[0].numRated);
         }
 
         // get menu item reviews
@@ -403,7 +405,7 @@ const getMenuItems = (categoryId) => {
         menuItem.ratingPhrases = [];
         // eslint-disable-next-line no-await-in-loop
         const rpRes = await client.query(
-          'SELECT ratingphrase.phraseid, ratingphrase.phrasedescription, AVG(customerphraserating.ratingscore) AS "rating"'
+          'SELECT ratingphrase.phraseid, ratingphrase.phrasedescription, AVG(customerphraserating.ratingscore) AS "rating", COUNT(customerphraserating.ratingscore) AS "numRated"'
           + ' FROM public.customerphraserating'
           + ' INNER JOIN public.ratingphrase ON ratingphrase.phraseid = customerphraserating.phraseid'
           + ' INNER JOIN public.review ON customerphraserating.reviewid = review.reviewid'
@@ -417,6 +419,7 @@ const getMenuItems = (categoryId) => {
           ratingphraseItem.phraseId = ratePhrase.phraseid;
           ratingphraseItem.phrase = ratePhrase.phrasedescription;
           ratingphraseItem.rating = ratePhrase.rating;
+          ratingphraseItem.numRated = ratePhrase.numRated;
           menuItem.ratingPhrases.push(ratingphraseItem);
         });
 
