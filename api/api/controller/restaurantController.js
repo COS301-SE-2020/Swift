@@ -857,14 +857,16 @@ module.exports = {
             // add items to order
             // eslint-disable-next-line no-await-in-loop
             const itemOrdered = await client.query(
-              'SELECT quantity, itemtotal, promoprice, orderselections FROM public.itemordered'
-              + ' WHERE orderid = $1::integer AND menuitemid = $2::integer',
-              [reqBody.orderId, reqBody.orderItems[oi].menuItemId]
+              'SELECT quantity, itemtotal, promoprice FROM public.itemordered'
+              + ' WHERE orderid = $1::integer AND menuitemid = $2::integer AND CAST(orderselections AS TEXT) = CAST($3::json AS TEXT)',
+              [
+                reqBody.orderId,
+                reqBody.orderItems[oi].menuItemId,
+                reqBody.orderItems[oi].orderSelections
+              ]
             );
 
-            if (itemOrdered.rows.length === 0 || (itemOrdered.rows.length !== 0
-              && JSON.stringify(itemOrdered.rows[0].orderselections)
-                !== JSON.stringify(reqBody.orderItems[oi].orderSelections))) {
+            if (itemOrdered.rows.length === 0) {
               // add item
               // eslint-disable-next-line no-await-in-loop
               await client.query(
@@ -887,7 +889,7 @@ module.exports = {
               const orderProgressReset = 0;
               // eslint-disable-next-line no-await-in-loop
               await client.query(
-                'UPDATE public.itemordered SET quantity = $1::integer, progress = $2::integer,'
+                'UPDATE public.itemordered SET quantity = $1::integer, progress = $2::integer'
                 + ' WHERE orderid = $3::integer AND menuitemid = $4::integer',
                 [
                   reqBody.orderItems[oi].quantity + itemOrdered.rows[0].quantity,
