@@ -271,6 +271,86 @@ module.exports = {
     // Invalid token
     return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
   },
+  checkinCode: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'code')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || Object.keys(reqBody).length !== 3) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token validity
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      return db.query(
+        'SELECT tableid, tablenumber, restaurantid, numseats, qrcode FROM public.restauranttable'
+        + ' WHERE code = $1::text;',
+        [reqBody.code]
+      )
+        .then((res) => {
+          if (res.rows.length === 0) {
+            // code not found
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          // check if user already checked in
+          return db.query(
+            'SELECT checkedin FROM public.person'
+            + ' WHERE userid = $1::integer;',
+            [userToken.data.userId]
+          )
+            .then((cRes) => {
+              if (cRes.rows[0].checkedin == null) {
+                // check in user
+                return dbw.query(
+                  'UPDATE public.person SET checkedin = $1::text WHERE userid = $2::integer;',
+                  [res.rows[0].qrcode, userToken.data.userId]
+                )
+                  .then(() => response.status(200).send({
+                    restaurantId: res.rows[0].restaurantid,
+                    tableId: res.rows[0].tableid,
+                    tableNumber: res.rows[0].tablenumber
+                  }))
+                  .catch((err) => {
+                    console.error('Query Error [Restaurant - Update User CheckIn Status]', err.stack);
+                    return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+                  });
+              }
+
+              // user already checked in
+              return db.query(
+                'SELECT tableid, tablenumber, restaurantid, numseats FROM public.restauranttable'
+                + ' WHERE qrcode = $1::text;',
+                [cRes.rows[0].checkedin]
+              )
+                .then((checkedInRes) => response.status(205).send({
+                  restaurantId: checkedInRes.rows[0].restaurantid,
+                  tableId: checkedInRes.rows[0].tableid,
+                  tableNumber: checkedInRes.rows[0].tablenumber
+                }))
+                .catch((err) => {
+                  console.error('Query Error [Restaurant - Get Already CheckIn Details]', err.stack);
+                  return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+                });
+            })
+            .catch((err) => {
+              console.error('Query Error [Restaurant - Check User CheckIn Status]', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
+        })
+        .catch((err) => {
+          console.error('Query Error [Restaurant - Get CheckIn Details]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
   checkOut: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
@@ -971,6 +1051,40 @@ module.exports = {
         })
         .catch((err) => {
           console.error('Query Error [Restaurant - Get Table QR code]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
+  getTableCode: (reqBody, response) => {
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'tableId')
+      || Object.keys(reqBody).length !== 3) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      return db.query(
+        'SELECT code FROM public.restauranttable WHERE tableid = $1::integer',
+        [reqBody.tableId]
+      )
+        .then((res) => {
+          if (res.rows.length === 0) {
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          return response.status(200).send({ code: res.rows[0].code });
+        })
+        .catch((err) => {
+          console.error('Query Error [Restaurant - Get Table code]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }

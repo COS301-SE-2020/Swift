@@ -186,6 +186,10 @@ router.post('/', (req, res) => {
         restaurantController.checkIn(req.body, res);
         break;
       }
+      case 'checkinCode': {
+        restaurantController.checkinCode(req.body, res);
+        break;
+      }
       case 'checkout': {
         restaurantController.checkOut(req.body, res);
         break;
@@ -220,6 +224,10 @@ router.post('/', (req, res) => {
       }
       case 'getTableQR': {
         restaurantController.getTableQRCode(req.body, res);
+        break;
+      }
+      case 'getTableCode': {
+        restaurantController.getTableCode(req.body, res);
         break;
       }
       case 'getTableStatus': {
