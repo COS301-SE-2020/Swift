@@ -226,10 +226,6 @@ router.post('/', (req, res) => {
         restaurantController.getTableQRCode(req.body, res);
         break;
       }
-      case 'getTableCode': {
-        restaurantController.getTableCode(req.body, res);
-        break;
-      }
       case 'getTableStatus': {
         restaurantAdminController.getTableStatus(req.body, res);
         break;

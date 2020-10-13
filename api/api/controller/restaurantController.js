@@ -1039,7 +1039,7 @@ module.exports = {
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
       return db.query(
-        'SELECT qrcode FROM public.restauranttable WHERE tableid = $1::integer',
+        'SELECT qrcode, code FROM public.restauranttable WHERE tableid = $1::integer',
         [reqBody.tableId]
       )
         .then((res) => {
@@ -1047,44 +1047,13 @@ module.exports = {
             return response.status(404).send({ status: 404, reason: 'Not Found' });
           }
 
-          return response.status(200).send({ qrcode: res.rows[0].qrcode });
+          return response.status(200).send({
+            qrcode: res.rows[0].qrcode,
+            code: res.rows[0].code
+          });
         })
         .catch((err) => {
           console.error('Query Error [Restaurant - Get Table QR code]', err.stack);
-          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
-        });
-    }
-
-    if (userToken.state === tokenState.REFRESH) {
-      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
-    }
-
-    // Invalid token
-    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
-  },
-  getTableCode: (reqBody, response) => {
-    if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
-      || !Object.prototype.hasOwnProperty.call(reqBody, 'tableId')
-      || Object.keys(reqBody).length !== 3) {
-      return response.status(400).send({ status: 400, reason: 'Bad Request' });
-    }
-
-    // Check token
-    const userToken = validateToken(reqBody.token, true);
-    if (userToken.state === tokenState.VALID) {
-      return db.query(
-        'SELECT code FROM public.restauranttable WHERE tableid = $1::integer',
-        [reqBody.tableId]
-      )
-        .then((res) => {
-          if (res.rows.length === 0) {
-            return response.status(404).send({ status: 404, reason: 'Not Found' });
-          }
-
-          return response.status(200).send({ code: res.rows[0].code });
-        })
-        .catch((err) => {
-          console.error('Query Error [Restaurant - Get Table code]', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
     }
