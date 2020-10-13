@@ -65,6 +65,23 @@ const actions = {
     });
   },
 
+  checkInCustomerManually({commit}, data) {
+    return axios.post('https://api.swiftapp.ml', 
+      {
+        "requestType": "checkinCode",
+        "code": data.code,
+        "token": sessionStorage.getItem('authToken'),
+      }
+    ).then(result => {
+      console.log(result.data)
+      commit('SET_CHECKED_IN_CODE', result.data.qrCode);
+      commit('SET_CHECKED_IN_RESTAURANT_ID', result.data.restaurantId);
+      commit('SET_CHECKED_IN_TABLE_ID', result.data.tableId);
+      return result.data;
+    }).catch(({ response }) => {
+    });
+  },
+
   checkOutCustomer({commit}, data) {
     return axios.post('https://api.swiftapp.ml', 
       {

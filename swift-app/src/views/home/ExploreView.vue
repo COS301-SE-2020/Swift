@@ -397,13 +397,18 @@ export default {
     },
     filteredList() {
       if (Array.isArray(this.allRestaurants)) {
-        var items =  this.allRestaurants.filter(restaurant => 
+        var items = [];
+        items = this.allRestaurants.filter(restaurant => 
           this.containsCategories(restaurant.categories, this.selectedCategories) && restaurant.name.toLowerCase().includes(this.search.toLowerCase())
         )
 
-        return items.slice().sort(function(a, b) {
-          return b.rating - a.rating;
-        });
+        if (items.length != 0) {
+          return items.slice().sort(function(a, b) {
+            return b.rating - a.rating;
+          });
+        }
+
+        
       }
     },
     carouselTab () {
