@@ -80,35 +80,35 @@
           </v-carousel>
         </v-container>
 
-        <v-container v-show="!isLoading" py-0 transition="slide-x-transition">
+        <v-container v-if="!isLoading" py-0 transition="slide-x-transition">
           <v-row style="max-width: 400px" class="overflow-y-auto">
             <v-col cols="12">
               <div class="categoryTitle">Categories</div>
             </v-col>
           </v-row>
-          <v-sheet class="mx-auto" max-width="700">
-            <v-slide-group multiple>
-              <v-slide-item v-for="(category, index) in exploreCategories" :key="index">
-                <div class="mr-3" align="center">
-                  <v-btn color="primary" width="60px" height="60px" min-width="60px" class="categoryButtons"  @click="restCategories[index] = !restCategories[index]; toggleCategoryActive(index)">
-                    <v-img v-if="!restCategories[index]" height="60px" width="60px" :src="category.categoryImage"></v-img>
-                    <v-icon size="35px" v-else >{{category.categoryicon}}</v-icon>
-                  </v-btn>
-                  <div class="mt-1 caption">{{category.categoryName}}</div>
-                </div>
-              </v-slide-item>
-            </v-slide-group>
-          </v-sheet>
+          <!-- <v-sheet class="mx-auto" max-width="700"> -->
+          <v-slide-group multiple >
+            <v-slide-item v-for="(category, index) in exploreCategories" :key="index">
+              <div class="mr-3" align="center">
+                <v-btn color="primary" width="60px" height="60px" min-width="60px" class="categoryButtons"  @click="restCategories[index] = !restCategories[index]; toggleCategoryActive(index)">
+                  <v-img v-if="!restCategories[index]" height="60px" width="60px" :src="category.categoryImage"></v-img>
+                  <v-icon size="35px" v-else >{{category.categoryicon}}</v-icon>
+                </v-btn>
+                <div class="mt-1 caption">{{category.categoryName}}</div>
+              </div>
+            </v-slide-item>
+          </v-slide-group>
+          <!-- </v-sheet> -->
 
 
-          <v-row style="max-width: 400px" class="overflow-y-auto" v-show="filteredList != undefined && filteredList.length != 0">
+          <v-row style="max-width: 400px" class="overflow-y-auto" v-if="filteredList != undefined && filteredList.length != 0">
             <v-col cols="12">
               <div class="categoryTitle">Most Popular</div>
             </v-col>
           </v-row>
-          <v-sheet class="mx-auto" max-width="700" v-show="filteredList != undefined">
+          <!-- <v-sheet class="mx-auto" max-width="700" v-show="filteredList != undefined"> -->
             <v-slide-group multiple>
-              <v-slide-item v-for="(card, index) in filteredList" :key="index">
+              <v-slide-item v-for="(card, index) in filteredList" :key="index" >
                 
                 <v-card ripple flat width="200px" class="mr-4">
                   <v-img :src="card.image" @click="goToRestaurant(card.restaurantId)" class="white--text align-center restaurantImage" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="125px" >
@@ -128,28 +128,12 @@
                 </v-card>
               </v-slide-item>
             </v-slide-group>
-          </v-sheet>
-          <!-- <v-row style="max-width: 400px" class="overflow-y-auto">
-            <v-col cols="12">
-              <div class="categoryTitle">Recommended</div>
-            </v-col>
-          </v-row>
-          <v-row style="max-width: 400px" class="overflow-y-auto">
-            <v-col cols="12">
-              <div class="categoryTitle">Trending</div>
-            </v-col>
-          </v-row>
-          <v-row style="max-width: 400px" class="overflow-y-auto">
-            <v-col cols="12">
-              <div class="categoryTitle">Nearby</div>
-            </v-col>
-          </v-row> -->
           <v-row style="max-width: 400px" class="overflow-y-auto">
             <v-col cols="12">
               <div class="categoryTitle">Based On Your Ratings</div>
             </v-col>
           </v-row>
-          <v-sheet class="mx-auto" max-width="700">
+          <!-- <v-sheet class="mx-auto" max-width="700"> -->
             <v-slide-group multiple>
               <v-slide-item v-for="(item, index) in suggestedItemsFromRatings" :key="index">
                 <v-card ripple flat width="200px" class="mr-4">
@@ -162,7 +146,7 @@
                 </v-card>
               </v-slide-item>
             </v-slide-group>
-          </v-sheet>
+          <!-- </v-sheet> -->
         </v-container>
 
         <v-container v-show="!isLoading && (filteredList != undefined && filteredList.length != 0)" class="mt-0 pt-0">
@@ -622,4 +606,9 @@ export default {
   .v-slide-group__wrapper {
     touch-action: auto !important;
   }
+
+  .categoriesScroll {
+    overflow: hidden;
+  }
+
 </style>
