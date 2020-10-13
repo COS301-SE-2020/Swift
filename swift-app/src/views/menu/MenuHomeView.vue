@@ -313,6 +313,12 @@ export default {
       
       if (menuResponse)
         this.isLoading = !this.isLoading;
+    } else {
+      this.isLoading = !this.isLoading;
+      if (this.promotionItems.length == 0) {
+        await this.$store.dispatch('MenuStore/retrieveSuggestedPromotions', this.$route.params.menuId);
+      }
+      this.isLoading = !this.isLoading;
     }
   },
   computed: {

@@ -279,8 +279,11 @@ export default {
   }),
   methods: {
     async goToRestaurant (id) {
-      await this.clearMenu;
-      this.$store.dispatch('RestaurantsStore/retrieveRestaurantMenu', id);
+      if (this.menu.id != id) {
+        await this.clearMenu
+        this.$store.dispatch('RestaurantsStore/retrieveRestaurantMenu', id);
+      }
+      
       this.$router.push("/menu/" + id);
     },
     goToCheckin () {
@@ -414,7 +417,7 @@ export default {
           this.containsCategories(restaurant.categories, this.selectedCategories) && restaurant.name.toLowerCase().includes(this.search.toLowerCase())
         )
       }
-      
+
       return items;
     },
     carouselTab () {
@@ -438,6 +441,7 @@ export default {
       suggestedItemsIds: 'RestaurantsStore/getSuggestedItemsIds',
       suggestedItemsFromRatings: 'RestaurantsStore/getSuggestedItemsFromRatings',
       activePromotions: 'RestaurantsStore/getAllActiveRestaurantPromotions',
+      menu: "MenuStore/getMenu",
     }),
   },
 }

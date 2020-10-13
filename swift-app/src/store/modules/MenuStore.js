@@ -3,6 +3,7 @@ import axios from 'axios'
 // State object
 const initialState = () => ({
   menu: {},
+  checkedInMenu: {},
   promotionItems: []
 });
 

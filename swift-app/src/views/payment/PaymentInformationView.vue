@@ -249,13 +249,16 @@ export default {
       this.$router.go(-1)
     },
     async hideAlert () {
-      await this.submitPayment()
-      await this.updateOrderFlag(false);
+      await this.$store.dispatch('OrderStore/submitPayment');
+      console.log('ordered')
+      console.log(this.orderFlag())
+      await this.$store.dispatch('OrderStore/updateOrderFlag', false);
+      console.log(this.orderFlag())
       
-      await this.checkout
-      await this.setCheckedInQRCode (null)
-      await this.setCheckedInRestaurantId (null)
-      await this.setCheckedInTableId (null)
+      // await this.$store.dispatch('CustomerStore/checkOutCustomer');
+      // await this.$store.commit('CustomerStore/SET_CHECKED_IN_TABLE_ID', null);
+      // await this.$store.commit('CustomerStore/SET_CHECKED_IN_CODE', null);
+      // await this.$store.commit('CustomerStore/SET_CHECKED_IN_RESTAURANT_ID', null);
       this.$router.push('/orders')
     },
     calculateTotal() {

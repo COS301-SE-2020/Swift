@@ -163,6 +163,9 @@ const actions = {
       }
     ).then(result => {
       commit('CLEAR_ITEMS');
+      // commit('UPDATE_ORDER_FLAG', false);
+      // dispatch('OrderStore/updateOrderFlag', false);
+      // this.orderFlag = false;
     }).catch(({ response }) => {
     });
   },
