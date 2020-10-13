@@ -13,14 +13,14 @@
     <v-carousel v-if="!arActive && newMenuItem.images.length == 0" height="200px" :show-arrows="false" hide-delimiter-background continuous>
       <v-carousel-item v-for="(imageSrc,i) in newMenuItem.images" :key="i" src="../../assets/menuItemImages/item-placeholder.png"></v-carousel-item>
     </v-carousel>
-    <!-- <v-btn v-if="!arActive" width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 20px; left: 15px">
+    <v-btn v-if="!arActive" width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 30px; left: 65px">
       <v-icon>mdi-chevron-left</v-icon>
-    </v-btn> -->
-    <v-btn v-if="!arActive && (newMenuItem.arAsset != '')" @click="openARScanner" color="secondary" absolute small fab style="top: 175px; right: 65px;">
+    </v-btn>
+    <v-btn v-if="!arActive && (newMenuItem.arAsset != '')" @click="openARScanner" color="secondary" absolute small fab style="top: 175px; right: 135px;">
       <v-icon>mdi-cube-scan</v-icon>
     </v-btn>
     <v-fab-transition v-if="!arActive">
-      <v-btn @click="changeFavourite" :key="activateFavourite.icon" :color="activateFavourite.color" style="top: 175px;" absolute small fab  right >
+      <v-btn @click="changeFavourite" :key="activateFavourite.icon" :color="activateFavourite.color" style="top: 175px; right: 85px;" absolute small fab  right >
         <v-icon>{{ activateFavourite.icon }}</v-icon>
       </v-btn>
     </v-fab-transition>
@@ -144,7 +144,7 @@
         <v-card flat class="mt-2 mb-5">
           <v-row v-for="phrase in newMenuItem.ratingPhrases" :key="phrase.phrase">
             <v-card-text class="pb-0 pt-1 mt-0 ml-5">
-              <v-row class="mx-0 pb-0 pt-1">
+              <v-row class="mr-0 pb-0 pt-1 ml-12">
                 <v-col cols="8" class="pt-0 pl-0 pb-0">
                   <span class="black--text" style="font-size: 15px">{{phrase.phrase}}</span>
                 </v-col>

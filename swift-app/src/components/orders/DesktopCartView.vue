@@ -1,14 +1,16 @@
 <template>
-<v-container fill-height class="pa-0 cartOrders overflow-x-hidden" fluid>
-    <v-toolbar elevation='2' class="cartHeader">
+<v-container  class="pa-0 cartOrders overflow-x-hidden" fluid>
+  <DesktopNavbar></DesktopNavbar>
+  <v-container fill-height style="padding-left: 150px; padding-right: 170px;">
+    <v-toolbar elevation='0' class="cartHeader">
       <v-container>
         <v-row>
-          <v-col cols='1' class="pl-0">
+          <!-- <v-col cols='1' class="pl-0">
             <v-btn icon @click="goBack">
               <v-icon>mdi-chevron-left</v-icon>
             </v-btn>
-          </v-col>
-          <v-col cols='11' class="pl-0 d-flex justify-center align-self-center">
+          </v-col> -->
+          <v-col cols='12' class="pl-0 d-flex justify-center align-self-center">
             <v-toolbar-title >Your Order</v-toolbar-title>
           </v-col>
         </v-row>
@@ -157,30 +159,35 @@
             </v-card>
           </v-col>
         </v-row>
-        <v-row class="d-flex justify-space-around mt-5 mb-3" >
+        <v-row class="d-flex justify-space-around mt-12 mb-3" >
           <v-col cols="5" class="pa-0">
               <v-btn v-show="Object.keys(orderInfo()).length != 0" rounded color="primary" elevation="2" class="body-2" width="100%" @click="goToOrder">Order Now, Pay Later</v-btn>
           </v-col>
           <v-col cols="5" class="pa-0">
-              <v-btn rounded color="accent" elevation="2" class="body-2" width="100%" @click="goToPayment">Pay Now</v-btn>
+              <v-btn rounded color="accent" elevation="2" class="body-2" width="50%" @click="goToPayment">Pay Now</v-btn>
           </v-col>
         </v-row>
       </div>
     </v-container>
     
 
-    <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
+    <!-- <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
       <v-icon>mdi-cart-outline</v-icon>
-    </v-btn>
+    </v-btn> -->
+    </v-container>
   </v-container>
 </template>
 
 <script>
 import { mapActions, mapGetters, mapMutations } from "vuex";
 import NavBar from '@/components/layout/NavBar';
+import DesktopNavbar from '@/components/layout/DesktopNavbar';
 
 export default {
   name: 'DesktopCart',
+  components: {
+    'DesktopNavbar': DesktopNavbar,
+  },
   data () {
     return {
       subtotal: 0,
@@ -194,9 +201,6 @@ export default {
         { img: 'https://source.unsplash.com/2NaeHe0-p1I/800x800/', name: 'Fruit Salad', price: '85.00'}
       ],
     }
-  },
-  components: {
-    'NavBar': NavBar
   },
   methods: {
     goBack () {

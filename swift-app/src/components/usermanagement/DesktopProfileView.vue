@@ -1,5 +1,8 @@
 <template>
   <v-container class="pa-0" style="overflow-x: hidden">
+    <v-btn style="position: absolute; top: 15px; right: 50px; z-index: 100;" class="mr-3" v-show="!isLoading" v-if="checkedIn()" @click="goToCart" app color="primary" width="35px" height="35px" dark  elevation="1"  fab>
+      <v-icon>mdi-cart-outline</v-icon>
+    </v-btn>
     <DesktopNavbar v-show="!isLoading"></DesktopNavbar>
     <v-container style="padding-left: 70px; padding-right: 70px;">
       <v-row class="mt-2">
@@ -119,9 +122,9 @@
           </v-list>
         </v-tab-item>
       </v-tabs-items>
-      <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
+      <!-- <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
         <v-icon>mdi-cart-outline</v-icon>
-      </v-btn>
+      </v-btn> -->
     </v-container>
   </v-container>
 

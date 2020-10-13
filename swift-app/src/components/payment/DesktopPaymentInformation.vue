@@ -1,13 +1,14 @@
 <template>
   <v-container class="pl-0 pt-0 pr-0 pb-0 overflow-y-auto overflow-x-hidden" fluid>
-    <v-card class="mx-auto pr-0 pl-0 pt-0 mt-0" height="65px" elevation="1" style="line-height: 2.9; border-radius: 0">
+    <DesktopNavbar></DesktopNavbar>
+    <v-card class="mx-auto pr-0 pl-0 pt-0 mt-0" height="65px" elevation="0" style="line-height: 2.9; border-radius: 0">
       <v-row class="mt-0 pt-0" align="center">
-        <v-col cols="3" class="mt-0 pt-1 pr-0 pb-0">
+        <!-- <v-col cols="3" class="mt-0 pt-1 pr-0 pb-0">
           <v-btn @click="backNavigation" color="secondary" small text>
             <v-icon size="35">mdi-chevron-left</v-icon>
           </v-btn>
-        </v-col>
-        <v-col cols="9" class="mt-0 pt-0 pr-0 pb-0" align="left">
+        </v-col> -->
+        <v-col cols="9" class="mt-0 pt-0 pr-0 pb-0 ml-16" align="left">
           <span style="font-size: 27px">Payment Method</span>
         </v-col>
       </v-row>
@@ -172,11 +173,13 @@
 <script>
 import NavBar from "@/components/layout/NavBar";
 import { mapActions, mapGetters, mapMutations } from "vuex";
+import DesktopNavbar from '@/components/layout/DesktopNavbar';
 
 export default {
   name: 'DesktopPaymentInformation',
     components: {
-      NavBar: NavBar
+      NavBar: NavBar,
+      'DesktopNavbar': DesktopNavbar,
     },
     data() {
     return {

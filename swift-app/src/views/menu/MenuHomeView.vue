@@ -13,8 +13,10 @@
                 <v-carousel height="200px" :show-arrows="false" hide-delimiter cycle hide-delimiters continuous>
                   <v-carousel-item gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.4)" :src="menu.image">
                     <v-row  align="center" justify="center" class="mt-6">
-                      <div v-if="checkedIn()" class="white--text display-1">Welcome to<br/> {{menu.name}}</div>
-                      <div v-if="!checkedIn()" class="white--text display-1">{{menu.name}}</div>
+                      <v-col cols="12" v-if="checkedIn()" class="white--text display-1 py-0" style="text-align: center;">Welcome to {{menu.name}}</v-col>
+                      <v-col cols="12" v-if="!checkedIn()" class="white--text display-1 py-0" style="text-align: center;">{{menu.name}}</v-col>
+                    </v-row>
+                    <v-row  align="center" justify="center" class="mt-2">
                       <v-col cols="9" class="mt-3">
                         <v-text-field background-color="white" class="menuItemSearchbar"  v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search..."></v-text-field>
                       </v-col>

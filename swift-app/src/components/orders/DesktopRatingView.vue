@@ -1,15 +1,16 @@
 <template>
   <v-container fluid>
+    <!-- <DesktopNavbar></DesktopNavbar> -->
     <v-row v-for="(ratingType, index) in itemToRate().rating" :key="index">
       <v-container v-show="currentIndex == index">
         <v-card class="mx-auto" flat>
           <v-row class="mt-3">
-            <v-col cols="3" class="mt-0 pt-1 pr-0">
+            <v-col cols="1" class="mt-0 pt-1 pr-0">
               <v-btn @click="backNavigation" color="secondary" small text>
                 <v-icon size="35">mdi-chevron-left</v-icon>
               </v-btn>
             </v-col>
-            <v-col cols="9" class="mt-0 pt-0" align="left">
+            <v-col cols="9" class="mt-0 pt-0 ml-16" align="center">
               <span style="font-size: 27px">Rate {{ratingType.type}}</span>
             </v-col>
           </v-row>
@@ -182,8 +183,12 @@
 
 <script>
 import { mapActions, mapGetters, mapMutations } from "vuex";
+import DesktopNavbar from '@/components/layout/DesktopNavbar';
 
 export default {
+  components: {
+    'DesktopNavbar': DesktopNavbar,
+  },
   name: 'DesktopRating',
     data() {
     return {

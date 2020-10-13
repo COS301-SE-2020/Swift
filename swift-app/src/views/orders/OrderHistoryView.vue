@@ -7,7 +7,7 @@
       </div>
       <v-container v-show="!isLoadingCartItem" pa-0>
         <v-card flat>
-          <v-tabs v-model="tab" background-color="white" grow class="orderTabs">
+          <v-tabs v-model="tab"  grow class="orderTabs">
             <v-tab>
               Order History
             </v-tab>

@@ -1,7 +1,10 @@
 <template>
   <v-container class="orders pa-0">
+    <v-btn style="position: absolute; top: 15px; right: 50px; z-index: 100;" class="mr-3" v-show="!isLoading" v-if="checkedIn()" @click="goToCart" app color="primary" width="35px" height="35px" dark  elevation="1"  fab>
+      <v-icon>mdi-cart-outline</v-icon>
+    </v-btn>
     <DesktopNavbar v-show="!isLoading"></DesktopNavbar>
-    <v-container >
+    <v-container class="pa-0">
       <div v-show="isLoadingCartItem" style="display: flex; align-items: center; justify-content: center;">
         <v-progress-circular style="height: 400px" indeterminate color="primary"></v-progress-circular>
       </div>
@@ -20,8 +23,8 @@
 
       <v-container v-show="!isLoadingCartItem" py-0 px-0 >
         <v-tabs-items v-model="tab">
-          <v-tab-item style="padding-left: 70px; padding-right: 70px;">
-            <div class="orderSearchBar mx-0 px-0 d-flex align-center  justify-center">
+          <v-tab-item style="padding-left: 70px; padding-right: 70px; margin-top: 20px;">
+            <div class=" mx-0 px-0 d-flex align-center justify-center">
               <v-row class="mx-0 px-0 d-flex justify-center">
                 <v-col class="px-0" cols="11">
                   <v-text-field class="searchBarBg orderSearch mx-0" v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search for restaurant or order..."></v-text-field>
@@ -106,31 +109,48 @@
                           <div class="body-1 secondary--text">Order No: {{item.orderNumber}}</div>
                       </v-col>
                     </v-row>
-
-                    <v-row class="mt-12 mb-0 py-0 mx-1">
-                      <v-col cols="5" class="pb-0 pl-4 py-0">
-                          <div class="mt-2 body-1 secondary--text">Order Placed</div>
+                    <v-row class="mt-12 mb-0 py-0 mr-0 d-flex justify-end">
+                      <v-col cols="1" class="pb-0 pl-4 py-0">
+                          <div class="mt-6 body-1 secondary--text">Order Placed</div>
                           <div class="secondary--text" style="font-size:10px"><v-icon size="13px" class="font-weight-light">mdi-clock-time-four-outline</v-icon> {{displayOrderTime(item)}} </div>
                       </v-col>
-                      <v-col cols="2" class="pb-0 pl-0 py-0" style="margin-left: 2px;">
+                       <v-col cols="3" class="py-0 px-0 mx-0" style="display: table;">
+                        <div style="height: 0; display: flex; align-items: center;">
                           <v-icon id="orderPlacedIcon" size="50" class="pb-0 font-weight-light" color="primary">mdi-clock-time-four</v-icon>
+                          <v-progress-linear stream buffer-value="0" :value="item.progress" style="display: block; white-space: nowrap; progressBar"></v-progress-linear>
+                          <v-avatar color="primary" id="orderDoneIcon" size="45" class="ma-0 pa-0" >
+                            <v-icon size="32" class="font-weight-light ma-0 pa-0" color="white">mdi-pot-steam</v-icon>
+                          </v-avatar>
+                        </div>
+                      </v-col>
+                      <v-col cols="6" class="pb-0 pl-4">
+                          <div class="mt-2 body-1 secondary--text" v-show="parseInt(item.progress) > 0">Order Busy</div>
+                      </v-col>
+                      <v-col cols="6" class="pb-0 pl-7 pr-0 pt-0 mr-3">
+                          <div class="secondary--text" style="font-size:12px" v-show="parseInt(item.progress) > 0">Our chef is busy preparing your order</div>
+                      </v-col>
+                    </v-row>
+                    <v-row>
+                      <v-col cols="12" class="pb-0 pl-5 ">
+                        <div class="mt-2 body-1 secondary--text d-flex justify-center">Complete</div>
+                        <div class="secondary--text d-flex justify-center" style="font-size:35px">{{item.progress}}%</div>
                       </v-col>
                     </v-row>
 
-                    <v-row class="my-0 py-0 mx-0">
-                      <v-col cols="6" class="py-0 px-0 mx-0" style="display: table;">
-                        <div style="height: 0; padding: 43% 0;">
-                          <v-progress-linear stream buffer-value="0" :value="item.progress" style="display: block; transform-origin: top right; transform: rotate(90deg); margin-top: 50%; white-space: nowrap; progressBar"></v-progress-linear>
+                    <!-- <v-row class="my-0 py-0 mx-0">
+                      <v-col cols="3" class="py-0 px-0 mx-0" style="display: table;">
+                        <div style="height: 0;">
+                          <v-progress-linear stream buffer-value="0" :value="item.progress" style="display: block; white-space: nowrap; progressBar"></v-progress-linear>
                         </div>
                       </v-col>
                       <v-col cols="6" class="pb-0 pl-5">
                           <div class="mt-2 body-1 secondary--text d-flex justify-center">Complete</div>
                           <div class="secondary--text d-flex justify-center" style="font-size:35px">{{item.progress}}%</div>
                       </v-col>
-                    </v-row>
+                    </v-row> -->
 
-                    <v-row class="mt-0 mb-0 py-0 mx-1">
-                      <v-col cols="5" class="pb-0 pl-4">
+                    <!-- <v-row class="mt-0 mb-0 py-0 mr-11">
+                      <v-col cols="6" class="pb-0 pl-4">
                           <div class="mt-2 body-1 secondary--text" v-show="parseInt(item.progress) > 0">Order Busy</div>
                       </v-col>
                       <v-col cols="1" class="pb-0 pl-0" style="margin-left: 4px;">
@@ -141,7 +161,7 @@
                       <v-col cols="5" class="pb-0 pl-7 pr-0">
                           <div class="secondary--text" style="font-size:12px" v-show="parseInt(item.progress) > 0">Our chef is busy preparing your order</div>
                       </v-col>
-                    </v-row>
+                    </v-row> -->
                   <!-- </v-container> -->
                 </v-tab-item>
               </v-tabs>
@@ -149,9 +169,9 @@
           </v-tab-item>
         </v-tabs-items>
       </v-container>
-      <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
+      <!-- <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
         <v-icon>mdi-cart-outline</v-icon>
-      </v-btn>
+      </v-btn> -->
     </v-container>
       
   </v-container>

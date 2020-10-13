@@ -8,7 +8,7 @@
         <v-icon>mdi-cart-outline</v-icon>
       </v-btn>
       <v-btn v-show="!isLoading" v-if="checkedIn()" @click="goToRestaurant(checkedInRestaurantId)" app color="accent" width="35px" height="35px" dark  elevation="1"  fab>
-        <v-icon>mdi-table-furniture</v-icon>
+        <v-icon>mdi-storefront-outline</v-icon>
       </v-btn>
     </div>
     <DesktopNavbar v-show="!isLoading"></DesktopNavbar>

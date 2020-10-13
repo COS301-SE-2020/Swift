@@ -409,10 +409,13 @@ export default {
       }
     },
     filteredList() {
-      if (Array.isArray(this.allRestaurants))
-        return this.allRestaurants.filter(restaurant => 
+      if (Array.isArray(this.allRestaurants)) {
+        var items =  this.allRestaurants.filter(restaurant => 
           this.containsCategories(restaurant.categories, this.selectedCategories) && restaurant.name.toLowerCase().includes(this.search.toLowerCase())
         )
+      }
+      
+      return items;
     },
     carouselTab () {
       return 'mdi-checkbox-blank-circle';

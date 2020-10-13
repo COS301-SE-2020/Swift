@@ -29,7 +29,7 @@
         </v-col>
       </v-row>
 
-      <v-tabs class="mt-2" height="60px" v-model="tab" background-color="white" grow>
+      <v-tabs class="mt-2" height="60px" v-model="tab"  grow>
         <v-tab>
           Profile Info
         </v-tab>
