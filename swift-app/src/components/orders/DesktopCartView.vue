@@ -65,7 +65,7 @@
             </v-list>
 
 
-            <v-list v-for="(orderMenuItem,j) in orderInfo().orderItems" :key="j" class="py-2" width="100%">
+            <v-list v-for="(orderMenuItem,i) in orderInfo().orderItems" :key="i" class="py-2" width="100%">
               <v-card   width="100%">
                 <v-list-item class="pt-1">
                   <v-list-item-content >
@@ -82,7 +82,7 @@
                     <v-row >
                       <v-col cols="8" class="py-0" @click="editItem(orderMenuItem)">
                         <div v-if="(orderMenuItem.orderSelections != undefined)">
-                          <div v-for="(orderItem, index) in orderMenuItem.orderSelections.selections" :key="index">
+                          <div v-for="(orderItem, ind) in orderMenuItem.orderSelections.selections" :key="ind">
                             <v-list-item-subtitle v-if="!Array.isArray(orderItem.values)">- {{orderItem.name}}: {{orderItem.values}}</v-list-item-subtitle>
                             <v-list-item-subtitle v-else>- {{orderItem.name}}: {{(orderItem.values).join(', ')}}</v-list-item-subtitle>
                           </div>
