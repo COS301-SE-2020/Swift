@@ -106,7 +106,7 @@ const actions = {
         }
       ).then(result => {
         commit('SET_RATING_PHRASES', result.data);
-        console.log(result.data)
+        // console.log(result.data)
         return result.data
       }).catch(({ response }) => {
       });
@@ -309,8 +309,11 @@ const mutations = {
       return item.menuItemId == itemId
     });
 
-    if (itemIndex != -1)
+    if (itemIndex != -1) {
       state.orderInfo.orderItems.splice(itemIndex, 1);
+      if (state.orderInfo.orderItems.length == 0)
+        state.orderInfo = {}
+    }
   },
 
   ADD_PAYMENT(state, orderPaymentinfo) {

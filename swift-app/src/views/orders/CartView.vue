@@ -70,12 +70,22 @@
                   <v-list-item class="pt-1">
                     <v-list-item-content >
                       <v-row @click="editItem(orderMenuItem)">
-                        <v-col cols="8">
+                        <v-col cols="8" class="pb-1">
                           <v-list-item-title>{{ getItemName(orderMenuItem.menuItemId) }}</v-list-item-title>
                         </v-col>
-                        <v-col cols="4 d-flex justify-end">
+                        <v-col cols="4" class="d-flex justify-end pb-1">
                           <div>
-                            <v-list-item-title><span style="color: #f75564; font-size: 14px" class="pr-1">{{orderMenuItem.quantity}}x</span> R{{((orderMenuItem.itemTotal != null) ? orderMenuItem.itemTotal : (0)).toFixed(2)}}</v-list-item-title>
+                            <v-list-item-title><span style="color: #f75564; font-size: 14px" class="pr-1">{{orderMenuItem.quantity}}x </span><span style="text-decoration: line-through">R{{((orderMenuItem.itemTotal != null) ? orderMenuItem.itemTotal : (0)).toFixed(2)}}</span></v-list-item-title>
+                          </div>
+                        </v-col>
+                      </v-row>
+                      <v-row v-if="discounts.length > 0 && discounts.some(promo => promo.index == j)" @click="editItem(orderMenuItem)" class="mt-0 pt-0">
+                        <v-col cols="8" class="mt-0 pt-0">
+                          <v-list-item-title><span style="color: #76C5BA; font-size: 14px" class="pr-1">Discount applied</span></v-list-item-title>
+                        </v-col>
+                        <v-col cols="4" class="d-flex justify-end mt-0 pt-0">
+                          <div>
+                            <v-list-item-title><span style="color: #76C5BA; font-size: 14px" class="pr-1">R{{(discounts.find(promo => promo.index == j).newPrice).toFixed(2)}}</span></v-list-item-title>
                           </div>
                         </v-col>
                       </v-row>
@@ -226,6 +236,7 @@ export default {
       selected: 1,
       tip: 0,
       quantity: [],
+      discounts: [],
       tipOptions: [
         '0%', '10%', '15%', 'Other'
       ],
@@ -353,6 +364,32 @@ export default {
       // console.log(this.checkedInRestaurantId)
       this.$router.push("/menu/" + this.checkedInRestaurantId());
     },
+    calculateTotalPromoGroupPrice(promoGroup) {
+      let total = 0;
+      let itemIndex = -1;
+      for (let i = 0; i < promoGroup.items.length; i++) {
+        let item = promoGroup.items[i];
+        let addedToCart = this.orderInfo().orderItems.find((orderItem, index) => {
+          if (item.attributeId != null) {
+            if (orderItem.menuItemId === item.itemId && orderItem.orderSelections.selections.some(selection => selection.id == item.attributeId && selection.values == item.attributeVal)) 
+              itemIndex = index
+            
+            return orderItem.menuItemId === item.itemId 
+              && orderItem.orderSelections.selections.some(selection => selection.id == item.attributeId && selection.values == item.attributeVal)
+          } else {
+            if (orderItem.menuItemId === item.itemId)
+              itemIndex = index
+
+            return orderItem.menuItemId === item.itemId
+          }
+        })
+
+        if (addedToCart != undefined)
+          total += addedToCart.itemTotal;
+      }
+
+      return total;    
+    },
     increaseQuantity(item) {
       let singlePrice = this.subtotal/item.quantity
       item.quantity++
@@ -381,6 +418,7 @@ export default {
     ...mapGetters({
       menu: "MenuStore/getMenu",
       allRestaurants: 'RestaurantsStore/getAllRestaurants',
+      restaurantPromos: 'RestaurantsStore/getCheckedInRestaurantPromotions',
       orderInfo: "OrderStore/getOrderInfo",
       orderedItems: "OrderStore/getOrderedItems",
       orderHistory: 'CustomerStore/getCustomerOrderHistory',
@@ -392,6 +430,9 @@ export default {
       let tax = (this.subtotal * 0.14).toFixed(2);
       // let tip = (Object.keys(this.orderedItems()).length != 0) ? this.orderedItems().waiterTip : (this.subtotal * 0.1).toFixed(2);
       return (parseFloat(this.subtotal) + parseFloat(tax) + parseFloat(this.tip)).toFixed(2);
+    },
+    checkIfPromo() {
+
     },
     getItemName(id) {
       // console.log("here")
@@ -413,10 +454,68 @@ export default {
   mounted: function() {
     this.onResize()
     window.addEventListener('resize', this.onResize, { passive: true })
+
+    // console.log(this.restaurantPromos())
+    // console.log(this.orderInfo())
+    let applyPromo = true;
+    let promoArr = [];
+    if (Object.keys(this.orderInfo()).length != 0) {
+      for (let i = 0; i < this.restaurantPromos().length; i++) {
+        let promo = this.restaurantPromos()[i];
+        for (let j = 0; j < promo.promotions.length; j++) {
+          let group = promo.promotions[j];
+          for (let y = 0; y < group.items.length; y++) {
+            let item = group.items[y];
+            let itemIndex = -1;
+            let addedToCart = this.orderInfo().orderItems.find((orderItem, index) => {
+              if (item.attributeId != null) {
+                if (orderItem.menuItemId === item.itemId && orderItem.orderSelections.selections.some(selection => selection.id == item.attributeId && selection.values == item.attributeVal)) 
+                  itemIndex = index
+                
+                return orderItem.menuItemId === item.itemId 
+                  && orderItem.orderSelections.selections.some(selection => selection.id == item.attributeId && selection.values == item.attributeVal)
+              } else {
+                if (orderItem.menuItemId === item.itemId)
+                  itemIndex = index
+
+                return orderItem.menuItemId === item.itemId
+              }
+            })
+
+            if (addedToCart != undefined) {
+              let percentage = (100 - promo.value) / 100
+              if (promo.type != "percent") {
+                let total = this.calculateTotalPromoGroupPrice(group);
+                percentage = promo.value / total;
+              }
+              let price = addedToCart.itemTotal * percentage;
+              let data = {
+                "id": addedToCart.menuItemId,
+                "newPrice": price,
+                "index": itemIndex
+              }
+              promoArr.push(data);
+            } else {
+              applyPromo = false
+            }
+          }
+
+          if (applyPromo) {
+            promoArr.forEach((promo) => {
+              this.discounts.push(promo)
+            })
+          }
+          promoArr = [];
+          applyPromo = true;
+        }
+      }
+    }
+
     // this.clearItem;
     if (Object.keys(this.orderInfo()).length != 0) {
       for (let i = 0; i < this.orderInfo().orderItems.length; i++) {
-        this.subtotal += (this.orderInfo().orderItems[i].itemTotal != null) ? parseFloat(this.orderInfo().orderItems[i].itemTotal) * parseFloat(this.orderInfo().orderItems[i].quantity) : 0;
+        let price = this.discounts.some(promo => promo.index == i) ? this.discounts.find(promo => promo.index == i).newPrice : this.orderInfo().orderItems[i].itemTotal
+        this.subtotal += (price != null) ? parseFloat(price) * parseFloat(this.orderInfo().orderItems[i].quantity) : 0;
         this.quantity[i] = parseFloat(this.orderInfo().orderItems[i].quantity)
       }
     }
@@ -460,7 +559,6 @@ export default {
         this.tipVal = (this.orderedItems().waiterTip).toString()
       }
     }
-    
   }
 }
 </script>

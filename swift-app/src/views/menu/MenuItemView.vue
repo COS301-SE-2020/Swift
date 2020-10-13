@@ -74,7 +74,7 @@
       
 
       <v-tabs-items v-if="!arActive" v-model="tab">
-        <v-tab-item v-if="checkedIn()">
+        <v-tab-item v-if="checkedIn()" class="customiseTab">
           <v-card flat>
             <v-card-title v-if="newMenuItem.attributes != null" class="pb-0 pt-4">Customise Order</v-card-title>
             <v-container>
@@ -82,7 +82,7 @@
                 <v-list-group sub-group  class="attributeElements" v-for="(attribute, i) in newMenuItem.attributes.attributes" :key="i"  no-action value="true">
                   <template v-slot:activator>
                     <v-list-item-content @click="rotateIcon(i)">
-                      <v-list-item-title class="label pl-0" v-text="attribute.attributeName"></v-list-item-title>
+                      <v-list-item-title class="label pl-0 itemGroup" :value="attribute.id" v-text="attribute.attributeName"></v-list-item-title>
                     </v-list-item-content>
                     <v-list-item-action @click="rotateIcon(i)">
                       <v-icon class="chevron-icon mx-1">mdi-chevron-up</v-icon>
@@ -99,10 +99,10 @@
                               <v-list-item-title v-text="value.name"></v-list-item-title>
                             </v-col>
                             <v-col>
-                              <v-list-item-title v-if="value.price != 0" v-text="`+ R${(value.price).toFixed(2)}`"></v-list-item-title>
+                              <v-list-item-title v-if="parseFloat(value.price) != 0" v-text="`+ R${(parseFloat(value.price)).toFixed(2)}`"></v-list-item-title>
                             </v-col>
                           </v-row>
-                          <v-list-item-action>
+                          <v-list-item-action class="customiseIcon">
                             <v-radio :id="`${i}${j}${(value.name).replace(/\s+/g, '')}`" checked v-if="attribute.max == '1' && attribute.min == '1'" :input-value="active" ></v-radio>
                             <v-checkbox v-else :input-value="active"></v-checkbox>
                           </v-list-item-action>
@@ -390,7 +390,14 @@ export default {
     getDate(date) {
       return moment(String(date.slice(0, 10))).format('DD MMM YYYY')
     },
-    
+    findSelected(i,j) {
+      let selected = this.model[i] === j;
+      if (selected) {
+        // console.log('hey')
+        console.log($('.customiseTab'))
+        // $('.mdi-radiobox-blank').eq().addClass('mdi-radiobox-blank');
+      }
+    },
     changeFavouriteComment: function (comment) {
       this.liked = !this.liked
       if (this.liked)
@@ -479,8 +486,10 @@ export default {
             let values = [];
             for (let j = 0; j < this.model[i].length; j++)
               values.push(this.newMenuItem.attributes.attributes[i].values[this.model[i][j]].name)
+            // console.log($('.label').eq(i).attr('value'))
             let data = {
               "name": $('.label').eq(i).text(),
+              "id": $('.label').eq(i).attr('value'),
               "values": (this.model[i].length > 1) ? values 
                 : this.newMenuItem.attributes.attributes[i].values[this.model[i]].name
             };
@@ -523,6 +532,7 @@ export default {
               values.push(this.newMenuItem.attributes.attributes[i].values[this.model[i][j]].name)
             let data = {
               "name": $('.label').eq(i).text(),
+              "id": $('.label').eq(i).attr('value'),
               "values": (this.model[i].length > 1) ? values 
                 : this.newMenuItem.attributes.attributes[i].values[this.model[i]].name
             };
@@ -626,6 +636,10 @@ export default {
     }),
   },
   mounted: function() {
+    // this.$nextTick(function () {
+    //   // console.log('hey')
+    //   // console.log($('.radioButtonItem:first').html())
+    // })
     this.onResize()
     window.addEventListener('resize', this.onResize, { passive: true })
 
@@ -637,7 +651,7 @@ export default {
     }
 
     for (let i = 0; i < this.newMenuItem.attributes.attributes.length; i++) {
-      console.log(this.newMenuItem.attributes.attributes[i].max)
+      // console.log(this.newMenuItem.attributes.attributes[i].max)
       if (this.newMenuItem.attributes.attributes[i].max == 1) {
         var item = 0;
         this.newMenuItem.attributes.attributes[i].values.find((val, index) => {
@@ -677,6 +691,7 @@ export default {
         this.model[i] = item;
       }
     }
+    
   }
 }
 </script>
