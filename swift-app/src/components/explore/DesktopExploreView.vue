@@ -92,7 +92,7 @@
             </v-col>
           </v-row>
             <v-row v-show="filteredList != undefined">
-              <v-col v-for="(card, index) in filteredList" :key="index"  cols="3" style="display: flex; flex-direction; row;">
+              <v-col v-for="(card, index) in filteredList.slice(0, 12)" :key="index"  cols="3" style="display: flex; flex-direction; row;">
                 <v-card ripple flat  class="mr-4">
                   <v-img :src="card.image" @click="goToRestaurant(card.restaurantId)" class="white--text align-center restaurantImage" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="250px" width="417px">
                     <v-rating background-color="white" readonly size="14" dense color="yellow darken-3" :value="parseInt(card.rating)" style="bottom: 3px; right: 3px; position: absolute"></v-rating>
@@ -372,10 +372,15 @@ export default {
       }
     },
     filteredList() {
-      if (Array.isArray(this.allRestaurants))
-        return this.allRestaurants.filter(restaurant => 
+      if (Array.isArray(this.allRestaurants)) {
+        var items =  this.allRestaurants.filter(restaurant => 
           this.containsCategories(restaurant.categories, this.selectedCategories) && restaurant.name.toLowerCase().includes(this.search.toLowerCase())
         )
+
+        return items.slice().sort(function(a, b) {
+          return b.rating - a.rating;
+        });
+      }
     },
     carouselTab () {
       return 'mdi-checkbox-blank-circle';

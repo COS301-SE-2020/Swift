@@ -108,7 +108,7 @@
           </v-row>
           <!-- <v-sheet class="mx-auto" max-width="700" v-show="filteredList != undefined"> -->
             <v-slide-group multiple>
-              <v-slide-item v-for="(card, index) in filteredList" :key="index" >
+              <v-slide-item v-for="(card, index) in filteredList.slice(0, 10)" :key="index" >
                 
                 <v-card ripple flat width="200px" class="mr-4">
                   <v-img :src="card.image" @click="goToRestaurant(card.restaurantId)" class="white--text align-center restaurantImage" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="125px" >
@@ -400,9 +400,11 @@ export default {
         var items =  this.allRestaurants.filter(restaurant => 
           this.containsCategories(restaurant.categories, this.selectedCategories) && restaurant.name.toLowerCase().includes(this.search.toLowerCase())
         )
-      }
 
-      return items;
+        return items.slice().sort(function(a, b) {
+          return b.rating - a.rating;
+        });
+      }
     },
     carouselTab () {
       return 'mdi-checkbox-blank-circle';
