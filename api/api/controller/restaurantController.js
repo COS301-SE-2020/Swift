@@ -857,12 +857,14 @@ module.exports = {
             // add items to order
             // eslint-disable-next-line no-await-in-loop
             const itemOrdered = await client.query(
-              'SELECT quantity, itemtotal, promoprice FROM public.itemordered'
+              'SELECT quantity, itemtotal, promoprice, orderselections FROM public.itemordered'
               + ' WHERE orderid = $1::integer AND menuitemid = $2::integer',
               [reqBody.orderId, reqBody.orderItems[oi].menuItemId]
             );
 
-            if (itemOrdered.rows.length === 0) {
+            if (itemOrdered.rows.length === 0 || (itemOrdered.rows.length !== 0
+              && JSON.stringify(itemOrdered.rows[0].orderselections)
+                !== JSON.stringify(reqBody.orderItems[oi].orderSelections))) {
               // add item
               // eslint-disable-next-line no-await-in-loop
               await client.query(
