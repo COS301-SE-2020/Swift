@@ -146,12 +146,12 @@
         <v-tab-item class="overflow-x-hidden">
           <v-card flat class="mt-2 mb-5">
             <v-row v-for="phrase in newMenuItem.ratingPhrases" :key="phrase.phrase">
-              <v-card-text class="pb-0 pt-1 mt-0 ml-5">
+              <v-card-text class="pb-0 pt-1 mt-0 ml-5 pr-0">
                 <v-row class="mx-0 pb-0 pt-1">
-                  <v-col cols="6" class="pt-0 pl-0 pb-0 ">
+                  <v-col cols="6" class="pt-0 pl-0 pb-0">
                     <span class="black--text" style="font-size: 15px">{{phrase.phrase}}</span>
                   </v-col>
-                  <v-col cols="5" class="py-0 pt-0 pl-0 pb-0 d-flex justify-start">
+                  <v-col cols="5" class="py-0 pl-0 d-flex justify-end">
                     <v-rating readonly size="18" dense color="yellow darken-3" background-color="secondary" :value="parseInt(phrase.rating)"></v-rating>
                     <span class="body-2 black--text ml-2" style="margin-top: 2.8px;">({{phrase.numRated}})</span>
                   </v-col>

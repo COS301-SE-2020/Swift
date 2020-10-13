@@ -15,10 +15,11 @@
       <v-row class="mt-0 pt-4" align="center">
         <v-col cols="12" class="pt-0" align="center">
           <v-avatar height="120" width="120" v-ripple v-if="!avatar"  class="grey lighten-3 mb-3">
-            <v-img :src="customerInfo.profileimageurl" cover alt="avatar"></v-img>
+            <v-img :src="customerInfo.profileimageurl" @click="chooseFiles()" cover alt="avatar"></v-img>
           </v-avatar>
-          
+          <input hidden ref="uploadImageInputRef" id="uploadImageInput" type="file" @change="updateItemImage" accept="image/*"/>
         </v-col>
+        
       </v-row>
       <v-row>
         <v-col cols="12" class="py-0" align="center">
@@ -158,6 +159,7 @@ export default {
     photo: null,
     image: '',
     isMobile: false,
+    itemImage: "",
   }),
   watch:{
     avatar: {
@@ -191,32 +193,40 @@ export default {
         console.log("Old browser. No support for Filereader API");
       }
     },
-    onRemoved() {
-      this.image = '';
+    chooseFiles() {
+      this.$refs.uploadImageInputRef.click();
+    },
+    updateItemImage() {
+      var file =  this.$refs.uploadImageInputRef.files[0];
+      var reader = new FileReader();
+
+      if (file && file.type.match("image.*")) {
+        reader.readAsDataURL(file);
+      }
+
+      reader.onloadend = () => {
+        this.setItemImagePreview(reader.result);
+        this.attemptUpload();
+      };
+      reader.onerror = function (error) {
+        console.log("Error: ", error);
+      };
+
+      
+    },
+    setItemImagePreview(image) {
+      this.itemImage = image;
+      // document.getElementById("itemImageUploadPreview").style.display = "block";
     },
     async attemptUpload() {
-
       var profileObj = {
         name: this.customerInfo.name,
         surname: this.customerInfo.surname,
-        profileImage: this.image,
+        profileImage: this.itemImage,
         theme: this.customerInfo.theme
       }
 
       await this.$store.dispatch('CustomerStore/editProfile', profileObj);
-      
-      /* if (this.image){
-        FormDataPost('http://localhost:8001/user/picture', this.image)
-          .then(response=>{
-            if (response.data.success){
-              this.image = '';
-              console.log("Image uploaded successfully ✨");
-            }
-          })
-          .catch(err=>{
-            console.error(err);
-          });
-      } */
     },
     async darkModeUpdate() {
       this.darkMode = !this.darkMode;
