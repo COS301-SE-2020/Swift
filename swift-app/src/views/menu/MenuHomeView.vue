@@ -75,7 +75,7 @@
         </v-row>
       </v-container> 
 
-      <v-container v-show="!isLoading" class="px-0 pt-0 overflow-x-hidden" transition="slide-x-transition">
+      <v-container v-if="search == ''" v-show="!isLoading" class="px-0 pt-0 overflow-x-hidden" transition="slide-x-transition">
         <v-tabs v-model="secondaryCategoryTab" background-color="secondary" color="primary" dark>
           <v-tab v-for="(category, index) in primaryCategoryList" :key="index">
             {{ category.categoryName }}
@@ -143,6 +143,40 @@
         </div> -->
 
       </v-container>
+
+      <v-container v-if="search != ''" v-show="!isLoading" class="pa-0">
+        <v-tabs background-color="secondary" color="primary" dark>
+          <v-tab>
+            Results:
+          </v-tab>
+        </v-tabs>
+        <v-list  v-for="(menuItem, i) in searchItemsList()" :key="i" class="py-0">
+          <v-list-item v-if="menuItem.availability" style="opacity: 1" @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1">
+            <v-list-item-avatar tile  style="border-radius: 4px" size="45" >
+              <img v-if="menuItem.images.length != 0" :src="menuItem.images[0]">
+              <img v-else src="../../assets/menuItemImages/item-placeholder.png">
+            </v-list-item-avatar>
+            <v-list-item-content>
+              <v-list-item-title v-html="menuItem.menuItemName"></v-list-item-title>
+              <v-list-item-subtitle v-html="menuItem.menuItemDescription"></v-list-item-subtitle>
+            </v-list-item-content>
+            <span class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</span>
+          </v-list-item>
+          <v-list-item v-else style="opacity: 0.3" @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1">
+            <v-list-item-avatar tile  style="border-radius: 4px" size="45" >
+              <img v-if="menuItem.images.length != 0" :src="menuItem.images[0]">
+              <img v-else src="../../assets/menuItemImages/item-placeholder.png">
+            </v-list-item-avatar>
+            <v-list-item-content>
+              <v-list-item-title v-html="menuItem.menuItemName"></v-list-item-title>
+              <v-list-item-subtitle v-html="menuItem.menuItemDescription"></v-list-item-subtitle>
+            </v-list-item-content>
+            <span class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</span>
+          </v-list-item>
+          <v-divider divider class="ml-3" width="93%"></v-divider>
+        </v-list>
+        <!-- <div v-else class="pl-1 py-0 restaurantLocation font-weight-light" style="display: inline; font-size: 15px">No search results...</div> -->
+      </v-container> 
       <!-- <v-snackbar :v-if=checkedIn id="notification" :timeout="2000" centered color="primary" elevation="24" v-model="snackbar">You have been checked-in to {{menu.name}}</v-snackbar> -->
       <!-- <NavBar></NavBar> -->
     </div>
@@ -181,6 +215,7 @@ export default {
     snackbar: true,
     carouselIndex: 0,
     isMobile: false,
+    busySearching: false
   }),
   methods: {
     goToMenuItem(id) {
@@ -223,22 +258,33 @@ export default {
           var list =  this.menu.categories.filter((category, index) => {
             return category.type == "secondary" && category.parentCategoryId == id
           })
-          console.log(list)
-
           return list
-        } else {
+        } /* else {
           var list = [];
-          for (let i = 0; i < this.menu.categories.length; i++) {
-            for (let j = 0; j < this.menu.categories[i].menuItems.length; j++) {
-              if (this.menu.categories[i].menuItems[j].menuItemName.toLowerCase().includes(this.search.toLowerCase())) {
-                // console.log(this.menu.categories[i].menuItems[j])
-                list.push(this.menu.categories[i]);
+            for (let i = 0; i < this.menu.categories.length; i++) {
+              for (let j = 0; j < this.menu.categories[i].menuItems.length; j++) {
+                if (this.menu.categories[i].menuItems[j].menuItemName.toLowerCase().includes(this.search.toLowerCase())) {
+                  // console.log(this.menu.categories[i].menuItems[j])
+                  list.push(this.menu.categories[i]);
+                }
               }
             }
+        } */
+      }
+    },
+    searchItemsList() {
+      if (this.search != '') {
+        console.log("in here")
+        var list = [];
+        for (let i = 0; i < this.menu.categories.length; i++) {
+          for (let j = 0; j < this.menu.categories[i].menuItems.length; j++) {
+            if (this.menu.categories[i].menuItems[j].menuItemName.toLowerCase().includes(this.search.toLowerCase())) {
+              list.push(this.menu.categories[i].menuItems[j]);
+            }
           }
-          console.log(list)
-          return list;
         }
+        console.log(list)
+        return list;
       }
     },
     searchForItem(items) {
