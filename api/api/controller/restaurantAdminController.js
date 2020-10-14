@@ -607,7 +607,7 @@ module.exports = {
           }
 
           // get table statuses
-          let sQuery = 'SELECT tableid, tablenumber, numseats, qrcode';
+          let sQuery = 'SELECT tableid, tablenumber, numseats, qrcode, code';
           sQuery += ' FROM public.restauranttable';
           if (allTablesStatus) {
             sQuery += ' WHERE restaurantid = $1::integer;';
@@ -645,6 +645,7 @@ module.exports = {
             }
 
             singleTableStatus.qrcode = tblStat.rows[t].qrcode;
+            singleTableStatus.code = tblStat.rows[t].code;
             tableStatusResponse.result.push(singleTableStatus);
           }
 
