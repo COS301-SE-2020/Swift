@@ -283,7 +283,7 @@ const mutations = {
   SET_ORDER_HISTORY(state, orderHistory) {
     state.orderHistory = orderHistory;
 
-    if (orderHistory.length != 0 && orderHistory[0].orderStatus == 'Received') {
+    if (orderHistory.length != 0 && orderHistory[0].orderStatus == 'Received' && orderHistory[0].restaurantId == this.getters['CustomerStore/getCheckedInTableId']) {
       let itemsOrdered = [];
       for (let i = 0; i < orderHistory[0].items.length; i++) {
         // console.log(orderHistory[0].items[i].orderSelections)

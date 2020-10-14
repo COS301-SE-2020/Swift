@@ -641,8 +641,11 @@ export default {
         category => {if (category != undefined && category.menuItems != undefined) return category.menuItems.find(menuItem => menuItem.menuItemId === id )}
       )
 
-      let item = category.menuItems.find(menuItem => menuItem.menuItemId === id )
-      return item.menuItemName;
+      if (category != undefined) {
+        let item = category.menuItems.find(menuItem => menuItem.menuItemId === id )
+        return item.menuItemName;
+      }
+
     },
     getRestaurantName(id) {
       return this.allRestaurants().find(
