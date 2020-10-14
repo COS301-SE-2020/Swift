@@ -41,11 +41,13 @@ export default {
           this.goToHome();
     },
     async goToHome () {
-      await this.updateOrderFlag(true);
+      
+      await this.submitPayment();
       this.$router.push('/paymentInformation')
     },
     ...mapActions({
-      updateOrderFlag: 'OrderStore/updateOrderFlag',
+      
+      submitPayment: 'OrderStore/submitPayment',
     }),
   },
   computed: {

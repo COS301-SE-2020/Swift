@@ -210,7 +210,7 @@ export default {
 
     this.onResize() 
     window.addEventListener('resize', this.onResize, { passive: true }) 
-
+    
     if (Object.keys(this.orderHistory).length === 0) {
       this.isLoading = !this.isLoading;
       await this.$store.dispatch('MenuStore/retrieveMenu', this.checkedInRestaurantId);
