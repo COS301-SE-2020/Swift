@@ -226,23 +226,23 @@ const actions = {
     commit('ADD_PAYMENT', orderPaymentinfo);
   },
 
-  retrieveOrderStatus({commit}, data) {
-    var orderId = data.orderId;
+  retrieveOrderStatus({commit}) {
+    // var orderId = data.orderId;
     axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "orderStatus",
-        "orderId": orderId,
         "token": sessionStorage.getItem('authToken')
       }
     ).then(result => {
-      var data = {
+      /* var data = {
         "orderId": orderId,
         "orderProgress": result.data.orderProgress,
         "itemProgress": result.data.itemProgress
-      }
+      } */
       // console.log(result.data.itemProgress)
-      commit('CustomerStore/UPDATE_ORDER_STATUS', data);
-      commit('UPDATE_ORDER_FLAG', false);
+      console.log(result.data)
+      this.commit('CustomerStore/UPDATE_ORDER_PROGRESS', result.data.orders);
+      // commit('UPDATE_ORDER_FLAG', false);
     }).catch(({ response }) => {
     });
   },
@@ -359,7 +359,6 @@ const mutations = {
   },
   
   UPDATE_ORDER_STATUS(state, data) {
-    console.log('hereeeee')
     var orderHistory = this.getters['CustomerStore/getCustomerOrderHistory'];
 
     var item = orderHistory.find(orderItem => 
