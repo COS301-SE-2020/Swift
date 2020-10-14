@@ -601,6 +601,16 @@ module.exports = {
           const orderStatus = 'Received';
           const initialProgress = 0;
 
+          const empRole = 'waiter';
+          const emp = await client.query(
+            'SELECT restaurantemployee.employeeid, restaurantemployee.userid,'
+            + '(SELECT COUNT(employeeid) FROM public.customerorder WHERE ordercompletiontime IS NULL AND customerorder.employeeid = restaurantemployee.userid) AS "numOrders"'
+            + ' FROM public.restaurantemployee'
+            + ' WHERE restaurantemployee.restaurantid = $1::integer AND LOWER(restaurantemployee.employeerole) = $2::text'
+            + ' ORDER BY "numOrders" ASC',
+            [orderInfo.restaurantId, empRole]
+          );
+
           // create order
           // TODO: Work out order completion time from estimated time
           const resOrderId = await client.query(
@@ -610,7 +620,7 @@ module.exports = {
             + ' RETURNING orderid',
             [
               customerId,
-              orderInfo.employeeId,
+              emp.rows[0].userid,
               orderInfo.tableId,
               orderStatus,
               initialProgress,
