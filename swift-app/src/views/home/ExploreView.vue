@@ -1,7 +1,7 @@
 <template>
   <v-container class="pa-0 ma-0">
-    <DesktopExplore v-if="!isMobile"></DesktopExplore>
-    <v-container v-else class="pa-0">
+    <DesktopExplore v-show="!isLoading" v-if="!isMobile"></DesktopExplore>
+    <v-container v-if="isMobile" class="pa-0">
       <div v-show="isLoading" style="display: flex; align-items: center; justify-content: center;">
         <v-progress-circular style="height: 400px" indeterminate color="primary"></v-progress-circular>
       </div>

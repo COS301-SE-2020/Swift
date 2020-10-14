@@ -185,6 +185,7 @@ export default {
     return {
       selected: false,
       paymentMade: false,
+      isMobile: false,
       type: "Card",
       selectedItemPublic: [],
       orderTotal: 0,
@@ -221,6 +222,9 @@ export default {
     requestReceipt () {
 
     },
+    onResize () {
+      this.isMobile = window.innerWidth < 600
+    },
     toggleAlert() {
         this.paymentMade = !this.paymentMade
     },
@@ -243,9 +247,17 @@ export default {
     backNavigation () {
       this.$router.go(-1)
     },
-    hideAlert () {
-      this.submitPayment()
-      this.updateOrderFlag(false);
+    async hideAlert () {
+      await this.$store.dispatch('OrderStore/submitPayment');
+      console.log('ordered')
+      console.log(this.orderFlag())
+      await this.$store.dispatch('OrderStore/updateOrderFlag', false);
+      console.log(this.orderFlag())
+      
+      // await this.$store.dispatch('CustomerStore/checkOutCustomer');
+      // await this.$store.commit('CustomerStore/SET_CHECKED_IN_TABLE_ID', null);
+      // await this.$store.commit('CustomerStore/SET_CHECKED_IN_CODE', null);
+      // await this.$store.commit('CustomerStore/SET_CHECKED_IN_RESTAURANT_ID', null);
       this.$router.push('/orders')
     },
     calculateTotal() {
@@ -257,11 +269,7 @@ export default {
       console.log(this.orderFlag())
       return this.orderFlag()
     },
-    async goToPayment (){
-      await this.checkout
-      await this.setCheckedInQRCode (null)
-      await this.setCheckedInRestaurantId (null)
-      await this.setCheckedInTableId (null)
+    goToPayment (){
       this.setTotal(this.calculateTotal())
       this.$router.push('pay')
     },
@@ -280,6 +288,10 @@ export default {
       paymentInfo: 'OrderStore/getPaymentInfo',
       orderFlag: 'OrderStore/getOrderFlag',
     }),
+  },
+  mounted() {
+    this.onResize()
+    window.addEventListener('resize', this.onResize, { passive: true })
   },
   computed: {
     selectTab () {
