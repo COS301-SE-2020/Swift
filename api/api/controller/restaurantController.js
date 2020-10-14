@@ -12,7 +12,8 @@ const {
   getMenuCategories,
   getOrderHistory,
   getActivePromotions,
-  getOrderItems
+  getOrderItems,
+  getOrderStatuses
 } = require('../helper/objectBuilder');
 
 module.exports = {
@@ -977,68 +978,59 @@ module.exports = {
   getOrderStatus: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
-      || !Object.prototype.hasOwnProperty.call(reqBody, 'orderId')
-      || Object.keys(reqBody).length !== 3) {
+      || Object.keys(reqBody).length !== 2) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 
     // Check token
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
-      return (async () => {
-        const client = await db.connect();
-        try {
-          await client.query('BEGIN');
-          const res = await client.query(
-            'SELECT orderstatus, progress FROM public.customerorder WHERE orderid = $1::integer;',
-            [reqBody.orderId]
-          );
+      const orderStatusPromises = [];
+      const orderStatusResponse = {};
 
-          if (res.rows.length === 0) {
-            // order does not exist
-            return response.status(404).send({ status: 404, reason: 'Not Found' });
-          }
+      orderStatusPromises.push(new Promise((resolve, reject) => {
+        orderStatusPromises.push(getOrderStatuses().then((orderStatusPromise) => {
+          orderStatusResponse.orders = [];
+          Promise.all(orderStatusPromise)
+            .then((orderStatItems) => {
+              orderStatItems.forEach((orderStatusItem) => {
+                orderStatusResponse.orders.push(orderStatusItem);
+              });
+              resolve();
+            })
+            .catch((err) => {
+              reject(err);
+            });
+        }));
+      }));
 
-          const orderStatusResponse = {};
-          orderStatusResponse.orderStatus = res.rows[0].orderstatus;
-          orderStatusResponse.orderProgress = res.rows[0].progress;
-          orderStatusResponse.itemProgress = [];
-
-          const itemProg = await client.query(
-            'SELECT menuitemid, progress FROM public.itemordered'
-            + ' WHERE orderid = $1::integer',
-            [reqBody.orderId]
-          );
-
-          for (let i = 0; i < itemProg.rows.length; i++) {
-            const singleItem = {};
-            singleItem.menuItemId = itemProg.rows[i].menuitemid;
-            singleItem.progress = itemProg.rows[i].progress;
-            orderStatusResponse.itemProgress.push(singleItem);
-          }
-
-          // commit and return order status
-          await client.query('COMMIT');
-          return response.status(200).send(orderStatusResponse);
-        } catch (err) {
-          await client.query('ROLLBACK');
-          throw err;
-        } finally {
-          client.release();
-        }
-      })()
+      Promise.all(orderStatusPromises).then(() => response.status(200).send(orderStatusResponse))
         .catch((err) => {
-          console.error('Query Error [Restaurant - Get Order Status]', err.stack);
+          console.error('Login Promise Error', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
-    }
 
-    if (userToken.state === tokenState.REFRESH) {
-      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
-    }
+      // const orderStatusResponse = {};
+      // orderStatusResponse.orders = [];
+      // res.rows.forEach((order) => {
+      //   orderStatusResponse.orders.push(getOrderItemStatus(order.orderid)
+      //     .then((itemStatus) => {
+      //       const orderObj = {};
+      //       orderObj.orderStatus = order.orderstatus;
+      //       orderObj.orderProgress = order.progress;
+      //       // orderObj.itemProgress = itemStatus;
+      //     }));
+      // });
 
-    // Invalid token
-    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+      // return response.status(201).send(orderStatusResponse);
+      // } catch (err) {
+      //   await client.query('ROLLBACK');
+      //   throw err;
+      // } finally {
+      //   client.release();
+      // }
+    }
+    return true;
   },
   getTableQRCode: (reqBody, response) => {
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
