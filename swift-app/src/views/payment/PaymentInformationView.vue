@@ -249,9 +249,9 @@ export default {
       this.$router.go(-1)
     },
     async hideAlert () {
-      await this.$store.dispatch('OrderStore/submitPayment');
-      console.log('ordered')
-      console.log(this.orderFlag())
+      // await this.$store.dispatch('OrderStore/submitPayment');
+      // console.log('ordered')
+      // console.log(this.orderFlag())
       await this.$store.dispatch('OrderStore/updateOrderFlag', false);
       console.log(this.orderFlag())
       
@@ -270,8 +270,9 @@ export default {
       console.log(this.orderFlag())
       return this.orderFlag()
     },
-    goToPayment (){
+    async goToPayment (){
       this.setTotal(this.calculateTotal())
+      await this.updateOrderFlag(true);
       this.$router.push('pay')
     },
     ...mapMutations({

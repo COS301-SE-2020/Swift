@@ -298,13 +298,14 @@ export default {
     onResize () {
       this.isMobile = window.innerWidth < 600
     },
-    goToOrder () {
-      this.updateOrderFlag(true);
+    async goToOrder () {
+      // this.updateOrderFlag(true);
       console.log("ADD ITEM")
       let data = {
         "tip": this.tip
       }
-      this.submitOrder(data);
+      await this.submitOrder(data);
+      console.log(this.orderHistory())
       this.$router.push('/orders')
     },
     toggleAlert() {
@@ -313,7 +314,7 @@ export default {
     async goToPayment () {
       let orderId;
       if (Object.keys(this.orderInfo()).length != 0) {
-        this.updateOrderFlag(true);
+        // this.updateOrderFlag(true);
         // console.log("ADD ITEM")
         let data = {
           "tip": this.tip

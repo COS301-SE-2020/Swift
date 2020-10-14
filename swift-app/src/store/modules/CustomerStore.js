@@ -360,6 +360,22 @@ const mutations = {
     });
   },
 
+  UPDATE_ORDER_HISTORY(state, orderInformation) {
+    // console.log('hey, hey')
+    state.customer.orderHistory = orderInformation;
+  },
+
+  UPDATE_ORDER_STATUS(state, orderStatus) {
+    console.log("hyelloo")
+    let customerOrder = state.customer.orderHistory.find(order => 
+      order.orderId === orderStatus.id  
+    )
+    console.log(customerOrder)
+    if (customerOrder)
+      customerOrder.orderStatus = orderStatus.status
+    console.log(state.customer.orderHistory)
+  },
+
   RESET(state) {
     const newState = initialState();
     Object.keys(newState).forEach(key => {

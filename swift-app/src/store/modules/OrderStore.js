@@ -69,22 +69,23 @@ const getters = {
 // Actions 
 const actions = {
   submitOrder({state, commit}, data) {
-    console.log(data);
+    console.log(state.orderHistory[0].orderId);
     state.orderInfo.waiterTip = data.tip
     if(Object.keys(state.orderedItems).length === 0) {
-      
       return axios.post('https://api.swiftapp.ml', 
         {
           "requestType": "addOrder",
           "token": sessionStorage.getItem('authToken'),
           "orderInfo": this.getters['OrderStore/getOrderInfo']
         }
-      ).then(result => {
-        commit('UPDATE_ORDER_HISTORY', result.data.orderHistory);
+      ).then( result => {
+        commit('UPDATE_ORDER_HISTORY',  result.data.orderHistory);
         return result.data.orderHistory[0].orderId;
       }).catch(({ response }) => {
       });
     } else {
+      console.log(state.orderHistory[0].orderId)
+      console.log(this.getters['OrderStore/getOrderInfo'].orderItems)
       axios.post('https://api.swiftapp.ml', 
         {
           "requestType": "updateOrder",
@@ -93,6 +94,7 @@ const actions = {
           "orderItems": this.getters['OrderStore/getOrderInfo'].orderItems
         }
       ).then(result => {
+        console.log("order history: ", result.data.orderHistory)
         commit('UPDATE_ORDER_HISTORY', result.data.orderHistory);
       }).catch(({ response }) => {
       });
@@ -128,6 +130,13 @@ const actions = {
             "phrases": ratingObject.ratings[i].phrases,
           }
         ).then(result => {
+          let data = {
+            "status": 'Rated',
+            "id": ratingObject.ratings[i].orderId
+          }
+          
+          commit('CLEAR_ITEMS');
+          this.commit('CustomerStore/UPDATE_ORDER_STATUS', data);
         }).catch(({ response }) => {
         });
     }
@@ -163,8 +172,15 @@ const actions = {
         "orderTax": this.getters['OrderStore/getPaymentInfo'].orderTax
       }
     ).then(result => {
-      commit('CLEAR_ITEMS');
+      let data = {
+        "status": 'Paid',
+        "id": this.getters['OrderStore/getPaymentInfo'].orderId
+      }
+      console.log('got to here')
       // commit('UPDATE_ORDER_FLAG', false);
+      commit('CLEAR_ITEMS');
+      this.commit('CustomerStore/UPDATE_ORDER_STATUS', data);
+      
       // dispatch('OrderStore/updateOrderFlag', false);
       // this.orderFlag = false;
     }).catch(({ response }) => {
@@ -225,7 +241,8 @@ const actions = {
         "itemProgress": result.data.itemProgress
       }
       // console.log(result.data.itemProgress)
-      commit('UPDATE_ORDER_STATUS', data);
+      commit('CustomerStore/UPDATE_ORDER_STATUS', data);
+      commit('UPDATE_ORDER_FLAG', false);
     }).catch(({ response }) => {
     });
   },
@@ -342,6 +359,7 @@ const mutations = {
   },
   
   UPDATE_ORDER_STATUS(state, data) {
+    console.log('hereeeee')
     var orderHistory = this.getters['CustomerStore/getCustomerOrderHistory'];
 
     var item = orderHistory.find(orderItem => 
@@ -374,7 +392,7 @@ const mutations = {
     // console.log(state.orderedItems)
     state.orderInfo = {}
 
-    this.getters['CustomerStore/getCustomer'].orderHistory = orderInformation;
+    this.commit('CustomerStore/UPDATE_ORDER_HISTORY', orderInformation);
 
   },
   
@@ -392,7 +410,9 @@ const mutations = {
 
   UPDATE_ORDER_FLAG(state, orderFlag) {
     // console.log("flag: " + orderFlag)
+    console.log("in here: " + orderFlag)
     state.orderFlag = orderFlag;
+    console.log(state.orderFlag)
   }
 }
 export default {
