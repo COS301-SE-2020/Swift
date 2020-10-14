@@ -69,6 +69,7 @@ const getters = {
 // Actions 
 const actions = {
   submitOrder({state, commit}, data) {
+    console.log(data);
     state.orderInfo.waiterTip = data.tip
     if(Object.keys(state.orderedItems).length === 0) {
       

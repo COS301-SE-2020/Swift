@@ -44,17 +44,17 @@
                         </v-col>
                         <v-col cols="3" class="d-flex justify-end pb-1">
                           <div>
-                            <v-list-item-title><span style="color: #f75564; font-size: 14px" class="pr-1">{{orderMenuItem.quantity}}x </span><span :class="discounts.length > 0 && discounts.some(promo => promo.index == j) ? 'promoApplied' : ''">R{{((orderMenuItem.itemTotal != null) ? orderMenuItem.itemTotal : (0)).toFixed(2)}}</span></v-list-item-title>
+                            <v-list-item-title><span style="color: #f75564; font-size: 14px" class="pr-1">{{orderMenuItem.quantity}}x </span><span :class="discounts.length > 0 && discounts.some(promo => promo.index == j && promo.id == orderMenuItem.menuItemId) ? 'promoApplied' : ''">R{{((orderMenuItem.itemTotal != null) ? orderMenuItem.itemTotal : (0)).toFixed(2)}}</span></v-list-item-title>
                           </div>
                         </v-col>
                       </v-row>
-                      <v-row v-if="discounts.length > 0 && discounts.some(promo => promo.index == j)" @click="editItem(orderMenuItem)" class="mt-0 pt-0">
+                      <v-row v-if="discounts.length > 0 && discounts.some(promo => promo.index == j && promo.id == orderMenuItem.menuItemId)" class="mt-0 pt-0">
                         <v-col cols="8" class="mt-0 pt-0">
                           <v-list-item-title><span style="color: #76C5BA; font-size: 14px" class="pr-1">Discount applied</span></v-list-item-title>
                         </v-col>
                         <v-col cols="4" class="d-flex justify-end mt-0 pt-0">
                           <div>
-                            <v-list-item-title><span style="color: #76C5BA; font-size: 14px" class="pr-1">R{{(discounts.find(promo => promo.index == j).newPrice).toFixed(2)}}</span></v-list-item-title>
+                            <v-list-item-title><span style="color: #76C5BA; font-size: 14px" class="pr-1">R{{(discounts.find(promo => promo.index == j && promo.id == orderMenuItem.menuItemId).newPrice).toFixed(2)}}</span></v-list-item-title>
                           </div>
                         </v-col>
                       </v-row>
@@ -85,17 +85,17 @@
                         </v-col>
                         <v-col cols="4" class="d-flex justify-end pb-1">
                           <div>
-                            <v-list-item-title><span style="color: #f75564; font-size: 14px" class="pr-1">{{orderMenuItem.quantity}}x </span><span :class="discounts.length > 0 && discounts.some(promo => promo.index == j) ? 'promoApplied' : ''">R{{((orderMenuItem.itemTotal != null) ? orderMenuItem.itemTotal : (0)).toFixed(2)}}</span></v-list-item-title>
+                            <v-list-item-title><span style="color: #f75564; font-size: 14px" class="pr-1">{{orderMenuItem.quantity}}x </span><span :class="discounts.length > 0 && discounts.some(promo => promo.index == j && promo.id == orderMenuItem.menuItemId) ? 'promoApplied' : ''">R{{((orderMenuItem.itemTotal != null) ? orderMenuItem.itemTotal : (0)).toFixed(2)}}</span></v-list-item-title>
                           </div>
                         </v-col>
                       </v-row>
-                      <v-row v-if="discounts.length > 0 && discounts.some(promo => promo.index == j)" @click="editItem(orderMenuItem)" class="mt-0 pt-0">
+                      <v-row v-if="discounts.length > 0 && discounts.some(promo => promo.index == j && promo.id == orderMenuItem.menuItemId)" @click="editItem(orderMenuItem)" class="mt-0 pt-0">
                         <v-col cols="8" class="mt-0 pt-0">
                           <v-list-item-title><span style="color: #76C5BA; font-size: 14px" class="pr-1">Discount applied</span></v-list-item-title>
                         </v-col>
                         <v-col cols="4" class="d-flex justify-end mt-0 pt-0">
                           <div>
-                            <v-list-item-title><span style="color: #76C5BA; font-size: 14px" class="pr-1">R{{(discounts.find(promo => promo.index == j).newPrice).toFixed(2)}}</span></v-list-item-title>
+                            <v-list-item-title><span style="color: #76C5BA; font-size: 14px" class="pr-1">R{{(discounts.find(promo => promo.index == j && promo.id == orderMenuItem.menuItemId).newPrice).toFixed(2)}}</span></v-list-item-title>
                           </div>
                         </v-col>
                       </v-row>
@@ -414,15 +414,16 @@ export default {
               })
 
               if (addedToCart != undefined) {
+                console.log(addedToCart)
                 let percentage = (100 - promo.value) / 100
                 if (promo.type != "percent") {
                   let total = this.calculateTotalPromoGroupPrice(group);
                   percentage = promo.value / total;
                 }
-                let price = addedToCart.itemTotal * percentage;
+                addedToCart.promoPrice = addedToCart.itemTotal * percentage;
                 let data = {
                   "id": addedToCart.menuItemId,
-                  "newPrice": price,
+                  "newPrice": addedToCart.promoPrice,
                   "index": itemIndex
                 }
                 promoArr.push(data);
@@ -438,6 +439,7 @@ export default {
             }
             promoArr = [];
             applyPromo = true;
+            console.log(this.discounts)
           }
         }
       }

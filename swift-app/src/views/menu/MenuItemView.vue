@@ -103,8 +103,11 @@
                               <v-list-item-title v-if="parseFloat(value.price) != 0" v-text="`+ R${(parseFloat(value.price)).toFixed(2)}`"></v-list-item-title>
                             </v-col>
                           </v-row>
-                          <v-list-item-action class="customiseIcon">
-                            <v-radio :id="`${i}${j}${(value.name).replace(/\s+/g, '')}`" checked v-if="attribute.max == '1' && attribute.min == '1'" :input-value="active" ></v-radio>
+                          <v-list-item-action class="customiseIcon ma-0">
+                            <v-btn :input-value="active" v-if="attribute.max == '1' && attribute.min == '1'" :color="model[i] === j ? 'primary' : 'secondary'" icon class="ma-0">
+                              <v-icon>{{ model[i] === j ? 'mdi-circle-slice-8' : 'mdi-checkbox-blank-circle-outline'}}</v-icon>
+                            </v-btn>
+                            <!-- <v-radio :id="`${i}${j}${(value.name).replace(/\s+/g, '')}`" checked v-if="attribute.max == '1' && attribute.min == '1'" :input-value="active" ></v-radio> -->
                             <v-checkbox v-else :input-value="active"></v-checkbox>
                           </v-list-item-action>
                         </template>
@@ -512,6 +515,7 @@ export default {
             {
               "menuItemId": this.newMenuItem.menuItemId,
               "itemTotal": this.total / this.quantity,
+              "promoPrice": null,
               "quantity": this.quantity,
               "orderSelections": {
                 "selections": selectionValues
@@ -520,6 +524,8 @@ export default {
           ]
         }
       }
+
+      // console.log(data)
       
       this.addItemToOrder(data)
       this.$router.push("/cart");
@@ -548,6 +554,7 @@ export default {
       let data = {
         "menuItemId": this.newMenuItem.menuItemId,
         "itemTotal": this.total / this.quantity,
+        "promoPrice": 0,
         "quantity": this.quantity,
         "orderSelections": {
           "selections": selectionValues
