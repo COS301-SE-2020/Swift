@@ -21,7 +21,7 @@ const router = new Router({
       children: [
         //management views
         {
-          path: '/',
+          path: '/dashboard',
           name: 'dashboard',
           component: () => import('./views/dashboard/DashboardView.vue')
         },
@@ -66,7 +66,7 @@ const router = new Router({
           component: () => import('./views/reviews/ReviewsListView.vue')
         },
         {
-          path: '/mybusiness',
+          path: '/',
           name: 'mybusiness',
           component: () => import('./views/mybusiness/MyBusinessView.vue')
         },

@@ -52,7 +52,9 @@ import analyticsData from "@/store/analytics/analyticsDataList.js";
 
 export default {
   data() {
-    return {};
+    return {
+      curRes: null,
+    };
   },
   name: "the-navbar-vertical",
   props: {
@@ -67,7 +69,13 @@ export default {
     ProfileDropDown,
   },
   computed: {
+    activeUserInfo() {
+      if (localStorage.getItem("userInfo") === null)
+        return this.$store.state.AppActiveUser;
+      else return JSON.parse(localStorage.getItem("userInfo"));
+    },
     currentRestaurantName() {
+      if (this.curRes) return this.curRes;
       return this.getCurrentRestaurantName();
     },
     myRestaurants() {
@@ -108,7 +116,20 @@ export default {
   methods: {
     switchRestaurant(name, id) {
       this.$store.commit("SET_CURRENT_RESTAURANT", { name: name, id: id });
-      this.currentRestaurantName = name;
+      this.curRes = name;
+
+      //set accessList
+
+      var accessList = ["nothing"];
+      for (var i = 0; i < this.activeUserInfo.employeeData.length; i++) {
+        if (
+          this.activeUserInfo.employeeData[i].restaurantId == this.getCurrentRestaurantId()
+        ) {
+          accessList = this.activeUserInfo.employeeData[i].rights;
+        }
+      }
+      localStorage.setItem("accessList", JSON.stringify(accessList));
+
       //location.reload();
     },
     showSidebar() {

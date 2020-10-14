@@ -71,6 +71,7 @@ const actions = {
             id: result.data.restaurants[0].restaurantId
           });
 
+          //set accessList
         if (result.data.restaurants.length > 0) {
           var accessList = ["nothing"];
           for (var i = 0; i < state.AppActiveUser.employeeData.length; i++) {

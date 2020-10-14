@@ -340,6 +340,7 @@ export default {
   watch: {
     myRestaurants(newCount, oldCount) {
       this.$vs.loading.close();
+      if(this.myRestaurants)
       if (this.myRestaurants.length <= 0) this.addFirstItemPrompt();
     },
   },

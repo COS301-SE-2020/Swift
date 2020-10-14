@@ -162,11 +162,13 @@ export default {
         this.restaurantObject.categories.forEach((category) => {
           if (category.categoryName === this.currentMenu) {
             category.menuItems.forEach((item) => {
+              item['categoryId'] = category.categoryId;
               myMenu.push(item);
             });
             this.restaurantObject.categories.forEach((subcategory) => {
               if (subcategory.parentCategoryId === category.categoryId)
                 subcategory.menuItems.forEach((item) => {
+                  item['categoryId'] = subcategory.categoryId;
                   myMenu.push(item);
                 });
             });
@@ -264,7 +266,7 @@ export default {
         .dispatch("menuList/editMenuItem", {
           authKey: this.getAuthToken(),
           itemId: this.deleteItem.menuItemId,
-          categoryId: 2,
+          categoryId: this.deleteItem.categoryId,
           itemName: this.deleteItem.menuItemName,
           itemDescription: this.deleteItem.menuItemDescription,
           itemPrice: this.deleteItem.price,
@@ -275,12 +277,12 @@ export default {
           itemImages: this.deleteItem.images,
         })
         .then(() => {
-          this.$vs.loading.close();
+          this.listMenuItems();
           this.$vs.notify({
             title: "Success",
             text:
-              "The menu item: <b>" + this.itemName + "</b> has been set inactive.",
-            color: "success",
+              "The menu item: <b>" + this.deleteItem.menuItemName + "</b> has been removed.",
+            color: "warning",
           });
           this.$router.push("/menu");
         });

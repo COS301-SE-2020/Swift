@@ -31,7 +31,7 @@
             <vs-avatar v-if="customer.profileImageURL" src="customer.profileImageURL" />
             <span class="customerName">{{ customer.name +" " + customer.surname }}</span>
           </div>
-          <vs-button v-if="table.code" size="small" style="margin: 0 auto; pointer-events:none" class="mb-4 mt-4 text-center">Table Code: {{ table.code }}</vs-button>
+          <vs-button v-if="table.code" type="border" size="small" style="margin: 0 auto; pointer-events:none" class="mb-4 mt-4 text-center">Table Code: {{ table.code }}</vs-button>
           <qrcode-vue
             class="tableQR"
             :id="'qrCodeDisplay'+table.tableId"
