@@ -164,7 +164,7 @@
           </v-card>
           <v-divider style="opacity: 0.6"></v-divider>
           <v-card flat class="mt-2 mb-5">
-            <v-row v-for="(comment, index) in newMenuItem.reviews" :key="index">
+            <v-row v-for="(comment, index) in sortReviews(newMenuItem.reviews)" :key="index">
               <v-card-text class="pb-0 pt-1 mt-0">
                 <!-- <v-row v-if="comment.public == true" class="mx-0 pb-0 pt-3"> only show public reviews --> 
                 <v-row class="mx-0 pb-0 pt-3">
@@ -591,7 +591,15 @@ export default {
     },
     rotateIcon(index) {
       $('.chevron-icon').eq(index).toggleClass('rotate')
-    }
+    },
+    sortReviews(reviews) {      
+      if (reviews.length != 0) {        
+        var items = reviews.slice().sort(function(a, b) {
+          return new Date(b.reviewDateTime) - new Date(a.reviewDateTime);
+        });
+        return items;
+      }
+    },
   },
   computed: {
     menuItem() {

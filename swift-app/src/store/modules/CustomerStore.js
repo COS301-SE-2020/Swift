@@ -300,8 +300,6 @@ const actions = {
       return response
     });
   }
-
-  
 }
 
 // Mutations
