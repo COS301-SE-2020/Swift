@@ -49,7 +49,6 @@
     />
     <!--  <span class="text-danger text-sm">{{ errors.first('confirm_password') }}</span> -->
 
-    <vs-checkbox v-model="isTermsConditionAccepted" class="mt-6">I accept the terms & conditions.</vs-checkbox>
     <vs-button class="float-right mt-6" @click="register">Register</vs-button>
   </div>
 </template>
