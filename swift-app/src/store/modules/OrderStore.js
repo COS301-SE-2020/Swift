@@ -74,7 +74,7 @@ const getters = {
 // Actions 
 const actions = {
   submitOrder({state, commit}, data) {
-    console.log(state.orderHistory[0].orderId);
+    // console.log(state.orderHistory[0].orderId);
     state.orderInfo.waiterTip = data.tip
     if(Object.keys(state.orderedItems).length === 0) {
       return axios.post('https://api.swiftapp.ml', 
@@ -89,8 +89,8 @@ const actions = {
       }).catch(({ response }) => {
       });
     } else {
-      console.log(state.orderHistory[0].orderId)
-      console.log(this.getters['OrderStore/getOrderInfo'].orderItems)
+      // console.log(state.orderHistory[0].orderId)
+      // console.log(this.getters['OrderStore/getOrderInfo'].orderItems)
       axios.post('https://api.swiftapp.ml', 
         {
           "requestType": "updateOrder",
@@ -99,7 +99,7 @@ const actions = {
           "orderItems": this.getters['OrderStore/getOrderInfo'].orderItems
         }
       ).then(result => {
-        console.log("order history: ", result.data.orderHistory)
+        // console.log("order history: ", result.data.orderHistory)
         commit('UPDATE_ORDER_HISTORY', result.data.orderHistory);
       }).catch(({ response }) => {
       });

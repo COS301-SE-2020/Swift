@@ -146,7 +146,7 @@ export default {
       let url = await this.googleLogin();
       this.googleAuthUrl = url;
       window.location.href = url;
-      console.log('url :'+ url);
+      // console.log('url :'+ url);
 
        this.$router.push('/');
     },

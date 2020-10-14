@@ -80,7 +80,7 @@ export default {
         "qrcode": result
       }
       var response = await this.checkInCustomer(data);
-      console.log(response.restaurantId)
+      // console.log(response.restaurantId)
       this.$router.push("/menu/" + response.restaurantId);
     },
     toggleCheckInMethod() {

@@ -246,7 +246,7 @@ export default {
       this.$router.push('/rating')
     },
     async viewOrder (item) {
-      console.log(item)
+      // console.log(item)
       if (item.orderStatus == "Received" && item.restaurantId == this.checkedInRestaurantId) {
         this.$router.push('/cart')
       } else {
@@ -311,8 +311,8 @@ export default {
     },
     createReceiptObject(item) {
       let itemsOrdered = [];
-      console.log("REPEAT:")
-      console.log(item)
+      // console.log("REPEAT:")
+      // console.log(item)
       for (let i = 0; i < item.items.length; i++) {
         let data = {
           "menuItemId": item.items[i].menuItemId,
@@ -439,7 +439,7 @@ export default {
 
     async filterPhrases(type) {
       let phrases = await this.ratingPhrasesRestaurant()
-      console.log(phrases)
+      // console.log(phrases)
       return phrases.phrases.filter(phrase => {
         return phrase.phraseType == type
       })
@@ -458,8 +458,8 @@ export default {
       }
 
       this.addPaymentInfo(data);
-      console.log("payment")
-      console.log(data)
+      // console.log("payment")
+      // console.log(data)
       this.$router.push("/paymentinformation");
 
     },

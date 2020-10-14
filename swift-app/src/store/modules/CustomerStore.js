@@ -73,7 +73,7 @@ const actions = {
         "token": sessionStorage.getItem('authToken'),
       }
     ).then(result => {
-      console.log(result.data)
+      // console.log(result.data)
       commit('SET_CHECKED_IN_CODE', result.data.qrCode);
       commit('SET_CHECKED_IN_RESTAURANT_ID', result.data.restaurantId);
       commit('SET_CHECKED_IN_TABLE_ID', result.data.tableId);
@@ -99,7 +99,7 @@ const actions = {
       "requestType": "handleGoogle",
       "code" : code
     }).then(result => {
-      console.log("result.data.token");
+      // console.log("result.data.token");
       commit('SAVE_TOKEN', result.data.token);
       sessionStorage.setItem('authToken', result.data.token);
       commit('SAVE_CUSTOMER', result.data);

@@ -399,7 +399,7 @@ export default {
       let selected = this.model[i] === j;
       if (selected) {
         // console.log('hey')
-        console.log($('.customiseTab'))
+        // console.log($('.customiseTab'))
         // $('.mdi-radiobox-blank').eq().addClass('mdi-radiobox-blank');
       }
     },

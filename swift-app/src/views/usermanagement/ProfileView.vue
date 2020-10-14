@@ -183,14 +183,14 @@ export default {
     selectFile(event) {
       // `files` is always an array because the file input may be in multiple mode
       this.photo = event.target.files[0];
-      console.log(this.photo)
+      // console.log(this.photo)
     },
     onChanged() {
-      console.log("New picture loaded");
+      // console.log("New picture loaded");
       if (this.$refs.pictureInput.file) {
         this.image = this.$refs.pictureInput.file;
       } else {
-        console.log("Old browser. No support for Filereader API");
+        // console.log("Old browser. No support for Filereader API");
       }
     },
     chooseFiles() {
@@ -209,7 +209,7 @@ export default {
         this.attemptUpload();
       };
       reader.onerror = function (error) {
-        console.log("Error: ", error);
+        // console.log("Error: ", error);
       };
 
       

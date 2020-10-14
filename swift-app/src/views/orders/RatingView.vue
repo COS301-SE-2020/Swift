@@ -312,7 +312,6 @@ export default {
 
           ratings.push(data)
         } else {
-            console.log("blah4")
             for (let j = 0; j < this.itemToRate().rating[i].info.length; j++) {
               let phrases = [];
               for (let y = 0; y < this.itemToRate().rating[i].ratingPhrases.length; y++) {
@@ -348,7 +347,7 @@ export default {
     },
     addPhraseItemScore(score, tab, id) {
       this.phraseRatingMenuItem[tab][id] = score;
-      console.log(this.phraseRatingMenuItem[tab][id])
+      // console.log(this.phraseRatingMenuItem[tab][id])
     },
     addPhraseScore(score, id) {
       this.phraseRating[id] = score;

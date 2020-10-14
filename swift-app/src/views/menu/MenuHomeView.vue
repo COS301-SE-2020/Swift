@@ -274,7 +274,6 @@ export default {
     },
     searchItemsList() {
       if (this.search != '') {
-        console.log("in here")
         var list = [];
         for (let i = 0; i < this.menu.categories.length; i++) {
           for (let j = 0; j < this.menu.categories[i].menuItems.length; j++) {
@@ -283,7 +282,7 @@ export default {
             }
           }
         }
-        console.log(list)
+        // console.log(list)
         return list;
       }
     },

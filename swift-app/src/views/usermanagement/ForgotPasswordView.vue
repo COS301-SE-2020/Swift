@@ -252,7 +252,7 @@ export default {
         }
 
         await this.verifyCode(data).then(result => {
-          console.log(result)
+          // console.log(result)
           if (result.status == 201) {
             this.codeErrorMssg = ''
             this.step = this.step + 1;
