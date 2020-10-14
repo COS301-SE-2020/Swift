@@ -219,20 +219,38 @@ export default {
     },    
     secondaryCategoryList(id) {
       if (this.menu.categories != undefined) {
-        var list =  this.menu.categories.filter(category => {
-          return category.type == "secondary" && category.parentCategoryId == id /* && this.searchForItem(category.menuItems) */
-        })
+        if (this.search == '') {
+          var list =  this.menu.categories.filter((category, index) => {
+            return category.type == "secondary" && category.parentCategoryId == id
+          })
+          console.log(list)
 
-        return list
+          return list
+        } else {
+          var list = [];
+          for (let i = 0; i < this.menu.categories.length; i++) {
+            for (let j = 0; j < this.menu.categories[i].menuItems.length; j++) {
+              if (this.menu.categories[i].menuItems[j].menuItemName.toLowerCase().includes(this.search.toLowerCase())) {
+                // console.log(this.menu.categories[i].menuItems[j])
+                list.push(this.menu.categories[i]);
+              }
+            }
+          }
+          console.log(list)
+          return list;
+        }
       }
     },
     searchForItem(items) {
       if (items != undefined) {
         for (let i = 0; i < items.length; i++) {
-          if (items[i].menuItemName.toLowerCase().includes(this.search.toLowerCase()))
-            return true
+          if (items[i].menuItemName.toLowerCase().includes(this.search.toLowerCase())) {
+            return items[i]
+          } else {
+            return null;
+          }
         }
-        return false
+        
       }
     },
     filterPromotionItems(promotionItems) {
