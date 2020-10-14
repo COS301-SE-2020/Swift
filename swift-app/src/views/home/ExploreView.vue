@@ -62,6 +62,7 @@
                         <!-- <span class="specialsText font-weight-light">30%</span> <span class="specialsText discount font-weight-light">discount</span> <span class="specialsText font-weight-light">on all pizza slices</span> -->
                         <span class="specialsText font-weight-light">{{ promotion.message }}</span>
                         <div class="mt-1 specialsDate">{{ getDate(promotion.startDate) }} until {{ getDate(promotion.endDate) }}</div>
+                        <span class="specialsDate font-weight-light">{{ promotionDays(promotion.days).join(', ') }}</span>
                       </div>
                       <!-- <div class="browseButton">
                         <v-btn @click="goToRestaurant(promotion.restaurantId)" color="accent" height="33px" class="browseMenu px-2">Browse Menu</v-btn>
@@ -350,7 +351,12 @@ export default {
     },
     onResize () { 
       this.isMobile = $(window).width() < 600
-    }
+    },
+    promotionDays(days) {
+      var list = [];
+      days.forEach(element => list.push(element.substring(0,3)) );
+      return list;
+    },
   },
   ...mapActions({
     checkInCustomer: 'CustomerStore/checkInCustomer',

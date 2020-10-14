@@ -4,16 +4,17 @@
   <v-container v-else fill-height class="pa-0 cartOrders overflow-x-hidden" fluid>
       <v-toolbar elevation='2' class="cartHeader">
         <v-container>
+          <v-btn v-if="Object.keys(receiptObj()).length != 0" width="25px" height="25px" @click="goBack" color="secondary" absolute small fab style="z-index:11; top: 17px; left: 15px">
+            <v-icon>mdi-chevron-left</v-icon>
+          </v-btn>
           <v-row>
-            <v-col cols='1' class="pl-0">
-              <v-btn icon @click="goBack">
-                <v-icon>mdi-chevron-left</v-icon>
-              </v-btn>
-            </v-col>
-            <v-col cols='11' class="pl-0 d-flex justify-center align-self-center">
+            <v-col cols='12' class="pl-0 d-flex justify-center align-self-center">
               <v-toolbar-title >Your Order</v-toolbar-title>
             </v-col>
           </v-row>
+          <v-btn v-if="Object.keys(receiptObj()).length === 0" width="25px" height="25px" @click="goToRestaurantMenu" color="primary" elevation="1" absolute small fab style="z-index:11; top: 17px; right: 15px">
+            <v-icon>mdi-plus</v-icon>
+          </v-btn>
         </v-container>
       </v-toolbar>
 
