@@ -300,8 +300,6 @@ const actions = {
       return response
     });
   }
-
-  
 }
 
 // Mutations
@@ -366,14 +364,55 @@ const mutations = {
   },
 
   UPDATE_ORDER_STATUS(state, orderStatus) {
-    console.log("hyelloo")
     let customerOrder = state.customer.orderHistory.find(order => 
       order.orderId === orderStatus.id  
     )
-    console.log(customerOrder)
+    // console.log(customerOrder)
     if (customerOrder)
       customerOrder.orderStatus = orderStatus.status
-    console.log(state.customer.orderHistory)
+    // console.log(state.customer.orderHistory)
+  },
+
+  UPDATE_ORDER_PROGRESS(state, orders) {
+    let active = [];
+    active = state.customer.orderHistory.filter(order => 
+      parseInt(order.progress) < 100  
+    )
+
+    if (active.length > 0) {
+      for (let i = 0; i < active.length; i++) {
+        let found = false;
+        for (let y = 0; y < orders.length; y++) {
+          if (active[i].orderId == orders[y].orderId)
+            found = true;
+        }
+
+        if (!found) {
+          for (let y = 0; y < active[i].items.length; y++) {
+            active[i].items[y].progress = 100;
+          }
+          active[i].progress = 100;
+        }
+      }
+    }
+
+    for (let i = 0; i < orders.length; i++) {
+      let activeOrder = state.customer.orderHistory.find(order => 
+        order.orderId === orders[i].orderId  
+      )
+
+      if (activeOrder) {
+        activeOrder.progress = orders[i].orderProgress;
+        for (let y = 0; y < orders[i].itemProgress.length; y++) {
+          let item = activeOrder.items.find(orderItem => 
+            orderItem.menuItemId === orders[i].itemProgress[y].menuItemId  
+          )
+          if (item) {
+            item.progress = orders[i].itemProgress[y].progress
+          }
+        }
+      }
+    }
   },
 
   RESET(state) {
