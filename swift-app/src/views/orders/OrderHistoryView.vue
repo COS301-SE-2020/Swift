@@ -278,7 +278,7 @@ export default {
       let orderItems = []; 
       if (this.checkedInTableId != null) {
         orderItems = this.orderHistory.filter(orderItem => {
-          return parseInt(orderItem.progress) < 100 || orderItem.orderStatus == "Received"
+          return parseInt(orderItem.progress) < 100
         });
       } 
       
@@ -441,15 +441,15 @@ export default {
     },
     updateOrderStatus() {
       let self = this;
-      // setInterval(() => { 
-      //   let order = self.getOrderStatusItem();
-      //   if (order != undefined) {
-      //     let data = {
-      //       "orderId": order.orderId
-      //     }
-      //     self.orderStatus(data)
-      //   }
-      // }, 5000);  
+      // this.orderStatus();
+
+      setInterval(() => { 
+        let order = [];
+        order = self.getOrderStatusItems();
+        if (order.length != 0) {
+          self.orderStatus()
+        }
+      }, 7000);  
     },
     ...mapActions({
       addItemToOrder: "OrderStore/addItemToOrder",

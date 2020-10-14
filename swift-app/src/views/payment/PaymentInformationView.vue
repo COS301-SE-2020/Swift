@@ -294,6 +294,11 @@ export default {
   mounted() {
     this.onResize()
     window.addEventListener('resize', this.onResize, { passive: true })
+    if (Object.keys(this.paymentInfo()).length != 0) {
+      
+    } else {
+      this.$router.push("/orders");
+    }
   },
   computed: {
     selectTab () {

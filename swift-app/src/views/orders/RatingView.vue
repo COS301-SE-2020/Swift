@@ -410,9 +410,15 @@ export default {
     this.onResize()
     window.addEventListener('resize', this.onResize, { passive: true })
 
-    for(let i = 0; i < this.itemToRate().rating[1].info.length; i++) {
-      this.phraseRatingMenuItem[i] = [];
+    if (Object.keys(this.itemToRate()).length !== 0) {
+      for(let i = 0; i < this.itemToRate().rating[1].info.length; i++) {
+        this.phraseRatingMenuItem[i] = [];
+      }
+    } else {
+      this.$router.push("/orders");
     }
+
+    
   }
 };
 </script>
