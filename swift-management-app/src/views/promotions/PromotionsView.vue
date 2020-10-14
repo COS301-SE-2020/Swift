@@ -37,7 +37,7 @@
         </div>
       </div>
       <div class="text-center">
-      <vs-button class="mb-2 mt-2" type="border" size="small" :href="'https://ml.api.swiftapp.ml/visualize?restaurantId='+getCurrentRestaurantId()">View Machine Learning Model</vs-button>
+      <vs-button class="mb-2 mt-2" type="border" size="small" :href="'https://ml.api.swiftapp.ml/visualize?restaurantId='+getCurrentRestaurantId()"  target="_blank">View Machine Learning Model</vs-button>
       </div>
     </vs-card>
 
@@ -116,7 +116,7 @@
                 <span style="font-weight: 400">{{ promo.value }}</span>
               </vs-alert>
             </div>
-            <vs-button class="mt-2" size="small">Remove Promotion</vs-button>
+           
           </vx-card>
         </div>
       </div>
