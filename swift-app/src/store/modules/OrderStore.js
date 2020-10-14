@@ -150,19 +150,19 @@ const actions = {
   },
 
   submitPayment({commit}) {
-    let data = {
-      "requestType": "payment",
-        "token": sessionStorage.getItem('authToken'),
-        "orderId": this.getters['OrderStore/getPaymentInfo'].orderId,
-        "paymentMethod": this.getters['OrderStore/getPaymentInfo'].paymentMethod,
-        "amountPaid": this.getters['OrderStore/getPaymentInfo'].amountPaid,
-        "restaurantName": this.getters['OrderStore/getPaymentInfo'].restaurantName,
-        "menuItemName": this.getters['OrderStore/getPaymentInfo'].menuItemName,
-        "name": this.getters['CustomerStore/getCustomerProfile'].name,
-        "email": this.getters['CustomerStore/getCustomerProfile'].email,
-        "waiterTip": this.getters['OrderStore/getPaymentInfo'].waiterTip,
-        "orderTax": this.getters['OrderStore/getPaymentInfo'].orderTax
-    }
+    // let data = {
+    //   "requestType": "payment",
+    //     "token": sessionStorage.getItem('authToken'),
+    //     "orderId": this.getters['OrderStore/getPaymentInfo'].orderId,
+    //     "paymentMethod": this.getters['OrderStore/getPaymentInfo'].paymentMethod,
+    //     "amountPaid": this.getters['OrderStore/getPaymentInfo'].amountPaid,
+    //     "restaurantName": this.getters['OrderStore/getPaymentInfo'].restaurantName,
+    //     "menuItemName": this.getters['OrderStore/getPaymentInfo'].menuItemName,
+    //     "name": this.getters['CustomerStore/getCustomerProfile'].name,
+    //     "email": this.getters['CustomerStore/getCustomerProfile'].email,
+    //     "waiterTip": this.getters['OrderStore/getPaymentInfo'].waiterTip,
+    //     "orderTax": this.getters['OrderStore/getPaymentInfo'].orderTax
+    // }
     
     axios.post('https://api.swiftapp.ml', 
       {
@@ -206,6 +206,10 @@ const actions = {
 
   setWaiterTip({commit}, tip) {
     commit('SET_WAITER_TIP', tip);
+  },
+
+  changePaymentType({commit}, type) {
+    commit('SET_PAYMENT_TYPE', type);
   },
 
   setReceipt({commit}, order) {
@@ -311,6 +315,10 @@ const mutations = {
 
   CLEAR_ORDER(state) {
     state.orderInfo = {}
+  },
+
+  SET_PAYMENT_TYPE(state, type) {
+    state.paymentInfo.paymentMethod = type
   },
 
   CLEAR_RECEIPT(state) {
@@ -432,9 +440,7 @@ const mutations = {
 
   UPDATE_ORDER_FLAG(state, orderFlag) {
     // console.log("flag: " + orderFlag)
-    console.log("in here: " + orderFlag)
     state.orderFlag = orderFlag;
-    console.log(state.orderFlag)
   }
 }
 export default {

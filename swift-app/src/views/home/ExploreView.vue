@@ -383,9 +383,13 @@ export default {
       var menuItemsList = await this.$store.dispatch('RestaurantsStore/retrieveSuggestedMenuItemIds');
       if (menuItemsList) 
         await this.$store.dispatch('RestaurantsStore/retrieveSuggestedMenuItemsFromRatings', menuItemsList);
-      await this.$store.dispatch('RestaurantsStore/retrieveActivePromotions');
-      if (this.checkedInRestaurantId)
+      let promos = await this.$store.dispatch('RestaurantsStore/retrieveActivePromotions');
+      if (this.checkedInRestaurantId) {
+        if (Object.keys(promos).length != 0 && promos.restaurantPromo.length > 0){
+          await this.$store.dispatch('RestaurantsStore/fetchActiveCheckedInPromo', promos);
+        }
         await this.$store.dispatch('MenuStore/retrieveMenu', this.checkedInRestaurantId);
+      }
       
       if (retrievedAllRestaurants && retrievedExploreCategories)
         this.isLoading = false;

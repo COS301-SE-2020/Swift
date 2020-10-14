@@ -8,8 +8,14 @@
             <v-icon>mdi-chevron-left</v-icon>
           </v-btn>
           <v-row>
-            <v-col cols='12' class="pl-0 d-flex justify-center align-self-center">
-              <v-toolbar-title >Your Order</v-toolbar-title>
+            <v-col cols='1' class="pl-0">
+              <v-btn icon @click="goBack">
+                <v-icon>mdi-chevron-left</v-icon>
+              </v-btn>
+            </v-col>
+            <v-col cols='11' class="pl-0 d-flex justify-center align-self-center">
+              <v-toolbar-title v-if="Object.keys(receiptObj()).length == 0">Your Order</v-toolbar-title>
+              <v-toolbar-title v-else>Receipt</v-toolbar-title>
             </v-col>
           </v-row>
           <v-btn v-if="Object.keys(receiptObj()).length === 0" width="25px" height="25px" @click="goToRestaurantMenu" color="primary" elevation="1" absolute small fab style="z-index:11; top: 17px; right: 15px">
@@ -506,6 +512,7 @@ export default {
     applyPromotionsToCart(arr) {
       let applyPromo = true;
       let promoArr = [];
+      console.log(this.restaurantPromos())
       if (Object.keys(arr).length != 0) {
         for (let i = 0; i < this.restaurantPromos().length; i++) {
           let promo = this.restaurantPromos()[i];

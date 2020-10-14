@@ -114,13 +114,18 @@ const actions = {
       "token": sessionStorage.getItem('authToken'),
     }
     ).then(result => {
-      console.log(this.getters['CustomerStore/getCheckedInRestaurantId'])
+      // console.log(this.getters['CustomerStore/getCheckedInRestaurantId'])
       commit('SAVE_ACTIVE_PROMOTIONS', result.data);
-      if (this.getters['CustomerStore/getCheckedInRestaurantId'] != null)
-        commit('SAVE_CHECKEDIN_PROMOTIONS', result.data);
+      return result.data
+      // if (this.getters['CustomerStore/getCheckedInRestaurantId'] != null)
+        
     }).catch(({ response }) => {
 
     });
+  },
+
+  fetchActiveCheckedInPromo({commit}, promos) {
+    commit('SAVE_CHECKEDIN_PROMOTIONS', promos);
   },
 
   // Used to reset the store
@@ -168,13 +173,14 @@ const mutations = {
   },
 
   SAVE_CHECKEDIN_PROMOTIONS(state, promotions) {
-    console.log(promotions)
     let id = this.getters['CustomerStore/getCheckedInRestaurantId'];
     let weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
     state.checkedInRestaurantPromotions = promotions.restaurantPromo.filter((promo) => {
       let today = new Date();
+      // console.log((promo.restaurantId === id) && (new Date(promo.endDate) > Date.now()) && ((promo.days).includes(weekdays[today.getDay()])))
       return (promo.restaurantId === id) && (new Date(promo.endDate) > Date.now()) && ((promo.days).includes(weekdays[today.getDay()]))
     });
+    // console.log(state.checkedInRestaurantPromotions)
   },
 
   updateCheckInFlag(state, data) {

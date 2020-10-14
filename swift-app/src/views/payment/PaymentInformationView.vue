@@ -127,7 +127,7 @@
         <v-row>
           <v-col cols="12" class="pr-0 pt-1 pb-0" align="center">
             <div style="font-size: 27px; text-align: center" class="mt-1">Total: R{{calculateTotal()}}</div>
-            <v-btn @click="requestReceipt" v-if="type == 'Cash'" class="mt-6 subtitle-1" height="50px" width="180px" rounded large color="accent">Request Bill</v-btn>
+            <v-btn @click="toggleAlert" v-if="type == 'Cash'" class="mt-6 subtitle-1" height="50px" width="180px" rounded large color="accent">Request Bill</v-btn>
             <v-btn @click="toggleAlert" v-else class="mt-6 subtitle-1" height="50px" width="180px" rounded large color="accent">Pay Now</v-btn>
           </v-col>
         </v-row>
@@ -220,9 +220,9 @@ export default {
     }
   },
   methods: {
-    requestReceipt () {
-
-    },
+    // requestReceipt () {
+    //   this.paymentMade = !this.paymentMade
+    // },
     onResize () {
       this.isMobile = window.innerWidth < 600
     },
@@ -253,7 +253,6 @@ export default {
       // console.log('ordered')
       // console.log(this.orderFlag())
       await this.$store.dispatch('OrderStore/updateOrderFlag', false);
-      console.log(this.orderFlag())
       
       await this.$store.dispatch('CustomerStore/checkOutCustomer');
       await this.$store.commit('CustomerStore/SET_CHECKED_IN_TABLE_ID', null);
@@ -266,14 +265,21 @@ export default {
       return (parseFloat((this.paymentInfo().amountPaid != null) ? this.paymentInfo().amountPaid : 0)).toFixed(2)
     },
     showPopUp() {
-      console.log("in here2")
-      console.log(this.orderFlag())
+      // console.log("in here2")
+      // console.log(this.orderFlag())
       return this.orderFlag()
     },
     async goToPayment (){
+      
+      this.setPaymentMethod(this.type)
       this.setTotal(this.calculateTotal())
       await this.updateOrderFlag(true);
-      this.$router.push('pay')
+      this.toggleAlert()
+      if (this.type == 'Card') {
+        this.$router.push('pay')
+      } else {
+        await this.submitPayment();
+      }
     },
     ...mapMutations({
       setTotal : 'OrderStore/setOrderTotal',
@@ -285,6 +291,7 @@ export default {
       submitPayment: 'OrderStore/submitPayment',
       updateOrderFlag: 'OrderStore/updateOrderFlag',
       checkout: 'CustomerStore/checkOutCustomer',
+      setPaymentMethod: 'OrderStore/changePaymentType',
     }),
     ...mapGetters({
       paymentInfo: 'OrderStore/getPaymentInfo',
