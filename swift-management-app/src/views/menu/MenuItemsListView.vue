@@ -108,7 +108,7 @@
                 icon="TrashIcon"
                 svgClasses="w-5 h-5 hover:text-danger stroke-current"
                 class="ml-2"
-                @click.stop="deleteData(tr.menuItemId)"
+                @click.stop="deleteMenuItem(tr)"
               />
             </vs-td>
           </vs-tr>
@@ -130,6 +130,7 @@ export default {
       itemsPerPage: 10,
       isMounted: false,
       currentMenu: "",
+      deleteItem: null,
     };
   },
   computed: {
@@ -176,7 +177,9 @@ export default {
     },
     menuItems() {
       if (this.menu) {
-        return this.menu;
+        return this.menu.filter(
+          (i) => i.availability
+        );
       } else return [];
     },
     queriedItems() {
@@ -247,6 +250,41 @@ export default {
         this.currentMenu = this.primaryCategories[0].categoryName;
       //set the current menu filter
     },
+    deleteMenuItem(menuItem){
+      this.deleteItem = menuItem;
+      this.$vs.dialog({
+        color: "danger",
+        title: "Confirm deletion of: " + menuItem.menuItemName,
+        text: "Please confirm that this is what you which to do?",
+        accept: this.acceptRemoveAlert,
+      });
+    },
+    acceptRemoveAlert(){
+        this.$store
+        .dispatch("menuList/editMenuItem", {
+          authKey: this.getAuthToken(),
+          itemId: this.deleteItem.menuItemId,
+          categoryId: 2,
+          itemName: this.deleteItem.menuItemName,
+          itemDescription: this.deleteItem.menuItemDescription,
+          itemPrice: this.deleteItem.price,
+          itemWaitingTime: this.deleteItem.estimatedWaitingTime,
+          itemAttributes: this.deleteItem.attributes,
+          arAsset: "",
+          available: false,
+          itemImages: this.deleteItem.images,
+        })
+        .then(() => {
+          this.$vs.loading.close();
+          this.$vs.notify({
+            title: "Success",
+            text:
+              "The menu item: <b>" + this.itemName + "</b> has been set inactive.",
+            color: "success",
+          });
+          this.$router.push("/menu");
+        });
+    }
   },
   created() {
     if (this.getAuthToken() != null) {

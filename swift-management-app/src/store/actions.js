@@ -1,4 +1,5 @@
 import axios from "@/axios.js"
+import state from "./state.js";
 
 const actions = {
 
@@ -51,7 +52,7 @@ const actions = {
     commit('SET_CURRENT_RESTAURANT', payload);
   },
   retrieveMyRestaurants({
-    commit,
+    commit
   }, payload) {
     return new Promise((resolve, reject) => {
       axios.post(process.env.VUE_APP_BASEURL, {
@@ -70,6 +71,16 @@ const actions = {
             id: result.data.restaurants[0].restaurantId
           });
 
+        if (result.data.restaurants.length > 0) {
+          var accessList = ["nothing"];
+          for (var i = 0; i < state.AppActiveUser.employeeData.length; i++) {
+            if (state.AppActiveUser.employeeData[i].restaurantId == result.data.restaurants[0].restaurantId) {
+              accessList = state.AppActiveUser.employeeData[i].rights;
+            }
+          }
+          localStorage.setItem("accessList", JSON.stringify(accessList));
+        }
+
         resolve(result);
       }).catch(({
         response
@@ -81,7 +92,8 @@ const actions = {
     });
   },
   editProfile({
-    commit, dispatch
+    commit,
+    dispatch
   }, payload) {
     return new Promise((resolve, reject) => {
       axios.post(process.env.VUE_APP_BASEURL, {

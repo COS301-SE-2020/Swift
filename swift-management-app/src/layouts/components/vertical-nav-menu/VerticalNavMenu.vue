@@ -14,14 +14,22 @@
     >
       <div @mouseenter="mouseEnter" @mouseleave="mouseLeave">
         <!-- Header -->
-        <div class="header-sidebar flex items-end justify-between" slot="header">
+        <div
+          class="header-sidebar flex items-end justify-between"
+          slot="header"
+        >
           <!-- Logo -->
-          <router-link tag="div" class="vx-logo cursor-pointer flex items-center" to="/">
+          <router-link
+            tag="div"
+            class="vx-logo cursor-pointer flex items-center"
+            to="/"
+          >
             <span
               class="vx-logo-text text-primary"
               v-show="isMouseEnter || !reduce"
               v-if="title"
-            >{{ title }}</span>
+              >{{ title }}</span
+            >
           </router-link>
           <!-- /Logo -->
 
@@ -32,7 +40,9 @@
               <feather-icon
                 icon="XIcon"
                 class="m-0 cursor-pointer"
-                @click="$store.commit('TOGGLE_IS_VERTICAL_NAV_MENU_ACTIVE', false)"
+                @click="
+                  $store.commit('TOGGLE_IS_VERTICAL_NAV_MENU_ACTIVE', false)
+                "
               />
             </template>
 
@@ -61,13 +71,14 @@
           @ps-scroll-y="psSectionScroll"
           :key="$vs.rtl"
         >
-          <template v-for="(item, index) in menuItemsUpdated">
+          <template v-for="(item, index) in menuItems">
             <!-- Group Header -->
             <span
               v-if="item.header && !verticalNavMenuItemsMin"
               class="navigation-header truncate"
               :key="`header-${index}`"
-            >{{ item.header }}</span>
+              >{{ item.header }}</span
+            >
             <!-- /Group Header -->
 
             <template v-else-if="!item.header">
@@ -83,12 +94,15 @@
                 :isDisabled="item.isDisabled"
                 :slug="item.slug"
               >
-                <span v-show="!verticalNavMenuItemsMin" class="truncate">{{ item.name }}</span>
+                <span v-show="!verticalNavMenuItemsMin" class="truncate">{{
+                  item.name
+                }}</span>
                 <vs-chip
                   class="ml-auto"
                   :color="item.tagColor"
                   v-if="item.tag && (isMouseEnter || !reduce)"
-                >{{ item.tag }}</vs-chip>
+                  >{{ item.tag }}</vs-chip
+                >
               </v-nav-menu-item>
 
               <!-- Nav-Group -->
@@ -155,8 +169,18 @@ export default {
       swipeEasing: true,
     },
     showShadowBottom: false,
+    menuItems: null,
   }),
   computed: {
+    myRestaurants() {
+      if (this.$store.state) return this.$store.state.myRestaurants;
+      else return null;
+    },
+    activeUserInfo() {
+      if (localStorage.getItem("userInfo") === null)
+        return this.$store.state.AppActiveUser;
+      else return JSON.parse(localStorage.getItem("userInfo"));
+    },
     isGroupActive() {
       return (item) => {
         const path = this.$route.fullPath;
@@ -182,42 +206,6 @@ export default {
         func(item);
         return open;
       };
-    },
-    menuItemsUpdated() {
-      let clone = this.navMenuItems.slice();
-
-      for (let [index, item] of this.navMenuItems.entries()) {
-        if (item.header && item.items.length && (index || 1)) {
-          let i = clone.findIndex((ix) => ix.header === item.header);
-          for (let [subIndex, subItem] of item.items.entries()) {
-            clone.splice(i + 1 + subIndex, 0, subItem);
-          }
-        }
-      }
-
-      var accessList = ["nothing"];
-      var role = "";
-      var employeeData = JSON.parse(localStorage.getItem("userInfo"))
-        .employeeData;
-      if (employeeData)
-        for (var i = 0; i < employeeData.length; i++) {
-          if (employeeData[i].restaurantId == this.getCurrentRestaurantId()) {
-            accessList = employeeData[i].rights;
-            role = employeeData[i].role;
-          }
-        }
-
-      this.$store.dispatch("updateUserInfo", {
-        userRole: role,
-      });
-
-      //remove menu items users don't have access to
-      var accessibleMenus = [];
-      for (var i = 0; i < clone.length; i++)
-        if (accessList.indexOf(clone[i].name) >= 0 || 1 == 1)
-          accessibleMenus.push(clone[i]);
-
-      return accessibleMenus;
     },
     isVerticalNavMenuActive: {
       get() {
@@ -280,6 +268,18 @@ export default {
     //   this.windowWidth = event.currentTarget.innerWidth;
     //   this.setVerticalNavMenuWidth()
     // },
+    generateMenuItems() {
+      let accessList = JSON.parse(localStorage.getItem("accessList"));
+      let clone = this.navMenuItems.slice();
+
+      if(accessList)
+      for (let [index, item] of this.navMenuItems.entries()) {
+        if (accessList.indexOf(item.name) < 0 && item.name != "My Business") {
+          clone.splice(clone.indexOf(item), 1);
+        }
+      }
+      this.menuItems = clone;
+    },
     onSwipeLeft() {
       if (this.isVerticalNavMenuActive && this.showCloseButton)
         this.isVerticalNavMenuActive = false;
@@ -395,8 +395,16 @@ export default {
       this.setVerticalNavMenuWidth();
     },
   },
+  created() {
+    //this.generateMenuItems();
+  },
   mounted() {
     this.setVerticalNavMenuWidth();
+  },
+  watch: {
+    myRestaurants(newCount, oldCount) {
+      this.generateMenuItems();
+    },
   },
 };
 </script>

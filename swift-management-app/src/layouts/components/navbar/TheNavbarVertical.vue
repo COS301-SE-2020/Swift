@@ -14,7 +14,7 @@
         />
 
         <vs-dropdown class="mr-4">
-          <vs-button style="font-size: 12px;" size="small" type="border">
+          <vs-button style="font-size: 12px" size="small" type="border">
             <span class="flex items-center">
               <span>
                 <b>Restaurant:</b>
@@ -25,10 +25,13 @@
           </vs-button>
           <vs-dropdown-menu>
             <vs-dropdown-item
-              @click="switchRestaurant(restaurant.name, restaurant.restaurantId)"
+              @click="
+                switchRestaurant(restaurant.name, restaurant.restaurantId)
+              "
               v-for="restaurant in myRestaurants"
               :key="restaurant.restaurantId"
-            >{{ restaurant.name }}</vs-dropdown-item>
+              >{{ restaurant.name }}</vs-dropdown-item
+            >
           </vs-dropdown-menu>
         </vs-dropdown>
 
@@ -106,7 +109,7 @@ export default {
     switchRestaurant(name, id) {
       this.$store.commit("SET_CURRENT_RESTAURANT", { name: name, id: id });
       this.currentRestaurantName = name;
-      this.$router.go();
+      //location.reload();
     },
     showSidebar() {
       this.$store.commit("TOGGLE_IS_VERTICAL_NAV_MENU_ACTIVE", true);
@@ -120,7 +123,7 @@ export default {
     this.$store.dispatch("retrieveMyRestaurants", {
       authKey: this.getAuthToken(),
       currentRestaurantName: this.getCurrentRestaurantName(),
-    });    
+    });
   },
 };
 </script>

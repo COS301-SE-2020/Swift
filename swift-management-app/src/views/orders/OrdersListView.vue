@@ -4,10 +4,18 @@
       <div class="content-area__heading pr-4">
         <h2 class="mb-1">Orders</h2>
       </div>
-      <label class="mr-4">Show all orders</label>
+      <label class="mr-4">Show past orders</label>
       <vs-switch color="success" v-model="showAll" />
+      <label class="mr-4 ml-4">Show all waiter's orders</label>
+      <vs-switch color="success" v-model="showAllWaiters" />
     </div>
-    <vs-row v-if="orderCount <= 0" vs-type="flex" vs-justify="center" vs-align="center" vs-w="12">
+    <vs-row
+      v-if="orderCount <= 0"
+      vs-type="flex"
+      vs-justify="center"
+      vs-align="center"
+      vs-w="12"
+    >
       <vs-col class="mt-20" vs-sm="12" vs-lg="6">
         <vx-card>
           <h5 class="mb-1 text-center">No Orders Yet</h5>
@@ -18,22 +26,23 @@
       <div
         v-for="(order, index) in orders"
         :key="index"
-        class="vx-col w-full md:w-1/3 lg:w-1/3 xl:w-1/3 mb-base"
+        class="vx-col w-full sml:w-1/1 md:w-1/2 lg:w-1/4 xl:w-1/4 mb-base"
       >
         <vx-card
           :title="'Order: Table ' + order.tableNumber"
           :subtitle="'Placed: ' + orderTimePlaced(order.orderDateTime)"
-          @refresh="closeCardAnimationDemo"
           collapse-action
           :data-item-count="orderCount"
           :data-progress="order.orderProgress"
-          :id="'OrderCard'+order.orderId"
+          :id="'OrderCard' + order.orderId"
         >
-          <vs-chip class="employeeName" color="success">Status: {{order.orderStatus}}</vs-chip>
-          <vs-chip
-            class="employeeName"
-            color="primary"
-          >Waiter: {{order.employeeName}} {{order.employeeSurname}}</vs-chip>
+          <vs-chip class="employeeName" color="success"
+            >Status: {{ order.orderStatus }}</vs-chip
+          >
+          <vs-chip class="employeeName" color="primary"
+            >Waiter: {{ order.employeeName }}
+            {{ order.employeeSurname }}</vs-chip
+          >
 
           <vs-divider border-style="solid" color="white"></vs-divider>
           <p>Order Progress:</p>
@@ -43,15 +52,19 @@
             :color="getStatusColor(order.orderProgress)"
           ></vs-progress>
           <vs-list>
-            <vs-list-header :title="'Order Total: R'+order.orderTotal"></vs-list-header>
+            <vs-list-header
+              :title="'Order Total: R' + order.orderTotal"
+            ></vs-list-header>
             <div
-              v-for="menuItem in order.orderDetails.items"
-              :key="menuItem.menuItemName"
+              v-for="(menuItem, index) in order.orderDetails.items"
+              :key="index"
               class="singleMenuItem"
             >
               <vs-row>
-                <vs-chip color="primary">R{{menuItem.itemTotal.toFixed(2)}}</vs-chip>
-                <vs-chip color="success">Qty: {{menuItem.quantity}}</vs-chip>
+                <vs-chip color="primary"
+                  >R{{ menuItem.itemTotal.toFixed(2) }}</vs-chip
+                >
+                <vs-chip color="success">Qty: {{ menuItem.quantity }}</vs-chip>
 
                 <vs-list-item
                   :title="menuItem.menuItemName"
@@ -59,22 +72,35 @@
                 >
                   <vs-button
                     class="ml-4"
-                    :id="'ItemProgressOrderID'+order.orderId+'ItemID'+menuItem.menuItemId"
+                    :id="
+                      'ItemProgressOrderID' +
+                      order.orderId +
+                      'ItemID' +
+                      menuItem.menuItemId
+                    "
                     :data-progress="menuItem.progress"
                     size="small"
                     :color="getStatusColor(menuItem.progress)"
-                    @click.stop="updateMenuItemProgress(order.orderId,menuItem.menuItemId)"
-                  >{{getMenuItemStatus(menuItem.progress)}}</vs-button>
+                    @click.stop="
+                      updateMenuItemProgress(order.orderId, menuItem.menuItemId)
+                    "
+                    >{{ getMenuItemStatus(menuItem.progress) }}</vs-button
+                  >
                 </vs-list-item>
               </vs-row>
-              <vs-collapse v-if="menuItem.orderselections0" type="margin" class="pt-0">
+              <vs-collapse
+                v-if="menuItem.orderselections0"
+                type="margin"
+                class="pt-0"
+              >
                 <vs-collapse-item class="addonsSection">
                   <div slot="header">Add-ons</div>
                   <vs-list-item
                     v-for="selection in menuItem.orderselections.selections"
                     :key="selection.name"
                     :title="selection.name"
-                  >{{ selection.values }}</vs-list-item>
+                    >{{ selection.values }}</vs-list-item
+                  >
                 </vs-collapse-item>
               </vs-collapse>
             </div>
@@ -95,24 +121,38 @@ export default {
     return {
       isMounted: false,
       showAll: false,
+      showAllWaiters: true,
     };
   },
   computed: {
     orders() {
+      var filteredOrders = null;
       if (this.$store.state.orderList) {
         if (this.$store.state.orderList.orders)
           if (this.showAll) {
-            return this.$store.state.orderList.orders;
+            filteredOrders = this.$store.state.orderList.orders;
           } else {
-            return this.$store.state.orderList.orders.filter(
+            filteredOrders = this.$store.state.orderList.orders.filter(
               (i) => i.orderStatus != "Paid"
             );
           }
-      } else return null;
+
+          if (!this.showAllWaiters) {
+            filteredOrders = filteredOrders.filter(
+              (i) => i.employeeName == this.activeUserInfo.displayName
+            );
+          }
+      }
+      return filteredOrders;
     },
     orderCount() {
       if (this.orders) return this.orders.length;
       else return 0;
+    },
+     activeUserInfo() {
+      if (localStorage.getItem("userInfo") === null)
+        return this.$store.state.AppActiveUser;
+      else return JSON.parse(localStorage.getItem("userInfo"));
     },
   },
   methods: {
@@ -136,9 +176,6 @@ export default {
         authKey: this.getAuthToken(),
         currentRestaurantId: this.getCurrentRestaurantId(),
       });
-    },
-    closeCardAnimationDemo(card) {
-      card.removeRefreshAnimation(3000);
     },
     getStatusColor(percentage) {
       if (percentage < 10) return "danger";
@@ -199,7 +236,7 @@ export default {
 
       setInterval(() => {
         this.listOrders();
-      }, 5000);
+      }, 8000);
     }
   },
   mounted() {
