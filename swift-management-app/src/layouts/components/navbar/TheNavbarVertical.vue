@@ -109,7 +109,7 @@ export default {
     switchRestaurant(name, id) {
       this.$store.commit("SET_CURRENT_RESTAURANT", { name: name, id: id });
       this.currentRestaurantName = name;
-      location.reload();
+      //location.reload();
     },
     showSidebar() {
       this.$store.commit("TOGGLE_IS_VERTICAL_NAV_MENU_ACTIVE", true);
