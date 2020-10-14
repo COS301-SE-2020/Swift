@@ -231,7 +231,7 @@ export default {
         axisTicks: {
           show: false,
         },
-        categories: ['01', '05', '09', '13', '17', '21', '26', '31'],
+        categories: [],
         axisBorder: {
           show: false,
         },

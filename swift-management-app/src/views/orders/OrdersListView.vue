@@ -8,6 +8,12 @@
       <vs-switch color="success" v-model="showAll" />
       <label class="mr-4 ml-4">Show all waiter's orders</label>
       <vs-switch color="success" v-model="showAllWaiters" />
+      <label class="mr-4 ml-4">Show orders from</label>
+      <datepicker
+        title="test"
+        placeholder="Select Date"
+        v-model="showFromDate"
+      ></datepicker>
     </div>
     <vs-row
       v-if="orderCount <= 0"
@@ -114,20 +120,26 @@
 
 <script>
 import moduleDataList from "@/store/orders/orderDataList.js";
+import Datepicker from "vuejs-datepicker";
 import $ from "jquery";
 
 export default {
+  components: {
+    Datepicker,
+  },
   data() {
     return {
       isMounted: false,
       showAll: false,
       showAllWaiters: true,
+      showFromDate: null,
     };
   },
   computed: {
     orders() {
       var filteredOrders = null;
       if (this.$store.state.orderList) {
+        //status filter
         if (this.$store.state.orderList.orders)
           if (this.showAll) {
             filteredOrders = this.$store.state.orderList.orders;
@@ -136,12 +148,19 @@ export default {
               (i) => i.orderStatus != "Paid"
             );
           }
-
-          if (!this.showAllWaiters) {
-            filteredOrders = filteredOrders.filter(
-              (i) => i.employeeName == this.activeUserInfo.displayName
-            );
-          }
+        //waiter filter
+        if (!this.showAllWaiters && filteredOrders) {
+          filteredOrders = filteredOrders.filter(
+            (i) =>
+              i.employeeName + " " + i.employeeSurname ==
+              this.activeUserInfo.displayName
+          );
+        }
+        //date filter
+        if(filteredOrders)
+        filteredOrders = filteredOrders.filter(
+          (i) => new Date(i.orderDateTime) > this.showFromDate
+        );
       }
       return filteredOrders;
     },
@@ -149,7 +168,7 @@ export default {
       if (this.orders) return this.orders.length;
       else return 0;
     },
-     activeUserInfo() {
+    activeUserInfo() {
       if (localStorage.getItem("userInfo") === null)
         return this.$store.state.AppActiveUser;
       else return JSON.parse(localStorage.getItem("userInfo"));
@@ -233,6 +252,8 @@ export default {
       if (this.orders == null) this.$vs.loading();
 
       this.listOrders();
+      var date = new Date();
+      this.showFromDate = date.setDate(date.getDate() - 7);
 
       setInterval(() => {
         this.listOrders();
