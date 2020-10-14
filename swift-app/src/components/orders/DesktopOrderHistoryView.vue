@@ -136,6 +136,18 @@
                         <div class="secondary--text d-flex justify-center" style="font-size:35px">{{item.progress}}%</div>
                       </v-col>
                     </v-row>
+                    <div class="mt-12">
+                      <v-row class="mx-0 d-flex justify-center" v-for="(orderItem, index) in item.items" :key="index" @click="viewOrder(item)">
+                        <v-col class="pb-0 pt-0 pl-0" cols="1">
+                          <v-icon size="15px">{{(parseInt(orderItem.progress) == 100) ? 'mdi-check-box-outline' : 'mdi-checkbox-blank-outline'}}</v-icon> 
+                          <span class="pl-1 orderDetails">{{orderItem.menuItemName}}</span>
+                        </v-col>
+                        <v-col class="pb-0 pt-0 pl-0" cols="1">
+                          <span class="orderDetails">{{orderItem.quantity}}x </span>
+                        </v-col>
+                      </v-row>
+                    </div>
+                    
 
                     <!-- <v-row class="my-0 py-0 mx-0">
                       <v-col cols="3" class="py-0 px-0 mx-0" style="display: table;">

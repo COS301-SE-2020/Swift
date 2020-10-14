@@ -13,7 +13,7 @@
                 <v-carousel height="200px" :show-arrows="false" hide-delimiter cycle hide-delimiters continuous>
                   <v-carousel-item gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.4)" :src="menu.image">
                     <v-row  align="center" justify="center" class="mt-6">
-                      <v-col cols="12" v-if="checkedIn()" class="white--text display-1 py-0" style="text-align: center;">Welcome to {{menu.name}}</v-col>
+                      <v-col cols="12" v-if="checkedIn()" class="white--text display-1 py-0" style="text-align: center;">Welcome to <br/> {{menu.name}}</v-col>
                       <v-col cols="12" v-if="!checkedIn()" class="white--text display-1 py-0" style="text-align: center;">{{menu.name}}</v-col>
                     </v-row>
                     <v-row  align="center" justify="center" class="mt-2">
