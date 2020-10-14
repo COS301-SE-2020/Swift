@@ -655,6 +655,7 @@ module.exports = {
         orderItemPromises.push(getOrderItemStatus(order.orderid)
           .then((itemStatus) => {
             const orderObj = {};
+            orderObj.orderId = order.orderid;
             orderObj.orderStatus = order.orderstatus;
             orderObj.orderProgress = order.progress;
             orderObj.itemProgress = itemStatus.items;

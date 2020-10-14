@@ -745,6 +745,20 @@ module.exports = {
             [reqBody.orderId]
           );
 
+          const progressRes = await client.query(
+            'SELECT progress FROM public.customerorder'
+            + ' WHERE orderid = $1::integer',
+            [reqBody.orderId]
+          );
+
+          if (progressRes.rows[0].progress === 100) {
+            await client.query(
+              'UPDATE public.customerorder SET ordercompletiontime = NOW()'
+              + ' WHERE orderid = $1::integer',
+              [reqBody.orderId]
+            );
+          }
+
           // commit changes
           await client.query('COMMIT');
 

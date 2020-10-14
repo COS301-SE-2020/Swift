@@ -605,8 +605,8 @@ module.exports = {
           // TODO: Work out order completion time from estimated time
           const resOrderId = await client.query(
             'INSERT INTO public.customerorder (customerid, employeeid, tableid, ordernumber, orderdatetime,'
-            + ' ordercompletiontime, orderstatus, progress, waitertip)'
-            + ' VALUES ($1::integer,$2::integer,$3::integer,\'0\',NOW(),NOW(),$4::text,$5::integer,$6::real)'
+            + ' orderstatus, progress, waitertip)'
+            + ' VALUES ($1::integer,$2::integer,$3::integer,\'0\',NOW(),$4::text,$5::integer,$6::real)'
             + ' RETURNING orderid',
             [
               customerId,
