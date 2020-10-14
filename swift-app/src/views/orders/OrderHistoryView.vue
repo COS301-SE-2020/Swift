@@ -210,6 +210,8 @@ export default {
 
     this.onResize() 
     window.addEventListener('resize', this.onResize, { passive: true }) 
+
+    this.clearReceipt();
     
     if (Object.keys(this.orderHistory).length === 0) {
       this.isLoading = !this.isLoading;
@@ -232,8 +234,17 @@ export default {
     goToRating () {
       this.$router.push('/rating')
     },
-    viewOrder (item) {
-      // this.addOrder(item)
+    async viewOrder (item) {
+      console.log(item)
+      if (item.orderStatus == "Received" && item.restaurantId == this.checkedInRestaurantId) {
+        this.$router.push('/cart')
+      } else {
+        let data = await this.createReceiptObject(item);
+        await this.setReceipt(data);
+        // console.log(data)
+        // console.log(this.getReceipt)
+        this.$router.push('/cart')
+      }
     },
     onResize () { 
       this.isMobile = window.innerWidth < 600 
@@ -278,7 +289,7 @@ export default {
       let orderItems = []; 
       if (this.checkedInTableId != null) {
         orderItems = this.orderHistory.filter(orderItem => {
-          return parseInt(orderItem.progress) < 100
+          return parseInt(orderItem.progress) < 100 && orderItem.restaurantId == this.checkedInRestaurantId
         });
       } 
       
@@ -287,13 +298,14 @@ export default {
       // console.log(orderItem)
       // return orderItem;
     },
-    createOrderObject(item) {
+    createReceiptObject(item) {
       let itemsOrdered = [];
-      // console.log("REPEAT:")
-      // console.log(item)
+      console.log("REPEAT:")
+      console.log(item)
       for (let i = 0; i < item.items.length; i++) {
         let data = {
           "menuItemId": item.items[i].menuItemId,
+          "menuItemName": item.items[i].menuItemName,
           "itemTotal": item.items[i].itemTotal,
           "quantity": item.items[i].quantity,
           "orderSelections": item.items[i].orderselections
@@ -306,7 +318,43 @@ export default {
         "orderInfo": {
           "restaurantId": item.restaurantId,
           "tableId": this.checkedInTableId,
-          "employeeId": 6,
+          // "employeeId": 6,
+          "waiterTip": item.waiterTip,
+          "orderNumber": item.orderNumber,
+          "orderDateTime": item.orderDateTime,
+          "restaurantName": item.restaurantName,
+          "restaurantLocation": item.restaurantLocation,
+          "employeeName": item.orderEmployeeName,
+          "employeeSurname": item.orderEmployeeSurname,
+          "orderItems": itemsOrdered
+        }
+      }
+
+      console.log(data)
+
+      return data;
+    },
+    createOrderObject(item) {
+      let itemsOrdered = [];
+      // console.log("REPEAT2:")
+      // console.log(item)
+      for (let i = 0; i < item.items.length; i++) {
+        let data = {
+          "menuItemId": item.items[i].menuItemId,
+          "itemTotal": item.items[i].itemTotal,
+          "quantity": item.items[i].quantity,
+          "promoPrice": item.items[i].promoPrice,
+          "orderSelections": item.items[i].orderselections
+        };
+        itemsOrdered[i] = data;
+      }
+
+      
+      let data = {
+        "orderInfo": {
+          "restaurantId": item.restaurantId,
+          "tableId": this.checkedInTableId,
+          // "employeeId": 6,
           "waiterTip": 0,
           "orderItems": itemsOrdered
         }
@@ -450,6 +498,8 @@ export default {
       addPaymentInfo: "OrderStore/addPaymentInfo",
       addItemToRate: "OrderStore/addItemToRate",
       clearOrder: "OrderStore/clearOrder",
+      clearReceipt: "OrderStore/clearReceipt",
+      setReceipt: "OrderStore/setReceipt",
       orderStatus: 'OrderStore/retrieveOrderStatus',
       ratingPhrasesRestaurant: 'OrderStore/ratingPhrasesRestaurant',
     }),
@@ -475,6 +525,7 @@ export default {
       orderHistory: 'CustomerStore/getCustomerOrderHistory',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
       allRestaurants: 'RestaurantsStore/getAllRestaurants',
+      getReceipt: "OrderStore/getReceipt",
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
       fetchedOrderHistory: 'CustomerStore/getFetchedOrderHistory',
     }),

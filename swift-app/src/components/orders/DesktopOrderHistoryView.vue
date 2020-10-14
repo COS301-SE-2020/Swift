@@ -297,7 +297,7 @@ export default {
         "orderInfo": {
           "restaurantId": item.restaurantId,
           "tableId": this.checkedInTableId,
-          "employeeId": 6,
+          // "employeeId": 6,
           "waiterTip": 0,
           "orderItems": itemsOrdered
         }

@@ -503,7 +503,7 @@ export default {
         "orderInfo": {
           "restaurantId": this.checkedInRestaurantId,
           "tableId": this.checkedInTableId,
-          "employeeId": 6,
+          // "employeeId": 6,
           "waiterTip": 0,
           "orderItems": [
             {

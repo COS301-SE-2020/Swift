@@ -16,7 +16,116 @@
           </v-row>
         </v-container>
       </v-toolbar>
-      <v-container v-if="Object.keys(orderInfo()).length === 0 && Object.keys(orderedItems()).length === 0" py-0 fill-height>
+
+      <v-container v-if="Object.keys(receiptObj()).length != 0" class="orderDetailsCart d-flex align-content-space-between flex-wrap">
+        <div style="width: 100%">
+          <v-row class="d-flex justify-start">
+            <v-col cols="12 d-flex justify-center pb-3">
+              <div style="font-size: 15px; color: #f75564"> {{receiptObj().orderInfo.restaurantName}}, {{receiptObj().orderInfo.restaurantLocation}}</div>
+            </v-col>
+          </v-row>
+          <v-row class="d-flex justify-space-between">
+            <v-col cols="6 d-flex justify-start pb-1 pt-0">
+              <div style="font-size: 14px"> Order No: {{receiptObj().orderInfo.orderNumber}}</div>
+            </v-col>
+            <v-col cols="6 d-flex justify-end pb-1 pt-0" style="font-size: 14px">
+              <div> {{getDate(receiptObj().orderInfo.orderDateTime)}} </div>
+            </v-col>
+          </v-row>
+          <v-row class="d-flex justify-space-between">
+            <v-col cols="12 d-flex justify-start pt-0 mt-0">
+              <div style="font-size: 14px"> Served by: {{receiptObj().orderInfo.employeeName}} {{receiptObj().orderInfo.employeeSurname}}</div>
+            </v-col>
+          </v-row>
+          <v-divider divider class="ml-3 mb-4" width="93%"></v-divider>
+          <v-list v-for="(orderMenuItem,j) in receiptObj().orderInfo.orderItems" :key="j" class="py-2">
+            <v-card disabled >
+              <v-list-item class="pt-1">
+                <v-list-item-content>
+                  <v-row>
+                    <v-col cols="9" class="pb-1">
+                      <v-list-item-title>{{ orderMenuItem.menuItemName }}</v-list-item-title>
+                    </v-col>
+                    <v-col cols="3" class="d-flex justify-end pb-1">
+                      <div>
+                        <v-list-item-title><span style="color: #f75564; font-size: 14px" class="pr-1">{{orderMenuItem.quantity}}x </span><span :class="discounts.length > 0 && discounts.some(promo => promo.index == j && promo.id == orderMenuItem.menuItemId) ? 'promoApplied' : ''">R{{((orderMenuItem.itemTotal != null) ? orderMenuItem.itemTotal : (0)).toFixed(2)}}</span></v-list-item-title>
+                      </div>
+                    </v-col>
+                  </v-row>
+                  <v-row v-if="receiptObj().orderInfo.promoPrice != null" class="mt-0 pt-0">
+                    <v-col cols="8" class="mt-0 pt-0">
+                      <v-list-item-title><span style="color: #76C5BA; font-size: 14px" class="pr-1">Discount applied</span></v-list-item-title>
+                    </v-col>
+                    <v-col cols="4" class="d-flex justify-end mt-0 pt-0">
+                      <div>
+                        <v-list-item-title><span style="color: #76C5BA; font-size: 14px" class="pr-1">R{{(receiptObj().orderInfo.promoPrice).toFixed(2)}}</span></v-list-item-title>
+                      </div>
+                    </v-col>
+                  </v-row>
+                  <v-row >
+                    <v-col cols="8" class="py-0 p">
+                      <div v-if="(orderMenuItem.orderSelections != undefined)">
+                        <div v-for="(orderItem, index) in orderMenuItem.orderSelections.selections" :key="index">
+                          <v-list-item-subtitle v-if="!Array.isArray(orderItem.values)">- {{orderItem.name}}: {{orderItem.values}}</v-list-item-subtitle>
+                          <v-list-item-subtitle v-else>- {{orderItem.name}}: {{(orderItem.values).join(', ')}}</v-list-item-subtitle>
+                        </div>
+                      </div>
+                    </v-col>
+                  </v-row>
+                </v-list-item-content>
+              </v-list-item>
+            </v-card>
+          </v-list>
+        </div>
+        <div class="ma-0 pa-0 pt-4 mb-2" style="width: 100%">
+          <v-row>
+            <v-col class="d-flex justify-center pb-1">
+              <v-card width="100%" class="pa-1 pr-2">
+                <v-container py-0>
+                  <v-row>
+                    <v-col cols="9" class="pb-0">
+                      <div class="body-1 secondary--text">Subtotal</div>
+                    </v-col>
+                    <v-col cols="3" class="pb-0 px-0"> 
+                      <div class="body-1 secondary--text d-flex justify-end">R {{subtotal.toFixed(2)}}</div>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col cols="9" class="pb-0">
+                      <div class="body-1 secondary--text">Tax(14% VAT)</div>
+                    </v-col>
+                    <v-col cols="3" class="pb-0 px-0">
+                      <div class="body-1 secondary--text d-flex justify-end">R {{(subtotal  * 0.14).toFixed(2)}}</div>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-col cols="9">
+                      <div class="body-1 secondary--text">Waiter Tip</div>
+                    </v-col>
+                    <v-col cols="3" class="px-0">
+                      <div class="body-1 secondary--text d-flex justify-end">R {{tip.toFixed(2)}}</div>
+                    </v-col>
+                  </v-row>
+                  <v-row>
+                    <v-divider></v-divider>
+                  </v-row>
+                  <v-row>
+                    <v-col cols="9">
+                      <div class="body-1 secondary--text font-weight-bold">Total</div>
+                    </v-col>
+                    <v-col cols="3" class="px-0">
+                      <div class="body-1 secondary--text d-flex justify-end font-weight-bold">R {{calculateTotal()}}</div>
+                    </v-col>
+                  </v-row>
+                </v-container>
+              </v-card>
+            </v-col>
+          </v-row>
+        </div>
+      </v-container>
+
+
+      <v-container v-else-if="Object.keys(orderInfo()).length === 0 && Object.keys(orderedItems()).length === 0" py-0 fill-height>
         <div class="row d-flex flex-column align-stretch align-self-stretch">
           <v-container fluid fill-height class="pa-0">
             <div class="row d-flex flex-column align-self-center align-center">
@@ -30,6 +139,7 @@
           </v-container>
         </div>
       </v-container>
+
       <v-container v-else class="orderDetailsCart d-flex align-content-space-between flex-wrap">
         <!-- <template> -->
           <div style="width: 100%">
@@ -219,11 +329,12 @@
         </v-alert>
       </v-overlay>
       
-
-      <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
-        <v-icon>mdi-cart-outline</v-icon>
-      </v-btn>
-      <NavBar></NavBar>
+      <div class="ma-0 pa-0" v-if="Object.keys(receiptObj()).length == 0">
+        <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
+          <v-icon>mdi-cart-outline</v-icon>
+        </v-btn>
+        <NavBar></NavBar>
+      </div>
     </v-container>
   </v-container>
 </template>
@@ -231,6 +342,7 @@
 <script>
 import { mapActions, mapGetters, mapMutations } from "vuex";
 import NavBar from '@/components/layout/NavBar';
+import moment from 'moment'
 import DesktopCart from "../../components/orders/DesktopCartView"
 
 export default {
@@ -300,7 +412,7 @@ export default {
     },
     async goToOrder () {
       // this.updateOrderFlag(true);
-      console.log("ADD ITEM")
+      // console.log("ADD ITEM")
       let data = {
         "tip": this.tip
       }
@@ -380,6 +492,8 @@ export default {
       this.$router.push("/menu/" + this.checkedInRestaurantId());
     },
     calculateCartTotal(arr) {
+      // console.log("print")
+      // console.log(arr)
       if (Object.keys(arr).length != 0) {
         for (let i = 0; i < arr.orderItems.length; i++) {
           let price = this.discounts.some(promo => promo.index == i && promo.id == arr.orderItems[i].menuItemId) ? this.discounts.find(promo => promo.index == i && promo.id == arr.orderItems[i].menuItemId).newPrice : arr.orderItems[i].itemTotal
@@ -501,6 +615,7 @@ export default {
       allRestaurants: 'RestaurantsStore/getAllRestaurants',
       restaurantPromos: 'RestaurantsStore/getCheckedInRestaurantPromotions',
       orderInfo: "OrderStore/getOrderInfo",
+      receiptObj: "OrderStore/getReceipt",
       orderedItems: "OrderStore/getOrderedItems",
       orderHistory: 'CustomerStore/getCustomerOrderHistory',
       wTip: 'OrderStore/getWaiterTip',
@@ -511,6 +626,9 @@ export default {
       let tax = (this.subtotal * 0.14).toFixed(2);
       // let tip = (Object.keys(this.orderedItems()).length != 0) ? this.orderedItems().waiterTip : (this.subtotal * 0.1).toFixed(2);
       return (parseFloat(this.subtotal) + parseFloat(tax) + parseFloat(this.tip)).toFixed(2);
+    },
+    getDate(date) {
+      return date.slice(11, 16) + ', ' + moment(String(date.slice(0, 10))).format('DD MMM YYYY')
     },
     getItemName(id) {
       // console.log("here")
@@ -539,9 +657,12 @@ export default {
     this.applyPromotionsToCart(this.orderInfo())
     this.applyPromotionsToCart(this.orderedItems())
 
-    // this.clearItem;
+
+    if (Object.keys(this.receiptObj()).length != 0)
+      this.calculateCartTotal(this.receiptObj().orderInfo)
     this.calculateCartTotal(this.orderInfo())
     this.calculateCartTotal(this.orderedItems())
+
 
     this.tip = this.subtotal * 0.1;
     if (Object.keys(this.wTip()).length != 0) {

@@ -9,6 +9,7 @@ const initialState = () => ({
   paymentInfo: {},
   currentId: -1,
   waiterTip: {},
+  receipt: {},
   
   
   orderHistory: {},
@@ -49,6 +50,10 @@ const getters = {
 
   getOrderFlag(state) {
     return state.orderFlag;
+  },
+
+  getReceipt(state) {
+    return state.receipt;
   },
 
   getOrderTotal(state) {
@@ -136,6 +141,8 @@ const actions = {
           }
           
           commit('CLEAR_ITEMS');
+          this.commit('MenuStore/CLEAR_MENU');
+          this.dispatch('RestaurantsStore/retrieveRestaurantMenu');
           this.commit('CustomerStore/UPDATE_ORDER_STATUS', data);
         }).catch(({ response }) => {
         });
@@ -176,7 +183,6 @@ const actions = {
         "status": 'Paid',
         "id": this.getters['OrderStore/getPaymentInfo'].orderId
       }
-      console.log('got to here')
       // commit('UPDATE_ORDER_FLAG', false);
       commit('CLEAR_ITEMS');
       this.commit('CustomerStore/UPDATE_ORDER_STATUS', data);
@@ -200,6 +206,14 @@ const actions = {
 
   setWaiterTip({commit}, tip) {
     commit('SET_WAITER_TIP', tip);
+  },
+
+  setReceipt({commit}, order) {
+    commit('SET_RECEIPT', order);
+  },
+
+  clearReceipt({commit}) {
+    commit('CLEAR_RECEIPT');
   },
 
   addItemToOrder({commit,}, orderItemInfo) {
@@ -240,7 +254,7 @@ const actions = {
         "itemProgress": result.data.itemProgress
       } */
       // console.log(result.data.itemProgress)
-      console.log(result.data)
+      // console.log(result.data)
       this.commit('CustomerStore/UPDATE_ORDER_PROGRESS', result.data.orders);
       // commit('UPDATE_ORDER_FLAG', false);
     }).catch(({ response }) => {
@@ -282,7 +296,7 @@ const mutations = {
         // "orderInfo": {
           "restaurantId": orderHistory[0].restaurantId,
           "tableId": this.getters['CustomerStore/getCheckedInTableId'],
-          "employeeId": 6,
+          // "employeeId": 6,
           "waiterTip": orderHistory[0].waiterTip,
           "orderItems": itemsOrdered
         // }
@@ -297,6 +311,10 @@ const mutations = {
 
   CLEAR_ORDER(state) {
     state.orderInfo = {}
+  },
+
+  CLEAR_RECEIPT(state) {
+    state.receipt = {}
   },
 
   UPDATE_ORDER(state) {
@@ -344,10 +362,15 @@ const mutations = {
   CLEAR_ITEMS(state) {
     state.orderInfo = {}
     state.orderedItems = {}
+    state.itemToRate = {}
   },
 
   SET_RATING_PHRASES(state, ratingPhrases) {
     state.ratingPhrases = ratingPhrases
+  },
+
+  SET_RECEIPT(state, order) {
+    state.receipt = order
   },
 
   SET_WAITER_TIP(state, tip) {
