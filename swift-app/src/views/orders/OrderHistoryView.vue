@@ -289,20 +289,14 @@ export default {
     },
     createOrderObject(item) {
       let itemsOrdered = [];
-      console.log("REPEAT:")
-      console.log(item)
+      // console.log("REPEAT:")
+      // console.log(item)
       for (let i = 0; i < item.items.length; i++) {
-        // console.log(item.items[i].menuItemId)
-        // console.log(item.items[i].itemTotal)
-        // console.log(item.items[i].quantity)
-        // console.log(item.items[i].orderSelections)
         let data = {
           "menuItemId": item.items[i].menuItemId,
           "itemTotal": item.items[i].itemTotal,
           "quantity": item.items[i].quantity,
-          "orderSelections": {
-            "selections": item.items[i].orderSelections
-          }
+          "orderSelections": item.items[i].orderselections
         };
         itemsOrdered[i] = data;
       }

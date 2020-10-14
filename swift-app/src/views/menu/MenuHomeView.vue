@@ -17,18 +17,18 @@
                       <v-col cols="12" v-if="!checkedIn()" class="white--text display-1 py-0" style="text-align: center;">{{menu.name}}</v-col>
                     </v-row>
                     <v-row  align="center" justify="center" class="mt-2">
-                      <v-col cols="9" class="mt-3">
+                      <v-col cols="11" class="mt-3">
                         <v-text-field background-color="white" class="menuItemSearchbar"  v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search..."></v-text-field>
                       </v-col>
-                      <v-col cols="1" class="d-flex align-center px-0 mt-3">
+                      <!-- <v-col cols="1" class="d-flex align-center px-0 mt-3">
                         <v-btn small icon color="white">
                           <v-icon size="24px">mdi-filter-variant</v-icon> 
                         </v-btn>
-                      </v-col>
+                      </v-col> -->
                     </v-row>
                   </v-carousel-item>
                 </v-carousel>
-                <v-btn width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 20px; left: 15px;">
+                <v-btn width="30px" height="30px" @click="backNavigation" color="secondary" absolute small fab style="top: 30px; left: 15px;">
                   <v-icon>mdi-chevron-left</v-icon>
                 </v-btn>
                 <!-- <v-btn v-if="checkedIn()" width="30px" height="30px" @click="callWaiterPressed()" :key="activeCall.icon" :color="activeCall.color" absolute small fab style="top: 20px; right: 10px;">
@@ -88,7 +88,7 @@
               <v-list v-for="(secondary, i) in secondaryCategoryList(category.categoryId)" :key="i" class="py-0">
                 <div class="ml-2 mt-2">{{secondary.categoryName}}</div>
                 <v-list  v-for="(menuItem, i) in secondary.menuItems" :key="i" class="py-0">
-                  <v-list-item v-if="menuItem.availability" style="opacity: 1" @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1">
+                  <v-list-item v-if="menuItem.availability" style="opacity: 1" @click="goToMenuItem(menuItem.menuItemId)" :disabled="!menuItem.availability" ripple class="py-1">
                     <v-list-item-avatar tile  style="border-radius: 4px" size="45" >
                       <img v-if="menuItem.images.length != 0" :src="menuItem.images[0]">
                       <img v-else src="../../assets/menuItemImages/item-placeholder.png">
@@ -99,7 +99,7 @@
                     </v-list-item-content>
                     <span class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</span>
                   </v-list-item>
-                  <v-list-item v-else style="opacity: 0.3" @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1">
+                  <!-- <v-list-item v-else style="opacity: 0.3" @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1">
                     <v-list-item-avatar tile  style="border-radius: 4px" size="45" >
                       <img v-if="menuItem.images.length != 0" :src="menuItem.images[0]">
                       <img v-else src="../../assets/menuItemImages/item-placeholder.png">
@@ -109,7 +109,7 @@
                       <v-list-item-subtitle v-html="menuItem.menuItemDescription"></v-list-item-subtitle>
                     </v-list-item-content>
                     <span class="subtitle-1">R{{ (menuItem.price).toFixed(2) }}</span>
-                  </v-list-item>
+                  </v-list-item> -->
                   <v-divider divider class="ml-3" width="93%"></v-divider>
                 </v-list>
               </v-list>
@@ -117,7 +117,7 @@
 
             <div v-else>
               <v-list v-for="(menuItem, i) in category.menuItems" :key="i" class="py-0">
-                <v-list-item @click="goToMenuItem(menuItem.menuItemId)"  ripple class="py-1 ">
+                <v-list-item @click="goToMenuItem(menuItem.menuItemId)" ripple class="py-1 ">
                   <v-list-item-avatar tile  style="border-radius: 4px" size="45" >
                     <img v-if="menuItem.images.length != 0" :src="menuItem.images[0]">
                     <img v-else src="../../assets/menuItemImages/item-placeholder.png">

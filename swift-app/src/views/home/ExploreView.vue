@@ -8,18 +8,18 @@
       <v-container v-show="!isLoading" py-0>
         <v-card flat tile>
           <v-row class="d-flex justify-space-between">
-            <v-col cols="8">
+            <v-col cols="12">
               <div class="pl-1 welcome font-weight-light">Welcome, </div>
               <div class="pl-1 pt-0 customerName">{{customerInfo.name}} {{customerInfo.surname}}</div>
             </v-col>
-            <v-col cols="4" class="d-flex justify-end align-center">
+            <!-- <v-col cols="4" class="d-flex justify-end align-center">
               <v-btn class="mr-4" elevation="2" width="35px" height="35px" @click="getNotifications" color="secondary" small fab>
                 <v-icon size="23px">mdi-email-outline</v-icon>
-              </v-btn>
+              </v-btn> -->
               <!-- <v-btn v-if="checkedIn()" @click="goToCart" elevation="2" width="35px" height="35px" small fab>
                 <v-icon size="23px">mdi-cart-outline</v-icon>
               </v-btn> -->
-            </v-col>
+            <!-- </v-col> -->
           </v-row>
 
           <v-card v-show="checkedIn()" @click="goToRestaurant(checkedInRestaurantId)" color="accent" height="80px" flat tile style="border-radius: 13px !important" class="mt-2 mb-5">
@@ -403,6 +403,7 @@ export default {
         )
 
         if (items.length != 0) {
+          // console.log(items)
           return items.slice().sort(function(a, b) {
             return b.rating - a.rating;
           });
