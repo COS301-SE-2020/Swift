@@ -61,8 +61,8 @@
                       <div class="px-3">
                         <!-- <span class="specialsText font-weight-light">30%</span> <span class="specialsText discount font-weight-light">discount</span> <span class="specialsText font-weight-light">on all pizza slices</span> -->
                         <span class="specialsText font-weight-light">{{ promotion.message }}</span>
-                        <div class="mt-1 specialsDate">{{ getDate(promotion.startDate) }} until {{ getDate(promotion.endDate) }}</div>
-                        <span class="specialsDate font-weight-light">{{ promotionDays(promotion.days).join(', ') }}</span>
+                        <div class="mt-2 specialsDate">{{ getDate(promotion.startDate) }} until {{ getDate(promotion.endDate) }}</div>
+                        <span class="specialsDate font-weight-light pt-1 ma-0">{{ promotionDays(promotion.days)}}</span>
                       </div>
                       <!-- <div class="browseButton">
                         <v-btn @click="goToRestaurant(promotion.restaurantId)" color="accent" height="33px" class="browseMenu px-2">Browse Menu</v-btn>
@@ -354,8 +354,23 @@ export default {
     },
     promotionDays(days) {
       var list = [];
-      days.forEach(element => list.push(element.substring(0,3)) );
-      return list;
+      let weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      let consecutive = true;
+      if (days.length != 7) {
+        for (let i = 1; i < days.length; i++) {
+          if (weekdays.indexOf(days[i]) != weekdays.indexOf(days[i-1]) + 1) {
+            consecutive = false;
+            break;
+          }
+        }
+        if (!consecutive) {
+          days.forEach(element => list.push(element.substring(0,3)) );
+        } else {
+          return days[0].substring(0,3) + " - " + (days[days.length-1]).substring(0,3)
+        }
+      }
+      
+      return list.join(', ');
     },
   },
   ...mapActions({
