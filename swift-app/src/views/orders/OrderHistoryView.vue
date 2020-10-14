@@ -142,6 +142,17 @@
                           <div class="secondary--text" style="font-size:12px" v-show="parseInt(item.progress) > 0">Our chef is busy preparing your order</div>
                       </v-col>
                     </v-row>
+                    <div class="mt-12">
+                      <v-row class="mx-0 d-flex justify-center" v-for="(orderItem, index) in item.items" :key="index" @click="viewOrder(item)">
+                        <v-col class="pb-0 pt-0 pl-0" cols="6">
+                          <v-icon size="15px">{{(parseInt(orderItem.progress) == 100) ? 'mdi-check-box-outline' : 'mdi-checkbox-blank-outline'}}</v-icon> 
+                          <span class="pl-1 orderDetails">{{orderItem.menuItemName}}</span>
+                        </v-col>
+                        <v-col class="pb-0 pt-0 pl-0" cols="1">
+                          <span class="orderDetails">{{orderItem.quantity}}x </span>
+                        </v-col>
+                      </v-row>
+                    </div>
                   <!-- </v-container> -->
                 </v-tab-item>
               </v-tabs>

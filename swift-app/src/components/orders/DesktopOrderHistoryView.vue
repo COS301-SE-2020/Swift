@@ -200,14 +200,17 @@ export default {
       ptr: this,
       isLoading: false,
       isLoadingCartItem: false,
-      isMobile: false,
+      isMobile: false, 
     }
   },
   async mounted() {
     // await this.$store.commit('CustomerStore/RESET_FETCHED_ORDER_HISTORY'); 
-    this.onResize()
-    window.addEventListener('resize', this.onResize, { passive: true })
 
+    this.onResize() 
+    window.addEventListener('resize', this.onResize, { passive: true }) 
+
+    this.clearReceipt();
+    
     if (Object.keys(this.orderHistory).length === 0) {
       this.isLoading = !this.isLoading;
       await this.$store.dispatch('MenuStore/retrieveMenu', this.checkedInRestaurantId);
@@ -218,17 +221,31 @@ export default {
     }
   },
   methods: {
-    goToMenu () {
-      this.$router.push('/menu')
+    goToRestaurantMenu() {
+      // console.log(this.checkedInRestaurantId)
+      this.$router.push("/menu/" + this.checkedInRestaurantId);
+    },
+    goToExplore() {
+      // console.log(this.checkedInRestaurantId)
+      this.$router.push("/");
     },
     goToRating () {
       this.$router.push('/rating')
     },
-    viewOrder (item) {
-      // this.addOrder(item)
+    async viewOrder (item) {
+      console.log(item)
+      if (item.orderStatus == "Received" && item.restaurantId == this.checkedInRestaurantId) {
+        this.$router.push('/cart')
+      } else {
+        let data = await this.createReceiptObject(item);
+        await this.setReceipt(data);
+        // console.log(data)
+        // console.log(this.getReceipt)
+        this.$router.push('/cart')
+      }
     },
-    onResize () {
-      this.isMobile = window.innerWidth < 600
+    onResize () { 
+      this.isMobile = window.innerWidth < 600 
     },
     orderActive(arr) {
       if (arr != undefined) {
@@ -249,7 +266,10 @@ export default {
       let total = 0;
       if (item.items != undefined) {
         for (let i = 0; i < item.items.length; i++) {
-          total += parseFloat((item.items[i].itemTotal != null) ? item.items[i].itemTotal * item.items[i].quantity : 0);
+          if (item.items[i].promoPrice == null)
+            total += parseFloat((item.items[i].itemTotal != null) ? item.items[i].itemTotal * item.items[i].quantity : 0);
+          else
+            total += parseFloat(item.items[i].promoPrice * item.items[i].quantity);
         }
       }
       return parseFloat(total).toFixed(2);
@@ -264,30 +284,65 @@ export default {
       })
     },
     getOrderStatusItems() {
+      let orderItems = []; 
+      if (this.checkedInTableId != null) {
+        orderItems = this.orderHistory.filter(orderItem => {
+          return parseInt(orderItem.progress) < 100 && orderItem.restaurantId == this.checkedInRestaurantId
+        });
+      } 
       
-      var orderItem = (this.orderHistory.filter(orderItem => {
-        return parseInt(orderItem.progress) < 100 || orderItem.orderStatus == "Received"
-      }))
+      return orderItems;
       // console.log("STATUS")
       // console.log(orderItem)
-      return orderItem;
+      // return orderItem;
     },
-    createOrderObject(item) {
+    createReceiptObject(item) {
       let itemsOrdered = [];
       console.log("REPEAT:")
       console.log(item)
       for (let i = 0; i < item.items.length; i++) {
-        // console.log(item.items[i].menuItemId)
-        // console.log(item.items[i].itemTotal)
-        // console.log(item.items[i].quantity)
-        // console.log(item.items[i].orderSelections)
+        let data = {
+          "menuItemId": item.items[i].menuItemId,
+          "menuItemName": item.items[i].menuItemName,
+          "itemTotal": item.items[i].itemTotal,
+          "quantity": item.items[i].quantity,
+          "orderSelections": item.items[i].orderselections
+        };
+        itemsOrdered[i] = data;
+      }
+
+      
+      let data = {
+        "orderInfo": {
+          "restaurantId": item.restaurantId,
+          "tableId": this.checkedInTableId,
+          // "employeeId": 6,
+          "waiterTip": item.waiterTip,
+          "orderNumber": item.orderNumber,
+          "orderDateTime": item.orderDateTime,
+          "restaurantName": item.restaurantName,
+          "restaurantLocation": item.restaurantLocation,
+          "employeeName": item.orderEmployeeName,
+          "employeeSurname": item.orderEmployeeSurname,
+          "orderItems": itemsOrdered
+        }
+      }
+
+      console.log(data)
+
+      return data;
+    },
+    createOrderObject(item) {
+      let itemsOrdered = [];
+      // console.log("REPEAT2:")
+      // console.log(item)
+      for (let i = 0; i < item.items.length; i++) {
         let data = {
           "menuItemId": item.items[i].menuItemId,
           "itemTotal": item.items[i].itemTotal,
           "quantity": item.items[i].quantity,
-          "orderSelections": {
-            "selections": item.items[i].orderSelections
-          }
+          "promoPrice": item.items[i].promoPrice,
+          "orderSelections": item.items[i].orderselections
         };
         itemsOrdered[i] = data;
       }
@@ -426,21 +481,23 @@ export default {
     },
     updateOrderStatus() {
       let self = this;
-      // setInterval(() => { 
-      //   let order = self.getOrderStatusItem();
-      //   if (order != undefined) {
-      //     let data = {
-      //       "orderId": order.orderId
-      //     }
-      //     self.orderStatus(data)
-      //   }
-      // }, 5000);  
+      // this.orderStatus();
+
+      setInterval(() => { 
+        let order = [];
+        order = self.getOrderStatusItems();
+        if (order.length != 0) {
+          self.orderStatus()
+        }
+      }, 7000);  
     },
     ...mapActions({
       addItemToOrder: "OrderStore/addItemToOrder",
       addPaymentInfo: "OrderStore/addPaymentInfo",
       addItemToRate: "OrderStore/addItemToRate",
       clearOrder: "OrderStore/clearOrder",
+      clearReceipt: "OrderStore/clearReceipt",
+      setReceipt: "OrderStore/setReceipt",
       orderStatus: 'OrderStore/retrieveOrderStatus',
       ratingPhrasesRestaurant: 'OrderStore/ratingPhrasesRestaurant',
     }),
@@ -466,11 +523,16 @@ export default {
       orderHistory: 'CustomerStore/getCustomerOrderHistory',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
       allRestaurants: 'RestaurantsStore/getAllRestaurants',
+      getReceipt: "OrderStore/getReceipt",
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
       fetchedOrderHistory: 'CustomerStore/getFetchedOrderHistory',
     }),
     
   },
+  // async mounted() {
+  //   console.log(await this.orderHistory)
+  // },
+
   beforeMount: function() {
     this.updateOrderStatus();
   },
