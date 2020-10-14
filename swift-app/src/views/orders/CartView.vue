@@ -282,7 +282,7 @@ export default {
       }      
     },
     changeTipManual () {
-        this.tip = parseInt(this.tipVal)
+        this.tip = parseFloat(this.tipVal)
         this.selected = this.tipOptions.length - 1;
         this.toggleTipAlert()
 
@@ -381,7 +381,7 @@ export default {
     calculateCartTotal(arr) {
       if (Object.keys(arr).length != 0) {
         for (let i = 0; i < arr.orderItems.length; i++) {
-          let price = this.discounts.some(promo => promo.index == i) ? this.discounts.find(promo => promo.index == i).newPrice : arr.orderItems[i].itemTotal
+          let price = this.discounts.some(promo => promo.index == i && promo.id == arr.orderItems[i].menuItemId) ? this.discounts.find(promo => promo.index == i && promo.id == arr.orderItems[i].menuItemId).newPrice : arr.orderItems[i].itemTotal
           this.subtotal += (price != null) ? parseFloat(price) * parseFloat(arr.orderItems[i].quantity) : 0;
           this.quantity[i] = parseFloat(arr.orderItems[i].quantity)
         }
@@ -553,7 +553,10 @@ export default {
       let total = 0;
       if (this.orderedItems().orderItems.length > 0) {
         for (let i = 0; i < this.orderedItems().orderItems.length; i++) {
-          total += this.orderedItems().orderItems[i].itemTotal * this.orderedItems().orderItems[i].quantity
+          if (this.orderedItems().orderItems[i].promoPrice == null)
+            total += this.orderedItems().orderItems[i].itemTotal * this.orderedItems().orderItems[i].quantity
+          else
+            total += this.orderedItems().orderItems[i].promoPrice * this.orderedItems().orderItems[i].quantity
         }
       }
 

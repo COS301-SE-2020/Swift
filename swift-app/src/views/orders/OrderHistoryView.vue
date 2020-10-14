@@ -257,7 +257,10 @@ export default {
       let total = 0;
       if (item.items != undefined) {
         for (let i = 0; i < item.items.length; i++) {
-          total += parseFloat((item.items[i].itemTotal != null) ? item.items[i].itemTotal * item.items[i].quantity : 0);
+          if (item.items[i].promoPrice == null)
+            total += parseFloat((item.items[i].itemTotal != null) ? item.items[i].itemTotal * item.items[i].quantity : 0);
+          else
+            total += parseFloat(item.items[i].promoPrice * item.items[i].quantity);
         }
       }
       return parseFloat(total).toFixed(2);
