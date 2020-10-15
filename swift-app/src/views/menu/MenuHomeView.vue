@@ -18,7 +18,7 @@
                     </v-row>
                     <v-row  align="center" justify="center" class="mt-2">
                       <v-col cols="11" class="mt-3">
-                        <v-text-field background-color="white" class="menuItemSearchbar"  v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search..."></v-text-field>
+                        <v-text-field background-color="white" class="menuItemSearchbar"  v-model="search" rounded solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search..."></v-text-field>
                       </v-col>
                       <!-- <v-col cols="1" class="d-flex align-center px-0 mt-3">
                         <v-btn small icon color="white">
