@@ -1,9 +1,7 @@
 <template>
   <v-container class="pa-0 ma-0">
     <div style="position: absolute; z-index: 100; right: 80px; top: 15px;">
-      <v-btn v-show="!isLoading" class="mr-3" elevation="2" width="35px" height="35px" @click="getNotifications" color="secondary" small fab>
-        <v-icon size="23px">mdi-email-outline</v-icon>
-      </v-btn>
+      
       <v-btn class="mr-3" v-show="!isLoading" v-if="checkedIn()" @click="goToCart" app color="primary" width="35px" height="35px" dark  elevation="1"  fab>
         <v-icon>mdi-cart-outline</v-icon>
       </v-btn>
