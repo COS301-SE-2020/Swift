@@ -9,7 +9,7 @@
       <div
         v-for="table in tables"
         :key="table.tableId"
-        class="vx-col w-full lg:w-1/6 sm:w-1/1 w-full mb-base"
+        class="vx-col w-full xl:w-1/6 lg:w-1/4 md:w-1/4 sm:w-1/1 mb-base"
       >
         <vx-card
           :title="'Table ' + table.tableNumber"
@@ -31,6 +31,7 @@
             <vs-avatar v-if="customer.profileImageURL" src="customer.profileImageURL" />
             <span class="customerName">{{ customer.name +" " + customer.surname }}</span>
           </div>
+          <vs-button v-if="table.code" type="border" size="small" style="margin: 0 auto; pointer-events:none" class="mb-4 mt-4 text-center">Table Code: {{ table.code }}</vs-button>
           <qrcode-vue
             class="tableQR"
             :id="'qrCodeDisplay'+table.tableId"
@@ -275,7 +276,7 @@ export default {
 
       setInterval(() => {
         this.listTables();
-      }, 5000);
+      }, 15000);
     }
   },
   mounted() {

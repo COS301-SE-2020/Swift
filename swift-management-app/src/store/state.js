@@ -12,7 +12,7 @@ var userDefaults = {
   photoURL: require("@/assets/images/portrait/small/avatar-s-10.jpg"), // From Auth
   status: "online",
   userRole: "",
-  employeeData: null
+  employeeData: null,
 }
 
 // /////////////////////////////////////////////

@@ -151,8 +151,7 @@ export default {
       return (parseFloat((this.paymentInfo().amountPaid != null) ? this.paymentInfo().amountPaid : 0)).toFixed(2)
     },
     showPopUp() {
-      console.log("in here2")
-      console.log(this.orderFlag())
+      // console.log(this.orderFlag())
       return this.orderFlag()
     },
     goToPayment (){

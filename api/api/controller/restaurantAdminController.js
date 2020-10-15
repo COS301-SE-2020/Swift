@@ -359,16 +359,39 @@ module.exports = {
 
           // create table
           const qrcode = uuidv4().replace(/-/g, ''); // UUID v4 without dashes (~10^-37 collison rate)
+          let unique = false;
+          let code = '';
+          const codeLength = 7;
+          const symbols = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+          while (!unique) {
+            for (let i = 0; i < codeLength; i++) {
+              code += symbols.charAt(Math.floor(Math.random() * symbols.length));
+            }
+
+            // eslint-disable-next-line no-await-in-loop
+            const table = await client.query(
+              'SELECT tablenumber FROM public.restauranttable'
+              + ' WHERE code = $1::text',
+              [code]
+            );
+
+            if (table.rows.length === 0) {
+              unique = true;
+            }
+          }
+
           const tblRes = await client.query(
             'INSERT INTO public.restauranttable'
-            + ' (restaurantid, numseats, tablenumber, qrcode)'
-            + ' VALUES ($1::integer, $2::integer, $3::text, $4::text)'
+            + ' (restaurantid, numseats, tablenumber, qrcode, code)'
+            + ' VALUES ($1::integer, $2::integer, $3::text, $4::text, $5::text)'
             + ' RETURNING tableid;',
             [
               reqBody.restaurantId,
               parseInt(reqBody.seatCount, 10),
               reqBody.tableNumber,
-              qrcode
+              qrcode,
+              code
             ]
           );
 
@@ -378,7 +401,8 @@ module.exports = {
           // send response
           return response.status(201).send({
             tableId: tblRes.rows[0].tableid,
-            qrcode
+            qrcode,
+            code
           });
         } catch (err) {
           // rollback changes
@@ -489,7 +513,8 @@ module.exports = {
             tableId: tableInfo.rows[0].tableid,
             tableNumber: tableInfo.rows[0].tablenumber,
             seatCount: tableInfo.rows[0].numseats,
-            qrcode: tableInfo.rows[0].qrcode
+            qrcode: tableInfo.rows[0].qrcode,
+            code: tableInfo.rows[0].code
           });
         } catch (err) {
           // rollback changes
@@ -582,7 +607,7 @@ module.exports = {
           }
 
           // get table statuses
-          let sQuery = 'SELECT tableid, tablenumber, numseats, qrcode';
+          let sQuery = 'SELECT tableid, tablenumber, numseats, qrcode, code';
           sQuery += ' FROM public.restauranttable';
           if (allTablesStatus) {
             sQuery += ' WHERE restaurantid = $1::integer;';
@@ -620,6 +645,7 @@ module.exports = {
             }
 
             singleTableStatus.qrcode = tblStat.rows[t].qrcode;
+            singleTableStatus.code = tblStat.rows[t].code;
             tableStatusResponse.result.push(singleTableStatus);
           }
 
@@ -718,6 +744,20 @@ module.exports = {
             + ' WHERE orderid = $1::integer',
             [reqBody.orderId]
           );
+
+          const progressRes = await client.query(
+            'SELECT progress FROM public.customerorder'
+            + ' WHERE orderid = $1::integer',
+            [reqBody.orderId]
+          );
+
+          if (progressRes.rows[0].progress === 100) {
+            await client.query(
+              'UPDATE public.customerorder SET ordercompletiontime = NOW()'
+              + ' WHERE orderid = $1::integer',
+              [reqBody.orderId]
+            );
+          }
 
           // commit changes
           await client.query('COMMIT');

@@ -14,7 +14,7 @@
         />
 
         <vs-dropdown class="mr-4">
-          <vs-button style="font-size: 12px;" size="small" type="border">
+          <vs-button style="font-size: 12px" size="small" type="border">
             <span class="flex items-center">
               <span>
                 <b>Restaurant:</b>
@@ -25,10 +25,13 @@
           </vs-button>
           <vs-dropdown-menu>
             <vs-dropdown-item
-              @click="switchRestaurant(restaurant.name, restaurant.restaurantId)"
+              @click="
+                switchRestaurant(restaurant.name, restaurant.restaurantId)
+              "
               v-for="restaurant in myRestaurants"
               :key="restaurant.restaurantId"
-            >{{ restaurant.name }}</vs-dropdown-item>
+              >{{ restaurant.name }}</vs-dropdown-item
+            >
           </vs-dropdown-menu>
         </vs-dropdown>
 
@@ -49,7 +52,9 @@ import analyticsData from "@/store/analytics/analyticsDataList.js";
 
 export default {
   data() {
-    return {};
+    return {
+      curRes: null,
+    };
   },
   name: "the-navbar-vertical",
   props: {
@@ -64,7 +69,13 @@ export default {
     ProfileDropDown,
   },
   computed: {
+    activeUserInfo() {
+      if (localStorage.getItem("userInfo") === null)
+        return this.$store.state.AppActiveUser;
+      else return JSON.parse(localStorage.getItem("userInfo"));
+    },
     currentRestaurantName() {
+      if (this.curRes) return this.curRes;
       return this.getCurrentRestaurantName();
     },
     myRestaurants() {
@@ -105,8 +116,21 @@ export default {
   methods: {
     switchRestaurant(name, id) {
       this.$store.commit("SET_CURRENT_RESTAURANT", { name: name, id: id });
-      this.currentRestaurantName = name;
-      this.$router.go();
+      this.curRes = name;
+
+      //set accessList
+
+      var accessList = ["nothing"];
+      for (var i = 0; i < this.activeUserInfo.employeeData.length; i++) {
+        if (
+          this.activeUserInfo.employeeData[i].restaurantId == this.getCurrentRestaurantId()
+        ) {
+          accessList = this.activeUserInfo.employeeData[i].rights;
+        }
+      }
+      localStorage.setItem("accessList", JSON.stringify(accessList));
+
+      //location.reload();
     },
     showSidebar() {
       this.$store.commit("TOGGLE_IS_VERTICAL_NAV_MENU_ACTIVE", true);
@@ -120,7 +144,7 @@ export default {
     this.$store.dispatch("retrieveMyRestaurants", {
       authKey: this.getAuthToken(),
       currentRestaurantName: this.getCurrentRestaurantName(),
-    });    
+    });
   },
 };
 </script>

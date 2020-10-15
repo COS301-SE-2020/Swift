@@ -10,7 +10,6 @@
         @load="iframeLoad()"
       ></iframe>
     </div>
-    <NavBar></NavBar>
   </div>
 </template>
 
@@ -23,10 +22,10 @@ export default {
     return {
         loadCount: 0,
         payfast:{
-            //url gets concatinated with payment amount
-            //should possibly move to computed section
-            urlPart1: "https://sandbox.payfast.co.za/eng/process?cmd=_paynow&receiver=10009935&item_name=Swift%20Order&amount=",
-            urlPart2: "&return_url=https%3A%2F%2Fswiftapp.ml%2F&cancel_url=https%3A%2F%2Fswiftapp.ml%2F"
+          //url gets concatinated with payment amount
+          //should possibly move to computed section
+          urlPart1: "https://sandbox.payfast.co.za/eng/process?cmd=_paynow&receiver=10009935&item_name=Swift%20Order&amount=",
+          urlPart2: "&return_url=https%3A%2F%2Fswiftapp.ml%2F&cancel_url=https%3A%2F%2Fswiftapp.ml%2F"
         }
     }
   },
@@ -42,11 +41,13 @@ export default {
           this.goToHome();
     },
     async goToHome () {
-      await this.updateOrderFlag(true);
+      
+      await this.submitPayment();
       this.$router.push('/paymentInformation')
     },
     ...mapActions({
-      updateOrderFlag: 'OrderStore/updateOrderFlag',
+      
+      submitPayment: 'OrderStore/submitPayment',
     }),
   },
   computed: {

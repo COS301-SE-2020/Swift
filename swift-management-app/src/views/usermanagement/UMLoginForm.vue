@@ -24,7 +24,7 @@
     <!--   <span class="text-danger text-sm">{{ errors.first('password') }}</span> -->
 
     <div class="flex flex-wrap justify-between my-5">
-      <router-link to="/reset-password">Forgot Password?</router-link>
+      <a href="https://app.swiftapp.ml/#/login">Forgot Password?</a>
     </div>
     <div class="flex flex-wrap justify-between mb-3">
       <vs-button @click="login">Login</vs-button>

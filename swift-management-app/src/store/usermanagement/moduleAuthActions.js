@@ -17,7 +17,7 @@ export default {
         commit('SAVE_USER', result.data);
         commit('SET_AUTHENTICATION', true);
 
-        console.log("USER",result.data)
+        console.log("USER", result.data)
 
         dispatch("updateUserInfo", {
           employeeData: result.data.employeeData
