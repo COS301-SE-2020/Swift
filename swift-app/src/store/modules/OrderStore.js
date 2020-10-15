@@ -74,7 +74,6 @@ const getters = {
 // Actions 
 const actions = {
   submitOrder({state, commit}, data) {
-    // console.log(state.orderHistory[0].orderId);
     state.orderInfo.waiterTip = data.tip
     if(Object.keys(state.orderedItems).length === 0) {
       return axios.post('https://api.swiftapp.ml', 
@@ -89,17 +88,14 @@ const actions = {
       }).catch(({ response }) => {
       });
     } else {
-      // console.log(state.orderHistory[0].orderId)
-      // console.log(this.getters['OrderStore/getOrderInfo'].orderItems)
       axios.post('https://api.swiftapp.ml', 
         {
           "requestType": "updateOrder",
           "token": sessionStorage.getItem('authToken'),
-          "orderId": state.orderHistory[0].orderId,
+          "orderId": this.getters['CustomerStore/getCustomerOrderHistory'][0].orderId,
           "orderItems": this.getters['OrderStore/getOrderInfo'].orderItems
         }
       ).then(result => {
-        // console.log("order history: ", result.data.orderHistory)
         commit('UPDATE_ORDER_HISTORY', result.data.orderHistory);
       }).catch(({ response }) => {
       });
@@ -282,8 +278,10 @@ const actions = {
 const mutations = {
   SET_ORDER_HISTORY(state, orderHistory) {
     state.orderHistory = orderHistory;
-
-    if (orderHistory.length != 0 && orderHistory[0].orderStatus == 'Received' && orderHistory[0].restaurantId == this.getters['CustomerStore/getCheckedInTableId']) {
+    // console.log(this.getters['CustomerStore/getCheckedInRestaurantId'])
+    if (orderHistory.length != 0 && orderHistory[0].orderStatus == 'Received' && orderHistory[0].restaurantId == this.getters['CustomerStore/getCheckedInRestaurantId']) {
+      // console.log("hello")
+      // console.log(orderHistory[0].orderId)
       let itemsOrdered = [];
       for (let i = 0; i < orderHistory[0].items.length; i++) {
         // console.log(orderHistory[0].items[i].orderSelections)

@@ -341,6 +341,8 @@ export default {
         "ratings": ratings
       }
 
+      // console.log(JSON.stringify(rate))
+
       this.submitRatingVals(rate)
       this.$router.push("/orders");
 

@@ -71,6 +71,7 @@ export default {
       var data = {
         "code": manualCode
       }
+      await this.clearMenu()
       
       var response = await this.$store.dispatch('CustomerStore/checkInCustomerManually', data);
       this.$router.push("/menu/" + response.restaurantId);
@@ -81,7 +82,9 @@ export default {
       }
       var response = await this.checkInCustomer(data);
       // console.log(response.restaurantId)
+      await this.clearMenu()
       this.$router.push("/menu/" + response.restaurantId);
+      
     },
     toggleCheckInMethod() {
       this.qrCodeView = !this.qrCodeView;
@@ -91,10 +94,14 @@ export default {
       setCheckedInStatus : 'CustomerStore/SET_CHECKED_IN_STATUS',
       setCheckedInQRCode : 'CustomerStore/SET_CHECKED_IN_CODE',
       updateCheckInFlag : 'CustomerStore/UPDATE_CHECKED_IN',
+      clearMenu: 'MenuStore/CLEAR_MENU',
     }),
     ...mapActions({
       checkInCustomer: 'CustomerStore/checkInCustomer',
       checkInCustomerManually: 'CustomerStore/checkInCustomerManually',
+    }),
+    ...mapGetters({
+      checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId'
     }),
   },
 };
