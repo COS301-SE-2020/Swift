@@ -102,10 +102,11 @@ const actions = {
       // console.log("result.data.token");
       commit('SAVE_TOKEN', result.data.token);
       sessionStorage.setItem('authToken', result.data.token);
-      commit('SAVE_CUSTOMER', result.data);
-      this.dispatch('OrderStore/initOrderHistory');
-      this.dispatch('OrderStore/ratingPhrasesRestaurant');
       commit('SET_CHECKED_IN_CODE', result.data.checkedIn);
+      commit('SAVE_CUSTOMER', result.data);
+      // this.dispatch('OrderStore/initOrderHistory');
+      this.dispatch('OrderStore/ratingPhrasesRestaurant');
+      
     }).then(result => {
       let checkedInVal = this.getters['CustomerStore/getCheckedInQRCode'];
       if (checkedInVal != null && this.getters['CustomerStore/getCheckedInRestaurantId'] == null) {
@@ -113,8 +114,10 @@ const actions = {
         var data = {
           "qrcode": checkedInVal
         }
-
+        
         this.dispatch('CustomerStore/checkInCustomer', data);
+        this.dispatch('OrderStore/initOrderHistory');
+        
       }
       return "Success";
     }).catch(({ response }) => {
@@ -132,10 +135,10 @@ const actions = {
     ).then(result => {
       commit('SAVE_TOKEN', result.data.token);
       sessionStorage.setItem('authToken', result.data.token);
-      commit('SAVE_CUSTOMER', result.data);
-      this.dispatch('OrderStore/initOrderHistory');
-      this.dispatch('OrderStore/ratingPhrasesRestaurant');
       commit('SET_CHECKED_IN_CODE', result.data.checkedIn);
+      commit('SAVE_CUSTOMER', result.data);
+      // this.dispatch('OrderStore/initOrderHistory');
+      this.dispatch('OrderStore/ratingPhrasesRestaurant');
     }).then(result => {
       let checkedInVal = this.getters['CustomerStore/getCheckedInQRCode'];
       if (checkedInVal != null && this.getters['CustomerStore/getCheckedInRestaurantId'] == null) {
@@ -145,6 +148,7 @@ const actions = {
         }
 
         this.dispatch('CustomerStore/checkInCustomer', data);
+        this.dispatch('OrderStore/initOrderHistory');
       }
       
       return "Success";
