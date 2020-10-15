@@ -1,6 +1,6 @@
 export default [
   {
-    url: "/",
+    url: "/dashboard",
     name: "Dashboard",
     slug: "home",
     icon: "BarChartIcon",
@@ -48,7 +48,7 @@ export default [
     icon: "ThumbsUpIcon",
   },
   {
-    url: "/mybusiness",
+    url: "/",
     name: "My Business",
     slug: "mybusiness",
     icon: "BriefcaseIcon",

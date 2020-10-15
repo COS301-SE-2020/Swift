@@ -108,36 +108,15 @@
           ></vue-apex-charts>
         </vx-card>
       </div>
-
-      <div class="vx-col w-full md:w-1/3 mb-base">
-        <vx-card title="Orders Completed Goal" subtitle="This Year">
-          <template slot="no-body">
-            <div class="mt-10">
-              <vue-apex-charts
-                type="radialBar"
-                height="240"
-                ref="orderGoal"
-                :options="goalOverviewRadialBar.chartOptions"
-                :series="goalOverviewRadialBar.series"
-              />
-            </div>
-          </template>
-
-          <!-- DATA -->
-          <div class="flex justify-between text-center mt-6" slot="no-body-bottom">
-            <div
-              class="w-1/2 border border-solid d-theme-border-grey-light border-r-0 border-b-0 border-l-0"
-            >
-              <p class="mt-4">Completed</p>
-              <p
-                class="mb-4 text-3xl font-semibold"
-              >{{ goalOverviewRadialBar.analyticsData.completed }}</p>
-            </div>
-            <div class="w-1/2 border border-solid d-theme-border-grey-light border-r-0 border-b-0">
-              <p class="mt-4">Goal</p>
-              <p class="mb-4 text-3xl font-semibold">{{ goalOverviewRadialBar.analyticsData.goal }}</p>
-            </div>
-          </div>
+        <div class="vx-col md:w-1/3 w-full mb-base">
+        <vx-card title="Monthly Menu">
+          <vue-apex-charts
+            ref="menuPopularityMonthly"
+            type="bar"
+            height="300"
+            :options="menuPopularityMonthly.chartOptions"
+            :series="menuPopularityMonthly.series"
+          ></vue-apex-charts>
         </vx-card>
       </div>
     </div>
@@ -209,10 +188,10 @@ export default {
         return this.$store.state.analytics.menuDistribution;
       } else return null;
     },
-    goalOverviewRadialBar() {
-      if (this.$store.state.analytics) {
-        return this.$store.state.analytics.goalOverviewRadialBar;
-      } else return null;
+     menuPopularityMonthly() {
+      if (this.$store.state.analytics)
+        return this.$store.state.analytics.menuPopularityMonthly;
+      else return null;
     },
     restaurantObject() {
       //if restaurant has been loaded before menu - use that
@@ -318,6 +297,17 @@ export default {
         restaurantId: this.getCurrentRestaurantId(),
         startPeriod: 999999,
       });
+
+       this.$store
+        .dispatch("analytics/statsMenuRevenue", {
+          authKey: this.getAuthToken(),
+          restaurantId: this.getCurrentRestaurantId(),
+        })
+        .then(() => {
+          this.$refs.menuPopularityMonthly.updateSeries(this.$store.state.analytics.menuPopularityMonthly.series);
+          this.$refs.menuPopularityMonthly.updateOptions(this.$store.state.analytics.menuPopularityMonthly.chartOptions);
+        });
+
     },
   },
   created() {

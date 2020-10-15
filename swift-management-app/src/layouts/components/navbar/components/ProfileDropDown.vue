@@ -1,5 +1,8 @@
 <template>
-  <div class="the-navbar__user-meta flex items-center" v-if="activeUserInfo.displayName">
+  <div
+    class="the-navbar__user-meta flex items-center"
+    v-if="activeUserInfo.displayName"
+  >
     <div class="text-right leading-tight hidden sm:block">
       <p class="font-semibold">{{ activeUserInfo.displayName }}</p>
       <small>{{ activeUserInfo.userRole }}</small>
@@ -19,7 +22,9 @@
 
       <vs-dropdown-menu class="vx-navbar-dropdown">
         <ul style="min-width: 9rem">
-          <li class="flex py-2 px-4 cursor-pointer hover:bg-primary hover:text-white">
+          <li
+            class="flex py-2 px-4 cursor-pointer hover:bg-primary hover:text-white"
+          >
             <feather-icon icon="UserIcon" svgClasses="w-4 h-4" />
             <span @click="editProfile()" class="ml-2">Profile</span>
           </li>
@@ -36,7 +41,11 @@
         </ul>
       </vs-dropdown-menu>
     </vs-dropdown>
-    <vs-popup class="text-center" title="Manage Profile" :active.sync="newProfilePopupActive">
+    <vs-popup
+      class="text-center"
+      title="Manage Profile"
+      :active.sync="newProfilePopupActive"
+    >
       <vx-card class="mb-4">
         <vs-avatar size="large" :src="newProfileImage" />
         <vs-divider></vs-divider>
@@ -45,7 +54,8 @@
           class="mb-4"
           size="small"
           @click="chooseFiles()"
-        >Upload New Profile Image</vs-button>
+          >Upload New Profile Image</vs-button
+        >
         <input
           hidden
           ref="uploadImageInputRef"
@@ -68,7 +78,9 @@
             class="mb-1 ml-2 mr-2 mt-2 w-full md:w-1/3 lg:w-1/3 xl:w-1/3 mr-auto"
           />
         </div>
-        <vs-button type="border" class="mt-4" @click="submitNewProfile">Save Profile</vs-button>
+        <vs-button type="border" class="mt-4" @click="submitNewProfile"
+          >Save Profile</vs-button
+        >
       </vx-card>
     </vs-popup>
   </div>
@@ -109,7 +121,7 @@ export default {
             });
           }
         });
-        this.newProfilePopupActive = false;
+      this.newProfilePopupActive = false;
     },
     editProfile() {
       var userInfo = localStorage.getItem("userInfo");
@@ -140,6 +152,7 @@ export default {
       this.$store.commit("SET_MY_RESTAURANTS", null);
       this.$store.commit("SET_CURRENT_RESTAURANT", {});
 
+      localStorage.setItem("accessList", null);
       localStorage.setItem("currentRestaurantName", null);
       localStorage.setItem("userInfo", null);
       localStorage.setItem("currentRestaurantId", null);

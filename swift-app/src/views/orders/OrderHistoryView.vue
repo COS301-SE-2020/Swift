@@ -1,156 +1,191 @@
 <template>
-  <v-container class="orders" py-0 px-0>
-    <div v-show="isLoadingCartItem" style="display: flex; align-items: center; justify-content: center;">
-      <v-progress-circular style="height: 400px" indeterminate color="primary"></v-progress-circular>
-    </div>
-    <v-container v-show="!isLoadingCartItem" py-0 px-0>
-      <v-card flat>
-        <v-tabs v-model="tab" background-color="white" grow class="orderTabs">
-          <v-tab>
-            Order History
-          </v-tab>
-          <v-tab>
-            Order Status
-          </v-tab>
-        </v-tabs>
-      </v-card>
-    </v-container>
+  <v-container class="orders d-flex flex-wrap fill-height align-content-start" pa-0 >
+    <DesktopOrderHistoryView v-if="!isMobile"></DesktopOrderHistoryView>
+    <v-container v-if="isMobile" class="pa-0">
+      <div v-show="isLoadingCartItem" style="display: flex; align-items: center; justify-content: center;">
+        <v-progress-circular style="height: 400px" indeterminate color="primary"></v-progress-circular>
+      </div>
+      <v-container v-show="!isLoadingCartItem" pa-0>
+        <v-card flat>
+          <v-tabs v-model="tab"  grow class="orderTabs">
+            <v-tab>
+              Order History
+            </v-tab>
+            <v-tab>
+              Order Status
+            </v-tab>
+          </v-tabs>
+        </v-card>
+      </v-container>
 
-    <v-container v-show="!isLoadingCartItem" py-0 px-0>
-      <v-tabs-items v-model="tab">
-        <v-tab-item>
-          <div class="orderSearchBar mx-0 px-0 d-flex align-center  justify-center">
-            <v-row class="mx-0 px-0 d-flex justify-center">
-              <v-col class="px-0" cols="11">
-                <v-text-field class="searchBarBg orderSearch mx-0" v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search for restaurant or order..."></v-text-field>
-              </v-col>
-            </v-row>
-          </div>
-          <div v-if="isLoading" style="display: flex; align-items: center; justify-content: center; margin-top: 10px">
-            <v-progress-circular indeterminate color="primary"></v-progress-circular>
-          </div>
-          <v-container v-if="!isLoading" class="px-4">
-            <div v-for="status in statusList" :key="status" class="pt-2 pb-2">
-              <div v-if="itemsForStatus(status).length != 0">
-                <v-subheader style="height: 20px" class="mt-3 mb-1 pl-1" v-text="status"></v-subheader>
-                <v-list v-for="(item, index) in itemsForStatus(status)" :key="index" class="py-2">
-                  <v-card class="pt-1 pr-0 orderCard" elevation="2">
-                    <v-row class="mx-0 d-flex justify-space-around" @click="viewOrder(item)">
-                      <v-col cols="7" class="pb-0 pt-2">
-                        <v-list-item-title class="restaurantName pb-1" v-text="item.restaurantName"></v-list-item-title>
-                        <!-- <v-rating background-color="secondary" readonly size="13" dense color="yellow darken-3" :value="4"></v-rating> -->
-                      </v-col>
-                      <v-col cols="5" class="pb-0 pt-2 d-flex justify-end">
-                        <v-list-item-action-text class="orderDateTime" v-text="getDate(item.orderDateTime)"></v-list-item-action-text>
+      <v-container v-show="!isLoadingCartItem" pa-0 class="fill-height align-stretch">
+        <v-tabs-items v-model="tab" style="min-width: 100%">
+          <v-tab-item>
+            <div class="orderSearchBar mx-0 px-0 d-flex align-center justify-center">
+              <v-row class="mx-0 px-0 d-flex justify-center">
+                <v-col class="px-0" cols="11">
+                  <v-text-field class="searchBarBg orderSearch mx-0" v-model="search" rounded clearable solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search for restaurant or order..."></v-text-field>
+                </v-col>
+              </v-row>
+            </div>
+            <div v-if="isLoading" style="display: flex; align-items: center; justify-content: center; margin-top: 10px">
+              <v-progress-circular indeterminate color="primary"></v-progress-circular>
+            </div>
+            <v-container v-if="!isLoading" class="px-4">
+              <div v-for="status in statusList" :key="status" class="py-2">
+                <div v-if="itemsForStatus(status).length != 0">
+                  <v-subheader style="height: 20px" class="mt-3 mb-1 pl-1" v-text="status"></v-subheader>
+                  <v-list v-for="(item, index) in itemsForStatus(status)" :key="index" class="py-2">
+                    <v-card class="pt-1 px-0 orderCard" elevation="2">
+                      <v-row class="mx-0 d-flex justify-space-around" @click="viewOrder(item)">
+                        <v-col cols="7" class="pb-0 pt-2">
+                          <v-list-item-title class="restaurantName pb-1" v-text="item.restaurantName"></v-list-item-title>
+                          <!-- <v-rating background-color="secondary" readonly size="13" dense color="yellow darken-3" :value="4"></v-rating> -->
+                        </v-col>
+                        <v-col cols="5" class="pb-0 pt-2 d-flex justify-end">
+                          <v-list-item-action-text class="orderDateTime" v-text="getDate(item.orderDateTime)"></v-list-item-action-text>
+                        </v-col>
+                      </v-row>
+                      <v-row class="mx-0" v-for="(orderItem, index) in item.items" :key="index" @click="viewOrder(item)">
+                        <v-col class="pb-0 pt-2" cols="8">
+                          <v-icon size="15px">{{(parseInt(orderItem.progress) == 100) ? 'mdi-check-box-outline' : 'mdi-checkbox-blank-outline'}}</v-icon> 
+                          <span class="pl-1 orderDetails">{{orderItem.menuItemName}}</span>
+                        </v-col>
+                        <v-col class="pb-0 pt-2 pl-0" cols="4">
+                          <span class="orderDetails">{{orderItem.quantity}}x </span>
+                          <!-- <v-rating background-color="secondary" readonly size="11" class="pl-2" dense color="yellow darken-3" :value="5" style="display: inline"></v-rating> -->
+                        </v-col>
+                      </v-row>
+                      <v-row class="mx-0 pb-1 pr-1">
+                        <v-col cols="5" class="pb-2 orderButtons ">
+                          <v-btn v-if="!orderActive(item.items) && checkedInRestaurantId == item.restaurantId" @click="addOrder(item)" text class="pa-0 button">
+                            <v-icon color="primary" size="20px">mdi-history</v-icon> 
+                            <span class="pl-1 orderOptions repeat">Repeat Order</span>
+                          </v-btn>
+                          <v-btn v-else-if="orderActive(item.items) && checkedInRestaurantId == item.restaurantId" text class="pa-0 button" @click="goToOrderStatus">
+                            <v-icon color="primary" size="20px">mdi-history</v-icon> 
+                            <span class="pl-1 orderOptions repeat">Order Status</span>
+                          </v-btn>
+                          <v-btn v-if="item.orderStatus == 'Received' && checkedInRestaurantId != item.restaurantId" text class="pa-0 button" @click="goToOrderStatus">
+                          </v-btn>
+                        </v-col>
+                        <v-col cols="3" class="pb-2 px-1 orderButtons">
+                          <v-btn v-if="item.orderStatus == 'Paid'" text class="pa-0 button" @click="rateOrder(item)">
+                            <v-icon size="17px">mdi-comment-edit</v-icon> 
+                            <span class="pl-1 orderOptions">Rate</span>
+                          </v-btn>
+                          <v-btn v-if="item.orderStatus == 'Received'" @click="payForOrder(item)" text class="pa-0 pl-1 button">
+                            <v-icon color="accent" size="17px">mdi-currency-usd</v-icon> 
+                            <span class="pl-1 orderOptions payNow">Pay Now</span>
+                          </v-btn>
+                        </v-col>
+                        <v-col cols="4" class="pb-2 d-flex justify-end">
+                          <div>
+                            <div class="totalTitle">TOTAL</div>
+                            <div class="orderPrice">R{{calculateFullTotal(item)}}</div>
+                          </div>
+                        </v-col>
+                      </v-row>
+                    </v-card>
+                  </v-list>
+                </div>
+              </div>
+            </v-container>
+          </v-tab-item>
+
+          <v-tab-item>
+            <v-container v-if="getOrderStatusItems().length != 0" fill-height fluid class="pa-0 mt-5 orderStatusTrack overflow-y-hidden overflow-x-hidden">
+              <v-tabs height="25px" v-model="statusTab" hide-slider centered>
+                <v-tab active-class="no-active" v-for="(item, ind) in getOrderStatusItems()" :key="ind" :href="`#tab-${ind}`" class="statusItems">
+                  <v-icon size="10px">mdi-circle-outline</v-icon>
+                </v-tab>
+                <v-tab-item v-for="(item, ind) in getOrderStatusItems()" :key="ind" :value="'tab-' + ind" class="mx-4">
+                  <!-- <v-container class="pa-0 mx-5 my-0"> -->
+                    <v-row class="mt-1">
+                      <v-col cols="12">
+                          <div class="body-1 secondary--text" style="text-align: center">Order No: {{item.orderNumber}}</div>
                       </v-col>
                     </v-row>
-                    <v-row class="mx-0" v-for="(orderItem, index) in item.items" :key="index" @click="viewOrder(item)">
-                      <v-col class="pb-0 pt-2" cols="8">
-                        <v-icon size="15px">{{(parseInt(orderItem.progress) == 100) ? 'mdi-check-box-outline' : 'mdi-checkbox-blank-outline'}}</v-icon> 
-                        <span class="pl-1 orderDetails">{{orderItem.menuItemName}}</span>
+
+                    <v-row class="ma-0 mt-12 pa-0">
+                      <v-col cols="5" class="pa-0">
+                          <div class="mt-2 body-1 secondary--text">Order Placed</div>
+                          <div class="secondary--text" style="font-size:10px"><v-icon size="13px" class="font-weight-light">mdi-clock-time-four-outline</v-icon> {{displayOrderTime(item)}} </div>
                       </v-col>
-                      <v-col class="pb-0 pt-2 pl-0" cols="4">
-                        <span class="orderDetails">{{orderItem.quantity}}x </span>
-                        <!-- <v-rating background-color="secondary" readonly size="11" class="pl-2" dense color="yellow darken-3" :value="5" style="display: inline"></v-rating> -->
+                      <v-col cols="2" class="pa-0" style="margin-left: 2px;">
+                          <v-icon id="orderPlacedIcon" size="50" class="pb-0 font-weight-light" color="primary">mdi-clock-time-four</v-icon>
                       </v-col>
                     </v-row>
-                    <v-row class="mx-0 pb-1 pr-1">
-                      <v-col cols="5" class="pb-2 orderButtons ">
-                        <v-btn v-if="!orderActive(item.items) && checkedInRestaurantId == item.restaurantId" @click="addOrder(item)" text class="pa-0 button">
-                          <v-icon color="primary" size="20px">mdi-history</v-icon> 
-                          <span class="pl-1 orderOptions repeat">Repeat Order</span>
-                        </v-btn>
-                        <v-btn v-else-if="orderActive(item.items) && checkedInRestaurantId == item.restaurantId" text class="pa-0 button" @click="goToOrderStatus">
-                          <v-icon color="primary" size="20px">mdi-history</v-icon> 
-                          <span class="pl-1 orderOptions repeat">Order Status</span>
-                        </v-btn>
-                        <v-btn v-if="item.orderStatus == 'Received' && checkedInRestaurantId != item.restaurantId" text class="pa-0 button" @click="goToOrderStatus">
-                        </v-btn>
-                      </v-col>
-                      <v-col cols="3" class="pb-2 px-1 orderButtons">
-                        <v-btn v-if="item.orderStatus == 'Paid'" text class="pa-0 button" @click="rateOrder(item)">
-                          <v-icon size="17px">mdi-comment-edit</v-icon> 
-                          <span class="pl-1 orderOptions">Rate</span>
-                        </v-btn>
-                        <v-btn v-if="item.orderStatus == 'Received'" @click="payForOrder(item)" text class="pa-0 pl-1 button">
-                          <v-icon color="accent" size="17px">mdi-currency-usd</v-icon> 
-                          <span class="pl-1 orderOptions payNow">Pay Now</span>
-                        </v-btn>
-                      </v-col>
-                      <v-col cols="4" class="pb-2 d-flex justify-end">
-                        <div>
-                          <div class="totalTitle">TOTAL</div>
-                          <div class="orderPrice">R{{calculateFullTotal(item)}}</div>
+
+                    <v-row class="ma-0 pa-0">
+                      <v-col cols="6" class="pa-0 mx-0" style="display: table;">
+                        <div style="height: 0; padding: 43% 0;">
+                          <v-progress-linear stream buffer-value="0" :value="item.progress" style="display: block; transform-origin: top right; transform: rotate(90deg); margin-top: 50%; white-space: nowrap; progressBar"></v-progress-linear>
                         </div>
                       </v-col>
+                      <v-col cols="6" class="pb-0 pl-5 pr-0">
+                          <div class="mt-2 body-1 secondary--text d-flex justify-center">Complete</div>
+                          <div class="secondary--text d-flex justify-center" style="font-size:35px">{{item.progress}}%</div>
+                      </v-col>
                     </v-row>
-                  </v-card>
-                </v-list>
-              </div>
-            </div>
-          </v-container>
-        </v-tab-item>
 
-        <v-tab-item v-if="getOrderStatusItems().length != undefined">
-          <v-container fill-height fluid class="pa-0 mt-5 d-flex align-start orderStatusTrack overflow-y-hidden overflow-x-hidden">
-            <v-tabs height="25px" v-model="statusTab" hide-slider centered>
-              <v-tab active-class="no-active" v-for="(item, ind) in getOrderStatusItems()" :key="ind" :href="`#tab-${ind}`" class="statusItems">
-                <v-icon size="10px">mdi-circle-outline</v-icon>
-              </v-tab>
-              <v-tab-item v-for="(item, ind) in getOrderStatusItems()" :key="ind" :value="'tab-' + ind">
-                <!-- <v-container fill-height fluid class="pa-0 d-flex align-start orderStatusTrack overflow-y-hidden overflow-x-hidden"> -->
-                  <v-row class="mt-1">
-                    <v-col cols="12" class="d-flex justify-center">
-                        <div class="body-1 secondary--text">Order No: {{item.orderNumber}}</div>
-                    </v-col>
-                  </v-row>
-
-                  <v-row class="mt-12 mb-0 py-0 mx-1">
-                    <v-col cols="5" class="pb-0 pl-4 py-0">
-                        <div class="mt-2 body-1 secondary--text">Order Placed</div>
-                        <div class="secondary--text" style="font-size:10px"><v-icon size="13px" class="font-weight-light">mdi-clock-time-four-outline</v-icon> {{displayOrderTime(item)}} </div>
-                    </v-col>
-                    <v-col cols="2" class="pb-0 pl-0 py-0" style="margin-left: 2px;">
-                        <v-icon id="orderPlacedIcon" size="50" class="pb-0 font-weight-light" color="primary">mdi-clock-time-four</v-icon>
-                    </v-col>
-                  </v-row>
-
-                  <v-row class="my-0 py-0 mx-0">
-                    <v-col cols="6" class="py-0 px-0 mx-0" style="display: table;">
-                      <div style="height: 0; padding: 43% 0;">
-                        <v-progress-linear stream buffer-value="0" :value="item.progress" style="display: block; transform-origin: top right; transform: rotate(90deg); margin-top: 50%; white-space: nowrap; progressBar"></v-progress-linear>
-                      </div>
-                    </v-col>
-                    <v-col cols="6" class="pb-0 pl-5">
-                        <div class="mt-2 body-1 secondary--text d-flex justify-center">Complete</div>
-                        <div class="secondary--text d-flex justify-center" style="font-size:35px">{{item.progress}}%</div>
-                    </v-col>
-                  </v-row>
-
-                  <v-row class="mt-0 mb-0 py-0 mx-1">
-                    <v-col cols="5" class="pb-0 pl-4">
-                        <div class="mt-2 body-1 secondary--text" v-show="parseInt(item.progress) > 0">Order Busy</div>
-                    </v-col>
-                    <v-col cols="1" class="pb-0 pl-0" style="margin-left: 4px;">
-                        <v-avatar color="primary" id="orderDoneIcon" size="45" class="ma-0 pa-0" >
-                          <v-icon size="32" class="font-weight-light ma-0 pa-0" color="white">mdi-pot-steam</v-icon>
-                        </v-avatar>
-                    </v-col>
-                    <v-col cols="5" class="pb-0 pl-7 pr-0">
-                        <div class="secondary--text" style="font-size:12px" v-show="parseInt(item.progress) > 0">Our chef is busy preparing your order</div>
-                    </v-col>
-                  </v-row>
+                    <v-row class="ma-0 pa-0">
+                      <v-col cols="5" class="pa-0">
+                          <div class="mt-2 body-1 secondary--text" v-show="parseInt(item.progress) > 0">Order Busy</div>
+                      </v-col>
+                      <v-col cols="1" class="pb-0 pl-0" style="margin-left: 4px;">
+                          <v-avatar color="primary" id="orderDoneIcon" size="45" class="ma-0 pa-0" >
+                            <v-icon size="32" class="font-weight-light ma-0 pa-0" color="white">mdi-pot-steam</v-icon>
+                          </v-avatar>
+                      </v-col>
+                      <v-col cols="5" class="pb-0 pl-7 pr-0">
+                          <div class="secondary--text" style="font-size:12px" v-show="parseInt(item.progress) > 0">Our chef is busy preparing your order</div>
+                      </v-col>
+                    </v-row>
+                    <div class="mt-12">
+                      <v-row class="mx-0 d-flex justify-center" v-for="(orderItem, index) in item.items" :key="index" @click="viewOrder(item)">
+                        <v-col class="pb-0 pt-0 pl-0" cols="6">
+                          <v-icon size="15px">{{(parseInt(orderItem.progress) == 100) ? 'mdi-check-box-outline' : 'mdi-checkbox-blank-outline'}}</v-icon> 
+                          <span class="pl-1 orderDetails">{{orderItem.menuItemName}}</span>
+                        </v-col>
+                        <v-col class="pb-0 pt-0 pl-0" cols="1">
+                          <span class="orderDetails">{{orderItem.quantity}}x </span>
+                        </v-col>
+                      </v-row>
+                    </div>
+                  <!-- </v-container> -->
+                </v-tab-item>
+              </v-tabs>
+            </v-container>
+            <v-container v-else class="pa-0 overflow-y-hidden overflow-x-hidden mt-15">
+              <!-- <div class="row d-flex flex-column align-stretch align-self-stretch">
+                <v-container fluid fill-height class="pa-0"> -->
+                  <div class="row d-flex flex-column align-center px-10">
+                    <v-avatar class="mb-8" height="140px" width="140px" fab color="primary">
+                      <v-icon size="65px" class="font-weight-light" color="white">mdi-cart-outline</v-icon>
+                    </v-avatar>
+                    <div v-if="checkedInRestaurantId != null" class="ma-0 pa-0 d-flex flex-column align-center">
+                      <div class="headline mb-3 mt-12 secondary--text">Order Empty</div>
+                      <div class="subtitle-1 secondary--text" style="text-align: center">Order some food or drinks to start tracking your order</div>
+                      <v-btn @click="goToRestaurantMenu" class="mt-6" height="45px" width="130px" large color="primary" style="border-radius: 10px">Menu</v-btn>
+                    </div>
+                    <div v-else class="ma-0 pa-0 d-flex flex-column align-center">
+                      <div class="headline mb-3 mt-12 secondary--text">You are not checked-in</div>
+                      <div class="subtitle-1 secondary--text" style="text-align: center">Check-in to a restaurant to start ordering and tracking your items</div>
+                      <v-btn @click="goToExplore" class="mt-6" height="45px" width="130px" large color="primary" style="border-radius: 10px">Explore</v-btn>
+                    </div>
+                  <!-- </div> -->
                 <!-- </v-container> -->
-              </v-tab-item>
-            </v-tabs>
-          </v-container>
-        </v-tab-item>
-      </v-tabs-items>
+              </div>
+            </v-container>
+          </v-tab-item>
+        </v-tabs-items>
+      </v-container>
+      <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
+        <v-icon>mdi-cart-outline</v-icon>
+      </v-btn>
+      <NavBar></NavBar>
     </v-container>
-    <v-btn v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" elevation="1" absolute dark bottom style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
-      <v-icon>mdi-cart-outline</v-icon>
-    </v-btn>
-    <NavBar></NavBar>
   </v-container>
 </template>
 
@@ -158,8 +193,13 @@
 import NavBar from '@/components/layout/NavBar';
 import { mapActions, mapGetters } from 'vuex'
 import moment from 'moment'
+import DesktopOrderHistoryView from "../../components/orders/DesktopOrderHistoryView" 
 
 export default {
+  components: { 
+    'DesktopOrderHistoryView': DesktopOrderHistoryView, 
+    'NavBar': NavBar 
+  }, 
   data () {
     return {
       statusList: ['Ongoing', 'Completed'],
@@ -173,11 +213,17 @@ export default {
       ptr: this,
       isLoading: false,
       isLoadingCartItem: false,
+      isMobile: false, 
     }
   },
   async mounted() {
     // await this.$store.commit('CustomerStore/RESET_FETCHED_ORDER_HISTORY'); 
 
+    this.onResize() 
+    window.addEventListener('resize', this.onResize, { passive: true }) 
+
+    this.clearReceipt();
+    
     if (Object.keys(this.orderHistory).length === 0) {
       this.isLoading = !this.isLoading;
       await this.$store.dispatch('MenuStore/retrieveMenu', this.checkedInRestaurantId);
@@ -188,14 +234,31 @@ export default {
     }
   },
   methods: {
-    goToMenu () {
-      this.$router.push('/menu')
+    goToRestaurantMenu() {
+      // console.log(this.checkedInRestaurantId)
+      this.$router.push("/menu/" + this.checkedInRestaurantId);
+    },
+    goToExplore() {
+      // console.log(this.checkedInRestaurantId)
+      this.$router.push("/");
     },
     goToRating () {
       this.$router.push('/rating')
     },
-    viewOrder (item) {
-      // this.addOrder(item)
+    async viewOrder (item) {
+      // console.log(item)
+      if (item.orderStatus == "Received" && item.restaurantId == this.checkedInRestaurantId) {
+        this.$router.push('/cart')
+      } else {
+        let data = await this.createReceiptObject(item);
+        await this.setReceipt(data);
+        // console.log(data)
+        // console.log(this.getReceipt)
+        this.$router.push('/cart')
+      }
+    },
+    onResize () { 
+      this.isMobile = window.innerWidth < 600 
     },
     orderActive(arr) {
       if (arr != undefined) {
@@ -216,7 +279,10 @@ export default {
       let total = 0;
       if (item.items != undefined) {
         for (let i = 0; i < item.items.length; i++) {
-          total += parseFloat((item.items[i].itemTotal != null) ? item.items[i].itemTotal : 0);
+          if (item.items[i].promoPrice == null)
+            total += parseFloat((item.items[i].itemTotal != null) ? item.items[i].itemTotal * item.items[i].quantity : 0);
+          else
+            total += parseFloat(item.items[i].promoPrice * item.items[i].quantity);
         }
       }
       return parseFloat(total).toFixed(2);
@@ -231,30 +297,29 @@ export default {
       })
     },
     getOrderStatusItems() {
+      let orderItems = []; 
+      if (this.checkedInTableId != null) {
+        orderItems = this.orderHistory.filter(orderItem => {
+          return parseInt(orderItem.progress) < 100 && orderItem.restaurantId == this.checkedInRestaurantId
+        });
+      } 
       
-      var orderItem = (this.orderHistory.filter(orderItem => {
-        return parseInt(orderItem.progress) < 100 || orderItem.orderStatus == "Received"
-      }))
+      return orderItems;
       // console.log("STATUS")
       // console.log(orderItem)
-      return orderItem;
+      // return orderItem;
     },
-    createOrderObject(item) {
+    createReceiptObject(item) {
       let itemsOrdered = [];
-      console.log("REPEAT:")
-      console.log(item)
+      // console.log("REPEAT:")
+      // console.log(item)
       for (let i = 0; i < item.items.length; i++) {
-        // console.log(item.items[i].menuItemId)
-        // console.log(item.items[i].itemTotal)
-        // console.log(item.items[i].quantity)
-        // console.log(item.items[i].orderSelections)
         let data = {
           "menuItemId": item.items[i].menuItemId,
+          "menuItemName": item.items[i].menuItemName,
           "itemTotal": item.items[i].itemTotal,
           "quantity": item.items[i].quantity,
-          "orderSelections": {
-            "selections": item.items[i].orderSelections
-          }
+          "orderSelections": item.items[i].orderselections
         };
         itemsOrdered[i] = data;
       }
@@ -264,7 +329,43 @@ export default {
         "orderInfo": {
           "restaurantId": item.restaurantId,
           "tableId": this.checkedInTableId,
-          "employeeId": 6,
+          // "employeeId": 6,
+          "waiterTip": item.waiterTip,
+          "orderNumber": item.orderNumber,
+          "orderDateTime": item.orderDateTime,
+          "restaurantName": item.restaurantName,
+          "restaurantLocation": item.restaurantLocation,
+          "employeeName": item.orderEmployeeName,
+          "employeeSurname": item.orderEmployeeSurname,
+          "orderItems": itemsOrdered
+        }
+      }
+
+      console.log(data)
+
+      return data;
+    },
+    createOrderObject(item) {
+      let itemsOrdered = [];
+      // console.log("REPEAT2:")
+      // console.log(item)
+      for (let i = 0; i < item.items.length; i++) {
+        let data = {
+          "menuItemId": item.items[i].menuItemId,
+          "itemTotal": item.items[i].itemTotal,
+          "quantity": item.items[i].quantity,
+          "promoPrice": item.items[i].promoPrice,
+          "orderSelections": item.items[i].orderselections
+        };
+        itemsOrdered[i] = data;
+      }
+
+      
+      let data = {
+        "orderInfo": {
+          "restaurantId": item.restaurantId,
+          "tableId": this.checkedInTableId,
+          // "employeeId": 6,
           "waiterTip": 0,
           "orderItems": itemsOrdered
         }
@@ -338,7 +439,7 @@ export default {
 
     async filterPhrases(type) {
       let phrases = await this.ratingPhrasesRestaurant()
-      console.log(phrases)
+      // console.log(phrases)
       return phrases.phrases.filter(phrase => {
         return phrase.phraseType == type
       })
@@ -357,8 +458,8 @@ export default {
       }
 
       this.addPaymentInfo(data);
-      console.log("payment")
-      console.log(data)
+      // console.log("payment")
+      // console.log(data)
       this.$router.push("/paymentinformation");
 
     },
@@ -393,21 +494,23 @@ export default {
     },
     updateOrderStatus() {
       let self = this;
-      // setInterval(() => { 
-      //   let order = self.getOrderStatusItem();
-      //   if (order != undefined) {
-      //     let data = {
-      //       "orderId": order.orderId
-      //     }
-      //     self.orderStatus(data)
-      //   }
-      // }, 5000);  
+      // this.orderStatus();
+
+      setInterval(() => { 
+        let order = [];
+        order = self.getOrderStatusItems();
+        if (order.length != 0) {
+          self.orderStatus()
+        }
+      }, 7000);  
     },
     ...mapActions({
       addItemToOrder: "OrderStore/addItemToOrder",
       addPaymentInfo: "OrderStore/addPaymentInfo",
       addItemToRate: "OrderStore/addItemToRate",
       clearOrder: "OrderStore/clearOrder",
+      clearReceipt: "OrderStore/clearReceipt",
+      setReceipt: "OrderStore/setReceipt",
       orderStatus: 'OrderStore/retrieveOrderStatus',
       ratingPhrasesRestaurant: 'OrderStore/ratingPhrasesRestaurant',
     }),
@@ -433,14 +536,16 @@ export default {
       orderHistory: 'CustomerStore/getCustomerOrderHistory',
       checkedInRestaurantId: 'CustomerStore/getCheckedInRestaurantId',
       allRestaurants: 'RestaurantsStore/getAllRestaurants',
+      getReceipt: "OrderStore/getReceipt",
       checkedInQRCode: 'CustomerStore/getCheckedInQRCode',
       fetchedOrderHistory: 'CustomerStore/getFetchedOrderHistory',
     }),
     
   },
-  components: {
-    'NavBar': NavBar
-  },
+  // async mounted() {
+  //   console.log(await this.orderHistory)
+  // },
+
   beforeMount: function() {
     this.updateOrderStatus();
   },
@@ -462,7 +567,7 @@ export default {
 
 .statusItems {
   min-width: 0px !important;
-  width: 10px !important;
+  width: 20px !important;
   height: 20px;
   padding-left: 0;
   padding-right: 0;

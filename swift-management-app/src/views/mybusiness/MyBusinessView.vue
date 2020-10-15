@@ -16,20 +16,34 @@
       >
         <vx-card class="mb-4">
           <vs-row vs-w="12">
-            <vs-col vs-type="flex" vs-justify="center" vs-align="center" vs-lg="6" vs-sm="12">
+            <vs-col
+              vs-type="flex"
+              vs-justify="center"
+              vs-align="center"
+              vs-lg="6"
+              vs-sm="12"
+            >
               <div
-                :style="'background-image: url('+business.image+')'"
+                :style="'background-image: url(' + business.image + ')'"
                 class="restaurantCover rounded-lg"
               ></div>
             </vs-col>
-            <vs-col style="margin: auto;" class="text-center" vs-lg="6" vs-sm="12">
+            <vs-col
+              style="margin: auto"
+              class="text-center"
+              vs-lg="6"
+              vs-sm="12"
+            >
               <h2 class="mb-4">{{ business.name }}</h2>
               <vs-chip
                 style="float: none; max-width: 200px; margin: auto"
                 class="mb-4"
                 color="primary"
-              >Branch: {{ business.branch }}</vs-chip>
-              <div class="newRestaurantDescription mb-4">{{ business.description }}</div>
+                >Branch: {{ business.branch }}</vs-chip
+              >
+              <div class="newRestaurantDescription mb-4">
+                {{ business.description }}
+              </div>
 
               <vs-button @click="editRestaurant(business)" type="border">
                 <span class="flex items-center">
@@ -79,7 +93,11 @@
             vs-lg="6"
             vs-sm="12"
           >
-            <vs-input label="Branch" placeholder="Centurion Mall" v-model="newRestaurantBranch" />
+            <vs-input
+              label="Branch"
+              placeholder="Centurion Mall"
+              v-model="newRestaurantBranch"
+            />
           </vs-col>
         </vs-row>
         <vs-row>
@@ -96,33 +114,41 @@
           </vs-col>
         </vs-row>
         <p class="vs-input--label mb-2">Target Sales (per day)</p>
-        <vs-input
-          style="margin: 0 auto"
-          type="number"
-          min="1"
-          placeholder="Sales Per Day Goal"
+        <vs-input-number
+          style="max-width: 100px; margin: 0 auto"
           v-model="salesPerDay"
-          class="mb-4 text-center"
-        ></vs-input>
-
-        <label class="vs-input--label">Select (up to 3) Restaurant Categories</label>
+          icon-inc="expand_less"
+          icon-dec="expand_more"
+          min="0"
+        />
+        <label class="vs-input--label"
+          >Select (up to 3) Restaurant Categories</label
+        >
         <div style="margin: auto" class="vx-row mt-4">
           <vx-card
-            :ref="'categoryCard'+category.categoryId"
-            style="pointer-events: all;cursor: pointer;"
+            :ref="'categoryCard' + category.categoryId"
+            style="pointer-events: all; cursor: pointer"
             @click="selectCategory($event, category.categoryId)"
             class="categoryOptionCards mr-2 ml-2 mb-6 md:w-1/6 lg:w-1/6 xl:w-1/6"
             v-for="category in restaurantCategoryOptions"
             :key="category.categoryId"
             type="border"
-            :card-background="'linear-gradient(120deg ,rgba(0,0,0,.6), rgba(0,0,0,0.1)),url('+category.categoryImage+')'"
+            :card-background="
+              'linear-gradient(120deg ,rgba(0,0,0,.6), rgba(0,0,0,0.1)),url(' +
+              category.categoryImage +
+              ')'
+            "
           >
-            <p style="color:white;pointer-events: none;">{{ category.categoryName }}</p>
+            <p style="color: white; pointer-events: none">
+              {{ category.categoryName }}
+            </p>
           </vx-card>
         </div>
 
         <vx-card>
-          <vs-button type="border" size="small" @click="chooseFiles()">Choose header image</vs-button>
+          <vs-button type="border" size="small" @click="chooseFiles()"
+            >Choose header image</vs-button
+          >
           <input
             hidden
             ref="uploadImageInputRef"
@@ -135,15 +161,16 @@
             id="restaurantCoverUploadPreview"
             hidden
             class="mt-4 rounded-lg"
-            :style="'background-image:url('+newRestaurantImage+')'"
+            :style="'background-image:url(' + newRestaurantImage + ')'"
           ></div>
         </vx-card>
         <vs-button
           @click="restaurantPopupSubmit"
-          style="margin-top:15px"
+          style="margin-top: 15px"
           color="primary"
           type="filled"
-        >{{ restaurantPopupButton }}</vs-button>
+          >{{ restaurantPopupButton }}</vs-button
+        >
       </form>
     </vs-popup>
   </div>
@@ -174,7 +201,9 @@ export default {
       else return null;
     },
     restaurantCategoryOptions() {
+      if(this.$store.state.mybusinessData)
       return this.$store.state.mybusinessData.restaurantCategoryOptions;
+      else return null;
     },
   },
   methods: {
@@ -311,6 +340,7 @@ export default {
   watch: {
     myRestaurants(newCount, oldCount) {
       this.$vs.loading.close();
+      if(this.myRestaurants)
       if (this.myRestaurants.length <= 0) this.addFirstItemPrompt();
     },
   },
