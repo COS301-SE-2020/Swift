@@ -172,8 +172,16 @@ export default {
         console.log(menuRevenue)
         state.incomeByMenu.series = []
         state.incomeByMenu.chartOptions.xaxis.categories = [];
+        state.menuPopularityMonthly.series = []
+        state.menuPopularityMonthly.chartOptions.xaxis.categories = [];
         var now = new Date()
         var beginningOfYear = new Date(now.getFullYear(), 0, 1)
+
+        var totalRev = 0;
+        var perc = 0;
+        for (var i = 0; i < menuRevenue.length; i++) {
+            totalRev += menuRevenue[i][2];
+        }
         for (var i = 0; i < menuRevenue.length; i++) {
             var dataPointDate = new Date(menuRevenue[i][0])
             if (dataPointDate > beginningOfYear) {
@@ -182,6 +190,8 @@ export default {
                     if (state.incomeByMenu.series[j].name === menuRevenue[i][1]) {
                         existing = true;
                         state.incomeByMenu.series[j].data.push(menuRevenue[i][2])
+                        perc = (menuRevenue[i][2]*100/totalRev).toFixed(2);
+                        state.menuPopularityMonthly.series[j].data.push(perc)
                     }
                 }
                 if (!existing) {
@@ -190,9 +200,17 @@ export default {
                     dataPoint["data"] = [];
                     dataPoint.data.push(menuRevenue[i][2]);
                     state.incomeByMenu.series.push(dataPoint);
+                    var dataPoint = {};
+                    dataPoint["name"] = menuRevenue[i][1];
+                    dataPoint["data"] = [];
+                    perc = (menuRevenue[i][2]*100/totalRev).toFixed(2);
+                    dataPoint.data.push(perc);
+                    state.menuPopularityMonthly.series.push(dataPoint);
                 }
-                if (state.incomeByMenu.chartOptions.xaxis.categories.indexOf(months[dataPointDate.getMonth()]) < 0)
+                if (state.incomeByMenu.chartOptions.xaxis.categories.indexOf(months[dataPointDate.getMonth()]) < 0){
                     state.incomeByMenu.chartOptions.xaxis.categories.push(months[dataPointDate.getMonth()]);
+                    state.menuPopularityMonthly.chartOptions.xaxis.categories.push(months[dataPointDate.getMonth()]);
+                }
             }
         }
     },

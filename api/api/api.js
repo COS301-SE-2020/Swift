@@ -186,6 +186,10 @@ router.post('/', (req, res) => {
         restaurantController.checkIn(req.body, res);
         break;
       }
+      case 'checkinCode': {
+        restaurantController.checkinCode(req.body, res);
+        break;
+      }
       case 'checkout': {
         restaurantController.checkOut(req.body, res);
         break;

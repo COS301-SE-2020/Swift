@@ -1,91 +1,94 @@
 <template>
-  <v-container class="px-0">
-    <div v-show="isLoading" style="display: flex; align-items: center; justify-content: center;">
-      <v-progress-circular style="height: 400px" indeterminate color="primary"></v-progress-circular>
-    </div>
-    <v-container v-show="!isLoading" py-0>
-      <v-card flat tile>
-        <v-row class="d-flex justify-space-between">
-          <v-col cols="8">
-            <div class="pl-1 welcome font-weight-light">Welcome, </div>
-            <div class="pl-1 pt-0 customerName">{{customerInfo.name}} {{customerInfo.surname}}</div>
-          </v-col>
-          <v-col cols="4" class="d-flex justify-end align-center">
-            <!-- <v-btn class="mr-4" elevation="2" width="35px" height="35px" @click="callWaiter" :key="activeCall.icon" :color="activeCall.color" small fab>
-              <v-icon size="23px" :style="called ? { 'transform': 'rotate(45deg)' } : { 'transform': 'rotate(0deg)' }">{{ activeCall.icon }}</v-icon>
-            </v-btn> -->
-            <!-- <v-btn v-if="checkedIn()" @click="goToCart" elevation="2" width="35px" height="35px" small fab>
-              <v-icon size="23px">mdi-cart-outline</v-icon>
-            </v-btn> -->
-          </v-col>
-        </v-row>
+  <v-container class="pa-0 ma-0">
+    <DesktopExplore v-show="!isLoading" v-if="!isMobile"></DesktopExplore>
+    <v-container v-if="isMobile" class="pa-0">
+      <div v-show="isLoading" style="display: flex; align-items: center; justify-content: center;">
+        <v-progress-circular style="height: 400px" indeterminate color="primary"></v-progress-circular>
+      </div>
+      <v-container v-show="!isLoading" py-0>
+        <v-card flat tile>
+          <v-row class="d-flex justify-space-between">
+            <v-col cols="12">
+              <div class="pl-1 welcome font-weight-light">Welcome, </div>
+              <div class="pl-1 pt-0 customerName">{{customerInfo.name}} {{customerInfo.surname}}</div>
+            </v-col>
+            <!-- <v-col cols="4" class="d-flex justify-end align-center">
+              <v-btn class="mr-4" elevation="2" width="35px" height="35px" @click="getNotifications" color="secondary" small fab>
+                <v-icon size="23px">mdi-email-outline</v-icon>
+              </v-btn> -->
+              <!-- <v-btn v-if="checkedIn()" @click="goToCart" elevation="2" width="35px" height="35px" small fab>
+                <v-icon size="23px">mdi-cart-outline</v-icon>
+              </v-btn> -->
+            <!-- </v-col> -->
+          </v-row>
 
-        <v-card v-show="checkedIn()" @click="goToRestaurant(checkedInRestaurantId)" color="accent" height="80px" flat tile style="border-radius: 13px !important" class="mt-2 mb-5">
-          <v-row class="d-flex justify-space-between specialsInfo">
-            <v-col cols="10" class="d-flex justify-center px-0">
-              <div style="text-align: center" class="checkedInBannerText">
-                <div class="specialsText font-weight-light">You are checked-in to</div>
-                <div class="specialsText checkedRestaurant font-weight-light">{{getCheckedInRestaurantName(checkedInRestaurantId)}}</div>
-              </div>
+          <v-card v-show="checkedIn()" @click="goToRestaurant(checkedInRestaurantId)" color="accent" height="80px" flat tile style="border-radius: 13px !important" class="mt-2 mb-5">
+            <v-row class="d-flex justify-space-between specialsInfo">
+              <v-col cols="10" class="d-flex justify-center px-0">
+                <div style="text-align: center" class="checkedInBannerText">
+                  <div class="specialsText font-weight-light">You are checked-in to</div>
+                  <div class="specialsText checkedRestaurant font-weight-light">{{getCheckedInRestaurantName(checkedInRestaurantId)}}</div>
+                </div>
+              </v-col>
+              <v-col cols="2" class="d-flex align-center px-0">
+                <v-btn small icon color="white">
+                  <v-icon size="32px">mdi-chevron-right</v-icon>
+                </v-btn>
+              </v-col>
+            </v-row>
+          </v-card>
+
+          <v-row no-gutters d-flex flex-row >
+            <v-col cols="12">
+              <v-text-field class="searchBarBg" background-color="red" v-model="search" rounded solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search for a restaurant..."></v-text-field>
             </v-col>
-            <v-col cols="2" class="d-flex align-center px-0">
-              <v-btn small icon color="white">
-                <v-icon size="32px">mdi-chevron-right</v-icon>
+            <!-- <v-col cols="1" class="d-flex align-center px-0">
+              <v-btn small icon color="primary">
+                <v-icon size="24px">mdi-filter-variant</v-icon> 
               </v-btn>
-            </v-col>
+            </v-col> -->
           </v-row>
         </v-card>
-
-        <v-row no-gutters d-flex flex-row >
-          <v-col cols="12">
-            <v-text-field class="searchBarBg" background-color="red" v-model="search" rounded solo-inverted hide-details prepend-inner-icon="mdi-magnify" label="Search for a restaurant..."></v-text-field>
-          </v-col>
-          <!-- <v-col cols="1" class="d-flex align-center px-0">
-            <v-btn small icon color="primary">
-              <v-icon size="24px">mdi-filter-variant</v-icon> 
-            </v-btn>
-          </v-col> -->
-        </v-row>
-      </v-card>
-    </v-container>
-    <v-container v-show="!isLoading" class="px-0 py-0" v-if="search == ''">
-      <v-container py-0>
-        <v-carousel v-model="carouselIndex" class="promotionalMaterial" :continuous="true" :cycle="false" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="170px">
-          <v-carousel-item v-for="(promotion, i) in activePromotions.restaurantPromo" :key="i">
-            <v-sheet @click="goToRestaurant(promotion.restaurantId)" :color="(i == 3) ? 'primary' : 'secondary'" height="150px" flat tile style="border-radius: 10px !important" class="mt-5">
-              <v-row class="d-flex justify-space-between px-0 py-0">
-                <v-col cols="6" class="py-3 pr-0">
-                  <v-layout column justify-space-between fill-height>
-                    <div class="px-3">
-                      <!-- <span class="specialsText font-weight-light">30%</span> <span class="specialsText discount font-weight-light">discount</span> <span class="specialsText font-weight-light">on all pizza slices</span> -->
-                      <span class="specialsText font-weight-light">{{ promotion.message }}</span>
-                      <div class="mt-1 specialsDate">{{ getDate(promotion.startDate) }} until {{ getDate(promotion.endDate) }}</div>
-                    </div>
-                    <!-- <div class="browseButton">
-                      <v-btn @click="goToRestaurant(promotion.restaurantId)" color="accent" height="33px" class="browseMenu px-2">Browse Menu</v-btn>
-                    </div> -->
-                  </v-layout>
-                </v-col>
-                <v-col cols="6" class="py-0" style="height: 155px">
-                  <v-layout column class="py-0 d-flex flex-column align-end">
-                    <v-img height="155px" :src="promotion.image" :class="(i == 3) ? 'specialsImage bannerImage pl-2' : 'specialsImage'"></v-img>
-                    <span class="specialsRestaurantName" style="top: 80px; right: 15px; position: absolute">{{ getCheckedInRestaurantName(promotion.restaurantId) }}</span>
-                  </v-layout>
-                </v-col>
-              </v-row>
-            </v-sheet>
-          </v-carousel-item>
-        </v-carousel>
       </v-container>
+      <v-container v-show="!isLoading" class="px-0 py-0" v-if="search == ''">
+        <v-container py-0>
+          <v-carousel v-model="carouselIndex" class="promotionalMaterial" :continuous="true" :cycle="true" :show-arrows="false" hide-delimiter-background :delimiter-icon="carouselTab" height="170px">
+            <v-carousel-item v-for="(promotion, i) in activePromotions.restaurantPromo" :key="i">
+              <v-sheet @click="goToRestaurant(promotion.restaurantId)" :color="(i == 3) ? 'primary' : 'secondary'" height="150px" flat tile style="border-radius: 10px !important" class="mt-5">
+                <v-row class="d-flex justify-space-between px-0 py-0">
+                  <v-col cols="6" class="py-3 pr-0">
+                    <v-layout column justify-space-between fill-height>
+                      <div class="px-3">
+                        <!-- <span class="specialsText font-weight-light">30%</span> <span class="specialsText discount font-weight-light">discount</span> <span class="specialsText font-weight-light">on all pizza slices</span> -->
+                        <span class="specialsText font-weight-light">{{ promotion.message }}</span>
+                        <div class="mt-2 specialsDate">{{ getDate(promotion.startDate) }} until {{ getDate(promotion.endDate) }}</div>
+                        <span class="specialsDate font-weight-light pt-1 ma-0">{{ promotionDays(promotion.days)}}</span>
+                      </div>
+                      <!-- <div class="browseButton">
+                        <v-btn @click="goToRestaurant(promotion.restaurantId)" color="accent" height="33px" class="browseMenu px-2">Browse Menu</v-btn>
+                      </div> -->
+                    </v-layout>
+                  </v-col>
+                  <v-col cols="6" class="py-0" style="height: 155px">
+                    <v-layout column class="py-0 d-flex flex-column align-end">
+                      <v-img height="155px" :src="promotion.image" :class="(i == 3) ? 'specialsImage bannerImage pl-2' : 'specialsImage'"></v-img>
+                      <span class="specialsRestaurantName" style="top: 80px; right: 15px; position: absolute">{{ getCheckedInRestaurantName(promotion.restaurantId) }}</span>
+                    </v-layout>
+                  </v-col>
+                </v-row>
+              </v-sheet>
+            </v-carousel-item>
+          </v-carousel>
+        </v-container>
 
-      <v-container v-show="!isLoading" py-0 transition="slide-x-transition">
-        <v-row style="max-width: 400px" class="overflow-y-auto">
-          <v-col cols="12">
-            <div class="categoryTitle">Categories</div>
-          </v-col>
-        </v-row>
-        <v-sheet class="mx-auto" max-width="700">
-          <v-slide-group multiple>
+        <v-container v-if="!isLoading" py-0 transition="slide-x-transition">
+          <v-row style="max-width: 400px" class="overflow-y-auto">
+            <v-col cols="12">
+              <div class="categoryTitle">Categories</div>
+            </v-col>
+          </v-row>
+          <!-- <v-sheet class="mx-auto" max-width="700"> -->
+          <v-slide-group multiple >
             <v-slide-item v-for="(category, index) in exploreCategories" :key="index">
               <div class="mr-3" align="center">
                 <v-btn color="primary" width="60px" height="60px" min-width="60px" class="categoryButtons"  @click="restCategories[index] = !restCategories[index]; toggleCategoryActive(index)">
@@ -96,145 +99,134 @@
               </div>
             </v-slide-item>
           </v-slide-group>
-        </v-sheet>
+          <!-- </v-sheet> -->
 
 
-        <v-row style="max-width: 400px" class="overflow-y-auto">
-          <v-col cols="12">
-            <div class="categoryTitle">Most Popular</div>
-          </v-col>
-        </v-row>
-        <v-sheet class="mx-auto" max-width="700">
-          <v-slide-group multiple>
-            <v-slide-item v-for="(card, index) in filteredList" :key="index">
-              <v-card ripple flat width="200px" class="mr-4">
-                <v-img :src="card.image" @click="goToRestaurant(card.restaurantId)" class="white--text align-center restaurantImage" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="125px" >
-                  <v-rating background-color="white" readonly size="14" dense color="yellow darken-3" :value="parseInt(card.rating)" style="bottom: 3px; right: 3px; position: absolute"></v-rating>
-                </v-img>
-                <div class="pl-1 pt-1 resaturantTitle cardFormat font-weight-light">{{card.name}}</div>
-                <v-row class="ml-0">
-                  <v-icon size="13px">mdi-map-marker</v-icon>
-                  <div class="pl-0 pt-0 restaurantLocation font-weight-light">{{card.branch}}</div>
-                </v-row>
-                <div class="ml-1 pt-0 restaurantCategory">{{getCategoryNames(card.categories)}}</div>
-                <v-row class="pl-3 mt-1">
-                  <v-col cols="auto" v-for="(tag, i) in card.phrases" :key="i" class="pl-0 pr-3 pt-0">
-                    <div class="restaurantDescriptor">{{tag}}</div>
-                  </v-col>
-                </v-row>
-              </v-card>
-            </v-slide-item>
-          </v-slide-group>
-        </v-sheet>
-        <!-- <v-row style="max-width: 400px" class="overflow-y-auto">
-          <v-col cols="12">
-            <div class="categoryTitle">Recommended</div>
-          </v-col>
-        </v-row>
-        <v-row style="max-width: 400px" class="overflow-y-auto">
-          <v-col cols="12">
-            <div class="categoryTitle">Trending</div>
-          </v-col>
-        </v-row>
-        <v-row style="max-width: 400px" class="overflow-y-auto">
-          <v-col cols="12">
-            <div class="categoryTitle">Nearby</div>
-          </v-col>
-        </v-row> -->
-         <v-row style="max-width: 400px" class="overflow-y-auto">
-          <v-col cols="12">
-            <div class="categoryTitle">Based On Your Ratings</div>
-          </v-col>
-        </v-row>
-        <v-sheet class="mx-auto" max-width="700">
-          <v-slide-group multiple>
-            <v-slide-item v-for="(item, index) in suggestedItemsFromRatings" :key="index">
-              <v-card ripple flat width="200px" class="mr-4">
-                <v-img v-if="item.menuItemInfo.images.length != 0" :src="item.menuItemInfo.images[0].imageurl" @click="goToRestaurant(item.menuItemInfo.restaurantid)" class="white--text align-center restaurantImage" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="125px" >
-                </v-img>
-                <v-img v-else src="../../assets/menuItemImages/item-placeholder.png" @click="goToRestaurant(item.menuItemInfo.restaurantid)" class="white--text align-center restaurantImage" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="125px" >
-                </v-img>
-                <div class="pl-1 pt-1 resaturantTitle cardFormat font-weight-light">{{item.menuItemInfo.menuitemname}}</div>
-                <span class="pl-1 subtitle-1">R{{ (item.menuItemInfo.price).toFixed(2) }}</span>
-              </v-card>
-            </v-slide-item>
-          </v-slide-group>
-        </v-sheet>
-      </v-container>
-
-      <v-container v-show="!isLoading" class="mt-0 pt-0">
-        <div class="categoryTitle mb-2">More Restaurants</div>
-        <v-row>
-          <v-col class="d-flex flex-column" cols=12>
-            <v-card v-for="(card, index) in filteredList" :key="index" ripple flat  class="mb-1">
-              <v-img :src="card.image" @click="goToRestaurant(card.restaurantId)" class="white--text align-center restaurantImage" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="125px" >
-                <v-rating background-color="white" readonly size="14" dense color="yellow darken-3" :value="parseInt(card.rating)" style="bottom: 3px; right: 3px; position: absolute"></v-rating>
-              </v-img>
-              <v-row class="d-flex flex-row ">
-                <v-col cols="6" class="pt-0">
-                  <div class="pl-1 pt-1 resaturantTitle cardFormat font-weight-light">{{card.name}}</div>
+          <v-row style="max-width: 400px" class="overflow-y-auto" v-if="filteredList != undefined && filteredList.length != 0">
+            <v-col cols="12">
+              <div class="categoryTitle">Most Popular</div>
+            </v-col>
+          </v-row>
+          <!-- <v-sheet class="mx-auto" max-width="700" v-show="filteredList != undefined"> -->
+            <v-slide-group multiple>
+              <v-slide-item v-for="(card, index) in filteredList.slice(0, 10)" :key="index" >
+                
+                <v-card ripple flat width="200px" class="mr-4">
+                  <v-img :src="card.image" @click="goToRestaurant(card.restaurantId)" class="white--text align-center restaurantImage" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="125px" >
+                    <v-rating background-color="white" readonly size="14" dense color="yellow darken-3" :value="parseInt(card.rating)" style="bottom: 3px; right: 3px; position: absolute"></v-rating>
+                  </v-img>
+                  <div class="pl-1 pt-1 resaturantTitle cardFormat font-weight-light">{{trimRestaurantName(card.name)}}</div>
                   <v-row class="ml-0">
                     <v-icon size="13px">mdi-map-marker</v-icon>
                     <div class="pl-0 pt-0 restaurantLocation font-weight-light">{{card.branch}}</div>
                   </v-row>
-                </v-col>
-                <v-col cols="6" class="pt-0">
+                  <div class="ml-1 pt-0 restaurantCategory">{{getCategoryNames(card.categories)}}</div>
                   <v-row class="pl-3 mt-1">
-                    <div class="ml-1 mr-2 pt-1 restaurantCategory">{{getCategoryNames(card.categories)}}</div>
-                    <v-col cols="auto" v-for="(tag, i) in card.phrases" :key="i" class="pl-0 pr-3 pt-1">
+                    <v-col cols="auto" v-for="(tag, i) in card.phrases" :key="i" class="pl-0 pr-3 pt-0">
                       <div class="restaurantDescriptor">{{tag}}</div>
                     </v-col>
                   </v-row>
-                </v-col>
-              </v-row>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-container>
-
-        <v-btn v-if="!checkedIn()" height="50px" width="50px" class="checkInBtn" @click=goToCheckin app color="primary" fab style="position: fixed; bottom: 65px; right: 13px">
-          <v-icon size="30">mdi-table-furniture</v-icon>
-        </v-btn>
-      <!-- </v-container> -->
-    </v-container>
-      
-    <v-container v-show="!isLoading" v-else class="mt-3">
-      <div v-if="filteredList.length != 0">
-        <v-card class="mb-2" @click="goToRestaurant(card.restaurantId)" elevation="2" v-for="(card, index) in filteredList" :key="index">
-          <v-row class="mx-0">
-            <v-col cols="3" class="py-0 px-1 pl-2">
-              <v-img width="75px" height="70px" style="background-size: contain" :src="card.image" class="align-center mt-3"></v-img>
-            </v-col>
-            <v-col cols="9" class="pt-2 py-0">
-              <v-row class="py-0">
-                <v-col cols="8" class="pt-0 pl-2 pb-1">
-                  <div class="pl-1 pt-1 resaturantTitle font-weight-light">{{card.name}}</div>
-                  <div class="ml-1 pt-0 restaurantCategory">{{getCategoryNames(card.categories)}}</div>
-                </v-col>
-                <v-col cols="4" class="pt-0 px-2 pb-1">
-                  <v-rating background-color="secondary" readonly size="11" dense color="yellow darken-3" :value="parseInt(card.rating)"></v-rating>
-                </v-col>
-              </v-row>
-              <v-row class="px-2">
-                <v-col cols="8" class="px-1 pt-0">
-                  <div class="px-1 mr-2 pt-0 restaurantDescriptor" v-for="(tag, i) in card.phrases" :key="i" style="display: inline">{{tag}}</div>
-                </v-col>
-                <v-col cols="4" class="px-0 pt-0" style="text-align: right">
-                  <v-icon size="13px">mdi-map-marker</v-icon>
-                  <div class="pl-1 py-0 restaurantLocation font-weight-light" style="display: inline">{{card.branch}}</div>
-                </v-col>
-              </v-row>
+                </v-card>
+              </v-slide-item>
+            </v-slide-group>
+          <v-row style="max-width: 400px" class="overflow-y-auto">
+            <v-col cols="12">
+              <div class="categoryTitle">Based On Your Ratings</div>
             </v-col>
           </v-row>
-        </v-card>
+          <!-- <v-sheet class="mx-auto" max-width="700"> -->
+            <v-slide-group multiple>
+              <v-slide-item v-for="(item, index) in suggestedItemsFromRatings" :key="index">
+                <v-card ripple flat width="200px" class="mr-4">
+                  <v-img v-if="item.menuItemInfo.images.length != 0" :src="item.menuItemInfo.images[0].imageurl" @click="goToRestaurant(item.menuItemInfo.restaurantid)" class="white--text align-center restaurantImage" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="125px" >
+                  </v-img>
+                  <v-img v-else src="../../assets/menuItemImages/item-placeholder.png" @click="goToRestaurant(item.menuItemInfo.restaurantid)" class="white--text align-center restaurantImage" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="125px" >
+                  </v-img>
+                  <div class="pl-1 pt-1 resaturantTitle cardFormat font-weight-light">{{item.menuItemInfo.menuitemname}}</div>
+                  <span class="pl-1 subtitle-1">R{{ (item.menuItemInfo.price).toFixed(2) }}</span>
+                </v-card>
+              </v-slide-item>
+            </v-slide-group>
+          <!-- </v-sheet> -->
+        </v-container>
+
+        <v-container v-show="!isLoading && (filteredList != undefined && filteredList.length != 0)" class="mt-0 pt-0">
+          <div class="categoryTitle mb-2">More Restaurants</div>
+          <v-row>
+            <v-col class="d-flex flex-column" cols=12>
+              <v-card v-for="(card, index) in filteredList" :key="index" ripple flat  class="mb-1">
+                <v-img :src="card.image" @click="goToRestaurant(card.restaurantId)" class="white--text align-center restaurantImage" gradient="to bottom, rgba(0,0,0,.1), rgba(0,0,0,.5)" height="125px" >
+                  <v-rating background-color="white" readonly size="14" dense color="yellow darken-3" :value="parseInt(card.rating)" style="bottom: 3px; right: 3px; position: absolute"></v-rating>
+                </v-img>
+                <v-row class="d-flex flex-row ">
+                  <v-col cols="7" class="pt-0">
+                    <div class="pl-1 pt-1 resaturantTitle cardFormat font-weight-light">{{trimRestaurantName(card.name)}}</div>
+                    <v-row class="ml-0">
+                      <v-icon size="13px">mdi-map-marker</v-icon>
+                      <div class="pl-0 pt-0 restaurantLocation font-weight-light">{{card.branch}}</div>
+                    </v-row>
+                  </v-col>
+                  <v-col cols="5" class="pt-0">
+                    <v-row class="pl-0 mt-1">
+                      <v-col cols="12" class="pa-0 pb-1">
+                        <div class="ml-1 mr-2 pt-1 restaurantCategory">{{getCategoryNames(card.categories)}}</div>
+                      </v-col>
+                      <v-col cols="auto" v-for="(tag, i) in card.phrases" :key="i" class="pl-0 pt-1 pr-1">
+                        <div class="restaurantDescriptor">{{tag}}</div>
+                      </v-col>
+                    </v-row>
+                  </v-col>
+                </v-row>
+              </v-card>
+            </v-col>
+          </v-row>
+        </v-container>
         
-      </div>
-      <div v-else class="pl-1 py-0 restaurantLocation font-weight-light" style="display: inline; font-size: 15px">No search results...</div>
-    </v-container>  
-    <v-btn v-show="!isLoading" v-if="checkedIn" @click="goToCart" fixed app color="primary" width="52px" height="52px" absolute dark bottom elevation="1" style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
-      <v-icon>mdi-cart-outline</v-icon>
-    </v-btn>
-    <NavBar v-show="!isLoading"></NavBar>
+
+          <v-btn v-if="!checkedIn()" height="50px" width="50px" class="checkInBtn" @click=goToCheckin app color="primary" fab style="position: fixed; bottom: 65px; right: 13px">
+            <v-icon size="30">mdi-table-furniture</v-icon>
+          </v-btn>
+      </v-container>
+        
+      <v-container v-show="!isLoading" v-else class="mt-3">
+        <div v-if="filteredList != undefined">
+          <v-card class="mb-2" @click="goToRestaurant(card.restaurantId)" elevation="2" v-for="(card, index) in filteredList" :key="index">
+            <v-row class="mx-0">
+              <v-col cols="3" class="py-0 px-1 pl-2">
+                <v-img width="75px" height="70px" style="background-size: contain" :src="card.image" class="align-center mt-3"></v-img>
+              </v-col>
+              <v-col cols="9" class="pt-2 py-0">
+                <v-row class="py-0">
+                  <v-col cols="8" class="pt-0 pl-2 pb-1">
+                    <div class="pl-1 pt-1 resaturantTitle font-weight-light">{{trimCardRestaurantName(card.name)}}</div>
+                    <div class="ml-1 pt-0 restaurantCategory">{{getCategoryNames(card.categories)}}</div>
+                  </v-col>
+                  <v-col cols="4" class="pt-0 px-2 pb-1">
+                    <v-rating background-color="secondary" readonly size="11" dense color="yellow darken-3" :value="parseInt(card.rating)"></v-rating>
+                  </v-col>
+                </v-row>
+                <v-row class="px-2">
+                  <v-col class="px-1 pt-0">
+                    <div class="px-1 mr-1 pt-0 restaurantDescriptor" v-for="(tag, i) in card.phrases" :key="i" style="display: inline">{{tag}}</div>
+                  </v-col>
+                  <v-col cols="auto" class="px-0 pt-0" style="text-align: right">
+                    <v-icon size="13px">mdi-map-marker</v-icon>
+                    <div class="pl-1 py-0 restaurantLocation font-weight-light" style="display: inline">{{card.branch}}</div>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
+          </v-card>
+          
+        </div>
+        <div v-else class="pl-1 py-0 restaurantLocation font-weight-light" style="display: inline; font-size: 15px">No search results...</div>
+      </v-container> 
+      
+      <v-btn v-show="!isLoading" v-if="checkedIn()" @click="goToCart" fixed app color="primary" width="52px" height="52px" absolute dark bottom elevation="1" style="right: 50%; transform: translateX(50%); bottom: 30px; z-index: 100;" fab>
+        <v-icon>mdi-cart-outline</v-icon>
+      </v-btn>
+      <NavBar v-show="!isLoading"></NavBar>
+    </v-container>
   </v-container>
 </template>
 
@@ -245,11 +237,13 @@ import store from '@/store/store.js';
 import { mapActions, mapGetters, mapMutations } from 'vuex'
 import $ from 'jquery'
 import moment from 'moment'
+import DesktopExplore from "../../components/explore/DesktopExploreView"
 
 export default {
   components: {
     'NavBar': NavBar,
-    'RestaurantSearchToolBar': RestaurantSearchToolBar
+    'RestaurantSearchToolBar': RestaurantSearchToolBar,
+    'DesktopExplore': DesktopExplore
   },
   data: () => ({
     search: '',
@@ -265,12 +259,16 @@ export default {
     restCategories: [],
     cycle: true,
     isLoading: false,
-    carouselIndex: 0
+    carouselIndex: 0,
+    isMobile: false,
   }),
   methods: {
     async goToRestaurant (id) {
-      await this.clearMenu;
-      this.$store.dispatch('RestaurantsStore/retrieveRestaurantMenu', id);
+      if (this.menu.id != id) {
+        await this.clearMenu
+        this.$store.dispatch('RestaurantsStore/retrieveRestaurantMenu', id);
+      }
+      
       this.$router.push("/menu/" + id);
     },
     goToCheckin () {
@@ -279,15 +277,16 @@ export default {
     changeFavouriteFab () {
       this.favourited = !this.favourited
     },
-    callWaiter() {
-      this.called = !this.called;
+    getNotifications() {
+      // this.called = !this.called;
     },
     toggleCategoryActive(i) {
-      const index = this.selectedCategories.indexOf(this.exploreCategories[i].categoryId);
+      let categoryId = this.exploreCategories[i].categoryId;
+      const index = this.selectedCategories.indexOf(categoryId);
       if (index > -1) {
         this.selectedCategories.splice(index, 1);
       } else {
-        this.selectedCategories.push(this.exploreCategories[i].categoryId)
+        this.selectedCategories.push(categoryId)
       }
     },
     getDate(date) {
@@ -304,16 +303,33 @@ export default {
         return item.name;
       }
     },
+    trimRestaurantName(name) {
+      var maxLength = 22;
+      if (name.length > maxLength) {
+        var trimmed = name.substr(0, maxLength);
+        trimmed = trimmed.substr(0, Math.min(trimmed.length, trimmed.lastIndexOf(" ")));
+        return trimmed;
+      }
+      return name;
+    },
+    trimCardRestaurantName(name) {
+      var maxLength = 18;
+      if (name.length > maxLength) {
+        var trimmed = name.substr(0, maxLength);
+        trimmed = trimmed.substr(0, Math.min(trimmed.length, trimmed.lastIndexOf(" ")));
+        return trimmed;
+      }
+      return name;
+    },
     getCategoryNames(categories) {
       if (categories.length != 0 ) {
         var list = [];
-        // if (this.exploreCategories.length != undefined) {
-          for (let i = 0; i < categories.length; i++) { 
+        if (Array.isArray(this.exploreCategories))
+          for (let i = 0; i < categories.length && i < 3; i++) { 
             list.push(this.exploreCategories.find((category) => {
               return category.categoryId === categories[i]
             }).categoryName)
           }
-        // }
 
         return list.join(', ')
       }
@@ -333,11 +349,37 @@ export default {
         return arr2.every(el => arr1.includes(el));
       return true;
     },
+    onResize () { 
+      this.isMobile = $(window).width() < 600
+    },
+    promotionDays(days) {
+      var list = [];
+      let weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      let consecutive = true;
+      if (days.length != 7) {
+        for (let i = 1; i < days.length; i++) {
+          if (weekdays.indexOf(days[i]) != weekdays.indexOf(days[i-1]) + 1) {
+            consecutive = false;
+            break;
+          }
+        }
+        if (!consecutive) {
+          days.forEach(element => list.push(element.substring(0,3)) );
+        } else {
+          return days[0].substring(0,3) + " - " + (days[days.length-1]).substring(0,3)
+        }
+      }
+      
+      return list.join(', ');
+    },
   },
   ...mapActions({
     checkInCustomer: 'CustomerStore/checkInCustomer',
   }),
   async mounted() {
+    this.onResize() 
+    window.addEventListener('resize', this.onResize, { passive: true })
+
     this.clearItem;
     if (this.customerInfo.theme === 'light') {
       this.$vuetify.theme.dark = false;
@@ -348,16 +390,21 @@ export default {
     // var length = await this.allRestaurants.length;
     // var categoryLength = await this.exploreCategories.length;
 
-    if (this.allRestaurants.length == undefined) {
+    if (!Array.isArray(this.allRestaurants)) {
       this.isLoading = true;
       var retrievedAllRestaurants = await this.fetchAllRestaurants;
       var retrievedExploreCategories = await this.retrieveExploreCategories;
       // Change this to have the checked-in menu be its own object
-      // await this.$store.dispatch('MenuStore/retrieveMenu', this.checkedInRestaurantId);
       var menuItemsList = await this.$store.dispatch('RestaurantsStore/retrieveSuggestedMenuItemIds');
-      await this.$store.dispatch('RestaurantsStore/retrieveSuggestedMenuItemsFromRatings', menuItemsList);
-      await this.$store.dispatch('RestaurantsStore/retrieveActivePromotions');
-      await this.$store.dispatch('MenuStore/retrieveMenu', this.checkedInRestaurantId);
+      if (menuItemsList) 
+        await this.$store.dispatch('RestaurantsStore/retrieveSuggestedMenuItemsFromRatings', menuItemsList);
+      let promos = await this.$store.dispatch('RestaurantsStore/retrieveActivePromotions');
+      if (this.checkedInRestaurantId) {
+        if (Object.keys(promos).length != 0 && promos.restaurantPromo.length > 0){
+          await this.$store.dispatch('RestaurantsStore/fetchActiveCheckedInPromo', promos);
+        }
+        await this.$store.dispatch('MenuStore/retrieveMenu', this.checkedInRestaurantId);
+      }
       
       if (retrievedAllRestaurants && retrievedExploreCategories)
         this.isLoading = false;
@@ -374,10 +421,21 @@ export default {
       }
     },
     filteredList() {
-      if (this.allRestaurants.length != undefined)
-        return this.allRestaurants.filter(restaurant => {
-          return restaurant.name.toLowerCase().includes(this.search.toLowerCase()) && this.containsCategories(restaurant.categories, this.selectedCategories)
-        })
+      if (Array.isArray(this.allRestaurants)) {
+        var items = [];
+        items = this.allRestaurants.filter(restaurant => 
+          this.containsCategories(restaurant.categories, this.selectedCategories) && restaurant.name.toLowerCase().includes(this.search.toLowerCase())
+        )
+
+        if (items.length != 0) {
+          // console.log(items)
+          return items.slice().sort(function(a, b) {
+            return b.rating - a.rating;
+          });
+        }
+
+        
+      }
     },
     carouselTab () {
       return 'mdi-checkbox-blank-circle';
@@ -400,12 +458,29 @@ export default {
       suggestedItemsIds: 'RestaurantsStore/getSuggestedItemsIds',
       suggestedItemsFromRatings: 'RestaurantsStore/getSuggestedItemsFromRatings',
       activePromotions: 'RestaurantsStore/getAllActiveRestaurantPromotions',
+      menu: "MenuStore/getMenu",
     }),
   },
 }
 </script>
 
 <style>
+
+@media (min-width: 960px) {
+  .container {
+    max-width: 100% !important;
+  }
+}
+@media (min-width: 1264px) {
+  .container {
+    max-width: 100% !important;
+  }
+}
+@media (min-width: 1904px) {
+  .container {
+    max-width: 100% !important;
+  }
+}
 
  body {
    font-family: 'Helvetica';
@@ -523,7 +598,7 @@ export default {
   }
 
   .restaurantCategory {
-    font-size: 13px;
+    font-size: 12px;
   }
 
   .restaurantDescriptor {
@@ -560,4 +635,13 @@ export default {
   .promotionalMaterial .v-image .v-responsive .v-carousel__item {
     height: 0px
   }
+
+  .v-slide-group__wrapper {
+    touch-action: auto !important;
+  }
+
+  .categoriesScroll {
+    overflow: hidden;
+  }
+
 </style>

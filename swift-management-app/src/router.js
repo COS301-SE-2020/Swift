@@ -21,7 +21,7 @@ const router = new Router({
       children: [
         //management views
         {
-          path: '/',
+          path: '/dashboard',
           name: 'dashboard',
           component: () => import('./views/dashboard/DashboardView.vue')
         },
@@ -66,7 +66,7 @@ const router = new Router({
           component: () => import('./views/reviews/ReviewsListView.vue')
         },
         {
-          path: '/mybusiness',
+          path: '/',
           name: 'mybusiness',
           component: () => import('./views/mybusiness/MyBusinessView.vue')
         },
@@ -89,11 +89,7 @@ const router = new Router({
           name: 'login',
           component: () => import('./views/usermanagement/UMView.vue')
         },
-        {
-          path: '/reset-password',
-          name: 'reset-password',
-          component: () => import('./views/usermanagement/UMResetPasswordView.vue')
-        },
+      
       ]
     },
     //404 redirects to home for now
