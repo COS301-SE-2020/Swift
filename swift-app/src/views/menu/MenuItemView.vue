@@ -428,13 +428,13 @@ export default {
       
       if (radio) {
         this.addOns -= this.prevVal
-        this.addOns += values[j].price
-        this.prevVal = values[j].price
+        this.addOns += parseFloat(values[j].price)
+        this.prevVal = parseFloat(values[j].price)
       } else {
         if (checked) {
-          this.addOns -= values[j].price
+          this.addOns -= parseFloat(values[j].price)
         } else {
-          this.addOns += values[j].price
+          this.addOns += parseFloat(values[j].price)
         }
       }
       this.changeTotal;
