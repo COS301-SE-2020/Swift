@@ -1,0 +1,21 @@
+name: Swift Team CI
+
+on:
+  push:
+    branches: [ master, documentation ]
+
+jobs:
+  deploy:
+    name: Deploy Team Page
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repo
+      uses: actions/checkout@v2
+    - name: Deploy to Firebase
+      uses: w9jds/firebase-action@master
+      with:
+        args: deploy --only hosting:lumiqon-team
+      env:
+        GCP_SA_KEY: ${{ secrets.GCP_SA_KEY }}
+        PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+        PROJECT_PATH: ./swift-team
