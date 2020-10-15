@@ -8,6 +8,8 @@ const initialState = () => ({
   itemToRate: {},
   paymentInfo: {},
   currentId: -1,
+  waiterTip: {},
+  receipt: {},
   
   
   orderHistory: {},
@@ -24,6 +26,10 @@ const state = initialState();
 const getters = {
   getOrderInfo(state) {
     return state.orderInfo;
+  },
+
+  getWaiterTip(state) {
+    return state.waiterTip;
   },
 
   getOrderedItems(state) {
@@ -46,6 +52,10 @@ const getters = {
     return state.orderFlag;
   },
 
+  getReceipt(state) {
+    return state.receipt;
+  },
+
   getOrderTotal(state) {
     return state.orderTotal;
   },
@@ -64,20 +74,23 @@ const getters = {
 // Actions 
 const actions = {
   submitOrder({state, commit}, data) {
+    // console.log(state.orderHistory[0].orderId);
     state.orderInfo.waiterTip = data.tip
     if(Object.keys(state.orderedItems).length === 0) {
-      
-      axios.post('https://api.swiftapp.ml', 
+      return axios.post('https://api.swiftapp.ml', 
         {
           "requestType": "addOrder",
           "token": sessionStorage.getItem('authToken'),
           "orderInfo": this.getters['OrderStore/getOrderInfo']
         }
-      ).then(result => {
-        commit('UPDATE_ORDER_HISTORY', result.data.orderHistory);
+      ).then( result => {
+        commit('UPDATE_ORDER_HISTORY',  result.data.orderHistory);
+        return result.data.orderHistory[0].orderId;
       }).catch(({ response }) => {
       });
     } else {
+      // console.log(state.orderHistory[0].orderId)
+      // console.log(this.getters['OrderStore/getOrderInfo'].orderItems)
       axios.post('https://api.swiftapp.ml', 
         {
           "requestType": "updateOrder",
@@ -86,6 +99,7 @@ const actions = {
           "orderItems": this.getters['OrderStore/getOrderInfo'].orderItems
         }
       ).then(result => {
+        // console.log("order history: ", result.data.orderHistory)
         commit('UPDATE_ORDER_HISTORY', result.data.orderHistory);
       }).catch(({ response }) => {
       });
@@ -100,7 +114,7 @@ const actions = {
         }
       ).then(result => {
         commit('SET_RATING_PHRASES', result.data);
-        console.log(result.data)
+        // console.log(result.data)
         return result.data
       }).catch(({ response }) => {
       });
@@ -121,25 +135,34 @@ const actions = {
             "phrases": ratingObject.ratings[i].phrases,
           }
         ).then(result => {
+          let data = {
+            "status": 'Rated',
+            "id": ratingObject.ratings[i].orderId
+          }
+          
+          commit('CLEAR_ITEMS');
+          this.commit('MenuStore/CLEAR_MENU');
+          this.dispatch('RestaurantsStore/retrieveRestaurantMenu');
+          this.commit('CustomerStore/UPDATE_ORDER_STATUS', data);
         }).catch(({ response }) => {
         });
     }
   },
 
   submitPayment({commit}) {
-    let data = {
-      "requestType": "payment",
-        "token": sessionStorage.getItem('authToken'),
-        "orderId": this.getters['OrderStore/getPaymentInfo'].orderId,
-        "paymentMethod": this.getters['OrderStore/getPaymentInfo'].paymentMethod,
-        "amountPaid": this.getters['OrderStore/getPaymentInfo'].amountPaid,
-        "restaurantName": this.getters['OrderStore/getPaymentInfo'].restaurantName,
-        "menuItemName": this.getters['OrderStore/getPaymentInfo'].menuItemName,
-        "name": this.getters['CustomerStore/getCustomerProfile'].name,
-        "email": this.getters['CustomerStore/getCustomerProfile'].email,
-        "waiterTip": this.getters['OrderStore/getPaymentInfo'].waiterTip,
-        "orderTax": this.getters['OrderStore/getPaymentInfo'].orderTax
-    }
+    // let data = {
+    //   "requestType": "payment",
+    //     "token": sessionStorage.getItem('authToken'),
+    //     "orderId": this.getters['OrderStore/getPaymentInfo'].orderId,
+    //     "paymentMethod": this.getters['OrderStore/getPaymentInfo'].paymentMethod,
+    //     "amountPaid": this.getters['OrderStore/getPaymentInfo'].amountPaid,
+    //     "restaurantName": this.getters['OrderStore/getPaymentInfo'].restaurantName,
+    //     "menuItemName": this.getters['OrderStore/getPaymentInfo'].menuItemName,
+    //     "name": this.getters['CustomerStore/getCustomerProfile'].name,
+    //     "email": this.getters['CustomerStore/getCustomerProfile'].email,
+    //     "waiterTip": this.getters['OrderStore/getPaymentInfo'].waiterTip,
+    //     "orderTax": this.getters['OrderStore/getPaymentInfo'].orderTax
+    // }
     
     axios.post('https://api.swiftapp.ml', 
       {
@@ -156,7 +179,16 @@ const actions = {
         "orderTax": this.getters['OrderStore/getPaymentInfo'].orderTax
       }
     ).then(result => {
+      let data = {
+        "status": 'Paid',
+        "id": this.getters['OrderStore/getPaymentInfo'].orderId
+      }
+      // commit('UPDATE_ORDER_FLAG', false);
       commit('CLEAR_ITEMS');
+      this.commit('CustomerStore/UPDATE_ORDER_STATUS', data);
+      
+      // dispatch('OrderStore/updateOrderFlag', false);
+      // this.orderFlag = false;
     }).catch(({ response }) => {
     });
   },
@@ -170,6 +202,22 @@ const actions = {
   setOrderHistory({commit}, fetchedOrderHistory) {
     var orderHistory = fetchedOrderHistory
     commit('SET_ORDER_HISTORY', orderHistory);
+  },
+
+  setWaiterTip({commit}, tip) {
+    commit('SET_WAITER_TIP', tip);
+  },
+
+  changePaymentType({commit}, type) {
+    commit('SET_PAYMENT_TYPE', type);
+  },
+
+  setReceipt({commit}, order) {
+    commit('SET_RECEIPT', order);
+  },
+
+  clearReceipt({commit}) {
+    commit('CLEAR_RECEIPT');
   },
 
   addItemToOrder({commit,}, orderItemInfo) {
@@ -196,22 +244,23 @@ const actions = {
     commit('ADD_PAYMENT', orderPaymentinfo);
   },
 
-  retrieveOrderStatus({commit}, data) {
-    var orderId = data.orderId;
+  retrieveOrderStatus({commit}) {
+    // var orderId = data.orderId;
     axios.post('https://api.swiftapp.ml', 
       {
         "requestType": "orderStatus",
-        "orderId": orderId,
         "token": sessionStorage.getItem('authToken')
       }
     ).then(result => {
-      var data = {
+      /* var data = {
         "orderId": orderId,
         "orderProgress": result.data.orderProgress,
         "itemProgress": result.data.itemProgress
-      }
+      } */
       // console.log(result.data.itemProgress)
-      commit('UPDATE_ORDER_STATUS', data);
+      // console.log(result.data)
+      this.commit('CustomerStore/UPDATE_ORDER_PROGRESS', result.data.orders);
+      // commit('UPDATE_ORDER_FLAG', false);
     }).catch(({ response }) => {
     });
   },
@@ -234,17 +283,16 @@ const mutations = {
   SET_ORDER_HISTORY(state, orderHistory) {
     state.orderHistory = orderHistory;
 
-    if (orderHistory.length != 0 && orderHistory[0].orderStatus == 'Received') {
+    if (orderHistory.length != 0 && orderHistory[0].orderStatus == 'Received' && orderHistory[0].restaurantId == this.getters['CustomerStore/getCheckedInTableId']) {
       let itemsOrdered = [];
       for (let i = 0; i < orderHistory[0].items.length; i++) {
+        // console.log(orderHistory[0].items[i].orderSelections)
         let data = {
           "menuItemId": orderHistory[0].items[i].menuItemId,
           "itemTotal": orderHistory[0].items[i].itemTotal,
           "quantity": orderHistory[0].items[i].quantity,
-          "orderSelections": {
-            "selections": orderHistory[0].items[i].orderSelections
-          }
-        };
+          "orderSelections": orderHistory[0].items[i].orderselections
+        }
         itemsOrdered[i] = data;
       }
 
@@ -252,8 +300,8 @@ const mutations = {
         // "orderInfo": {
           "restaurantId": orderHistory[0].restaurantId,
           "tableId": this.getters['CustomerStore/getCheckedInTableId'],
-          "employeeId": 6,
-          "waiterTip": 0,
+          // "employeeId": 6,
+          "waiterTip": orderHistory[0].waiterTip,
           "orderItems": itemsOrdered
         // }
       }
@@ -267,6 +315,14 @@ const mutations = {
 
   CLEAR_ORDER(state) {
     state.orderInfo = {}
+  },
+
+  SET_PAYMENT_TYPE(state, type) {
+    state.paymentInfo.paymentMethod = type
+  },
+
+  CLEAR_RECEIPT(state) {
+    state.receipt = {}
   },
 
   UPDATE_ORDER(state) {
@@ -295,12 +351,16 @@ const mutations = {
   REMOVE_ITEM(state, itemId) {
     let itemIndex = -1;
     state.orderInfo.orderItems.find((item, index) => {
-      itemIndex = index;
+      if (item.menuItemId == itemId)
+        itemIndex = index;
       return item.menuItemId == itemId
     });
 
-    if (itemIndex != -1)
+    if (itemIndex != -1) {
       state.orderInfo.orderItems.splice(itemIndex, 1);
+      if (state.orderInfo.orderItems.length == 0)
+        state.orderInfo = {}
+    }
   },
 
   ADD_PAYMENT(state, orderPaymentinfo) {
@@ -310,10 +370,19 @@ const mutations = {
   CLEAR_ITEMS(state) {
     state.orderInfo = {}
     state.orderedItems = {}
+    state.itemToRate = {}
   },
 
   SET_RATING_PHRASES(state, ratingPhrases) {
     state.ratingPhrases = ratingPhrases
+  },
+
+  SET_RECEIPT(state, order) {
+    state.receipt = order
+  },
+
+  SET_WAITER_TIP(state, tip) {
+    state.waiterTip = tip
   },
 
   ADD_ITEM_TO_RATE(state, itemInfo) {
@@ -347,9 +416,13 @@ const mutations = {
     } else {
       state.orderedItems = state.orderInfo;
     }
+    // console.log("Order")
+    // console.log(state.orderInfo)
+    // console.log("Ordered")
+    // console.log(state.orderedItems)
     state.orderInfo = {}
 
-    this.getters['CustomerStore/getCustomer'].orderHistory = orderInformation;
+    this.commit('CustomerStore/UPDATE_ORDER_HISTORY', orderInformation);
 
   },
   

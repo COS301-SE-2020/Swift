@@ -15,7 +15,7 @@ const mutations = {
     state.currentRestaurant = {
       name: payload.name,
       id: payload.id
-    }
+    } 
   },
 
   // Vertical NavMenu

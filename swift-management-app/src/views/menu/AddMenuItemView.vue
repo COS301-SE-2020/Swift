@@ -131,15 +131,18 @@
       <div class="addOnsList" v-for="addOn in itemAddons" :key="addOn.id">
         <vs-divider color="primary">{{ addOn.attributeName }}</vs-divider>
         <vs-row class="mb-4">
-          <vs-col vs-type="flex" vs-justify="center" vs-align="center" vs-w="4">
+          <vs-col  class="mt-4" vs-type="flex" vs-justify="center" vs-align="center" vs-lg="3" vs-sm="12">
             <vs-input
               label="Attribute Name"
               placeholder="Preperation of Eggs"
               v-model="addOn.attributeName"
             />
           </vs-col>
-          <vs-col vs-type="flex" vs-justify="center" vs-align="center" vs-w="4">
-            <p>How many can they select:</p>
+            <vs-col class="mt-4" vs-type="flex" vs-justify="center" vs-align="center" vs-w="3"  vs-sm="12">
+               <p>How many can a customer select:</p>
+            </vs-col>
+          <vs-col  class="mt-4" vs-type="flex" vs-justify="center" vs-align="center" vs-w="3"  vs-sm="12">
+         
             <vs-input-number
               label="min"
               style="max-width: 200px; margin: 0 auto"
@@ -148,7 +151,7 @@
               icon-dec="expand_more"
             />
           </vs-col>
-          <vs-col vs-type="flex" vs-justify="center" vs-align="center" vs-w="4">
+          <vs-col  class="mt-4" vs-type="flex" vs-justify="center" vs-align="center" vs-w="3"  vs-sm="12">
             <vs-input-number
               label="max"
               style="max-width: 200px; margin: 0 auto"
@@ -165,15 +168,14 @@
           :key="attributeValue.id"
         >
           <vs-row class="mb-8">
-            <vs-col vs-type="flex" vs-justify="left" vs-align="left" vs-w="3"></vs-col>
-            <vs-col vs-type="flex" vs-justify="left" vs-align="left" vs-w="2">
+            <vs-col  class="mt-4 ml-auto mr-auto" vs-type="flex" vs-justify="center" vs-align="center" vs-w="2" vs-sm="12">
               <vs-input
                 label="Value name"
                 placeholder="Hard, soft, etc."
                 v-model="attributeValue.name"
               />
             </vs-col>
-            <vs-col vs-type="flex" vs-justify="left" vs-align="left" vs-w="2">
+            <vs-col  class="mt-4 ml-auto mr-auto" vs-type="flex" vs-justify="center" vs-align="center" vs-w="2" vs-sm="12">
               <vs-input
                 type="number"
                 label="Additional Price (ZAR)"
@@ -182,7 +184,7 @@
                 v-model="attributeValue.price"
               />
             </vs-col>
-            <vs-col vs-type="flex" vs-justify="left" vs-align="left" vs-w="2">
+            <vs-col  class="mt-4 ml-auto mr-auto" vs-type="flex" vs-justify="center" vs-align="center" vs-w="2" vs-sm="12">
               <vs-checkbox v-model="attributeValue.selectedByDefault">selected by default</vs-checkbox>
             </vs-col>
           </vs-row>

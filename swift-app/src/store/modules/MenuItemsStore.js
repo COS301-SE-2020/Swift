@@ -78,7 +78,7 @@ const mutations = {
 
   ADD_ITEM_TO_EDIT(state, data) {
     state.menuItem = data;
-    console.log(this.getters['MenuItemsStore/getMenuItem'])
+    // console.log(this.getters['MenuItemsStore/getMenuItem'])
   },
 
   CLEAR_ITEM_TO_EDIT(state, data) {
