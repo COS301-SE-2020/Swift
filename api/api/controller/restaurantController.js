@@ -12,7 +12,8 @@ const {
   getMenuCategories,
   getOrderHistory,
   getActivePromotions,
-  getOrderItems
+  getOrderItems,
+  getOrderStatuses
 } = require('../helper/objectBuilder');
 
 module.exports = {
@@ -77,16 +78,18 @@ module.exports = {
 
             // eslint-disable-next-line no-await-in-loop
             const ratingRes = await client.query(
-              'SELECT AVG(ratingscore) AS "rating" FROM public.review'
+              'SELECT AVG(ratingscore) AS "rating", COUNT(ratingscore) AS "numRated" FROM public.review'
               + ' WHERE restaurantid = $1::integer AND ratingscore IS NOT NULL;',
               [res.rows[r].restaurantid]
             );
 
             if (ratingRes.rows[0].rating != null) {
               restaurantResponse.restaurants[r].rating = ratingRes.rows[0].rating;
+              restaurantResponse.restaurants[r].numRated = ratingRes.rows[0].numRated;
             } else {
               // no rating available
               restaurantResponse.restaurants[r].rating = 0.0;
+              restaurantResponse.restaurants[r].numRated = 0;
             }
           }
 
@@ -271,6 +274,90 @@ module.exports = {
     // Invalid token
     return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
   },
+  checkinCode: (reqBody, response) => {
+    // Check all keys are in place - no need to check request type at this point
+    if (!Object.prototype.hasOwnProperty.call(reqBody, 'code')
+      || !Object.prototype.hasOwnProperty.call(reqBody, 'token')
+      || Object.keys(reqBody).length !== 3) {
+      return response.status(400).send({ status: 400, reason: 'Bad Request' });
+    }
+
+    // Check token validity
+    const userToken = validateToken(reqBody.token, true);
+    if (userToken.state === tokenState.VALID) {
+      return db.query(
+        'SELECT tableid, tablenumber, restaurantid, numseats, qrcode FROM public.restauranttable'
+        + ' WHERE code = $1::text;',
+        [reqBody.code]
+      )
+        .then((res) => {
+          if (res.rows.length === 0) {
+            // code not found
+            return response.status(404).send({ status: 404, reason: 'Not Found' });
+          }
+
+          // check if user already checked in
+          return db.query(
+            'SELECT checkedin FROM public.person'
+            + ' WHERE userid = $1::integer;',
+            [userToken.data.userId]
+          )
+            .then((cRes) => {
+              if (cRes.rows[0].checkedin == null) {
+                // check in user
+                return dbw.query(
+                  'UPDATE public.person SET checkedin = $1::text WHERE userid = $2::integer;',
+                  [res.rows[0].qrcode, userToken.data.userId]
+                )
+                  .then(() => response.status(200).send({
+                    restaurantId: res.rows[0].restaurantid,
+                    tableId: res.rows[0].tableid,
+                    tableNumber: res.rows[0].tablenumber,
+                    qrCode: res.rows[0].qrcode,
+                    code: reqBody.code
+                  }))
+                  .catch((err) => {
+                    console.error('Query Error [Restaurant - Update User CheckIn Status]', err.stack);
+                    return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+                  });
+              }
+
+              // user already checked in
+              return db.query(
+                'SELECT tableid, tablenumber, restaurantid, numseats, qrcode FROM public.restauranttable'
+                + ' WHERE qrcode = $1::text;',
+                [cRes.rows[0].checkedin]
+              )
+                .then((checkedInRes) => response.status(205).send({
+                  restaurantId: checkedInRes.rows[0].restaurantid,
+                  tableId: checkedInRes.rows[0].tableid,
+                  tableNumber: checkedInRes.rows[0].tablenumber,
+                  qrCode: checkedInRes.rows[0].qrcode,
+                  code: reqBody.code
+                }))
+                .catch((err) => {
+                  console.error('Query Error [Restaurant - Get Already CheckIn Details]', err.stack);
+                  return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+                });
+            })
+            .catch((err) => {
+              console.error('Query Error [Restaurant - Check User CheckIn Status]', err.stack);
+              return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+            });
+        })
+        .catch((err) => {
+          console.error('Query Error [Restaurant - Get CheckIn Details]', err.stack);
+          return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
+        });
+    }
+
+    if (userToken.state === tokenState.REFRESH) {
+      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
+    }
+
+    // Invalid token
+    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+  },
   checkOut: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
@@ -398,6 +485,7 @@ module.exports = {
 
           // get menu
           const menuResponse = {};
+          menuResponse.id = reqBody.restaurantId;
           menuResponse.name = res.rows[0].restaurantname;
           menuResponse.location = res.rows[0].location;
 
@@ -513,16 +601,26 @@ module.exports = {
           const orderStatus = 'Received';
           const initialProgress = 0;
 
+          const empRole = 'waiter';
+          const emp = await client.query(
+            'SELECT restaurantemployee.employeeid, restaurantemployee.userid,'
+            + '(SELECT COUNT(employeeid) FROM public.customerorder WHERE ordercompletiontime IS NULL AND customerorder.employeeid = restaurantemployee.userid) AS "numOrders"'
+            + ' FROM public.restaurantemployee'
+            + ' WHERE restaurantemployee.restaurantid = $1::integer AND LOWER(restaurantemployee.employeerole) = $2::text'
+            + ' ORDER BY "numOrders" ASC',
+            [orderInfo.restaurantId, empRole]
+          );
+
           // create order
           // TODO: Work out order completion time from estimated time
           const resOrderId = await client.query(
             'INSERT INTO public.customerorder (customerid, employeeid, tableid, ordernumber, orderdatetime,'
-            + ' ordercompletiontime, orderstatus, progress, waitertip)'
-            + ' VALUES ($1::integer,$2::integer,$3::integer,\'0\',NOW(),NOW(),$4::text,$5::integer,$6::real)'
+            + ' orderstatus, progress, waitertip)'
+            + ' VALUES ($1::integer,$2::integer,$3::integer,\'0\',NOW(),$4::text,$5::integer,$6::real)'
             + ' RETURNING orderid',
             [
               customerId,
-              orderInfo.employeeId,
+              emp.rows[0].userid,
               orderInfo.tableId,
               orderStatus,
               initialProgress,
@@ -544,8 +642,8 @@ module.exports = {
             // add items to order
             // eslint-disable-next-line no-await-in-loop
             await client.query(
-              'INSERT INTO public.itemordered (orderid, menuitemid, quantity, orderselections, progress, itemtotal)'
-              + ' VALUES ($1::integer, $2::integer, $3::integer, $4::json, $5::integer, $6::real)',
+              'INSERT INTO public.itemordered (orderid, menuitemid, quantity, orderselections, progress, itemtotal, promoprice)'
+              + ' VALUES ($1::integer, $2::integer, $3::integer, $4::json, $5::integer, $6::real, $7::real)',
               [
                 resOrderId.rows[0].orderid,
                 orderInfo.orderItems[oi].menuItemId,
@@ -554,7 +652,8 @@ module.exports = {
                 Object.keys(orderInfo.orderItems[oi].orderSelections).length === 0
                   ? null : orderInfo.orderItems[oi].orderSelections,
                 initialProgress,
-                orderInfo.orderItems[oi].itemTotal
+                orderInfo.orderItems[oi].itemTotal,
+                orderInfo.orderItems[oi].promoPrice
               ]
             );
 
@@ -769,17 +868,21 @@ module.exports = {
             // add items to order
             // eslint-disable-next-line no-await-in-loop
             const itemOrdered = await client.query(
-              'SELECT quantity, itemtotal FROM public.itemordered'
-              + ' WHERE orderid = $1::integer AND menuitemid = $2::integer',
-              [reqBody.orderId, reqBody.orderItems[oi].menuItemId]
+              'SELECT quantity, itemtotal, promoprice FROM public.itemordered'
+              + ' WHERE orderid = $1::integer AND menuitemid = $2::integer AND CAST(orderselections AS TEXT) = CAST($3::json AS TEXT)',
+              [
+                reqBody.orderId,
+                reqBody.orderItems[oi].menuItemId,
+                reqBody.orderItems[oi].orderSelections
+              ]
             );
 
             if (itemOrdered.rows.length === 0) {
               // add item
               // eslint-disable-next-line no-await-in-loop
               await client.query(
-                'INSERT INTO public.itemordered (orderid, menuitemid, quantity, orderselections, progress, itemtotal)'
-              + ' VALUES ($1::integer, $2::integer, $3::integer, $4::json, $5::integer, $6::real)',
+                'INSERT INTO public.itemordered (orderid, menuitemid, quantity, orderselections, progress, itemtotal, promoprice)'
+              + ' VALUES ($1::integer, $2::integer, $3::integer, $4::json, $5::integer, $6::real, $7::real)',
                 [
                   reqBody.orderId,
                   reqBody.orderItems[oi].menuItemId,
@@ -788,7 +891,8 @@ module.exports = {
                   Object.keys(reqBody.orderItems[oi].orderSelections).length === 0
                     ? null : reqBody.orderItems[oi].orderSelections,
                   initialProgress,
-                  reqBody.orderItems[oi].itemTotal
+                  reqBody.orderItems[oi].itemTotal,
+                  reqBody.orderItems[oi].promoPrice
                 ]
               );
             } else {
@@ -796,14 +900,14 @@ module.exports = {
               const orderProgressReset = 0;
               // eslint-disable-next-line no-await-in-loop
               await client.query(
-                'UPDATE public.itemordered SET quantity = $1::integer, progress = $2::integer,'
-                + ' itemtotal = $3::real WHERE orderid = $4::integer AND menuitemid = $5::integer',
+                'UPDATE public.itemordered SET quantity = $1::integer, progress = $2::integer'
+                + ' WHERE orderid = $3::integer AND menuitemid = $4::integer AND CAST(orderselections AS TEXT) = CAST($5::json AS TEXT)',
                 [
                   reqBody.orderItems[oi].quantity + itemOrdered.rows[0].quantity,
                   orderProgressReset,
-                  reqBody.orderItems[oi].itemTotal + itemOrdered.rows[0].itemtotal,
                   reqBody.orderId,
-                  reqBody.orderItems[oi].menuItemId
+                  reqBody.orderItems[oi].menuItemId,
+                  reqBody.orderItems[oi].orderSelections
                 ]
               );
             }
@@ -884,68 +988,59 @@ module.exports = {
   getOrderStatus: (reqBody, response) => {
     // Check all keys are in place - no need to check request type at this point
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
-      || !Object.prototype.hasOwnProperty.call(reqBody, 'orderId')
-      || Object.keys(reqBody).length !== 3) {
+      || Object.keys(reqBody).length !== 2) {
       return response.status(400).send({ status: 400, reason: 'Bad Request' });
     }
 
     // Check token
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
-      return (async () => {
-        const client = await db.connect();
-        try {
-          await client.query('BEGIN');
-          const res = await client.query(
-            'SELECT orderstatus, progress FROM public.customerorder WHERE orderid = $1::integer;',
-            [reqBody.orderId]
-          );
+      const orderStatusPromises = [];
+      const orderStatusResponse = {};
 
-          if (res.rows.length === 0) {
-            // order does not exist
-            return response.status(404).send({ status: 404, reason: 'Not Found' });
-          }
+      orderStatusPromises.push(new Promise((resolve, reject) => {
+        orderStatusPromises.push(getOrderStatuses().then((orderStatusPromise) => {
+          orderStatusResponse.orders = [];
+          Promise.all(orderStatusPromise)
+            .then((orderStatItems) => {
+              orderStatItems.forEach((orderStatusItem) => {
+                orderStatusResponse.orders.push(orderStatusItem);
+              });
+              resolve();
+            })
+            .catch((err) => {
+              reject(err);
+            });
+        }));
+      }));
 
-          const orderStatusResponse = {};
-          orderStatusResponse.orderStatus = res.rows[0].orderstatus;
-          orderStatusResponse.orderProgress = res.rows[0].progress;
-          orderStatusResponse.itemProgress = [];
-
-          const itemProg = await client.query(
-            'SELECT menuitemid, progress FROM public.itemordered'
-            + ' WHERE orderid = $1::integer',
-            [reqBody.orderId]
-          );
-
-          for (let i = 0; i < itemProg.rows.length; i++) {
-            const singleItem = {};
-            singleItem.menuItemId = itemProg.rows[i].menuitemid;
-            singleItem.progress = itemProg.rows[i].progress;
-            orderStatusResponse.itemProgress.push(singleItem);
-          }
-
-          // commit and return order status
-          await client.query('COMMIT');
-          return response.status(200).send(orderStatusResponse);
-        } catch (err) {
-          await client.query('ROLLBACK');
-          throw err;
-        } finally {
-          client.release();
-        }
-      })()
+      Promise.all(orderStatusPromises).then(() => response.status(200).send(orderStatusResponse))
         .catch((err) => {
-          console.error('Query Error [Restaurant - Get Order Status]', err.stack);
+          console.error('Login Promise Error', err.stack);
           return response.status(500).send({ status: 500, reason: 'Internal Server Error' });
         });
-    }
 
-    if (userToken.state === tokenState.REFRESH) {
-      return response.status(407).send({ status: 407, reason: 'Token Refresh Required' });
-    }
+      // const orderStatusResponse = {};
+      // orderStatusResponse.orders = [];
+      // res.rows.forEach((order) => {
+      //   orderStatusResponse.orders.push(getOrderItemStatus(order.orderid)
+      //     .then((itemStatus) => {
+      //       const orderObj = {};
+      //       orderObj.orderStatus = order.orderstatus;
+      //       orderObj.orderProgress = order.progress;
+      //       // orderObj.itemProgress = itemStatus;
+      //     }));
+      // });
 
-    // Invalid token
-    return response.status(401).send({ status: 401, reason: 'Unauthorised Access' });
+      // return response.status(201).send(orderStatusResponse);
+      // } catch (err) {
+      //   await client.query('ROLLBACK');
+      //   throw err;
+      // } finally {
+      //   client.release();
+      // }
+    }
+    return true;
   },
   getTableQRCode: (reqBody, response) => {
     if (!Object.prototype.hasOwnProperty.call(reqBody, 'token')
@@ -958,7 +1053,7 @@ module.exports = {
     const userToken = validateToken(reqBody.token, true);
     if (userToken.state === tokenState.VALID) {
       return db.query(
-        'SELECT qrcode FROM public.restauranttable WHERE tableid = $1::integer',
+        'SELECT qrcode, code FROM public.restauranttable WHERE tableid = $1::integer',
         [reqBody.tableId]
       )
         .then((res) => {
@@ -966,7 +1061,10 @@ module.exports = {
             return response.status(404).send({ status: 404, reason: 'Not Found' });
           }
 
-          return response.status(200).send({ qrcode: res.rows[0].qrcode });
+          return response.status(200).send({
+            qrcode: res.rows[0].qrcode,
+            code: res.rows[0].code
+          });
         })
         .catch((err) => {
           console.error('Query Error [Restaurant - Get Table QR code]', err.stack);
