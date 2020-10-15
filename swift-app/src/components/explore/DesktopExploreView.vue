@@ -1,7 +1,6 @@
 <template>
   <v-container class="pa-0 ma-0">
     <div style="position: absolute; z-index: 100; right: 80px; top: 15px;">
-      
       <v-btn class="mr-3" v-show="!isLoading" v-if="checkedIn()" @click="goToCart" app color="primary" width="35px" height="35px" dark  elevation="1"  fab>
         <v-icon>mdi-cart-outline</v-icon>
       </v-btn>
@@ -241,13 +240,15 @@ export default {
     cycle: true,
     isLoading: false,
     carouselIndex: 0,
-    list: [],
-    page: 1,
+    isMobile: false,
   }),
   methods: {
     async goToRestaurant (id) {
-      await this.clearMenu;
-      this.$store.dispatch('RestaurantsStore/retrieveRestaurantMenu', id);
+      if (this.menu.id != id) {
+        await this.clearMenu
+        this.$store.dispatch('RestaurantsStore/retrieveRestaurantMenu', id);
+      }
+      
       this.$router.push("/menu/" + id);
     },
     goToCheckin () {
@@ -328,11 +329,37 @@ export default {
         return arr2.every(el => arr1.includes(el));
       return true;
     },
+    onResize () { 
+      this.isMobile = $(window).width() < 600
+    },
+    promotionDays(days) {
+      var list = [];
+      let weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      let consecutive = true;
+      if (days.length != 7) {
+        for (let i = 1; i < days.length; i++) {
+          if (weekdays.indexOf(days[i]) != weekdays.indexOf(days[i-1]) + 1) {
+            consecutive = false;
+            break;
+          }
+        }
+        if (!consecutive) {
+          days.forEach(element => list.push(element.substring(0,3)) );
+        } else {
+          return days[0].substring(0,3) + " - " + (days[days.length-1]).substring(0,3)
+        }
+      }
+      
+      return list.join(', ');
+    },
   },
   ...mapActions({
     checkInCustomer: 'CustomerStore/checkInCustomer',
   }),
   async mounted() {
+    this.onResize() 
+    window.addEventListener('resize', this.onResize, { passive: true })
+
     this.clearItem;
     if (this.customerInfo.theme === 'light') {
       this.$vuetify.theme.dark = false;
@@ -351,9 +378,13 @@ export default {
       var menuItemsList = await this.$store.dispatch('RestaurantsStore/retrieveSuggestedMenuItemIds');
       if (menuItemsList) 
         await this.$store.dispatch('RestaurantsStore/retrieveSuggestedMenuItemsFromRatings', menuItemsList);
-      await this.$store.dispatch('RestaurantsStore/retrieveActivePromotions');
-      if (this.checkedInRestaurantId)
+      let promos = await this.$store.dispatch('RestaurantsStore/retrieveActivePromotions');
+      if (this.checkedInRestaurantId) {
+        if (Object.keys(promos).length != 0 && promos.restaurantPromo.length > 0){
+          await this.$store.dispatch('RestaurantsStore/fetchActiveCheckedInPromo', promos);
+        }
         await this.$store.dispatch('MenuStore/retrieveMenu', this.checkedInRestaurantId);
+      }
       
       if (retrievedAllRestaurants && retrievedExploreCategories)
         this.isLoading = false;
@@ -371,13 +402,19 @@ export default {
     },
     filteredList() {
       if (Array.isArray(this.allRestaurants)) {
-        var items =  this.allRestaurants.filter(restaurant => 
+        var items = [];
+        items = this.allRestaurants.filter(restaurant => 
           this.containsCategories(restaurant.categories, this.selectedCategories) && restaurant.name.toLowerCase().includes(this.search.toLowerCase())
         )
 
-        return items.slice().sort(function(a, b) {
-          return b.rating - a.rating;
-        });
+        if (items.length != 0) {
+          // console.log(items)
+          return items.slice().sort(function(a, b) {
+            return b.rating - a.rating;
+          });
+        }
+
+        
       }
     },
     carouselTab () {
@@ -401,6 +438,7 @@ export default {
       suggestedItemsIds: 'RestaurantsStore/getSuggestedItemsIds',
       suggestedItemsFromRatings: 'RestaurantsStore/getSuggestedItemsFromRatings',
       activePromotions: 'RestaurantsStore/getAllActiveRestaurantPromotions',
+      menu: "MenuStore/getMenu",
     }),
   },
 }
