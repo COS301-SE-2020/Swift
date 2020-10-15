@@ -5,7 +5,7 @@ const db = require('../db').poolr;
 // helper to get individual order items
 const getOrderItems = async (oid = 0) => db.query(
   'SELECT menuitem.menuitemid, menuitem.menuitemname, menuitem.menuitemdescription,'
-    + ' itemordered.itemtotal, itemordered.quantity, itemordered.orderselections,'
+    + ' itemordered.itemtotal, itemordered.promoprice, itemordered.quantity, itemordered.orderselections,'
     + ' itemordered.progress FROM public.itemordered'
     + ' INNER JOIN public.menuitem ON menuitem.menuitemid = itemordered.menuitemid'
     + ' WHERE itemordered.orderid = $1::integer;',
@@ -20,6 +20,7 @@ const getOrderItems = async (oid = 0) => db.query(
       orderItem.menuItemName = ordItem.menuitemname;
       orderItem.menuItemDescription = ordItem.menuitemdescription;
       orderItem.itemTotal = ordItem.itemtotal;
+      orderItem.promoPrice = ordItem.promoprice;
       orderItem.quantity = ordItem.quantity;
       orderItem.progress = ordItem.progress;
       orderItem.orderselections = ordItem.orderselections;
@@ -30,6 +31,26 @@ const getOrderItems = async (oid = 0) => db.query(
   })
   .catch((err) => {
     console.error('Query Error [Order Helper - Get Order Items]', err.stack);
+    return [];
+  });
+
+const getOrderItemStatus = async (oid = 0) => db.query(
+  'SELECT menuitemid, progress FROM public.itemordered'
+    + ' WHERE orderid = $1::integer',
+  [oid]
+)
+  .then((orderItems) => {
+    const orderStatuses = [];
+    orderItems.rows.forEach((order) => {
+      const singleItem = {};
+      singleItem.menuItemId = order.menuitemid;
+      singleItem.progress = order.progress;
+      orderStatuses.push(singleItem);
+    });
+    return { items: orderStatuses };
+  })
+  .catch((err) => {
+    console.error('Query Error [Order Helper - Get Order Item Status]', err.stack);
     return [];
   });
 
@@ -296,15 +317,17 @@ const getMenuItems = (categoryId) => {
         // get menu item rating
         // eslint-disable-next-line no-await-in-loop
         const rtRes = await client.query(
-          'SELECT AVG(ratingscore) AS "rating" FROM public.review'
+          'SELECT AVG(ratingscore) AS "rating", COUNT(ratingscore) AS "numRated" FROM public.review'
           + ' WHERE menuitemid = $1::integer AND ratingscore IS NOT NULL;',
           [resMenuItem.menuitemid]
         );
 
         if (rtRes.rows.length === 0) {
           menuItem.rating = 0.0;
+          menuItem.numRated = 0;
         } else {
           menuItem.rating = parseFloat(rtRes.rows[0].rating);
+          menuItem.numRated = parseFloat(rtRes.rows[0].numRated);
         }
 
         // get menu item reviews
@@ -402,7 +425,7 @@ const getMenuItems = (categoryId) => {
         menuItem.ratingPhrases = [];
         // eslint-disable-next-line no-await-in-loop
         const rpRes = await client.query(
-          'SELECT ratingphrase.phraseid, ratingphrase.phrasedescription, AVG(customerphraserating.ratingscore) AS "rating"'
+          'SELECT ratingphrase.phraseid, ratingphrase.phrasedescription, AVG(customerphraserating.ratingscore) AS "rating", COUNT(customerphraserating.ratingscore) AS "numRated"'
           + ' FROM public.customerphraserating'
           + ' INNER JOIN public.ratingphrase ON ratingphrase.phraseid = customerphraserating.phraseid'
           + ' INNER JOIN public.review ON customerphraserating.reviewid = review.reviewid'
@@ -416,6 +439,7 @@ const getMenuItems = (categoryId) => {
           ratingphraseItem.phraseId = ratePhrase.phraseid;
           ratingphraseItem.phrase = ratePhrase.phrasedescription;
           ratingphraseItem.rating = ratePhrase.rating;
+          ratingphraseItem.numRated = ratePhrase.numRated;
           menuItem.ratingPhrases.push(ratingphraseItem);
         });
 
@@ -619,6 +643,29 @@ module.exports = {
     })
     .catch((err) => {
       console.error('Query Error [Order History - Get User Order History]', err.stack);
+      return Promise.reject(err);
+    }),
+  getOrderItemStatus,
+  getOrderStatuses: () => db.query(
+    'SELECT orderid, orderstatus, progress FROM public.customerorder WHERE progress < 100;'
+  )
+    .then((res) => {
+      const orderItemPromises = [];
+      res.rows.forEach((order) => {
+        orderItemPromises.push(getOrderItemStatus(order.orderid)
+          .then((itemStatus) => {
+            const orderObj = {};
+            orderObj.orderId = order.orderid;
+            orderObj.orderStatus = order.orderstatus;
+            orderObj.orderProgress = order.progress;
+            orderObj.itemProgress = itemStatus.items;
+            return orderObj;
+          }));
+      });
+      return orderItemPromises;
+    })
+    .catch((err) => {
+      console.error('Query Error [Order Status - Get Order Status]', err.stack);
       return Promise.reject(err);
     }),
   getReviews: (restaurantId = 0) => db.query(
