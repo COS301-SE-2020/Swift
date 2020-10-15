@@ -1,6 +1,10 @@
 <template>
-  <v-container fluid>
-      <v-container v-show="step == 1">
+  <v-container class="fill-height d-flex align-start">
+    <v-container v-if="!isMobile" class="fill-height d-flex align-center">
+      <DesktopForgetPassword></DesktopForgetPassword>
+    </v-container>
+    <v-container fluid class="pa-0">
+      <v-container v-if="isMobile" v-show="step == 1">
         <v-card class="mx-auto" flat>
           <v-row class="mt-3">
             <v-col cols="3" class="mt-0 pt-0 pr-0 pl-0">
@@ -45,7 +49,7 @@
         </v-row>
       </v-container>
 
-      <v-container v-show="step == 2">
+      <v-container v-if="isMobile" v-show="step == 2">
         <v-card class="mx-auto" flat>
           <v-row class="mt-3">
             <v-col cols="3" class="mt-0 pt-0 pr-0 pl-0">
@@ -66,11 +70,11 @@
               <span  style="font-size: 25px">Verify your email</span>
             </v-row>
             <v-row justify="center" class="mt-4 mb-6">
-              <span style="font-size: 16px; text-align: center; opacity: 0.9" class="font-weight-light">Please enter the 4 digit code sent to {{email}}</span>
+              <span style="font-size: 16px; text-align: center; opacity: 0.9" class="font-weight-light enterCodeMssg">Please enter the 4 digit code sent to {{email}}</span>
             </v-row>
             <v-row justify="center" class="mt-4 mb-6" style="text-align:center">
               <v-col cols="2" class="pl-1 pr-1" style="text-align: center" v-for="i in codeLength" :key='i'>
-                <v-textarea v-model="digits[i-1]" maxlength="1" class="centered-input text--darken-3 mt-3 digits" height="4" solo single-line outlined></v-textarea>
+                <v-textarea @input="changeFocus(i)" @focus="selectVal(i-1)" v-model="digits[i-1]" no-resize maxlength="1" class="centered-input text--darken-3 mt-3 digits" height="4" solo single-line outlined></v-textarea>
               </v-col>              
             </v-row>
             <v-row class="d-flex justify-center">
@@ -93,7 +97,7 @@
         </v-row>
       </v-container>
 
-      <v-container v-show="step == 3">
+      <v-container v-if="isMobile" v-show="step == 3">
         <v-card class="mx-auto" flat>
           <v-row class="mt-3">
             <v-col cols="3" class="mt-0 pt-0 pr-0 pl-0">
@@ -106,11 +110,11 @@
         <v-card flat tile>
           <v-card class="mx-auto" flat>
             <v-row justify="center" class="mt-1">
-              <v-avatar size="180px" color="#F5F5F5" justify="center">
+              <v-avatar size="180px" color="#F5F5F5" justify="center" >
+                <v-icon color="primary" class="lockIcon pr-0" size="25" style="width: 27px" v-for="asterisk in 4" :key="asterisk">mdi-asterisk</v-icon>
+                <!-- <v-icon color="primary" class="lockIcon pr-0" size="25" style="width: 27px">mdi-asterisk</v-icon>
                 <v-icon color="primary" class="lockIcon pr-0" size="25" style="width: 27px">mdi-asterisk</v-icon>
-                <v-icon color="primary" class="lockIcon pr-0" size="25" style="width: 27px">mdi-asterisk</v-icon>
-                <v-icon color="primary" class="lockIcon pr-0" size="25" style="width: 27px">mdi-asterisk</v-icon>
-                <v-icon color="primary" class="lockIcon pr-0" size="25" style="width: 27px">mdi-asterisk</v-icon>
+                <v-icon color="primary" class="lockIcon pr-0" size="25" style="width: 27px">mdi-asterisk</v-icon> -->
               </v-avatar>
             </v-row>
             <v-row class="mt-12" justify="center">
@@ -135,22 +139,24 @@
           <v-col cols="11" class="pt-0 mb-10" width="100%" style="position: absolute; bottom: 0;">
            <div class="row d-flex flex-column align-center mx-8">
               <v-btn @click="submitPass" block rounded class="py-5 body-2 font-weight-light" color="primary" style="font-size: 17px !important">Submit Password</v-btn>
+              <v-progress-circular v-show=isLoading indeterminate color="primary mt-1"></v-progress-circular>
            </div>
           </v-col>
         </v-row>
       </v-container>
+    </v-container>
 
-      <v-overlay relative opacity="0.25" :value="alert" z-index="10">
-      <v-avatar elevation="3" color="accent" class="pl-0 pr-0" absolute style="position: absolute; z-index: 12">
-        <v-icon size="33px" color="white" v-text="'mdi-lock-reset'"></v-icon>
-      </v-avatar>
-      <v-alert color="white" transition="scale-transition" class="alert" align="center" style="margin-top: 20px">
-        <div style="font-size: 22px !important; color: #343434" class="pl-8 pr-8 mt-8">Password updated</div>
-        <div class="mt-2" style="font-size: 16px !important; color: #343434">Your password was successfully updated</div>
-        <v-btn text @click="goToLogin" class="mt-6 mb-1">
-          <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline">Login</div>
-        </v-btn>
-      </v-alert>
+      <v-overlay v-if="isMobile" relative opacity="0.25" :value="alert" z-index="10">
+        <v-avatar elevation="3" color="accent" class="pl-0 pr-0" absolute style="position: absolute; z-index: 12">
+          <v-icon size="33px" color="white" v-text="'mdi-lock-reset'"></v-icon>
+        </v-avatar>
+        <v-alert color="white" transition="scale-transition" class="alert" align="center" style="margin-top: 20px">
+          <div style="font-size: 22px !important; color: #343434" class="pl-8 pr-8 mt-8">Password updated</div>
+          <div class="mt-2" style="font-size: 16px !important; color: #343434">Your password was successfully updated</div>
+          <v-btn text @click="goToLogin" class="mt-6 mb-1">
+            <div class="font-weight-light" style="font-size: 16px !important; color: #404040; text-decoration: underline">Login</div>
+          </v-btn>
+        </v-alert>
     </v-overlay>
   </v-container>
 </template>
@@ -160,12 +166,16 @@ import { mapActions, mapGetters, mapMutations } from "vuex";
 import { validationMixin } from 'vuelidate'
 import { required, minLength, email } from 'vuelidate/lib/validators'
 import $ from 'jquery';
+import DesktopForgetPassword from "../../components/usermanagement/DesktopForgetPassword.vue"
 
 export default {
   mixins: [validationMixin],
   validations: {
     email: { required, email },
     password: { required, minLength: minLength(8) },
+  },
+  components: {
+    DesktopForgetPassword
   },
   data() {
     return {
@@ -182,7 +192,12 @@ export default {
      errorMsg: '',
      password: '',
      isLoading: false,
+     isMobile: false,
     }
+  },
+  mounted:function(){
+    this.onResize()
+    window.addEventListener('resize', this.onResize, { passive: true })
   },
   methods: {
     backNavigation () {
@@ -191,27 +206,39 @@ export default {
       else 
         this.step = this.step - 1;
     },
+    onResize () {
+      this.isMobile = window.innerWidth < 600
+    },
     resetPass () {
       this.isLoading = true
       if (this.emailErrors.length > 0  || this.email.length == 0) {
         this.$v.$touch()
         this.isLoading = false
       } else {
-        
         this.sendEmail()
-        //console.log("user")
-        //console.log(user)
-        this.step = this.step + 1;
+        // this.step = this.step + 1;
       }
-
+      // this.isLoading = false
       
     },
+    changeFocus(index) {
+      var inputVal = $(".digits textarea").eq(index-1).val();
+      if (inputVal != '') {
+        var inputField = $(".digits textarea").eq(index);
+        if (inputField) {
+          inputField.focus();
+        }
+      } 
+    },
+    selectVal(index) {
+      var inputVal = $(".digits textarea").eq(index);
+      if (inputVal.val() != '')
+        inputVal.select();
+    },
     async confirmCode () {
-      //console.log("user")
       this.codeErrorMssg = ''
       let incomplete = false
       for (let i = 0; i < this.codeLength; i++) {
-        console.log(this.digits[i])
         if (this.digits[i] == undefined)
           incomplete = true;
       }
@@ -219,14 +246,13 @@ export default {
       if (incomplete) {
         this.codeErrorMssg = 'You must fill in the 4 digit code'
       } else {
-        console.log(this.digits.join(""))
         let data = {
           "email": this.email,
           "code": this.digits.join("")
         }
 
         await this.verifyCode(data).then(result => {
-          console.log(result)
+          // console.log(result)
           if (result.status == 201) {
             this.codeErrorMssg = ''
             this.step = this.step + 1;
@@ -241,9 +267,9 @@ export default {
       this.isLoading = true
       if (this.passwordErrors.length > 0  || this.password.length < 8) {
         this.$v.$touch()
-        this.isLoading = false
+        // this.isLoading = false
       } else {
-        this.isLoading = false
+        
         let data = {
           "email": this.email,
           "password": this.password
@@ -257,6 +283,7 @@ export default {
           }
         })
       }
+      this.isLoading = false
     },
     async sendEmail () {
       
@@ -264,19 +291,17 @@ export default {
         "email": this.email
       }
 
-        // console.log()
       await this.validateEmail(data).then(result => {
-        if (typeof result == 'string') {
-          this.token = result
-          this.errorMssg = ''
+        // console.log(result)
+        if (result.status == 200) {
+          this.token = result;
+          this.errorMssg = '';
           this.step = this.step + 1;
         } else {
-          this.errorMssg = result.data.reason
+          this.errorMssg = result.data.reason;
         }
-        
-        this.isLoading = false
-
       })
+      this.isLoading = false;
     },
     goToLogin() {
       this.alert = false;
@@ -317,13 +342,13 @@ export default {
     transform: rotate(180deg) scaleY(-1);
 }
 
-.digits {
+.digits{
   border-radius:5px !important;
   font-size: 30px;
 }
-
-.digits .v-application--is-ltr .v-textarea.v-text-field--enclosed .v-text-field__slot textarea {
+.digits textarea {
   text-align: center;
   line-height: 40px;
 }
+
 </style>

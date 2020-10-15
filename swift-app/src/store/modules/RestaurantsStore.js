@@ -9,7 +9,8 @@ const initialState = () => ({
   exploreCategories: {},
   suggestedItemsIds: {},
   suggestedItemsFromRatings: {},
-  allActiveRestaurantPromotions: {}
+  allActiveRestaurantPromotions: {},
+  checkedInRestaurantPromotions: {}
 });
 
 const state = initialState();
@@ -39,6 +40,9 @@ const getters = {
   },
   getAllActiveRestaurantPromotions(state) {
     return state.allActiveRestaurantPromotions;
+  },
+  getCheckedInRestaurantPromotions(state) {
+    return state.checkedInRestaurantPromotions;
   },
 }
 
@@ -81,7 +85,7 @@ const actions = {
       "token": sessionStorage.getItem('authToken'),
     }
     ).then(result => {
-      console.log(result.data)
+      // console.log(result.data)
       this.dispatch('RestaurantsStore/retrieveSuggestedMenuItemsFromRatings', result.data.menuItemIds);
     }).catch(({ response }) => {
 
@@ -89,7 +93,7 @@ const actions = {
   },
 
   retrieveSuggestedMenuItemsFromRatings({commit}, data) {
-    console.log(data)
+    // console.log(data)
     return axios.post('https://api.swiftapp.ml', 
     {
       "requestType": "suggestedMenuItems",
@@ -110,11 +114,18 @@ const actions = {
       "token": sessionStorage.getItem('authToken'),
     }
     ).then(result => {
-      console.log(result.data)
+      // console.log(this.getters['CustomerStore/getCheckedInRestaurantId'])
       commit('SAVE_ACTIVE_PROMOTIONS', result.data);
+      return result.data
+      // if (this.getters['CustomerStore/getCheckedInRestaurantId'] != null)
+        
     }).catch(({ response }) => {
 
     });
+  },
+
+  fetchActiveCheckedInPromo({commit}, promos) {
+    commit('SAVE_CHECKEDIN_PROMOTIONS', promos);
   },
 
   // Used to reset the store
@@ -159,6 +170,17 @@ const mutations = {
 
   SAVE_ACTIVE_PROMOTIONS(state, promotions) {
     state.allActiveRestaurantPromotions = promotions;
+  },
+
+  SAVE_CHECKEDIN_PROMOTIONS(state, promotions) {
+    let id = this.getters['CustomerStore/getCheckedInRestaurantId'];
+    let weekdays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    state.checkedInRestaurantPromotions = promotions.restaurantPromo.filter((promo) => {
+      let today = new Date();
+      // console.log((promo.restaurantId === id) && (new Date(promo.endDate) > Date.now()) && ((promo.days).includes(weekdays[today.getDay()])))
+      return (promo.restaurantId === id) && (new Date(promo.endDate) > Date.now()) && ((promo.days).includes(weekdays[today.getDay()]))
+    });
+    // console.log(state.checkedInRestaurantPromotions)
   },
 
   updateCheckInFlag(state, data) {
